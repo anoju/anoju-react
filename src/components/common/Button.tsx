@@ -32,7 +32,7 @@ const Button: React.FC<ButtonProps> = (props) => {
 
   // anchor 속성이 있으면 a 태그
   if ('anchor' in props || 'href' in props) {
-    const { href, target, onClick, children, ...rest } = props;
+    const { href = '#', target, onClick, children, ...rest } = props;
 
     // anchor 속성 제거
     const anchorProps = { ...rest };
