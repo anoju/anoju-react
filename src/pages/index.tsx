@@ -7,7 +7,7 @@ function Home() {
   const [count, setCount] = useState(0);
 
   return (
-    <>
+    <div className="home">
       <div>
         <Button href="https://vite.dev" target="_blank">
           <img src={viteLogo} className="logo" alt="Vite logo" />
@@ -33,7 +33,7 @@ function Home() {
       <p className="read-the-docs">
         Click on the Vite and React logos to learn more
       </p>
-    </>
+    </div>
   );
 }
 

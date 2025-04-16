@@ -7,7 +7,7 @@ interface MainLayoutProps {
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   return (
-    <div className="main-layout">
+    <div className="page">
       <header>메인 헤더</header>
       <main>{children}</main>
       <footer>메인 푸터</footer>
