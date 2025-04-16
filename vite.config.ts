@@ -1,6 +1,6 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react' // 또는 Vue 프로젝트라면 '@vitejs/plugin-vue'
-import path from 'path'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react'; // 또는 Vue 프로젝트라면 '@vitejs/plugin-vue'
+import path from 'path';
 
 export default defineConfig({
   plugins: [react()], // 또는 Vue 프로젝트라면 vue()
@@ -9,13 +9,13 @@ export default defineConfig({
     preprocessorOptions: {
       scss: {
         // implementation 대신 additionalData 사용
-        additionalData: `@use "@/styles/variables.scss" as *;`
-      }
-    }
+        additionalData: `@use "@/styles/variables.scss" as *;`,
+      },
+    },
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src')
-    }
-  }
-})
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
+});
