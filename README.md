@@ -24,7 +24,7 @@ export default tseslint.config({
   languageOptions: {
     // other options...
     parserOptions: {
-      project: ["./tsconfig.node.json", "./tsconfig.app.json"],
+      project: ['./tsconfig.node.json', './tsconfig.app.json'],
       tsconfigRootDir: import.meta.dirname,
     },
   },
@@ -35,19 +35,19 @@ You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-re
 
 ```js
 // eslint.config.js
-import reactX from "eslint-plugin-react-x";
-import reactDom from "eslint-plugin-react-dom";
+import reactX from 'eslint-plugin-react-x';
+import reactDom from 'eslint-plugin-react-dom';
 
 export default tseslint.config({
   plugins: {
     // Add the react-x and react-dom plugins
-    "react-x": reactX,
-    "react-dom": reactDom,
+    'react-x': reactX,
+    'react-dom': reactDom,
   },
   rules: {
     // other rules...
     // Enable its recommended typescript rules
-    ...reactX.configs["recommended-typescript"].rules,
+    ...reactX.configs['recommended-typescript'].rules,
     ...reactDom.configs.recommended.rules,
   },
 });
@@ -84,4 +84,34 @@ src/styles/
 |-- themes/          # 테마 관련 스타일
 |-- vendors/         # 외부 라이브러리 스타일
 |-- main.scss        # 모든 파일을 가져오는 메인 파일
+```
+
+추천 components폴더 구조(참고고)
+
+```
+src/
+├── components/
+│   ├── common/             # 공통 UI 컴포넌트
+│   │   ├── Button/
+│   │   │   ├── Button.tsx
+│   │   │   ├── Button.module.scss
+│   │   │   └── index.ts
+│   │   ├── Input/
+│   │   ├── Modal/
+│   │   └── ...
+│   ├── layout/             # 레이아웃 관련 컴포넌트
+│   │   ├── Header/
+│   │   ├── Footer/
+│   │   ├── Sidebar/
+│   │   └── ...
+│   ├── features/           # 기능별 컴포넌트
+│   │   ├── auth/           # 인증 관련
+│   │   ├── products/       # 상품 관련
+│   │   ├── cart/           # 장바구니 관련
+│   │   └── ...
+│   └── pages/              # 페이지 컴포넌트
+│       ├── Home/
+│       ├── About/
+│       └── ...
+└── ...
 ```
