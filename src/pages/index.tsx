@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import reactLogo from '@/assets/images/react.svg';
 import viteLogo from '/vite.svg';
-import Button from '@/components/common/Button';
+import { Button } from '@/components/common';
 
 function Home() {
   const [count, setCount] = useState(0);
