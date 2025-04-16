@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 type ButtonProps =
   | React.ButtonHTMLAttributes<HTMLButtonElement>
   | (React.AnchorHTMLAttributes<HTMLAnchorElement> & {
-      isAnchor?: boolean;
+      anchor?: boolean;
     })
   | ({ to: string } & Omit<
       React.AnchorHTMLAttributes<HTMLAnchorElement>,
@@ -24,17 +24,16 @@ const Button: React.FC<ButtonProps> = (props) => {
     );
   }
 
-  // isAnchor 속성이 있으면 a
+  // anchor 속성이 있으면 a
   type AnchorProps = React.AnchorHTMLAttributes<HTMLAnchorElement> & {
-    isAnchor?: boolean;
+    anchor?: boolean;
   };
+  if ('anchor' in props) {
+    const { href, target, onClick, children, ...rest } = props as AnchorProps;
 
-  if ('isAnchor' in props) {
-    const { href, onClick, children, ...rest } = props as AnchorProps;
-
-    // 새로운 객체를 만들어 isAnchor를 제외한 나머지 props만 전달
+    // 새로운 객체를 만들어 anchor를 제외한 나머지 props만 전달
     const anchorProps = Object.fromEntries(
-      Object.entries(rest).filter(([key]) => key !== 'isAnchor')
+      Object.entries(rest).filter(([key]) => key !== 'anchor')
     );
 
     const handleClick = (
@@ -47,7 +46,14 @@ const Button: React.FC<ButtonProps> = (props) => {
     };
 
     return (
-      <a href={href} onClick={handleClick} {...anchorProps}>
+      <a
+        href={href}
+        role="button"
+        target={target}
+        rel={target === '_blank' ? 'noopener noreferrer' : undefined}
+        onClick={handleClick}
+        {...anchorProps}
+      >
         {children}
       </a>
     );
