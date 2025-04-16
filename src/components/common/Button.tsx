@@ -1,8 +1,9 @@
 // src/components/common/Button.tsx
+// 프로젝트 내에서 이동시 to 속성 사용
+// 외부링크 이동시 anchor + href 속성 사용
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-// 타입 정의 수정
 type ButtonProps =
   | React.ButtonHTMLAttributes<HTMLButtonElement>
   | (React.AnchorHTMLAttributes<HTMLAnchorElement> & {
@@ -17,24 +18,25 @@ const Button: React.FC<ButtonProps> = (props) => {
   // to 속성이 있으면 Link
   if ('to' in props && props.to) {
     const { to, children, ...rest } = props;
+
+    // Link 시 target 속성 제외
+    const newRest = { ...rest };
+    delete newRest.target; // target 속성 제거
+
     return (
-      <Link to={to} {...rest}>
+      <Link to={to} {...newRest}>
         {children}
       </Link>
     );
   }
 
-  // anchor 속성이 있으면 a
-  type AnchorProps = React.AnchorHTMLAttributes<HTMLAnchorElement> & {
-    anchor?: boolean;
-  };
-  if ('anchor' in props) {
-    const { href, target, onClick, children, ...rest } = props as AnchorProps;
+  // anchor 속성이 있으면 a 태그
+  if ('anchor' in props || 'href' in props) {
+    const { href, target, onClick, children, ...rest } = props;
 
-    // 새로운 객체를 만들어 anchor를 제외한 나머지 props만 전달
-    const anchorProps = Object.fromEntries(
-      Object.entries(rest).filter(([key]) => key !== 'anchor')
-    );
+    // anchor 속성 제거
+    const anchorProps = { ...rest };
+    delete anchorProps.anchor;
 
     const handleClick = (
       e: React.MouseEvent<HTMLAnchorElement, MouseEvent>
