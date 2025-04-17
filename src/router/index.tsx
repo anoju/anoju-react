@@ -2,7 +2,7 @@
 import React, { ReactNode } from 'react';
 import { createBrowserRouter, RouteObject, Outlet } from 'react-router-dom';
 import { PageModule, LayoutModule } from './types';
-// import EmptyLayout from '../layouts/EmptyLayout';
+import EmptyLayout from '../layouts/EmptyLayout';
 import MainLayout from '../layouts/MainLayout';
 
 // 레이아웃 props 타입 정의
@@ -11,10 +11,10 @@ interface LayoutProps {
 }
 
 // 기본 레이아웃 매핑
-// const defaultLayoutMap: Record<string, React.ComponentType<LayoutProps>> = {
-//   empty: EmptyLayout, // 빈 레이아웃
-//   '': MainLayout, // 기본 레이아웃
-// };
+const defaultLayoutMap: Record<string, React.ComponentType<LayoutProps>> = {
+  empty: EmptyLayout, // 빈 레이아웃
+  '': MainLayout, // 기본 레이아웃
+};
 
 // Vite의 glob 임포트 기능
 const pages = import.meta.glob<PageModule>('../pages/**/*.tsx', {
@@ -28,6 +28,16 @@ const layouts = import.meta.glob<LayoutModule>('../pages/**/layout.tsx', {
 
 console.log('Available pages:', Object.keys(pages));
 console.log('Available layouts:', Object.keys(layouts));
+
+// 페이지 메타데이터 추출을 위한 인터페이스
+interface PageMetadata {
+  layout?: string; // 'empty' 또는 기본 레이아웃
+}
+
+// 페이지 모듈에서 메타데이터 추출
+function getPageMetadata(pageModule: PageModule): PageMetadata {
+  return (pageModule as unknown as { metadata?: PageMetadata }).metadata || {};
+}
 
 // 페이지 경로 추출 및 정규화 함수
 function extractRoutePath(filePath: string): {
@@ -78,6 +88,29 @@ function findLayoutForPath(
   return null;
 }
 
+// 페이지에 적합한 레이아웃 찾기
+function getLayoutForPage(
+  pagePath: string,
+  pageModule: PageModule
+): React.ComponentType<LayoutProps> {
+  // 1. 메타데이터에서 레이아웃 지정 확인
+  const metadata = getPageMetadata(pageModule);
+  if (metadata.layout && defaultLayoutMap[metadata.layout]) {
+    return defaultLayoutMap[metadata.layout];
+  }
+
+  // 2. 폴더에 레이아웃 파일이 있는지 확인
+  const { folderSegments } = extractRoutePath(pagePath);
+  const folderPath = folderSegments.slice(0, -1).join('/');
+  const folderLayout = findLayoutForPath(folderPath);
+  if (folderLayout) {
+    return folderLayout;
+  }
+
+  // 3. 기본 레이아웃 사용
+  return defaultLayoutMap[''];
+}
+
 // 폴더 구조 기반으로 중첩 라우트 생성
 function buildRouteTree(): RouteObject[] {
   // 폴더 구조와 페이지 매핑
@@ -90,6 +123,7 @@ function buildRouteTree(): RouteObject[] {
         loader?: PageModule['loader'];
         action?: PageModule['action'];
         errorBoundary?: PageModule['ErrorBoundary'];
+        originalPath: string; // 원본 파일 경로 저장
       }
     >;
     folders?: Record<string, FolderNode>;
@@ -106,6 +140,7 @@ function buildRouteTree(): RouteObject[] {
       loader: pages['../pages/index.tsx'].loader,
       action: pages['../pages/index.tsx'].action,
       errorBoundary: pages['../pages/index.tsx'].ErrorBoundary,
+      originalPath: '../pages/index.tsx',
     };
   }
 
@@ -140,6 +175,7 @@ function buildRouteTree(): RouteObject[] {
           loader: pages[pagePath].loader,
           action: pages[pagePath].action,
           errorBoundary: pages[pagePath].ErrorBoundary,
+          originalPath: pagePath,
         };
       } else {
         // 폴더 처리
@@ -158,6 +194,7 @@ function buildRouteTree(): RouteObject[] {
             loader: pages[pagePath].loader,
             action: pages[pagePath].action,
             errorBoundary: pages[pagePath].ErrorBoundary,
+            originalPath: pagePath,
           };
         }
       }
@@ -171,7 +208,14 @@ function buildRouteTree(): RouteObject[] {
   if (folderStructure.pages) {
     Object.entries(folderStructure.pages).forEach(([name, pageInfo]) => {
       const routePath = name === '' ? '' : name;
-      const element = React.createElement(MainLayout, {
+
+      // 페이지에 적합한 레이아웃 결정
+      const PageLayout = getLayoutForPage(
+        pageInfo.originalPath,
+        pages[pageInfo.originalPath]
+      );
+
+      const element = React.createElement(PageLayout, {
         children: React.createElement(pageInfo.component),
       });
 
@@ -223,10 +267,23 @@ function buildRouteTree(): RouteObject[] {
       Object.entries(structure.pages).forEach(([name, pageInfo]) => {
         const pagePath = name === '' ? '' : name;
 
-        // 컴포넌트만 렌더링 (레이아웃은 부모 라우트에서 처리)
+        // 페이지 메타데이터 확인
+        const pageModule = pages[pageInfo.originalPath];
+        const metadata = getPageMetadata(pageModule);
+
+        // 페이지별 레이아웃 결정 (메타데이터에 지정된 경우)
+        let pageElement;
+        if (metadata.layout && defaultLayoutMap[metadata.layout]) {
+          // 페이지에 지정된 레이아웃 사용
+          pageElement = React.createElement(pageInfo.component);
+        } else {
+          // 기본 폴더 처리 (레이아웃은 부모에서 처리)
+          pageElement = React.createElement(pageInfo.component);
+        }
+
         childRoutes.push({
           path: pagePath,
-          element: React.createElement(pageInfo.component),
+          element: pageElement,
           loader: pageInfo.loader,
           action: pageInfo.action,
           errorElement: pageInfo.errorBoundary
@@ -251,9 +308,27 @@ function buildRouteTree(): RouteObject[] {
             if (subStructure.pages) {
               Object.entries(subStructure.pages).forEach(([name, pageInfo]) => {
                 const pagePath = name === '' ? '' : name;
+                // 페이지 메타데이터 확인
+                const pageModule = pages[pageInfo.originalPath];
+                const metadata = getPageMetadata(pageModule);
+
+                let pageElement;
+                if (metadata.layout && defaultLayoutMap[metadata.layout]) {
+                  // 페이지 자체 레이아웃 사용 (하위 폴더 레이아웃 무시)
+                  pageElement = React.createElement(
+                    defaultLayoutMap[metadata.layout],
+                    {
+                      children: React.createElement(pageInfo.component),
+                    }
+                  );
+                } else {
+                  // 하위 폴더 레이아웃 내에서 컴포넌트 렌더링
+                  pageElement = React.createElement(pageInfo.component);
+                }
+
                 subChildRoutes.push({
                   path: pagePath,
-                  element: React.createElement(pageInfo.component),
+                  element: pageElement,
                   loader: pageInfo.loader,
                   action: pageInfo.action,
                   errorElement: pageInfo.errorBoundary
@@ -307,9 +382,27 @@ function buildRouteTree(): RouteObject[] {
                 const pagePath =
                   name === '' ? subRouteSegment : `${subRouteSegment}/${name}`;
 
+                // 페이지 메타데이터 확인
+                const pageModule = pages[pageInfo.originalPath];
+                const metadata = getPageMetadata(pageModule);
+
+                let pageElement;
+                if (metadata.layout && defaultLayoutMap[metadata.layout]) {
+                  // 페이지 지정 레이아웃 사용
+                  pageElement = React.createElement(
+                    defaultLayoutMap[metadata.layout],
+                    {
+                      children: React.createElement(pageInfo.component),
+                    }
+                  );
+                } else {
+                  // 레이아웃 없이 컴포넌트만 사용 (부모 라우트의 레이아웃 상속)
+                  pageElement = React.createElement(pageInfo.component);
+                }
+
                 childRoutes.push({
                   path: pagePath,
-                  element: React.createElement(pageInfo.component),
+                  element: pageElement,
                   loader: pageInfo.loader,
                   action: pageInfo.action,
                   errorElement: pageInfo.errorBoundary
@@ -358,14 +451,14 @@ function buildRouteTree(): RouteObject[] {
     let routeElement;
     if (folderLayout) {
       // 폴더 레이아웃이 있는 경우, 기본 레이아웃 > 폴더 레이아웃 > Outlet 순서로 중첩
-      routeElement = React.createElement(MainLayout, {
+      routeElement = React.createElement(defaultLayoutMap[''], {
         children: React.createElement(folderLayout, {
           children: React.createElement(Outlet),
         }),
       });
     } else {
       // 폴더 레이아웃이 없는 경우, 기본 레이아웃 > Outlet
-      routeElement = React.createElement(MainLayout, {
+      routeElement = React.createElement(defaultLayoutMap[''], {
         children: React.createElement(Outlet),
       });
     }
@@ -396,9 +489,25 @@ function buildRouteTree(): RouteObject[] {
     if (structure.pages) {
       Object.entries(structure.pages).forEach(([name, pageInfo]) => {
         const pagePath = name === '' ? '' : name;
+
+        // 페이지 메타데이터 확인
+        const pageModule = pages[pageInfo.originalPath];
+        const metadata = getPageMetadata(pageModule);
+
+        let pageElement;
+        if (metadata.layout && defaultLayoutMap[metadata.layout]) {
+          // 페이지 지정 레이아웃 사용
+          pageElement = React.createElement(defaultLayoutMap[metadata.layout], {
+            children: React.createElement(pageInfo.component),
+          });
+        } else {
+          // 레이아웃 없이 컴포넌트만 사용 (부모 레이아웃 상속)
+          pageElement = React.createElement(pageInfo.component);
+        }
+
         childRoutes.push({
           path: pagePath,
-          element: React.createElement(pageInfo.component),
+          element: pageElement,
           loader: pageInfo.loader,
           action: pageInfo.action,
           errorElement: pageInfo.errorBoundary
