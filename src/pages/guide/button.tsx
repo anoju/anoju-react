@@ -10,8 +10,8 @@ const ButtonGuide = () => {
         <h2>기본 버튼</h2>
         <div style={{ display: 'flex', gap: '10px' }}>
           <Button>Default Button</Button>
-          <Button>Primary Button</Button>
-          <Button>Secondary Button</Button>
+          <Button className="primary">Primary Button</Button>
+          <Button className="secondary">Secondary Button</Button>
         </div>
 
         <h3>사용 예</h3>
@@ -25,8 +25,12 @@ const ButtonGuide = () => {
       <section>
         <h2>링크 버튼</h2>
         <div style={{ display: 'flex', gap: '10px' }}>
-          <Button to="/">Home Link</Button>
-          <Button to="/about">About Link</Button>
+          <Button className="primary" to="/">
+            Home Link
+          </Button>
+          <Button className="primary" to="/about">
+            About Link
+          </Button>
         </div>
 
         <h3>사용 예</h3>
@@ -39,14 +43,18 @@ const ButtonGuide = () => {
       <section>
         <h2>외부 링크 버튼</h2>
         <div style={{ display: 'flex', gap: '10px' }}>
-          <Button href="https://example.com" target="_blank">
+          <Button
+            className="primary"
+            href="https://example.com"
+            target="_blank"
+          >
             External Link
           </Button>
         </div>
 
         <h3>사용 예</h3>
         <pre>
-          <code>{`<Button href="https://example.com" target="_blank">
+          <code>{`<Button className="primary" href="https://example.com" target="_blank">
   External Link
 </Button>`}</code>
         </pre>

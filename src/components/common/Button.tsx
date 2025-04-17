@@ -16,25 +16,20 @@ type ButtonProps =
     >);
 
 const Button: React.FC<ButtonProps> = (props) => {
-  const buttonClasses = [
-    styles.button,
-    // elevated && styles.elevated,
-    // size && styles[size],
-    // variant && styles[variant]
-  ]
-    .filter(Boolean)
-    .join(' ');
-
   // to 속성이 있으면 Link
   if ('to' in props && props.to) {
-    const { to, children, ...rest } = props;
+    const { to, children, className, ...rest } = props;
 
     // Link 시 target 속성 제외
     const newRest = { ...rest };
     delete newRest.target; // target 속성 제거
 
     return (
-      <Link to={to} className={buttonClasses} {...newRest}>
+      <Link
+        to={to}
+        className={`${styles.button} ${className || ''}`}
+        {...newRest}
+      >
         {children}
       </Link>
     );
@@ -42,7 +37,7 @@ const Button: React.FC<ButtonProps> = (props) => {
 
   // anchor 속성이 있으면 a 태그
   if ('anchor' in props || 'href' in props) {
-    const { href = '#', target, onClick, children, ...rest } = props;
+    const { href = '#', target, onClick, children, className, ...rest } = props;
 
     // anchor 속성 제거
     const anchorProps = { ...rest };
@@ -61,7 +56,7 @@ const Button: React.FC<ButtonProps> = (props) => {
       <a
         href={href}
         role="button"
-        className={buttonClasses}
+        className={`${styles.button} ${className || ''}`}
         target={target}
         rel={target === '_blank' ? 'noopener noreferrer' : undefined}
         onClick={handleClick}
@@ -73,10 +68,14 @@ const Button: React.FC<ButtonProps> = (props) => {
   }
 
   // 기본은 button
-  const { children, ...rest } =
+  const { children, className, ...rest } =
     props as React.ButtonHTMLAttributes<HTMLButtonElement>;
   return (
-    <button type="button" className={buttonClasses} {...rest}>
+    <button
+      type="button"
+      className={`${styles.button} ${className || ''}`}
+      {...rest}
+    >
       {children}
     </button>
   );
