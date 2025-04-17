@@ -35,6 +35,15 @@ function extractRoutePath(filePath: string): {
   layoutKey: string;
   folderSegments: string[];
 } {
+  // 특별히 ../pages/index.tsx 파일 처리
+  if (filePath === '../pages/index.tsx') {
+    return {
+      routePath: '/',
+      layoutKey: '',
+      folderSegments: [],
+    };
+  }
+
   // ../pages/path/to/component.tsx 형식 처리
   const pathMatch = filePath.match(/\.\.\/pages\/(.*)\.tsx$/);
   const pathSegment = pathMatch?.[1] || '';
@@ -93,8 +102,21 @@ function buildRouteTree(): RouteObject[] {
 
   const folderStructure: FolderNode = {};
 
-  // 1. 먼저 폴더 구조 만들기
+  // 특별히 index.tsx 먼저 처리 (루트 페이지)
+  if (pages['../pages/index.tsx']) {
+    if (!folderStructure.pages) folderStructure.pages = {};
+    folderStructure.pages[''] = {
+      path: '/',
+      component: pages['../pages/index.tsx'].default,
+      loader: pages['../pages/index.tsx'].loader,
+      action: pages['../pages/index.tsx'].action,
+      errorBoundary: pages['../pages/index.tsx'].ErrorBoundary,
+    };
+  }
+
+  // 1. 나머지 페이지들 처리하여 폴더 구조 만들기
   Object.keys(pages).forEach((pagePath) => {
+    if (pagePath === '../pages/index.tsx') return; // 루트 index는 이미 처리함
     if (pagePath.endsWith('layout.tsx')) return; // 레이아웃 파일 제외
 
     const { routePath, folderSegments } = extractRoutePath(pagePath);
@@ -131,6 +153,22 @@ function buildRouteTree(): RouteObject[] {
           currentLevel.folders[segment] = {};
         }
         currentLevel = currentLevel.folders[segment];
+
+        // index 페이지 처리 (폴더 인덱스)
+        if (i === folderSegments.length - 1 && segment === 'index') {
+          if (!currentLevel.pages) currentLevel.pages = {};
+          // const folderPath = currentPath.substring(
+          //   0,
+          //   currentPath.lastIndexOf('/') || 0
+          // );
+          currentLevel.pages[''] = {
+            path: routePath,
+            component: pages[pagePath].default,
+            loader: pages[pagePath].loader,
+            action: pages[pagePath].action,
+            errorBoundary: pages[pagePath].ErrorBoundary,
+          };
+        }
       }
     }
   });
@@ -154,8 +192,7 @@ function buildRouteTree(): RouteObject[] {
     // 현재 폴더의 페이지 처리
     if (structure.pages) {
       Object.entries(structure.pages).forEach(([name, pageInfo]) => {
-        // const pagePath = name === 'index' ? path : `${path}/${name}`;
-        const routePath = name === 'index' ? '' : name;
+        const routePath = name === '' ? '' : name;
 
         // 페이지 컴포넌트를 모든 레이아웃으로 감싸기
         let element: React.ReactNode = React.createElement(pageInfo.component);
@@ -186,6 +223,9 @@ function buildRouteTree(): RouteObject[] {
     if (structure.folders) {
       Object.entries(structure.folders).forEach(
         ([folderName, subStructure]) => {
+          // index 폴더는 무시 (이미 루트 처리됨)
+          if (folderName === 'index') return;
+
           const subPath = path ? `${path}/${folderName}` : folderName;
           const isDynamicSegment =
             folderName.startsWith('[') && folderName.endsWith(']');

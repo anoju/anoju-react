@@ -1,12 +1,12 @@
-// src/layouts/emptyLayout.tsx
+// src/layouts/EmptyLayout.tsx
 import React, { ReactNode } from 'react';
 
-interface emptyLayoutProps {
+interface EmptyLayoutProps {
   children: ReactNode;
 }
 
-const emptyLayout: React.FC<emptyLayoutProps> = ({ children }) => {
+const EmptyLayout: React.FC<EmptyLayoutProps> = ({ children }) => {
   return <>{children}</>;
 };
 
-export default emptyLayout;
+export default EmptyLayout;

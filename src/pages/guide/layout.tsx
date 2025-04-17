@@ -1,4 +1,4 @@
-// src/layouts/GuideLayout.tsx
+// src/pages/guide/layout.tsx
 import React, { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import styles from '@/assets/scss/layouts/layouts.module.scss';
