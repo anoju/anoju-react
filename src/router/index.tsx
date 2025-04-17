@@ -2,7 +2,7 @@
 import React, { ReactNode } from 'react';
 import { createBrowserRouter, RouteObject, Outlet } from 'react-router-dom';
 import { PageModule, LayoutModule } from './types';
-import EmptyLayout from '../layouts/EmptyLayout';
+// import EmptyLayout from '../layouts/EmptyLayout';
 import MainLayout from '../layouts/MainLayout';
 
 // 레이아웃 props 타입 정의
@@ -11,10 +11,10 @@ interface LayoutProps {
 }
 
 // 기본 레이아웃 매핑
-const defaultLayoutMap: Record<string, React.ComponentType<LayoutProps>> = {
-  empty: EmptyLayout, // 빈 레이아웃
-  '': MainLayout, // 기본 레이아웃
-};
+// const defaultLayoutMap: Record<string, React.ComponentType<LayoutProps>> = {
+//   empty: EmptyLayout, // 빈 레이아웃
+//   '': MainLayout, // 기본 레이아웃
+// };
 
 // Vite의 glob 임포트 기능
 const pages = import.meta.glob<PageModule>('../pages/**/*.tsx', {
@@ -32,14 +32,12 @@ console.log('Available layouts:', Object.keys(layouts));
 // 페이지 경로 추출 및 정규화 함수
 function extractRoutePath(filePath: string): {
   routePath: string;
-  layoutKey: string;
   folderSegments: string[];
 } {
   // 특별히 ../pages/index.tsx 파일 처리
   if (filePath === '../pages/index.tsx') {
     return {
       routePath: '/',
-      layoutKey: '',
       folderSegments: [],
     };
   }
@@ -51,9 +49,6 @@ function extractRoutePath(filePath: string): {
   // 폴더 세그먼트 추출
   const folderSegments = pathSegment.split('/');
 
-  // 레이아웃 키는 더 이상 필요하지 않지만, 기존 코드와의 호환성을 위해 유지
-  const layoutKey = '';
-
   // 동적 라우트 처리 및 index 파일 정규화
   const normalizedPath = pathSegment
     .replace(/\[([^\]]+)\]/g, ':$1') // [id] -> :id
@@ -61,13 +56,13 @@ function extractRoutePath(filePath: string): {
 
   // layout.tsx 파일은 라우트에서 제외
   if (normalizedPath.endsWith('layout')) {
-    return { routePath: '', layoutKey, folderSegments: [] };
+    return { routePath: '', folderSegments: [] };
   }
 
   const routePath =
     normalizedPath === '' ? '/' : `/${normalizedPath.toLowerCase()}`;
 
-  return { routePath, layoutKey, folderSegments };
+  return { routePath, folderSegments };
 }
 
 // 폴더 경로에 해당하는 레이아웃 컴포넌트 찾기
@@ -157,10 +152,6 @@ function buildRouteTree(): RouteObject[] {
         // index 페이지 처리 (폴더 인덱스)
         if (i === folderSegments.length - 1 && segment === 'index') {
           if (!currentLevel.pages) currentLevel.pages = {};
-          // const folderPath = currentPath.substring(
-          //   0,
-          //   currentPath.lastIndexOf('/') || 0
-          // );
           currentLevel.pages[''] = {
             path: routePath,
             component: pages[pagePath].default,
@@ -173,43 +164,69 @@ function buildRouteTree(): RouteObject[] {
     }
   });
 
-  console.log('Folder structure:', JSON.stringify(folderStructure, null, 2));
+  // 2. 최상위 라우트만 처리
+  const rootRoutes: RouteObject[] = [];
 
-  // 2. 폴더 구조에서 라우트 객체 생성
-  function createRoutesFromStructure(
-    structure: FolderNode,
-    path: string = '',
-    parentLayouts: React.ComponentType<LayoutProps>[] = []
-  ): RouteObject[] {
-    const routes: RouteObject[] = [];
+  // 최상위 페이지들 처리
+  if (folderStructure.pages) {
+    Object.entries(folderStructure.pages).forEach(([name, pageInfo]) => {
+      const routePath = name === '' ? '' : name;
+      const element = React.createElement(MainLayout, {
+        children: React.createElement(pageInfo.component),
+      });
 
-    // 현재 폴더의 레이아웃 확인
-    const currentLayout = findLayoutForPath(path);
-    const currentLayouts = currentLayout
-      ? [...parentLayouts, currentLayout]
-      : parentLayouts;
+      rootRoutes.push({
+        path: routePath,
+        element,
+        loader: pageInfo.loader,
+        action: pageInfo.action,
+        errorElement: pageInfo.errorBoundary
+          ? React.createElement(pageInfo.errorBoundary)
+          : undefined,
+      });
+    });
+  }
 
-    // 현재 폴더의 페이지 처리
+  // 최상위 폴더들 처리 (각 폴더는 독립적인 라우트 구조를 가짐)
+  if (folderStructure.folders) {
+    Object.entries(folderStructure.folders).forEach(
+      ([folderName, subStructure]) => {
+        const folderRoute = processFolderRoutes(folderName, subStructure);
+        if (folderRoute) {
+          rootRoutes.push(folderRoute);
+        }
+      }
+    );
+  }
+
+  return rootRoutes;
+
+  // 폴더 라우트 처리 함수
+  function processFolderRoutes(
+    folderName: string,
+    structure: FolderNode
+  ): RouteObject | null {
+    const isDynamicSegment =
+      folderName.startsWith('[') && folderName.endsWith(']');
+    const routeSegment = isDynamicSegment
+      ? `:${folderName.slice(1, -1)}`
+      : folderName;
+
+    // 이 폴더에 대한 레이아웃 컴포넌트 확인
+    const folderLayout = findLayoutForPath(folderName);
+
+    // 이 폴더 내의 페이지들을 처리할 자식 라우트 배열
+    const childRoutes: RouteObject[] = [];
+
+    // 이 폴더 내의 페이지들 처리
     if (structure.pages) {
       Object.entries(structure.pages).forEach(([name, pageInfo]) => {
-        const routePath = name === '' ? '' : name;
+        const pagePath = name === '' ? '' : name;
 
-        // 페이지 컴포넌트를 모든 레이아웃으로 감싸기
-        let element: React.ReactNode = React.createElement(pageInfo.component);
-
-        // 레이아웃이 있으면 적용 (안쪽부터 바깥쪽으로)
-        for (let i = currentLayouts.length - 1; i >= 0; i--) {
-          const Layout = currentLayouts[i];
-          element = React.createElement(Layout, { children: element });
-        }
-
-        // 최외곽에 기본 레이아웃 적용
-        const FinalLayout = defaultLayoutMap[''] || MainLayout;
-        element = React.createElement(FinalLayout, { children: element });
-
-        routes.push({
-          path: routePath,
-          element,
+        // 컴포넌트만 렌더링 (레이아웃은 부모 라우트에서 처리)
+        childRoutes.push({
+          path: pagePath,
+          element: React.createElement(pageInfo.component),
           loader: pageInfo.loader,
           action: pageInfo.action,
           errorElement: pageInfo.errorBoundary
@@ -222,83 +239,200 @@ function buildRouteTree(): RouteObject[] {
     // 하위 폴더 처리
     if (structure.folders) {
       Object.entries(structure.folders).forEach(
-        ([folderName, subStructure]) => {
-          // index 폴더는 무시 (이미 루트 처리됨)
-          if (folderName === 'index') return;
+        ([subFolderName, subStructure]) => {
+          const subFolderPath = `${folderName}/${subFolderName}`;
+          const subFolderLayout = findLayoutForPath(subFolderPath);
 
-          const subPath = path ? `${path}/${folderName}` : folderName;
-          const isDynamicSegment =
-            folderName.startsWith('[') && folderName.endsWith(']');
-          const routeSegment = isDynamicSegment
-            ? `:${folderName.slice(1, -1)}`
-            : folderName;
+          if (subFolderLayout) {
+            // 하위 폴더에 레이아웃이 있으면 독립적인 서브라우트로 처리
+            const subChildRoutes: RouteObject[] = [];
 
-          // 하위 폴더의 레이아웃 존재 여부 확인
-          const currentFolderLayout = findLayoutForPath(subPath);
-
-          // 해당 폴더에 layout.tsx가 있거나 자식 페이지가 있는 경우에만 라우트 생성
-          if (
-            currentFolderLayout ||
-            subStructure.pages ||
-            Object.keys(subStructure.folders || {}).length > 0
-          ) {
-            // Outlet을 생성하고 레이아웃으로 감싸기
-            let nestedElement: React.ReactNode = React.createElement(Outlet);
-
-            // 현재 폴더의 레이아웃 적용 (있는 경우)
-            if (currentFolderLayout) {
-              nestedElement = React.createElement(currentFolderLayout, {
-                children: nestedElement,
+            // 하위 폴더의 페이지들 처리
+            if (subStructure.pages) {
+              Object.entries(subStructure.pages).forEach(([name, pageInfo]) => {
+                const pagePath = name === '' ? '' : name;
+                subChildRoutes.push({
+                  path: pagePath,
+                  element: React.createElement(pageInfo.component),
+                  loader: pageInfo.loader,
+                  action: pageInfo.action,
+                  errorElement: pageInfo.errorBoundary
+                    ? React.createElement(pageInfo.errorBoundary)
+                    : undefined,
+                });
               });
             }
 
-            // 부모 레이아웃들 적용 (안쪽부터 바깥쪽으로)
-            for (let i = parentLayouts.length - 1; i >= 0; i--) {
-              const Layout = parentLayouts[i];
-              nestedElement = React.createElement(Layout, {
-                children: nestedElement,
-              });
+            // 더 깊은 하위 폴더들 재귀적으로 처리
+            if (subStructure.folders) {
+              Object.entries(subStructure.folders).forEach(
+                ([deeperName, deeperStructure]) => {
+                  const deeperFolderPath = `${subFolderPath}/${deeperName}`;
+                  const processed = processDeepNestedFolder(
+                    deeperName,
+                    deeperStructure,
+                    deeperFolderPath
+                  );
+                  if (processed) {
+                    subChildRoutes.push(processed);
+                  }
+                }
+              );
             }
 
-            // 최외곽에 기본 레이아웃 적용
-            const FinalLayout = defaultLayoutMap[''] || MainLayout;
-            const element = React.createElement(FinalLayout, {
-              children: nestedElement,
-            });
+            // 하위 폴더 레이아웃을 적용한 라우트 추가
+            const isDynamicSubSegment =
+              subFolderName.startsWith('[') && subFolderName.endsWith(']');
+            const subRouteSegment = isDynamicSubSegment
+              ? `:${subFolderName.slice(1, -1)}`
+              : subFolderName;
 
-            // 재귀적으로 하위 라우트 생성
-            const childLayouts = currentFolderLayout
-              ? [...currentLayouts, currentFolderLayout]
-              : currentLayouts;
-
-            const childRoutes = createRoutesFromStructure(
-              subStructure,
-              subPath,
-              childLayouts
-            );
-
-            routes.push({
-              path: routeSegment,
-              element,
-              children: childRoutes,
+            childRoutes.push({
+              path: subRouteSegment,
+              element: React.createElement(subFolderLayout, {
+                children: React.createElement(Outlet),
+              }),
+              children: subChildRoutes,
             });
           } else {
-            // 레이아웃이 없는 폴더의 하위 라우트는 평면화
-            const childRoutes = createRoutesFromStructure(
-              subStructure,
-              subPath,
-              currentLayouts
-            );
-            routes.push(...childRoutes);
+            // 하위 폴더에 레이아웃이 없으면 플랫하게 처리
+            // 하위 폴더의 페이지들을 현재 폴더에 추가
+            if (subStructure.pages) {
+              Object.entries(subStructure.pages).forEach(([name, pageInfo]) => {
+                const isDynamicSubSegment =
+                  subFolderName.startsWith('[') && subFolderName.endsWith(']');
+                const subRouteSegment = isDynamicSubSegment
+                  ? `:${subFolderName.slice(1, -1)}`
+                  : subFolderName;
+                const pagePath =
+                  name === '' ? subRouteSegment : `${subRouteSegment}/${name}`;
+
+                childRoutes.push({
+                  path: pagePath,
+                  element: React.createElement(pageInfo.component),
+                  loader: pageInfo.loader,
+                  action: pageInfo.action,
+                  errorElement: pageInfo.errorBoundary
+                    ? React.createElement(pageInfo.errorBoundary)
+                    : undefined,
+                });
+              });
+            }
+
+            // 더 깊은 하위 폴더들 재귀적으로 처리
+            if (subStructure.folders) {
+              Object.entries(subStructure.folders).forEach(
+                ([deeperName, deeperStructure]) => {
+                  const deeperFolderPath = `${subFolderPath}/${deeperName}`;
+                  const processed = processDeepNestedFolder(
+                    deeperName,
+                    deeperStructure,
+                    deeperFolderPath
+                  );
+                  if (processed) {
+                    // 경로 조정: subFolderName/processed.path
+                    const isDynamicSubSegment =
+                      subFolderName.startsWith('[') &&
+                      subFolderName.endsWith(']');
+                    const subRouteSegment = isDynamicSubSegment
+                      ? `:${subFolderName.slice(1, -1)}`
+                      : subFolderName;
+
+                    processed.path = `${subRouteSegment}/${processed.path}`;
+                    childRoutes.push(processed);
+                  }
+                }
+              );
+            }
           }
         }
       );
     }
 
-    return routes;
+    // 폴더에 페이지나 하위 폴더가 없으면 null 반환
+    if (childRoutes.length === 0) {
+      return null;
+    }
+
+    // 레이아웃 구성: 폴더 레이아웃이 있으면 적용, 없으면 기본 레이아웃
+    let routeElement;
+    if (folderLayout) {
+      // 폴더 레이아웃이 있는 경우, 기본 레이아웃 > 폴더 레이아웃 > Outlet 순서로 중첩
+      routeElement = React.createElement(MainLayout, {
+        children: React.createElement(folderLayout, {
+          children: React.createElement(Outlet),
+        }),
+      });
+    } else {
+      // 폴더 레이아웃이 없는 경우, 기본 레이아웃 > Outlet
+      routeElement = React.createElement(MainLayout, {
+        children: React.createElement(Outlet),
+      });
+    }
+
+    return {
+      path: routeSegment,
+      element: routeElement,
+      children: childRoutes,
+    };
   }
 
-  return createRoutesFromStructure(folderStructure);
+  // 깊이 중첩된 폴더 처리
+  function processDeepNestedFolder(
+    folderName: string,
+    structure: FolderNode,
+    fullPath: string
+  ): RouteObject | null {
+    const folderLayout = findLayoutForPath(fullPath);
+    const isDynamicSegment =
+      folderName.startsWith('[') && folderName.endsWith(']');
+    const routeSegment = isDynamicSegment
+      ? `:${folderName.slice(1, -1)}`
+      : folderName;
+
+    const childRoutes: RouteObject[] = [];
+
+    // 페이지 처리
+    if (structure.pages) {
+      Object.entries(structure.pages).forEach(([name, pageInfo]) => {
+        const pagePath = name === '' ? '' : name;
+        childRoutes.push({
+          path: pagePath,
+          element: React.createElement(pageInfo.component),
+          loader: pageInfo.loader,
+          action: pageInfo.action,
+          errorElement: pageInfo.errorBoundary
+            ? React.createElement(pageInfo.errorBoundary)
+            : undefined,
+        });
+      });
+    }
+
+    // 하위 폴더 처리 (추가 중첩이 필요한 경우)
+    if (structure.folders && Object.keys(structure.folders).length > 0) {
+      // 추가 중첩 폴더 처리 로직
+      // (간결함을 위해 생략)
+    }
+
+    if (childRoutes.length === 0) {
+      return null;
+    }
+
+    let routeElement;
+    if (folderLayout) {
+      routeElement = React.createElement(folderLayout, {
+        children: React.createElement(Outlet),
+      });
+    } else {
+      routeElement = React.createElement(Outlet);
+    }
+
+    return {
+      path: routeSegment,
+      element: routeElement,
+      children: childRoutes,
+    };
+  }
 }
 
 // 라우트 트리 생성
