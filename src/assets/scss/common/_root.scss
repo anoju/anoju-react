@@ -1,0 +1,11 @@
+@use '@/assets/scss' as s;
+
+:root {
+  --primary-color: #{s.$primary-color};
+
+  color-scheme: light dark;
+  font-synthesis: none;
+  text-rendering: optimizelegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

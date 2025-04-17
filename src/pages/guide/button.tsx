@@ -9,7 +9,7 @@ const ButtonGuide = () => {
       <section>
         <h2>기본 버튼</h2>
         <div style={{ display: 'flex', gap: '10px' }}>
-          <Button>Default Button</Button>
+          <Button size="sm">Default Button</Button>
           <Button className="primary">Primary Button</Button>
           <Button className="secondary">Secondary Button</Button>
         </div>

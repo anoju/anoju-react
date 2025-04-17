@@ -6,6 +6,11 @@
   justify-content: center;
 }
 
+@mixin text-blind {
+  font-size: 0.3rem;
+  color: transparent;
+}
+
 @mixin theme-colors($theme: 'light') {
   @if $theme == 'light' {
     background-color: white;

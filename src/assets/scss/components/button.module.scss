@@ -25,17 +25,22 @@
     width 0s;
   appearance: none;
 
-  &.primary {
-    background-color: s.$primary-color;
+  @media (prefers-color-scheme: light) {
+    // 라이트 모드에서 primary 버튼에만 적용할 스타일
+    box-shadow: 0 2px 4px rgb(0 0 0 / 20%);
+  }
+
+  &:global(.primary) {
+    background-color: var(--primary-color);
     color: white;
 
     &:hover {
       background-color: color.adjust(s.$primary-color, $lightness: -10%);
     }
+  }
 
-    @media (prefers-color-scheme: light) {
-      // 라이트 모드에서 primary 버튼에만 적용할 스타일
-      box-shadow: 0 2px 4px rgb(0 0 0 / 20%);
-    }
+  &.sm {
+    height: 3.2rem;
+    font-size: 1.4rem;
   }
 }

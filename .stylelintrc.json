@@ -7,6 +7,12 @@
     "no-duplicate-selectors": true,
     "color-hex-length": "short",
     "function-url-quotes": "always",
-    "selector-pseudo-element-colon-notation": "double"
+    "selector-pseudo-element-colon-notation": "double",
+    "selector-pseudo-class-no-unknown": [
+      true,
+      {
+        "ignorePseudoClasses": ["global"]
+      }
+    ]
   }
 }
