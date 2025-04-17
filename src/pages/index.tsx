@@ -34,6 +34,7 @@ function Home() {
           Edit <code>src/App.tsx</code> and save to test HMR
         </p>
         <Button to="/about">go to about</Button>
+        <Button to="/guide/button">go to guide</Button>
       </div>
       <p className={styles.docs}>
         Click on the Vite and React logos to learn more
