@@ -1,7 +1,7 @@
 // src/router/index.tsx
 import React, { ReactNode } from 'react';
 import { createBrowserRouter, RouteObject, Outlet } from 'react-router-dom';
-import { PageModule, LayoutModule } from './types';
+import { PageModule, LayoutModule, PageMetadata } from './types';
 import EmptyLayout from '../layouts/EmptyLayout';
 import MainLayout from '../layouts/MainLayout';
 
@@ -29,14 +29,10 @@ const layouts = import.meta.glob<LayoutModule>('../pages/**/layout.tsx', {
 console.log('Available pages:', Object.keys(pages));
 console.log('Available layouts:', Object.keys(layouts));
 
-// 페이지 메타데이터 추출을 위한 인터페이스
-interface PageMetadata {
-  layout?: string; // 'empty' 또는 기본 레이아웃
-}
-
 // 페이지 모듈에서 메타데이터 추출
 function getPageMetadata(pageModule: PageModule): PageMetadata {
-  return (pageModule as unknown as { metadata?: PageMetadata }).metadata || {};
+  // PageModule.default에 직접 접근하여 metadata 확인
+  return pageModule.default.metadata || {};
 }
 
 // 페이지 경로 추출 및 정규화 함수
