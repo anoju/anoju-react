@@ -1,0 +1,29 @@
+@use 'variables' as vars;
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin theme-colors($theme: 'light') {
+  @if $theme == 'light' {
+    background-color: white;
+    color: vars.$text-color;
+  } @else {
+    background-color: #222;
+    color: white;
+  }
+}
+
+@mixin light-mode {
+  @media (prefers-color-scheme: light) {
+    @content;
+  }
+}
+
+@mixin dark-mode {
+  @media (prefers-color-scheme: dark) {
+    @content;
+  }
+}
