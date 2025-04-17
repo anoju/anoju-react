@@ -1,0 +1,41 @@
+// button.module.scss
+@use '@/assets/scss' as s;
+@use 'sass:color';
+@use 'sass:math';
+
+.button {
+  display: inline-flex;
+  height: 4.8rem;
+  line-height: inherit;
+  padding: 0 1.2rem;
+  border: 0 solid transparent;
+  text-align: center;
+  text-decoration: none;
+  box-sizing: border-box;
+  border-radius: 1rem;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.6rem;
+  font-weight: 500;
+  opacity: 1;
+  transition:
+    0.3s,
+    visibility 0s,
+    margin 0s,
+    width 0s;
+  appearance: none;
+
+  &.primary {
+    background-color: s.$primary-color;
+    color: white;
+
+    &:hover {
+      background-color: color.adjust(s.$primary-color, $lightness: -10%);
+    }
+
+    @media (prefers-color-scheme: light) {
+      // 라이트 모드에서 primary 버튼에만 적용할 스타일
+      box-shadow: 0 2px 4px rgb(0 0 0 / 20%);
+    }
+  }
+}

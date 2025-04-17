@@ -3,6 +3,7 @@
 // 외부링크 이동시 anchor + href 속성 사용
 import React from 'react';
 import { Link } from 'react-router-dom';
+import styles from '@/assets/scss/components/button.module.scss';
 
 type ButtonProps =
   | React.ButtonHTMLAttributes<HTMLButtonElement>
@@ -15,6 +16,15 @@ type ButtonProps =
     >);
 
 const Button: React.FC<ButtonProps> = (props) => {
+  const buttonClasses = [
+    styles.button,
+    // elevated && styles.elevated,
+    // size && styles[size],
+    // variant && styles[variant]
+  ]
+    .filter(Boolean)
+    .join(' ');
+
   // to 속성이 있으면 Link
   if ('to' in props && props.to) {
     const { to, children, ...rest } = props;
@@ -24,7 +34,7 @@ const Button: React.FC<ButtonProps> = (props) => {
     delete newRest.target; // target 속성 제거
 
     return (
-      <Link to={to} {...newRest}>
+      <Link to={to} className={buttonClasses} {...newRest}>
         {children}
       </Link>
     );
@@ -51,6 +61,7 @@ const Button: React.FC<ButtonProps> = (props) => {
       <a
         href={href}
         role="button"
+        className={buttonClasses}
         target={target}
         rel={target === '_blank' ? 'noopener noreferrer' : undefined}
         onClick={handleClick}
@@ -65,7 +76,7 @@ const Button: React.FC<ButtonProps> = (props) => {
   const { children, ...rest } =
     props as React.ButtonHTMLAttributes<HTMLButtonElement>;
   return (
-    <button type="button" {...rest}>
+    <button type="button" className={buttonClasses} {...rest}>
       {children}
     </button>
   );
