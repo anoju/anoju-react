@@ -1,8 +1,10 @@
+import styles from '@/assets/scss/pages/about.module.scss';
+
 function About() {
   return (
-    <>
-      <p>about page</p>
-    </>
+    <div className={styles.home}>
+      <h1>about page</h1>
+    </div>
   );
 }
 

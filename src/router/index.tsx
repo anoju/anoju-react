@@ -1,7 +1,7 @@
 // src/router/index.tsx
 import { createBrowserRouter, RouteObject } from 'react-router-dom';
 import MainLayout from '../layouts/MainLayout';
-import AuthLayout from '../layouts/AuthLayout';
+import emptyLayout from '../layouts/emptyLayout';
 import React from 'react';
 import { PageModule } from './types'; // PageModule 타입을 가져옵니다.
 
@@ -19,7 +19,7 @@ console.log('Available pages:', Object.keys(pages));
 
 // 레이아웃 매핑 (인덱스 시그니처 추가)
 const layoutMap: Record<string, React.FC<LayoutProps>> = {
-  auth: AuthLayout,
+  empty: emptyLayout, // 빈 레이아웃
   '': MainLayout, // 기본 레이아웃
 };
 

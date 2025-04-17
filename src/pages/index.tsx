@@ -35,7 +35,7 @@ function Home() {
         </p>
         <Button to="/about">go to about</Button>
       </div>
-      <p className={styles['read-the-docs']}>
+      <p className={styles.docs}>
         Click on the Vite and React logos to learn more
       </p>
     </div>
