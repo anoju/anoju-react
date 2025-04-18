@@ -6,7 +6,9 @@
 }
 
 .section {
-  margin-bottom: 40px;
+  + .section {
+    margin-top: 80px;
+  }
 }
 
 .showcase {
@@ -30,5 +32,4 @@
 .subtitle {
   margin-top: 20px;
   margin-bottom: 10px;
-  color: #555;
 }

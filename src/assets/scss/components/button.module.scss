@@ -32,15 +32,43 @@
 
   &:global(.primary) {
     background-color: var(--primary-color);
-    color: white;
+    color: #fff;
 
     &:hover {
       background-color: color.adjust(s.$primary-color, $lightness: -10%);
     }
   }
 
+  &:global(.secondary) {
+    background: #f2f4f6;
+    color: #333;
+
+    &:hover {
+      background-color: color.adjust(#f2f4f6, $lightness: -10%);
+    }
+  }
+
+  &.xs {
+    height: 2.4rem;
+    padding: 0 0.8rem;
+    font-size: 1.2rem;
+    border-radius: 0.4rem;
+  }
+
   &.sm {
     height: 3.2rem;
+    font-size: 1.2rem;
+    border-radius: 0.6rem;
+  }
+
+  &.lg {
+    height: 3.8rem;
     font-size: 1.4rem;
+    border-radius: 0.6rem;
+  }
+
+  &.xl {
+    height: 5.2rem;
+    border-radius: 1.2rem;
   }
 }

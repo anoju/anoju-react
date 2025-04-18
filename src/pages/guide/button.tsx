@@ -10,16 +10,37 @@ const ButtonGuide = () => {
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>기본 버튼</h2>
         <div className={styles.showcase}>
-          <Button size="sm">Default Button</Button>
+          <Button>Default Button</Button>
           <Button className="primary">Primary Button</Button>
           <Button className="secondary">Secondary Button</Button>
         </div>
 
-        <h3 className={styles.subtitle}>사용 예</h3>
+        <h3 className={styles.subtitle}>참조 소스코드</h3>
         <CodeHighlight
           code={`<Button>Default Button</Button>
 <Button className="primary">Primary Button</Button>
 <Button className="secondary">Secondary Button</Button>`}
+          language="jsx"
+        />
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles.sectionTitle}>a태그 렌더링 필요시</h2>
+        <div className={styles.showcase}>
+          <Button anchor>Default Button</Button>
+          <Button anchor className="primary">
+            Primary Button
+          </Button>
+          <Button anchor className="secondary">
+            Secondary Button
+          </Button>
+        </div>
+
+        <h3 className={styles.subtitle}>참조 소스코드</h3>
+        <CodeHighlight
+          code={`<Button anchor>Default Button</Button>
+<Button anchor className="primary">Primary Button</Button>
+<Button anchor className="secondary">Secondary Button</Button>`}
           language="jsx"
         />
       </section>
@@ -35,7 +56,7 @@ const ButtonGuide = () => {
           </Button>
         </div>
 
-        <h3 className={styles.subtitle}>사용 예</h3>
+        <h3 className={styles.subtitle}>참조 소스코드</h3>
         <CodeHighlight
           code={`<Button to="/">Home Link</Button>
 <Button to="/about">About Link</Button>`}
@@ -46,18 +67,14 @@ const ButtonGuide = () => {
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>외부 링크 버튼</h2>
         <div className={styles.showcase}>
-          <Button
-            className="primary"
-            href="https://example.com"
-            target="_blank"
-          >
+          <Button className="primary" href="https://naver.com" target="_blank">
             External Link
           </Button>
         </div>
 
-        <h3 className={styles.subtitle}>사용 예</h3>
+        <h3 className={styles.subtitle}>참조 소스코드</h3>
         <CodeHighlight
-          code={`<Button className="primary" href="https://example.com" target="_blank">
+          code={`<Button className="primary" href="https://naver.com" target="_blank">
   External Link
 </Button>`}
           language="jsx"
