@@ -13,6 +13,15 @@
       {
         "ignorePseudoClasses": ["global"]
       }
-    ]
-  }
+    ],
+    "no-descending-specificity": true
+  },
+  "overrides": [
+    {
+      "files": ["**/*.module.scss"],
+      "rules": {
+        "no-descending-specificity": null
+      }
+    }
+  ]
 }
