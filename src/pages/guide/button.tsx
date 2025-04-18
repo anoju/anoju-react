@@ -1,30 +1,32 @@
 // src/pages/guide/button.tsx - 버튼 가이드 페이지
-import { Button } from '@/components/common';
+import { Button, CodeHighlight } from '@/components/common';
+import styles from '@/assets/scss/pages/guide.module.scss';
 
 const ButtonGuide = () => {
   return (
-    <div>
-      <h1>Button Component</h1>
+    <div className={styles.container}>
+      <h1 className={styles.title}>Button Component</h1>
 
-      <section>
-        <h2>기본 버튼</h2>
-        <div style={{ display: 'flex', gap: '10px' }}>
+      <section className={styles.section}>
+        <h2 className={styles.sectionTitle}>기본 버튼</h2>
+        <div className={styles.showcase}>
           <Button size="sm">Default Button</Button>
           <Button className="primary">Primary Button</Button>
           <Button className="secondary">Secondary Button</Button>
         </div>
 
-        <h3>사용 예</h3>
-        <pre>
-          <code>{`<Button>Default Button</Button>
+        <h3 className={styles.subtitle}>사용 예</h3>
+        <CodeHighlight
+          code={`<Button>Default Button</Button>
 <Button className="primary">Primary Button</Button>
-<Button className="secondary">Secondary Button</Button>`}</code>
-        </pre>
+<Button className="secondary">Secondary Button</Button>`}
+          language="jsx"
+        />
       </section>
 
-      <section>
-        <h2>링크 버튼</h2>
-        <div style={{ display: 'flex', gap: '10px' }}>
+      <section className={styles.section}>
+        <h2 className={styles.sectionTitle}>링크 버튼</h2>
+        <div className={styles.showcase}>
           <Button className="primary" to="/">
             Home Link
           </Button>
@@ -33,16 +35,17 @@ const ButtonGuide = () => {
           </Button>
         </div>
 
-        <h3>사용 예</h3>
-        <pre>
-          <code>{`<Button to="/">Home Link</Button>
-<Button to="/about">About Link</Button>`}</code>
-        </pre>
+        <h3 className={styles.subtitle}>사용 예</h3>
+        <CodeHighlight
+          code={`<Button to="/">Home Link</Button>
+<Button to="/about">About Link</Button>`}
+          language="jsx"
+        />
       </section>
 
-      <section>
-        <h2>외부 링크 버튼</h2>
-        <div style={{ display: 'flex', gap: '10px' }}>
+      <section className={styles.section}>
+        <h2 className={styles.sectionTitle}>외부 링크 버튼</h2>
+        <div className={styles.showcase}>
           <Button
             className="primary"
             href="https://example.com"
@@ -52,12 +55,13 @@ const ButtonGuide = () => {
           </Button>
         </div>
 
-        <h3>사용 예</h3>
-        <pre>
-          <code>{`<Button className="primary" href="https://example.com" target="_blank">
+        <h3 className={styles.subtitle}>사용 예</h3>
+        <CodeHighlight
+          code={`<Button className="primary" href="https://example.com" target="_blank">
   External Link
-</Button>`}</code>
-        </pre>
+</Button>`}
+          language="jsx"
+        />
       </section>
     </div>
   );
