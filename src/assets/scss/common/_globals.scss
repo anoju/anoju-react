@@ -15,11 +15,15 @@ body {
     'Apple SD Gothic Neo',
     AppleSDGothicNeo,
     sans-serif;
-}
 
-@include s.light-mode {
-  body {
+  @include s.light-mode {
     color: #213547;
     background-color: #fff;
   }
+}
+
+.btn-link {
+  color: var(--primary-color);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }

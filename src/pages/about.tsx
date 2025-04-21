@@ -13,7 +13,7 @@ function About() {
     ),
     rightButtons: (
       <>
-        <Button className="primary" size="sm">
+        <Button className="primary" size="sm" to="/empty">
           empty
         </Button>
       </>

@@ -11,6 +11,7 @@ type ButtonSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 // 공통 속성 타입 정의
 type CommonButtonProps = {
   size?: ButtonSize;
+  not?: boolean; // 'not' prop 추가
 };
 
 type ButtonProps =
@@ -26,7 +27,16 @@ type ButtonProps =
 
 const Button: React.FC<ButtonProps> = (props) => {
   // 버튼 클래스명 생성 함수
-  const getButtonClasses = (className?: string, size?: ButtonSize) => {
+  const getButtonClasses = (
+    className?: string,
+    size?: ButtonSize,
+    not?: boolean
+  ) => {
+    // not 속성이 true이면 className만 반환
+    if (not) {
+      return className;
+    }
+
     return [
       styles.button,
       size && styles[size], // size 클래스 추가
@@ -38,14 +48,18 @@ const Button: React.FC<ButtonProps> = (props) => {
 
   // to 속성이 있으면 Link
   if ('to' in props && props.to) {
-    const { to, children, className, size, ...rest } = props;
+    const { to, children, className, size, not, ...rest } = props;
 
     // Link 시 target 속성 제외
     const newRest = { ...rest };
     delete newRest.target; // target 속성 제거
 
     return (
-      <Link to={to} className={getButtonClasses(className, size)} {...newRest}>
+      <Link
+        to={to}
+        className={getButtonClasses(className, size, not)}
+        {...newRest}
+      >
         {children}
       </Link>
     );
@@ -60,6 +74,7 @@ const Button: React.FC<ButtonProps> = (props) => {
       children,
       className,
       size,
+      not,
       ...rest
     } = props;
 
@@ -80,7 +95,7 @@ const Button: React.FC<ButtonProps> = (props) => {
       <a
         href={href}
         role="button"
-        className={getButtonClasses(className, size)}
+        className={getButtonClasses(className, size, not)}
         target={target}
         rel={target === '_blank' ? 'noopener noreferrer' : undefined}
         onClick={handleClick}
@@ -92,13 +107,13 @@ const Button: React.FC<ButtonProps> = (props) => {
   }
 
   // 기본은 button
-  const { children, className, size, ...rest } =
+  const { children, className, size, not, ...rest } =
     props as React.ButtonHTMLAttributes<HTMLButtonElement> & CommonButtonProps;
 
   return (
     <button
       type="button"
-      className={getButtonClasses(className, size)}
+      className={getButtonClasses(className, size, not)}
       {...rest}
     >
       {children}
