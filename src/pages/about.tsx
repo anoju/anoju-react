@@ -6,10 +6,16 @@ import { Button } from '@/components/common';
 function About() {
   usePageLayout({
     title: 'About Us',
-    leftButtons: <Button to="/">Home</Button>,
+    leftButtons: (
+      <Button to="/" size="sm">
+        Home
+      </Button>
+    ),
     rightButtons: (
       <>
-        <Button className="primary">Contact</Button>
+        <Button className="primary" size="sm">
+          empty
+        </Button>
       </>
     ),
   });

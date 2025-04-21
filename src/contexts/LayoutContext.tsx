@@ -4,7 +4,7 @@ import React, {
   useContext,
   ReactNode,
   useState,
-  useEffect,
+  useCallback,
 } from 'react';
 
 // 레이아웃 설정을 위한 타입 정의
@@ -46,22 +46,14 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
 }) => {
   const [config, setConfig] = useState<LayoutConfig>(defaultLayoutConfig);
 
-  // 설정 업데이트 함수 - 일부만 업데이트 가능
-  const updateConfig = (newConfig: Partial<LayoutConfig>) => {
+  // useCallback으로 함수를 메모이제이션하여 불필요한 재생성 방지
+  const updateConfig = useCallback((newConfig: Partial<LayoutConfig>) => {
     setConfig((prevConfig) => ({ ...prevConfig, ...newConfig }));
-  };
+  }, []);
 
   // 설정 초기화 함수
-  const resetConfig = () => {
+  const resetConfig = useCallback(() => {
     setConfig(defaultLayoutConfig);
-  };
-
-  // 경로 변경 시 설정 초기화 (선택 사항)
-  useEffect(() => {
-    // 여기에 라우트 변경 감지 로직을 추가할 수 있음
-    return () => {
-      // 컴포넌트 언마운트 시 정리 로직
-    };
   }, []);
 
   return (

@@ -7,7 +7,7 @@ import { useLayout, LayoutConfig } from '@/contexts/LayoutContext';
  * @param config 레이아웃 설정
  * @param deps 의존성 배열 (선택 사항)
  */
-export function usePageLayout(config: Partial<LayoutConfig>, deps: any[] = []) {
+export function usePageLayout(config: Partial<LayoutConfig>) {
   const { updateConfig, resetConfig } = useLayout();
 
   useEffect(() => {
@@ -19,7 +19,7 @@ export function usePageLayout(config: Partial<LayoutConfig>, deps: any[] = []) {
       resetConfig();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [updateConfig, resetConfig, ...deps]);
+  }, []); // Only run on mount and unmount
 
   return useLayout();
 }
