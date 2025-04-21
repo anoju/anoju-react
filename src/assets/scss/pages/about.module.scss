@@ -1,3 +1,7 @@
+@use '@/assets/scss' as s;
+@use 'sass:color';
+@use 'sass:math';
+
 .home {
   text-align: center;
   display: flex;

@@ -1,9 +1,7 @@
 /* src/pages/guide/ButtonGuide.module.css */
-.container {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 20px;
-}
+@use '@/assets/scss' as s;
+@use 'sass:color';
+@use 'sass:math';
 
 .section {
   + .section {
@@ -14,14 +12,16 @@
 .showcase {
   display: flex;
   gap: 10px;
-  margin: 20px 0;
+  padding: 20px;
   flex-wrap: wrap;
+  border-radius: 8px;
+  border: 1px solid var(--bg-dark-75);
 }
 
 .title {
   margin-bottom: 30px;
   padding-bottom: 10px;
-  border-bottom: 1px solid #eaeaea;
+  border-bottom: 1px solid var(--bg-dark-50);
 }
 
 .section-title {
@@ -29,7 +29,7 @@
   margin-bottom: 20px;
 }
 
-.subtitle {
+.sub-title {
   margin-top: 20px;
   margin-bottom: 10px;
 }

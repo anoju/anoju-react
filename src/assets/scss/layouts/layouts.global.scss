@@ -1,0 +1,8 @@
+@use '@/assets/scss' as s;
+@use 'sass:color';
+@use 'sass:math';
+
+.page-inner {
+  padding-left: var(--side-padding);
+  padding-right: var(--side-padding);
+}

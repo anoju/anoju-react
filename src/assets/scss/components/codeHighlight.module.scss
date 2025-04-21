@@ -1,4 +1,7 @@
 /* src/components/common/CodeHighlight.module.scss */
+@use '@/assets/scss' as s;
+@use 'sass:color';
+@use 'sass:math';
 
 // 다크모드(기본) 스타일
 .container {
@@ -70,7 +73,7 @@
 }
 
 // 라이트모드 스타일 - 시스템 설정에 따른 자동 적용
-@media (prefers-color-scheme: light) {
+@include s.light-mode {
   .container {
     border-color: #ddd;
     background-color: #f6f8fa;

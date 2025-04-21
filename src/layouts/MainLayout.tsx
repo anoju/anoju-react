@@ -74,7 +74,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           </div>
         </header>
       )}
-      <main className={styles.body}>{children}</main>
+      <main className={styles.container}>{children}</main>
       {config.showFooter && (
         <footer className={styles.footer}>
           Copyright © 2025 ANOJU. All rights reserved.

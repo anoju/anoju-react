@@ -25,9 +25,9 @@
     width 0s;
   appearance: none;
 
-  @media (prefers-color-scheme: light) {
+  @include s.light-mode {
     // 라이트 모드에서 primary 버튼에만 적용할 스타일
-    box-shadow: 0 2px 4px rgb(0 0 0 / 20%);
+    // box-shadow: 0 2px 4px rgb(0 0 0 / 20%);
   }
 
   &:global(.primary) {
@@ -40,11 +40,11 @@
   }
 
   &:global(.secondary) {
-    background: #f2f4f6;
-    color: #333;
+    background: var(--secondary-color);
+    color: #fff;
 
     &:hover {
-      background-color: color.adjust(#f2f4f6, $lightness: -10%);
+      background-color: color.adjust(s.$secondary-color, $lightness: -10%);
     }
   }
 

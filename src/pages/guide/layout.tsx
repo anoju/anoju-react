@@ -1,7 +1,6 @@
 // src/pages/guide/layout.tsx
 import React, { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import styles from '@/assets/scss/layouts/layouts.module.scss';
 
 interface GuideLayoutProps {
   children: ReactNode;
@@ -9,8 +8,8 @@ interface GuideLayoutProps {
 
 const GuideLayout: React.FC<GuideLayoutProps> = ({ children }) => {
   return (
-    <div className={styles.guideContainer}>
-      <div className={styles.guideSidebar}>
+    <div>
+      <div>
         <nav>
           <ul>
             <li>
@@ -26,7 +25,7 @@ const GuideLayout: React.FC<GuideLayoutProps> = ({ children }) => {
           </ul>
         </nav>
       </div>
-      <div className={styles.guideContent}>{children}</div>
+      {children}
     </div>
   );
 };

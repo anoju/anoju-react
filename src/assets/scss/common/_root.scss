@@ -1,11 +1,26 @@
 @use '@/assets/scss' as s;
+@use 'sass:color';
+@use 'sass:math';
 
 :root {
-  --primary-color: #{s.$primary-color};
-
   color-scheme: light dark;
   font-synthesis: none;
   text-rendering: optimizelegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  // color
+  --primary-color: #{s.$primary-color};
+  --secondary-color: #{s.$secondary-color};
+
+  @for $i from 0 through 20 {
+    // 흰색에서 검은색으로 (light에서 dark로)
+    --bg-light-#{$i * 5}: #{color.mix(#fff, #000, $i * 5%)};
+
+    // 검은색에서 흰색으로 (dark에서 light로)
+    --bg-dark-#{$i * 5}: #{color.mix(#000, #fff, $i * 5%)};
+  }
+
+  // padding, margin
+  --side-padding: 2.4rem;
 }
