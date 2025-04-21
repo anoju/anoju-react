@@ -1,11 +1,27 @@
-import { useState } from 'react';
+// src/pages/index.tsx
+import { useState, useEffect } from 'react';
 import reactLogo from '@/assets/images/react.svg';
 import viteLogo from '/vite.svg';
 import { Button } from '@/components/common';
 import styles from '@/assets/scss/pages/home.module.scss';
+import { useLayout } from '@/contexts/LayoutContext';
 
 function Home() {
   const [count, setCount] = useState(0);
+  const { updateConfig } = useLayout();
+
+  useEffect(() => {
+    // 홈 페이지에 맞는 레이아웃 설정
+    updateConfig({
+      title: 'Vite + React',
+      leftButtons: null,
+      rightButtons: (
+        <Button className="primary" to="/guide/button">
+          Component Guide
+        </Button>
+      ),
+    });
+  }, [updateConfig]);
 
   return (
     <div className={styles.home}>
