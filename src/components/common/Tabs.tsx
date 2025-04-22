@@ -13,9 +13,21 @@ import React, {
 import { useNavigate, useLocation } from 'react-router-dom';
 import styles from '@/assets/scss/components/tabs.module.scss';
 
+// 고유 ID 생성을 위한 유틸리티 함수
+let uniqueIdCounter = 0;
+const generateUniqueId = (): string => {
+  let id;
+  do {
+    id = `tab-${uniqueIdCounter++}`;
+  } while (usedIds.has(id));
+
+  usedIds.add(id);
+  return id;
+};
+
 // Tab 아이템 인터페이스
 export interface TabItem {
-  id: string;
+  id?: string; // 선택 사항으로 변경
   label: ReactNode;
   content?: ReactNode;
   disabled?: boolean;
@@ -24,19 +36,21 @@ export interface TabItem {
 
 // Tab 컴포넌트 props
 interface TabProps {
-  id: string;
+  id?: string; // 선택 사항으로 변경
   label: ReactNode;
   active?: boolean;
   disabled?: boolean;
   onClick?: (id: string) => void;
   to?: string;
+  controls?: string; // 추가: aria-controls 속성을 위한 prop
 }
 
 // TabPanel 컴포넌트 props
 interface TabPanelProps {
-  id: string;
+  id?: string; // 선택 사항으로 변경
   active?: boolean;
   children: ReactNode;
+  labelledby?: string; // 추가: aria-labelledby 속성을 위한 prop
 }
 
 // Tabs 컴포넌트 props
@@ -44,7 +58,7 @@ interface TabsProps {
   children?: ReactNode;
   items?: TabItem[];
   activeTab?: string;
-  defaultTab?: string;
+  defaultTab?: string | number; // 문자열 또는 숫자(인덱스) 허용
   onChange?: (tabId: string) => void;
   variant?: 'default' | 'outline' | 'underline' | 'pills';
   alignment?: 'start' | 'center' | 'full';
@@ -53,10 +67,25 @@ interface TabsProps {
   contentClassName?: string;
 }
 
+// 라벨에 기반한 ID 매핑을 관리하기 위한 맵
+const idMap = new Map<ReactNode, string>();
+
+// ID 생성 시 중복 방지를 위한 이미 사용된 ID 집합
+const usedIds = new Set<string>();
+
 // Tab 컴포넌트
 export const Tab = React.forwardRef<HTMLDivElement, TabProps>(
-  ({ id, label, active = false, disabled = false, onClick, to }, ref) => {
+  (
+    { id, label, active = false, disabled = false, onClick, to, controls },
+    ref
+  ) => {
     const navigate = useNavigate();
+    const tabId = id || idMap.get(label) || generateUniqueId();
+
+    // 라벨로 ID를 맵에 저장 (이미 존재하지 않는 경우)
+    if (!idMap.has(label) && !id) {
+      idMap.set(label, tabId);
+    }
 
     const handleClick = () => {
       if (disabled) return;
@@ -64,9 +93,11 @@ export const Tab = React.forwardRef<HTMLDivElement, TabProps>(
       if (to) {
         navigate(to);
       } else if (onClick) {
-        onClick(id);
+        onClick(tabId);
       }
     };
+
+    const panelId = controls || `panel-${tabId}`;
 
     return (
       <div
@@ -74,8 +105,10 @@ export const Tab = React.forwardRef<HTMLDivElement, TabProps>(
         className={`${styles.tab} ${active ? styles.active : ''} ${disabled ? styles.disabled : ''}`}
         onClick={handleClick}
         role="tab"
+        id={`tab-${tabId}`}
         aria-selected={active}
         aria-disabled={disabled ? disabled : undefined}
+        aria-controls={panelId}
         tabIndex={disabled ? -1 : 0}
       >
         {label}
@@ -86,14 +119,17 @@ export const Tab = React.forwardRef<HTMLDivElement, TabProps>(
 
 // TabPanel 컴포넌트
 export const TabPanel = React.forwardRef<HTMLDivElement, TabPanelProps>(
-  ({ id, active = false, children }, ref) => {
+  ({ id, active = false, children, labelledby }, ref) => {
+    const panelId = id || generateUniqueId();
+    const tabId = labelledby || `tab-${panelId}`;
+
     return (
       <div
         ref={ref}
         className={`${styles['tab-panel']} ${active ? styles.active : ''}`}
         role="tabpanel"
-        id={`panel-${id}`}
-        aria-labelledby={`tab-${id}`}
+        id={`panel-${panelId}`}
+        aria-labelledby={tabId}
         hidden={!active}
       >
         {children}
@@ -122,6 +158,22 @@ export const Tabs: React.FC<TabsProps> = ({
   const activeIndicatorRef = useRef<{ left: number; width: number } | null>(
     null
   );
+
+  // 아이템에 ID가 없는 경우 ID 생성 및 할당 (인덱스 기반)
+  const processedItems = items?.map((item, index) => {
+    if (!item.id) {
+      // 라벨이 있으면 라벨 기반, 없으면 인덱스 기반으로 ID 생성
+      const labelBasedId =
+        item.label && typeof item.label === 'string'
+          ? item.label.toLowerCase().replace(/\s+/g, '-')
+          : `item-${index}`;
+
+      // 고유성 보장을 위해 접두사 추가
+      const generatedId = `tab-${labelBasedId}-${index}`;
+      return { ...item, id: generatedId };
+    }
+    return item;
+  });
 
   // 활성 탭의 위치를 업데이트하는 함수
   const updateActiveIndicator = useCallback(() => {
@@ -159,22 +211,53 @@ export const Tabs: React.FC<TabsProps> = ({
       return;
     }
 
-    // 먼저 defaultTab이 있으면 사용
-    if (defaultTab && !activeTabId) {
-      setActiveTabId(defaultTab);
-      return;
+    // defaultTab 처리 (문자열 또는 숫자)
+    if (defaultTab !== undefined && !activeTabId) {
+      if (typeof defaultTab === 'number' && processedItems) {
+        // 인덱스 기반 defaultTab 처리
+        const index =
+          defaultTab >= 0 && defaultTab < processedItems.length
+            ? defaultTab
+            : 0;
+        if (processedItems[index] && processedItems[index].id) {
+          setActiveTabId(processedItems[index].id as string);
+          return;
+        }
+      } else if (typeof defaultTab === 'number' && children) {
+        // 자식 컴포넌트가 있는 경우 인덱스 기반 처리
+        const tabChildren: ReactElement[] = [];
+        Children.forEach(children, (child) => {
+          if (isValidElement(child) && child.type === Tab) {
+            tabChildren.push(child);
+          }
+        });
+
+        const index =
+          defaultTab >= 0 && defaultTab < tabChildren.length ? defaultTab : 0;
+        if (tabChildren[index]) {
+          const tabProps = tabChildren[index].props as TabProps;
+          const tabId =
+            tabProps.id || idMap.get(tabProps.label) || generateUniqueId();
+          setActiveTabId(tabId);
+          return;
+        }
+      } else if (typeof defaultTab === 'string') {
+        // 문자열 기반 defaultTab 처리 (기존과 동일)
+        setActiveTabId(defaultTab);
+        return;
+      }
     }
 
-    if (items) {
+    if (processedItems && processedItems.length > 0) {
       // URL 경로와 일치하는 탭 찾기
-      const pathTab = items.find(
+      const pathTab = processedItems.find(
         (item) => item.to && location.pathname.startsWith(item.to)
       );
-      if (pathTab) {
+      if (pathTab && pathTab.id) {
         setActiveTabId(pathTab.id);
-      } else if (items.length > 0 && !activeTabId) {
+      } else if (!activeTabId && processedItems[0].id) {
         // 아무것도 일치하지 않으면 첫 번째 항목 선택
-        setActiveTabId(items[0].id);
+        setActiveTabId(processedItems[0].id);
       }
     } else if (children) {
       // 탭 컴포넌트들을 배열로 추출
@@ -190,8 +273,11 @@ export const Tabs: React.FC<TabsProps> = ({
 
       for (const child of tabChildren) {
         const tabProps = child.props as TabProps;
+        const tabId =
+          tabProps.id || idMap.get(tabProps.label) || generateUniqueId();
+
         if (tabProps.to && location.pathname.startsWith(tabProps.to)) {
-          setActiveTabId(tabProps.id);
+          setActiveTabId(tabId);
           foundActiveTab = true;
           break;
         }
@@ -200,10 +286,21 @@ export const Tabs: React.FC<TabsProps> = ({
       // 일치하는 탭이 없고 아직 활성화된 탭이 없으면 첫 번째 탭 선택
       if (!foundActiveTab && !activeTabId && tabChildren.length > 0) {
         const firstTabProps = tabChildren[0].props as TabProps;
-        setActiveTabId(firstTabProps.id);
+        const firstTabId =
+          firstTabProps.id ||
+          idMap.get(firstTabProps.label) ||
+          generateUniqueId();
+        setActiveTabId(firstTabId);
       }
     }
-  }, [activeTab, items, children, location.pathname, defaultTab, activeTabId]);
+  }, [
+    activeTab,
+    processedItems,
+    children,
+    location.pathname,
+    defaultTab,
+    activeTabId,
+  ]);
 
   // Tab ID가 변경될 때마다 인디케이터 업데이트
   useEffect(() => {
@@ -245,9 +342,9 @@ export const Tabs: React.FC<TabsProps> = ({
     }
 
     // items 배열을 사용하는 경우
-    if (items) {
+    if (processedItems) {
       // 탭 클릭시 to 속성이 있으면 해당 경로로 이동
-      const clickedTab = items.find((item) => item.id === tabId);
+      const clickedTab = processedItems.find((item) => item.id === tabId);
       if (clickedTab?.to) {
         navigate(clickedTab.to);
       }
@@ -259,37 +356,47 @@ export const Tabs: React.FC<TabsProps> = ({
   const alignmentClass = alignment !== 'start' ? styles[alignment] : '';
 
   // items 속성을 사용하는 경우
-  if (items && items.length > 0) {
+  if (processedItems && processedItems.length > 0) {
     return (
       <div className={`${styles.tabs} ${variantClass} ${className}`}>
         <div
           ref={tabsHeaderRef}
           className={`${styles['tabs-header']} ${alignmentClass} ${tabsClassName}`}
         >
-          {items.map((item) => (
-            <Tab
-              key={`tab-${item.id}`}
-              id={item.id}
-              label={item.label}
-              active={activeTabId === item.id}
-              disabled={item.disabled}
-              onClick={handleTabClick}
-              to={item.to}
-            />
-          ))}
+          {processedItems.map((item) => {
+            const itemId = item.id as string; // 이미 processedItems에서 ID를 생성했으므로 안전
+            const panelId = `panel-${itemId}`;
+
+            return (
+              <Tab
+                key={`tab-${itemId}`}
+                id={itemId}
+                label={item.label}
+                active={activeTabId === itemId}
+                disabled={item.disabled}
+                onClick={handleTabClick}
+                to={item.to}
+                controls={panelId}
+              />
+            );
+          })}
         </div>
         <div className={`${styles['tabs-content']} ${contentClassName}`}>
-          {items.map((item) =>
-            item.content ? (
+          {processedItems.map((item) => {
+            const itemId = item.id as string;
+            const tabId = `tab-${itemId}`;
+
+            return item.content ? (
               <TabPanel
-                key={`panel-${item.id}`}
-                id={item.id}
-                active={activeTabId === item.id}
+                key={`panel-${itemId}`}
+                id={itemId}
+                active={activeTabId === itemId}
+                labelledby={tabId}
               >
                 {item.content}
               </TabPanel>
-            ) : null
-          )}
+            ) : null;
+          })}
         </div>
       </div>
     );
@@ -299,49 +406,66 @@ export const Tabs: React.FC<TabsProps> = ({
   const tabs: ReactElement[] = [];
   const panels: ReactElement[] = [];
 
-  // 첫번째 순회: 모든 탭과 패널을 수집
-  const tabsMap = new Map<string, ReactElement>();
-  const panelsMap = new Map<string, ReactElement>();
+  // 탭과 패널 컴포넌트 분리
+  const tabComponents: ReactElement[] = [];
+  const panelComponents: ReactElement[] = [];
 
   Children.forEach(children, (child) => {
     if (isValidElement(child)) {
       if (child.type === Tab) {
-        const props = child.props as TabProps;
-        tabsMap.set(props.id, child);
+        tabComponents.push(child);
       } else if (child.type === TabPanel) {
-        const props = child.props as TabPanelProps;
-        panelsMap.set(props.id, child);
+        panelComponents.push(child);
       }
     }
   });
 
-  // 두번째 순회: 탭과 패널을 배열에 추가 (순서 유지)
-  let tabIndex = 0;
-  Children.forEach(children, (child) => {
-    if (isValidElement(child)) {
-      if (child.type === Tab) {
-        const tabProps = child.props as TabProps;
+  // 각 탭에 고유 ID 할당
+  const tabIds: string[] = [];
+  tabComponents.forEach((tabComponent) => {
+    const tabProps = tabComponent.props as TabProps;
+    const tabId =
+      tabProps.id || idMap.get(tabProps.label) || generateUniqueId();
 
-        // Tab 컴포넌트 복제 및 속성 추가
-        tabs.push(
-          cloneElement(child, {
-            key: `tab-${tabProps.id}-${tabIndex++}`,
-            active: activeTabId === tabProps.id,
-            onClick: handleTabClick,
-          } as Partial<TabProps>)
-        );
-      } else if (child.type === TabPanel) {
-        const panelProps = child.props as TabPanelProps;
-
-        // TabPanel 컴포넌트 복제 및 속성 추가
-        panels.push(
-          cloneElement(child, {
-            key: `panel-${panelProps.id}`,
-            active: activeTabId === panelProps.id,
-          } as Partial<TabPanelProps>)
-        );
-      }
+    if (!tabProps.id) {
+      idMap.set(tabProps.label, tabId);
     }
+
+    tabIds.push(tabId);
+  });
+
+  // 탭 컴포넌트 생성
+  tabComponents.forEach((tabComponent, index) => {
+    // const tabProps = tabComponent.props as TabProps;
+    const tabId = tabIds[index];
+    const panelId = `panel-${tabId}`;
+
+    tabs.push(
+      cloneElement(tabComponent, {
+        key: `tab-${tabId}-${index}`,
+        id: tabId,
+        active: activeTabId === tabId,
+        onClick: handleTabClick,
+        controls: panelId,
+      } as Partial<TabProps>)
+    );
+  });
+
+  // 패널 컴포넌트 생성 (인덱스 기반으로 탭과 매핑)
+  panelComponents.forEach((panelComponent, index) => {
+    // 해당 인덱스의 탭 ID가 있으면 사용, 없으면 새로 생성
+    const tabId = index < tabIds.length ? tabIds[index] : generateUniqueId();
+    const panelId = `panel-${tabId}`;
+    const tabElementId = `tab-${tabId}`;
+
+    panels.push(
+      cloneElement(panelComponent, {
+        key: panelId,
+        id: tabId,
+        active: activeTabId === tabId,
+        labelledby: tabElementId,
+      } as Partial<TabPanelProps>)
+    );
   });
 
   return (

@@ -30,17 +30,17 @@ const TabsGuide = () => {
         <p>Tab 및 TabPanel 컴포넌트를 직접 사용하는 방법입니다.</p>
 
         <div className={styles.showcase}>
-          <Tabs defaultTab="tab1">
-            <Tab id="tab1" label="탭 1" />
-            <Tab id="tab2" label="탭 2" />
-            <Tab id="tab3" label="탭 3" disabled />
-            <TabPanel id="tab1">
+          <Tabs>
+            <Tab label="탭 1" />
+            <Tab label="탭 2" />
+            <Tab label="탭 3" disabled />
+            <TabPanel>
               <p>탭 1 내용입니다. 기본으로 선택된 탭입니다.</p>
             </TabPanel>
-            <TabPanel id="tab2">
+            <TabPanel>
               <p>탭 2 내용입니다.</p>
             </TabPanel>
-            <TabPanel id="tab3">
+            <TabPanel>
               <p>
                 탭 3 내용입니다. 비활성화된 탭이라 이 내용은 보이지 않습니다.
               </p>
@@ -50,7 +50,26 @@ const TabsGuide = () => {
 
         <h3 className={styles['sub-title']}>참조 소스코드</h3>
         <CodeHighlight
-          code={`<Tabs defaultTab="tab1">
+          code={`<Tabs>
+  <Tab label="탭 1" />
+  <Tab label="탭 2" />
+  <Tab label="탭 3" disabled />
+  <TabPanel>
+    <p>탭 1 내용입니다. 기본으로 선택된 탭입니다.</p>
+  </TabPanel>
+  <TabPanel>
+    <p>탭 2 내용입니다.</p>
+  </TabPanel>
+  <TabPanel>
+    <p>
+      탭 3 내용입니다. 비활성화된 탭이라 이 내용은 보이지 않습니다.
+    </p>
+  </TabPanel>
+</Tabs>`}
+          language="jsx"
+        />
+        <CodeHighlight
+          code={`<Tabs>
   <Tab id="tab1" label="탭 1" />
   <Tab id="tab2" label="탭 2" />
   <Tab id="tab3" label="탭 3" disabled />
@@ -74,31 +93,50 @@ const TabsGuide = () => {
 
         <div className={styles.showcase}>
           <Tabs
+            defaultTab={1}
             items={[
               {
-                id: 'item1',
                 label: '아이템 1',
                 content: <p>아이템 1의 내용입니다.</p>,
               },
               {
-                id: 'item2',
                 label: '아이템 2',
                 content: <p>아이템 2의 내용입니다.</p>,
               },
               {
-                id: 'item3',
                 label: '아이템 3 (비활성화)',
                 content: <p>아이템 3의 내용입니다.</p>,
                 disabled: true,
               },
             ]}
-            defaultTab="item1"
           />
         </div>
 
         <h3 className={styles['sub-title']}>참조 소스코드</h3>
         <CodeHighlight
+          code={`<Tabs
+  defaultTab={1}
+  items={[
+    {
+      label: '아이템 1',
+      content: <p>아이템 1의 내용입니다.</p>,
+    },
+    {
+      label: '아이템 2',
+      content: <p>아이템 2의 내용입니다.</p>,
+    },
+    {
+      label: '아이템 3 (비활성화)',
+      content: <p>아이템 3의 내용입니다.</p>,
+      disabled: true,
+    },
+  ]}
+/>`}
+          language="jsx"
+        />
+        <CodeHighlight
           code={`<Tabs 
+  defaultTab="item2"
   items={[
     { 
       id: 'item1', 
@@ -117,7 +155,6 @@ const TabsGuide = () => {
       disabled: true 
     },
   ]}
-  defaultTab="item1"
 />`}
           language="jsx"
         />
