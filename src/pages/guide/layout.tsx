@@ -1,6 +1,6 @@
 // src/pages/guide/layout.tsx
 import React, { ReactNode } from 'react';
-import { Link } from 'react-router-dom';
+import { Tabs } from '@/components/common';
 
 interface GuideLayoutProps {
   children: ReactNode;
@@ -9,22 +9,30 @@ interface GuideLayoutProps {
 const GuideLayout: React.FC<GuideLayoutProps> = ({ children }) => {
   return (
     <div>
-      <div>
-        <nav>
-          <ul>
-            <li>
-              <Link to="/guide/button">Button</Link>
-            </li>
-            <li>
-              <Link to="/guide/input">Input</Link>
-            </li>
-            <li>
-              <Link to="/guide/modal">Modal</Link>
-            </li>
-            {/* 추가 컴포넌트 가이드 링크 */}
-          </ul>
-        </nav>
-      </div>
+      <Tabs
+        items={[
+          {
+            id: 'Button',
+            label: 'Button',
+            to: '/guide/button',
+          },
+          {
+            id: 'Tabs',
+            label: 'Tabs',
+            to: '/guide/tabs',
+          },
+          {
+            id: 'Input',
+            label: 'Input',
+            to: '/guide/input',
+          },
+          {
+            id: 'Modal',
+            label: 'Modal',
+            to: '/guide/modal',
+          },
+        ]}
+      />
       {children}
     </div>
   );

@@ -1,0 +1,158 @@
+// tabs.module.scss
+@use '@/assets/scss' as s;
+@use 'sass:color';
+@use 'sass:math';
+
+:root {
+  // 초기 인디케이터 위치 및 크기
+  --active-tab-left: 0;
+  --active-tab-width: 60px;
+}
+
+.tabs {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 43px; /* 탭 높이에 맞춰 조정 */
+    left: var(--active-tab-left, 0);
+    width: var(--active-tab-width, 60px);
+    height: 3px;
+    background-color: var(--primary-color);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1;
+  }
+
+  // 다양한 스타일 변형
+  &.outline {
+    .tabs-header {
+      border: 1px solid var(--bg-dark-10);
+      border-bottom: none;
+      border-top-left-radius: 0.8rem;
+      border-top-right-radius: 0.8rem;
+    }
+
+    .tabs-content {
+      border: 1px solid var(--bg-dark-10);
+      border-top: none;
+      border-bottom-left-radius: 0.8rem;
+      border-bottom-right-radius: 0.8rem;
+      padding: 2rem;
+    }
+  }
+
+  &.pills {
+    &::after {
+      display: none; // 인디케이터 라인 숨김
+    }
+
+    .tabs-header {
+      border-bottom: none;
+      gap: 0.5rem;
+    }
+
+    .tab {
+      border-radius: 5rem;
+      transition: all 0.2s ease;
+
+      &.active {
+        background-color: var(--primary-color);
+        color: white;
+      }
+    }
+  }
+
+  // 반응형 - 모바일에서는 스크롤
+  // @media (width <= 768px) {
+  //   .tabs-header.full {
+  //     .tab {
+  //       flex: 0 0 auto;
+  //     }
+  //   }
+  // }
+}
+
+.tabs-header {
+  display: flex;
+  border-bottom: 1px solid var(--bg-dark-60);
+  overflow-x: auto;
+  position: relative;
+
+  // 스크롤바 숨기기
+  scrollbar-width: none; // Firefox
+  -ms-overflow-style: none; // IE & Edge
+  &::-webkit-scrollbar {
+    display: none; // Chrome, Safari, Opera
+  }
+
+  &.center {
+    justify-content: center;
+  }
+
+  &.full {
+    .tab {
+      flex: 1 1 0%;
+    }
+  }
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 1.5rem;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  font-size: 1.6rem;
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--bg-dark-50);
+  position: relative;
+
+  &:hover {
+    color: var(--primary-color);
+  }
+
+  &.active {
+    color: var(--primary-color);
+  }
+
+  &.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+}
+
+.tabs-content {
+  padding: 2rem 0;
+}
+
+.tab-panel {
+  display: none;
+
+  &.active {
+    display: block;
+  }
+}
+
+// 라이트 모드 스타일
+@include s.light-mode {
+  .tab {
+    color: var(--bg-dark-60);
+
+    &.active {
+      color: var(--primary-color);
+    }
+  }
+
+  .tabs.outline {
+    .tabs-header,
+    .tabs-content {
+      border-color: var(--bg-dark-10);
+    }
+  }
+}
