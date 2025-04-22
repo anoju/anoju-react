@@ -31,16 +31,16 @@ const TabsGuide = () => {
 
         <div className={styles.showcase}>
           <Tabs defaultTab="tab1">
-            <Tab key="tab1" id="tab1" label="탭 1" />
-            <Tab key="tab2" id="tab2" label="탭 2" />
-            <Tab key="tab3" id="tab3" label="탭 3" disabled />
-            <TabPanel key="panel1" id="tab1">
+            <Tab id="tab1" label="탭 1" />
+            <Tab id="tab2" label="탭 2" />
+            <Tab id="tab3" label="탭 3" disabled />
+            <TabPanel id="tab1">
               <p>탭 1 내용입니다. 기본으로 선택된 탭입니다.</p>
             </TabPanel>
-            <TabPanel key="panel2" id="tab2">
+            <TabPanel id="tab2">
               <p>탭 2 내용입니다.</p>
             </TabPanel>
-            <TabPanel key="panel3" id="tab3">
+            <TabPanel id="tab3">
               <p>
                 탭 3 내용입니다. 비활성화된 탭이라 이 내용은 보이지 않습니다.
               </p>

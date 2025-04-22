@@ -75,7 +75,7 @@ export const Tab = React.forwardRef<HTMLDivElement, TabProps>(
         onClick={handleClick}
         role="tab"
         aria-selected={active}
-        aria-disabled={disabled}
+        aria-disabled={disabled ? disabled : undefined}
         tabIndex={disabled ? -1 : 0}
       >
         {label}
