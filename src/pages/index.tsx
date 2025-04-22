@@ -14,7 +14,7 @@ function Home() {
   const layoutConfig = useMemo(
     () => ({
       title: 'Vite + React',
-      leftButtons: null,
+      showBackButton: false,
       rightButtons: (
         <Button className="primary" to="/guide/button" size="sm">
           Guide

@@ -14,6 +14,7 @@ export interface LayoutConfig {
   rightButtons?: ReactNode; // 헤더 우측 버튼들
   showHeader?: boolean; // 헤더 표시 여부
   showFooter?: boolean; // 푸터 표시 여부
+  showBackButton?: boolean; // 뒤로 가기 버튼 표시 여부
   // 필요에 따라 추가 설정
 }
 
@@ -31,6 +32,7 @@ const defaultLayoutConfig: LayoutConfig = {
   rightButtons: null,
   showHeader: true,
   showFooter: true,
+  showBackButton: true, // 기본값 true
 };
 
 // 컨텍스트 생성

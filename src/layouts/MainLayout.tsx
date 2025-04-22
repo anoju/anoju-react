@@ -1,7 +1,9 @@
 // src/layouts/MainLayout.tsx
 import React, { ReactNode, useEffect, useRef, useCallback } from 'react';
-import styles from '@/assets/scss/layouts/layouts.module.scss';
+import { useNavigate } from 'react-router-dom';
 import { useLayout } from '@/contexts/LayoutContext';
+import styles from '@/assets/scss/layouts/layouts.module.scss';
+import { Button } from '@/components/common';
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -59,11 +61,37 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     return () => clearTimeout(timeoutId);
   }, [config.leftButtons, config.rightButtons, adjustHeaderWidths]);
 
+  const BackIcon = () => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M19 12H5M12 19l-7-7 7-7" />
+    </svg>
+  );
+
+  const navigate = useNavigate();
+  const handleGoBack = () => {
+    navigate(-1);
+  };
+
   return (
     <article className={styles.wrapper}>
       {config.showHeader && (
         <header className={styles.header}>
           <div ref={leftRef} className={styles['header-left']}>
+            {config.showBackButton && (
+              <Button onClick={handleGoBack} size="sm" aria-label="뒤로 가기">
+                <BackIcon />
+              </Button>
+            )}
             {config.leftButtons}
           </div>
           <div className={styles['header-center']}>
