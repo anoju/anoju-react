@@ -448,8 +448,13 @@ export const Tabs: React.FC<TabsProps> = ({
 
   // items 속성을 사용하는 경우
   if (processedItems && processedItems.length > 0) {
+    const hasAnyContent = processedItems.some((item) => !!item.content);
+    const onlyClass = !hasAnyContent ? styles['only-tab'] : '';
+
     return (
-      <div className={`${styles.tabs} ${variantClass} ${className}`}>
+      <div
+        className={[styles.tabs, variantClass, onlyClass, className].join(' ')}
+      >
         <div
           ref={tabsHeaderRef}
           className={`${styles['tabs-header']} ${alignmentClass} ${tabsClassName}`}
@@ -472,23 +477,25 @@ export const Tabs: React.FC<TabsProps> = ({
             );
           })}
         </div>
-        <div className={`${styles['tabs-content']} ${contentClassName}`}>
-          {processedItems.map((item) => {
-            const itemId = item.id as string;
-            const tabId = `tab-${itemId}`;
+        {hasAnyContent && (
+          <div className={`${styles['tabs-content']} ${contentClassName}`}>
+            {processedItems.map((item) => {
+              const itemId = item.id as string;
+              const tabId = `tab-${itemId}`;
 
-            return item.content ? (
-              <TabPanel
-                key={`panel-${itemId}`}
-                id={itemId}
-                active={activeTabId === itemId}
-                labelledby={tabId}
-              >
-                {item.content}
-              </TabPanel>
-            ) : null;
-          })}
-        </div>
+              return item.content ? (
+                <TabPanel
+                  key={`panel-${itemId}`}
+                  id={itemId}
+                  active={activeTabId === itemId}
+                  labelledby={tabId}
+                >
+                  {item.content}
+                </TabPanel>
+              ) : null;
+            })}
+          </div>
+        )}
       </div>
     );
   }
