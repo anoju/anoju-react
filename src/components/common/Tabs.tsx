@@ -16,12 +16,8 @@ import styles from '@/assets/scss/components/tabs.module.scss';
 // 고유 ID 생성을 위한 유틸리티 함수
 let uniqueIdCounter = 0;
 const generateUniqueId = (): string => {
-  let id;
-  do {
-    id = `${uniqueIdCounter++}_${Math.random().toString(36).substring(2, 9)}`;
-  } while (usedIds.has(id));
-
-  usedIds.add(id);
+  // 컴포넌트 내에서 사용하는 지역 변수로 변경되었으므로 전역 Set 체크 제거
+  const id = `tab_${uniqueIdCounter++}_${Math.random().toString(36).substring(2, 9)}`;
   return id;
 };
 
@@ -65,10 +61,8 @@ interface TabsProps {
   className?: string;
   tabsClassName?: string;
   contentClassName?: string;
+  forceUsePathname?: boolean; // 경로 기반 활성화를 강제하는 옵션 추가
 }
-
-// ID 생성 시 중복 방지를 위한 이미 사용된 ID 집합
-const usedIds = new Set<string>();
 
 // Tab 컴포넌트
 export const Tab = React.forwardRef<HTMLDivElement, TabProps>(
@@ -146,6 +140,7 @@ export const Tabs: React.FC<TabsProps> = ({
   className = '',
   tabsClassName = '',
   contentClassName = '',
+  forceUsePathname = false,
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -225,15 +220,50 @@ export const Tabs: React.FC<TabsProps> = ({
 
   // 경로를 기반으로 활성 탭 초기화
   useEffect(() => {
-    // 이미 초기화가 완료되었으면 아무것도 하지 않음
-    if (initializedRef.current) {
+    // 외부에서 activeTab이 전달된 경우 항상 우선 적용
+    if (activeTab) {
+      setActiveTabId(activeTab);
       return;
     }
 
-    // 외부에서 activeTab이 전달된 경우
-    if (activeTab) {
-      setActiveTabId(activeTab);
-      initializedRef.current = true;
+    // 이미 활성 탭이 설정되어 있고 초기화가 완료된 경우
+    if (activeTabId && initializedRef.current && !forceUsePathname) {
+      // 라우팅으로 들어온 경우에는 활성 탭을 재설정해야 할 수 있음
+      let shouldUpdateFromRoute = false;
+
+      // items 속성을 사용하는 경우
+      if (processedItems && processedItems.length > 0) {
+        const pathTab = processedItems.find(
+          (item) => item.to && location.pathname.startsWith(item.to)
+        );
+        if (pathTab && pathTab.id && pathTab.id !== activeTabId) {
+          setActiveTabId(pathTab.id);
+          shouldUpdateFromRoute = true;
+        }
+      }
+      // children을 사용하는 경우
+      else if (tabs.length > 0) {
+        for (let i = 0; i < tabs.length; i++) {
+          const tabComponent = tabs[i];
+          const tabProps = tabComponent.props as TabProps;
+
+          if (tabProps.to && location.pathname.startsWith(tabProps.to)) {
+            const tabId = tabIds[i];
+            if (tabId !== activeTabId) {
+              setActiveTabId(tabId);
+              shouldUpdateFromRoute = true;
+            }
+            break;
+          }
+        }
+      }
+
+      // 라우팅으로 활성 탭이 변경된 경우 추가 처리 불필요
+      if (shouldUpdateFromRoute) {
+        return;
+      }
+
+      // 이미 초기화되었고 라우팅으로 변경이 없는 경우 종료
       return;
     }
 
@@ -318,60 +348,19 @@ export const Tabs: React.FC<TabsProps> = ({
 
       initializedRef.current = true;
     }
-  }, [activeTab, processedItems, tabs, tabIds, location.pathname, defaultTab]);
+  }, [
+    activeTab,
+    processedItems,
+    tabs,
+    tabIds,
+    location.pathname,
+    defaultTab,
+    activeTabId,
+    forceUsePathname,
+  ]);
 
-  // location.pathname 변경 시 활성 탭 업데이트
-  useEffect(() => {
-    // 외부에서 직접 activeTab을 관리하는 경우 무시
-    if (activeTab) return;
-
-    // items 속성을 사용하는 경우
-    if (processedItems && processedItems.length > 0) {
-      // URL 경로와 일치하는 탭 찾기
-      const pathTab = processedItems.find(
-        (item) => item.to && location.pathname.startsWith(item.to)
-      );
-
-      if (pathTab && pathTab.id && pathTab.id !== activeTabId) {
-        setActiveTabId(pathTab.id);
-      }
-    }
-    // children을 사용하는 경우
-    else if (tabs.length > 0) {
-      let foundActiveTab = false;
-
-      for (let i = 0; i < tabs.length; i++) {
-        const tabComponent = tabs[i];
-        const tabProps = tabComponent.props as TabProps;
-
-        // disabled 상태의 탭은 건너뛰기
-        if (tabProps.disabled) continue;
-
-        const tabId = tabIds[i];
-
-        if (tabProps.to && location.pathname.startsWith(tabProps.to)) {
-          if (tabId !== activeTabId) {
-            setActiveTabId(tabId);
-          }
-          foundActiveTab = true;
-          break;
-        }
-      }
-
-      // 활성화된 탭이 없고, activeTabId도 없으면 첫 번째 탭 선택
-      if (!foundActiveTab && !activeTabId && tabs.length > 0) {
-        for (let i = 0; i < tabs.length; i++) {
-          const tabComponent = tabs[i];
-          const tabProps = tabComponent.props as TabProps;
-
-          if (!tabProps.disabled) {
-            setActiveTabId(tabIds[i]);
-            break;
-          }
-        }
-      }
-    }
-  }, [location.pathname, processedItems, tabs, tabIds, activeTabId, activeTab]);
+  // REMOVED: location.pathname 변경 시 활성 탭 업데이트 useEffect
+  // 이 로직은 위의 초기화 useEffect에 통합되었습니다.
 
   // 활성 탭이 변경될 때 인디케이터 업데이트
   useEffect(() => {
@@ -382,6 +371,17 @@ export const Tabs: React.FC<TabsProps> = ({
       return () => clearTimeout(timer);
     }
   }, [activeTabId, updateActiveIndicator]);
+
+  // 컴포넌트가 마운트된 후 항상 인디케이터 업데이트 (누락된 상황 방지)
+  useEffect(() => {
+    const timers = [
+      setTimeout(() => updateActiveIndicator(), 50),
+      setTimeout(() => updateActiveIndicator(), 200),
+      setTimeout(() => updateActiveIndicator(), 500),
+    ];
+
+    return () => timers.forEach((timer) => clearTimeout(timer));
+  }, [updateActiveIndicator]);
 
   // 윈도우 크기 변경 시 인디케이터 위치 업데이트
   useEffect(() => {
