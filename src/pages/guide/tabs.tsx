@@ -170,17 +170,14 @@ const TabsGuide = () => {
           <Tabs
             items={[
               {
-                id: 'home',
                 label: '홈',
                 to: '/',
               },
               {
-                id: 'about',
                 label: '소개',
                 to: '/about',
               },
               {
-                id: 'guide',
                 label: '가이드',
                 to: '/guide/button',
               },
@@ -193,17 +190,14 @@ const TabsGuide = () => {
           code={`<Tabs 
   items={[
     { 
-      id: 'home', 
       label: '홈', 
       to: '/' 
     },
     { 
-      id: 'about', 
       label: '소개', 
       to: '/about' 
     },
     { 
-      id: 'guide', 
       label: '가이드', 
       to: '/guide/button' 
     }
@@ -225,12 +219,10 @@ const TabsGuide = () => {
             variant="outline"
             items={[
               {
-                id: 'tab1',
                 label: '탭 1',
                 content: <p>Outline 스타일의 탭 1 내용입니다.</p>,
               },
               {
-                id: 'tab2',
                 label: '탭 2',
                 content: <p>Outline 스타일의 탭 2 내용입니다.</p>,
               },
@@ -244,12 +236,10 @@ const TabsGuide = () => {
             variant="underline"
             items={[
               {
-                id: 'tab1',
                 label: '탭 1',
                 content: <p>Underline 스타일의 탭 1 내용입니다.</p>,
               },
               {
-                id: 'tab2',
                 label: '탭 2',
                 content: <p>Underline 스타일의 탭 2 내용입니다.</p>,
               },
@@ -263,12 +253,10 @@ const TabsGuide = () => {
             variant="pills"
             items={[
               {
-                id: 'tab1',
                 label: '탭 1',
                 content: <p>Pills 스타일의 탭 1 내용입니다.</p>,
               },
               {
-                id: 'tab2',
                 label: '탭 2',
                 content: <p>Pills 스타일의 탭 2 내용입니다.</p>,
               },
@@ -282,17 +270,14 @@ const TabsGuide = () => {
             alignment="center"
             items={[
               {
-                id: 'tab1',
                 label: '탭 1',
                 content: <p>중앙 정렬된 탭 1 내용입니다.</p>,
               },
               {
-                id: 'tab2',
                 label: '탭 2',
                 content: <p>중앙 정렬된 탭 2 내용입니다.</p>,
               },
               {
-                id: 'tab3',
                 label: '탭 3',
                 content: <p>중앙 정렬된 탭 3 내용입니다.</p>,
               },
@@ -306,17 +291,14 @@ const TabsGuide = () => {
             alignment="full"
             items={[
               {
-                id: 'tab1',
                 label: '탭 1',
                 content: <p>전체 너비 탭 1 내용입니다.</p>,
               },
               {
-                id: 'tab2',
                 label: '탭 2',
                 content: <p>전체 너비 탭 2 내용입니다.</p>,
               },
               {
-                id: 'tab3',
                 label: '탭 3',
                 content: <p>전체 너비 탭 3 내용입니다.</p>,
               },
@@ -330,8 +312,8 @@ const TabsGuide = () => {
 <Tabs 
   variant="outline"
   items={[
-    { id: 'tab1', label: '탭 1', content: <p>Outline 스타일의 탭 1 내용입니다.</p> },
-    { id: 'tab2', label: '탭 2', content: <p>Outline 스타일의 탭 2 내용입니다.</p> },
+    { label: '탭 1', content: <p>Outline 스타일의 탭 1 내용입니다.</p> },
+    { label: '탭 2', content: <p>Outline 스타일의 탭 2 내용입니다.</p> },
   ]}
 />
 
@@ -339,8 +321,8 @@ const TabsGuide = () => {
 <Tabs 
   variant="underline"
   items={[
-    { id: 'tab1', label: '탭 1', content: <p>Underline 스타일의 탭 1 내용입니다.</p> },
-    { id: 'tab2', label: '탭 2', content: <p>Underline 스타일의 탭 2 내용입니다.</p> },
+    { label: '탭 1', content: <p>Underline 스타일의 탭 1 내용입니다.</p> },
+    { label: '탭 2', content: <p>Underline 스타일의 탭 2 내용입니다.</p> },
   ]}
 />
 
@@ -348,8 +330,8 @@ const TabsGuide = () => {
 <Tabs 
   variant="pills"
   items={[
-    { id: 'tab1', label: '탭 1', content: <p>Pills 스타일의 탭 1 내용입니다.</p> },
-    { id: 'tab2', label: '탭 2', content: <p>Pills 스타일의 탭 2 내용입니다.</p> },
+    { label: '탭 1', content: <p>Pills 스타일의 탭 1 내용입니다.</p> },
+    { label: '탭 2', content: <p>Pills 스타일의 탭 2 내용입니다.</p> },
   ]}
 />
 
@@ -357,9 +339,9 @@ const TabsGuide = () => {
 <Tabs 
   alignment="center"
   items={[
-    { id: 'tab1', label: '탭 1', content: <p>중앙 정렬된 탭 1 내용입니다.</p> },
-    { id: 'tab2', label: '탭 2', content: <p>중앙 정렬된 탭 2 내용입니다.</p> },
-    { id: 'tab3', label: '탭 3', content: <p>중앙 정렬된 탭 3 내용입니다.</p> },
+    { label: '탭 1', content: <p>중앙 정렬된 탭 1 내용입니다.</p> },
+    { label: '탭 2', content: <p>중앙 정렬된 탭 2 내용입니다.</p> },
+    { label: '탭 3', content: <p>중앙 정렬된 탭 3 내용입니다.</p> },
   ]}
 />
 
@@ -367,9 +349,9 @@ const TabsGuide = () => {
 <Tabs 
   alignment="full"
   items={[
-    { id: 'tab1', label: '탭 1', content: <p>전체 너비 탭 1 내용입니다.</p> },
-    { id: 'tab2', label: '탭 2', content: <p>전체 너비 탭 2 내용입니다.</p> },
-    { id: 'tab3', label: '탭 3', content: <p>전체 너비 탭 3 내용입니다.</p> },
+    { label: '탭 1', content: <p>전체 너비 탭 1 내용입니다.</p> },
+    { label: '탭 2', content: <p>전체 너비 탭 2 내용입니다.</p> },
+    { label: '탭 3', content: <p>전체 너비 탭 3 내용입니다.</p> },
   ]}
 />`}
           language="jsx"

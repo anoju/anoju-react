@@ -12,22 +12,18 @@ const GuideLayout: React.FC<GuideLayoutProps> = ({ children }) => {
       <Tabs
         items={[
           {
-            id: 'Button',
             label: 'Button',
             to: '/guide/button',
           },
           {
-            id: 'Tabs',
             label: 'Tabs',
             to: '/guide/tabs',
           },
           {
-            id: 'Input',
             label: 'Input',
             to: '/guide/input',
           },
           {
-            id: 'Modal',
             label: 'Modal',
             to: '/guide/modal',
           },
