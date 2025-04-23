@@ -18,7 +18,7 @@ let uniqueIdCounter = 0;
 const generateUniqueId = (): string => {
   let id;
   do {
-    id = `tab-${uniqueIdCounter++}-${Math.random().toString(36).substring(2, 9)}`;
+    id = `${uniqueIdCounter++}_${Math.random().toString(36).substring(2, 9)}`;
   } while (usedIds.has(id));
 
   usedIds.add(id);
@@ -167,6 +167,36 @@ export const Tabs: React.FC<TabsProps> = ({
 
   const processedItems = processedItemsRef.current;
 
+  // 자식 컴포넌트에 고유 ID 할당
+  const tabsAndPanelsRef = useRef<{
+    tabs: ReactElement[];
+    panels: ReactElement[];
+    tabIds: string[];
+  }>({ tabs: [], panels: [], tabIds: [] });
+
+  // 자식 컴포넌트 분리 및 ID 할당
+  if (!tabsAndPanelsRef.current.tabs.length && children) {
+    const tabs: ReactElement[] = [];
+    const panels: ReactElement[] = [];
+    const tabIds: string[] = [];
+
+    Children.forEach(children, (child) => {
+      if (isValidElement(child)) {
+        if (child.type === Tab) {
+          tabs.push(child);
+          const tabProps = child.props as TabProps;
+          tabIds.push(tabProps.id || generateUniqueId());
+        } else if (child.type === TabPanel) {
+          panels.push(child);
+        }
+      }
+    });
+
+    tabsAndPanelsRef.current = { tabs, panels, tabIds };
+  }
+
+  const { tabs, panels, tabIds } = tabsAndPanelsRef.current;
+
   // 활성 탭의 위치를 업데이트하는 함수
   const updateActiveIndicator = useCallback(() => {
     if (!tabsHeaderRef.current) return;
@@ -192,26 +222,6 @@ export const Tabs: React.FC<TabsProps> = ({
       }
     }
   }, []);
-
-  // 자식 컴포넌트 분리 - 미리 분석
-  const tabsAndPanels = React.useMemo(() => {
-    const tabs: ReactElement[] = [];
-    const panels: ReactElement[] = [];
-
-    if (children) {
-      Children.forEach(children, (child) => {
-        if (isValidElement(child)) {
-          if (child.type === Tab) {
-            tabs.push(child);
-          } else if (child.type === TabPanel) {
-            panels.push(child);
-          }
-        }
-      });
-    }
-
-    return { tabs, panels };
-  }, [children]);
 
   // 경로를 기반으로 활성 탭 초기화
   useEffect(() => {
@@ -240,22 +250,16 @@ export const Tabs: React.FC<TabsProps> = ({
           initializedRef.current = true;
           return;
         }
-      } else if (
-        typeof defaultTab === 'number' &&
-        tabsAndPanels.tabs.length > 0
-      ) {
+      } else if (typeof defaultTab === 'number' && tabs.length > 0) {
         // 자식 컴포넌트가 있는 경우 인덱스 기반 처리
         const index =
-          defaultTab >= 0 && defaultTab < tabsAndPanels.tabs.length
-            ? defaultTab
-            : 0;
+          defaultTab >= 0 && defaultTab < tabs.length ? defaultTab : 0;
 
-        const tabComponent = tabsAndPanels.tabs[index];
-        const tabProps = tabComponent.props as TabProps;
-        const tabId = tabProps.id || generateUniqueId();
-        setActiveTabId(tabId);
-        initializedRef.current = true;
-        return;
+        if (index < tabIds.length) {
+          setActiveTabId(tabIds[index]);
+          initializedRef.current = true;
+          return;
+        }
       } else if (typeof defaultTab === 'string') {
         // 문자열 기반 defaultTab 처리
         setActiveTabId(defaultTab);
@@ -276,19 +280,19 @@ export const Tabs: React.FC<TabsProps> = ({
         setActiveTabId(processedItems[0].id || '');
       }
       initializedRef.current = true;
-    } else if (tabsAndPanels.tabs.length > 0) {
+    } else if (tabs.length > 0) {
       // URL 경로와 일치하는 탭 찾기
       let foundActiveTab = false;
 
-      for (let i = 0; i < tabsAndPanels.tabs.length; i++) {
-        const tabComponent = tabsAndPanels.tabs[i];
+      for (let i = 0; i < tabs.length; i++) {
+        const tabComponent = tabs[i];
         const tabProps = tabComponent.props as TabProps;
 
         // 이미 disabled 상태의 탭은 건너뛰기
         if (tabProps.disabled) continue;
 
-        // 고유 ID 생성 또는 사용
-        const tabId = tabProps.id || `generated-tab-${i}`;
+        // ID 사용
+        const tabId = tabIds[i];
 
         // 경로 기반 활성화 확인
         if (tabProps.to && location.pathname.startsWith(tabProps.to)) {
@@ -301,13 +305,12 @@ export const Tabs: React.FC<TabsProps> = ({
       // 일치하는 탭이 없으면 첫 번째 활성화된 탭 선택
       if (!foundActiveTab) {
         // 첫 번째 활성화된 (disabled 아닌) 탭 찾기
-        for (let i = 0; i < tabsAndPanels.tabs.length; i++) {
-          const tabComponent = tabsAndPanels.tabs[i];
+        for (let i = 0; i < tabs.length; i++) {
+          const tabComponent = tabs[i];
           const tabProps = tabComponent.props as TabProps;
 
           if (!tabProps.disabled) {
-            const tabId = tabProps.id || `generated-tab-${i}`;
-            setActiveTabId(tabId);
+            setActiveTabId(tabIds[i]);
             break;
           }
         }
@@ -315,7 +318,7 @@ export const Tabs: React.FC<TabsProps> = ({
 
       initializedRef.current = true;
     }
-  }, [activeTab, processedItems, tabsAndPanels, location.pathname, defaultTab]);
+  }, [activeTab, processedItems, tabs, tabIds, location.pathname, defaultTab]);
 
   // location.pathname 변경 시 활성 탭 업데이트
   useEffect(() => {
@@ -334,18 +337,17 @@ export const Tabs: React.FC<TabsProps> = ({
       }
     }
     // children을 사용하는 경우
-    else if (tabsAndPanels.tabs.length > 0) {
+    else if (tabs.length > 0) {
       let foundActiveTab = false;
 
-      for (let i = 0; i < tabsAndPanels.tabs.length; i++) {
-        const tabComponent = tabsAndPanels.tabs[i];
+      for (let i = 0; i < tabs.length; i++) {
+        const tabComponent = tabs[i];
         const tabProps = tabComponent.props as TabProps;
 
         // disabled 상태의 탭은 건너뛰기
         if (tabProps.disabled) continue;
 
-        const generatedTabId = `generated-tab-${i}`;
-        const tabId = tabProps.id || generatedTabId;
+        const tabId = tabIds[i];
 
         if (tabProps.to && location.pathname.startsWith(tabProps.to)) {
           if (tabId !== activeTabId) {
@@ -357,26 +359,19 @@ export const Tabs: React.FC<TabsProps> = ({
       }
 
       // 활성화된 탭이 없고, activeTabId도 없으면 첫 번째 탭 선택
-      if (!foundActiveTab && !activeTabId && tabsAndPanels.tabs.length > 0) {
-        for (let i = 0; i < tabsAndPanels.tabs.length; i++) {
-          const tabComponent = tabsAndPanels.tabs[i];
+      if (!foundActiveTab && !activeTabId && tabs.length > 0) {
+        for (let i = 0; i < tabs.length; i++) {
+          const tabComponent = tabs[i];
           const tabProps = tabComponent.props as TabProps;
 
           if (!tabProps.disabled) {
-            const tabId = tabProps.id || `generated-tab-${i}`;
-            setActiveTabId(tabId);
+            setActiveTabId(tabIds[i]);
             break;
           }
         }
       }
     }
-  }, [
-    location.pathname,
-    processedItems,
-    tabsAndPanels.tabs,
-    activeTabId,
-    activeTab,
-  ]);
+  }, [location.pathname, processedItems, tabs, tabIds, activeTabId, activeTab]);
 
   // 활성 탭이 변경될 때 인디케이터 업데이트
   useEffect(() => {
@@ -431,22 +426,20 @@ export const Tabs: React.FC<TabsProps> = ({
         if (clickedTab?.to) {
           navigate(clickedTab.to);
         }
-      } else if (tabsAndPanels.tabs.length > 0) {
+      } else if (tabs.length > 0) {
         // children을 사용하는 경우, 인덱스로 탭 찾기
-        for (let i = 0; i < tabsAndPanels.tabs.length; i++) {
-          const tabComponent = tabsAndPanels.tabs[i];
-          const tabProps = tabComponent.props as TabProps;
-          const generatedTabId = `generated-tab-${i}`;
-          const currentTabId = tabProps.id || generatedTabId;
-
-          if (currentTabId === tabId && tabProps.to) {
-            navigate(tabProps.to);
+        for (let i = 0; i < tabs.length; i++) {
+          if (tabIds[i] === tabId) {
+            const tabProps = tabs[i].props as TabProps;
+            if (tabProps.to) {
+              navigate(tabProps.to);
+            }
             break;
           }
         }
       }
     },
-    [activeTabId, onChange, processedItems, tabsAndPanels.tabs, navigate]
+    [activeTabId, onChange, processedItems, tabs, tabIds, navigate]
   );
 
   // 변형 클래스 생성
@@ -501,13 +494,10 @@ export const Tabs: React.FC<TabsProps> = ({
   }
 
   // children을 사용하는 경우 (Tab과 TabPanel 컴포넌트 직접 사용)
-  const { tabs, panels } = tabsAndPanels;
-
   // 인덱스 기반 ID를 사용하여 마크업 생성
   const renderedTabs = tabs.map((tabComponent, index) => {
-    const tabProps = tabComponent.props as TabProps;
-    const generatedTabId = `generated-tab-${index}`;
-    const tabId = tabProps.id || generatedTabId;
+    // const tabProps = tabComponent.props as TabProps;
+    const tabId = tabIds[index];
     const isActive = index === 0 && !activeTabId ? true : activeTabId === tabId;
 
     return cloneElement(tabComponent, {
@@ -522,9 +512,7 @@ export const Tabs: React.FC<TabsProps> = ({
   const renderedPanels = panels.map((panelComponent, index) => {
     if (index >= tabs.length) return null;
 
-    const tabProps = tabs[index].props as TabProps;
-    const generatedTabId = `generated-tab-${index}`;
-    const tabId = tabProps.id || generatedTabId;
+    const tabId = tabIds[index];
     const isActive = index === 0 && !activeTabId ? true : activeTabId === tabId;
 
     return cloneElement(panelComponent, {
