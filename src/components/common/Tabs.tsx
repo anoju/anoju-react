@@ -115,7 +115,11 @@ export const Tab = React.forwardRef<HTMLDivElement, TabProps>(
     return (
       <div
         ref={ref}
-        className={`${styles.tab} ${active ? styles.active : ''} ${disabled ? styles.disabled : ''}`}
+        className={[
+          styles.tab,
+          active ? styles.active : '',
+          disabled ? styles.disabled : '',
+        ].join(' ')}
         onClick={handleClick}
         role="tab"
         id={`tab-${tabId}`}
@@ -141,7 +145,7 @@ export const TabPanel = React.forwardRef<HTMLDivElement, TabPanelProps>(
     return (
       <div
         ref={ref}
-        className={`${styles['tab-panel']} ${active ? styles.active : ''}`}
+        className={[styles['tab-panel'], active ? styles.active : ''].join(' ')}
         role="tabpanel"
         id={`panel-${panelId}`}
         aria-labelledby={tabId}
@@ -579,7 +583,11 @@ export const Tabs = React.forwardRef(
         >
           <div
             ref={tabsHeaderRef}
-            className={`${styles['tabs-header']} ${alignmentClass} ${tabsClassName}`}
+            className={[
+              styles['tabs-header'],
+              alignmentClass,
+              tabsClassName,
+            ].join(' ')}
           >
             {processedItems.map((item, index) => {
               const itemId = item.id as string;
@@ -603,7 +611,9 @@ export const Tabs = React.forwardRef(
             })}
           </div>
           {hasAnyContent && (
-            <div className={`${styles['tabs-content']} ${contentClassName}`}>
+            <div
+              className={[styles['tabs-content'], contentClassName].join(' ')}
+            >
               {processedItems.map((item, index) => {
                 const itemId = item.id as string;
                 const itemValue = item.value as string | number;
@@ -669,11 +679,15 @@ export const Tabs = React.forwardRef(
       >
         <div
           ref={tabsHeaderRef}
-          className={`${styles['tabs-header']} ${alignmentClass} ${tabsClassName}`}
+          className={[
+            styles['tabs-header'],
+            alignmentClass,
+            tabsClassName,
+          ].join(' ')}
         >
           {renderedTabs}
         </div>
-        <div className={`${styles['tabs-content']} ${contentClassName}`}>
+        <div className={[styles['tabs-content'], contentClassName].join(' ')}>
           {renderedPanels}
         </div>
       </div>

@@ -1,5 +1,5 @@
 // src/components/common/CodeHighlight.tsx
-import React, { useState, forwardRef } from 'react';
+import { useState, forwardRef } from 'react';
 import styles from '@/assets/scss/components/codeHighlight.module.scss';
 
 interface CodeHighlightProps {
@@ -44,7 +44,9 @@ const CodeHighlight = forwardRef<HTMLDivElement, CodeHighlightProps>(
         <div className={styles.header}>
           <span className={styles.badge}>{language}</span>
           <button
-            className={`${styles.button} ${copied ? styles.buttonCopied : ''}`}
+            className={[styles.button, copied ? styles.buttonCopied : ''].join(
+              ' '
+            )}
             onClick={handleCopy}
             aria-label="코드 복사"
           >
