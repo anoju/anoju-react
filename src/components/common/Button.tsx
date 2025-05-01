@@ -25,7 +25,7 @@ type ButtonProps =
     > &
       CommonButtonProps);
 
-const Button: React.FC<ButtonProps> = (props) => {
+const Button = React.forwardRef<HTMLElement, ButtonProps>((props, ref) => {
   // 버튼 클래스명 생성 함수
   const getButtonClasses = (
     className?: string,
@@ -59,6 +59,7 @@ const Button: React.FC<ButtonProps> = (props) => {
         to={to}
         className={getButtonClasses(className, size, not)}
         {...newRest}
+        ref={ref as React.Ref<HTMLAnchorElement>}
       >
         {children}
       </Link>
@@ -100,6 +101,7 @@ const Button: React.FC<ButtonProps> = (props) => {
         rel={target === '_blank' ? 'noopener noreferrer' : undefined}
         onClick={handleClick}
         {...anchorProps}
+        ref={ref as React.Ref<HTMLAnchorElement>}
       >
         {children}
       </a>
@@ -115,10 +117,13 @@ const Button: React.FC<ButtonProps> = (props) => {
       type="button"
       className={getButtonClasses(className, size, not)}
       {...rest}
+      ref={ref as React.Ref<HTMLButtonElement>}
     >
       {children}
     </button>
   );
-};
+});
+
+Button.displayName = 'Button';
 
 export default Button;

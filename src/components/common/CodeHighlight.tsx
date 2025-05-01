@@ -1,5 +1,5 @@
 // src/components/common/CodeHighlight.tsx
-import React, { useState } from 'react';
+import React, { useState, forwardRef } from 'react';
 import styles from '@/assets/scss/components/codeHighlight.module.scss';
 
 interface CodeHighlightProps {
@@ -25,40 +25,41 @@ const ClipboardIcon = () => (
   </svg>
 );
 
-const CodeHighlight: React.FC<CodeHighlightProps> = ({
-  code,
-  language = 'jsx',
-}) => {
-  const [copied, setCopied] = useState(false);
+const CodeHighlight = forwardRef<HTMLDivElement, CodeHighlightProps>(
+  ({ code, language = 'jsx' }, ref) => {
+    const [copied, setCopied] = useState(false);
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(code);
-    setCopied(true);
+    const handleCopy = () => {
+      navigator.clipboard.writeText(code);
+      setCopied(true);
 
-    // 2초 후에 복사 상태 초기화
-    setTimeout(() => {
-      setCopied(false);
-    }, 2000);
-  };
+      // 2초 후에 복사 상태 초기화
+      setTimeout(() => {
+        setCopied(false);
+      }, 2000);
+    };
 
-  return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <span className={styles.badge}>{language}</span>
-        <button
-          className={`${styles.button} ${copied ? styles.buttonCopied : ''}`}
-          onClick={handleCopy}
-          aria-label="코드 복사"
-        >
-          <ClipboardIcon />
-          <span>{copied ? '복사됨!' : '복사'}</span>
-        </button>
+    return (
+      <div className={styles.container} ref={ref}>
+        <div className={styles.header}>
+          <span className={styles.badge}>{language}</span>
+          <button
+            className={`${styles.button} ${copied ? styles.buttonCopied : ''}`}
+            onClick={handleCopy}
+            aria-label="코드 복사"
+          >
+            <ClipboardIcon />
+            <span>{copied ? '복사됨!' : '복사'}</span>
+          </button>
+        </div>
+        <pre className={styles.pre}>
+          <code className={`language-${language}`}>{code}</code>
+        </pre>
       </div>
-      <pre className={styles.pre}>
-        <code className={`language-${language}`}>{code}</code>
-      </pre>
-    </div>
-  );
-};
+    );
+  }
+);
+
+CodeHighlight.displayName = 'CodeHighlight';
 
 export default CodeHighlight;
