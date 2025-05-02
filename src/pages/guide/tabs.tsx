@@ -31,6 +31,16 @@ const TabsGuide = () => {
       <h1 className={styles.title}>Tabs Component</h1>
 
       <section className={styles.section}>
+        <h2 className={styles['section-title']}>import</h2>
+        <CodeHighlight
+          code={`// Tab, TabPanel 상황에 따라 사용시에만 import.
+// Tab, TabPanel 컴포넌트는 Tabs 컴포넌트 내부에서만 사용.
+import { Tabs ,Tab, TabPanel } from '@/components/common';`}
+          language="jsx"
+        />
+      </section>
+
+      <section className={styles.section}>
         <h2 className={styles['section-title']}>기본 탭</h2>
         <p>Tab 및 TabPanel 컴포넌트를 직접 사용하는 방법입니다.</p>
 
