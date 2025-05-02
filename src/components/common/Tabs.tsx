@@ -57,12 +57,19 @@ interface TabPanelProps {
   labelledby?: string; // aria-labelledby 속성을 위한 prop
 }
 
-// Tabs 컴포넌트 props
+// Improved type definition for setValue - more flexible
+type SetValueFunction<T> = T extends string
+  ? Dispatch<SetStateAction<string>> | ((value: string) => void)
+  : T extends number
+    ? Dispatch<SetStateAction<number>> | ((value: number) => void)
+    : Dispatch<SetStateAction<T>> | ((value: T) => void);
+
+// Tabs 컴포넌트 props with improved generic handling
 type TabsProps<T extends string | number = string | number> = {
   children?: ReactNode;
   items?: TabItem[];
   value?: T;
-  setValue?: Dispatch<SetStateAction<T>> | ((value: T) => void);
+  setValue?: SetValueFunction<T>;
   defaultValue?: T;
   onChange?: (value: string | number) => void;
   variant?: 'default' | 'outline' | 'underline' | 'pills';
@@ -432,7 +439,20 @@ export const Tabs = React.forwardRef(
 
               // setValue callback이 있는 경우 외부 상태도 업데이트
               if (setValue) {
-                setValue(pathTab.value as T);
+                // 타입 안전하게 setValue 호출
+                if (typeof pathTab.value === 'string') {
+                  // string 타입 처리
+                  const stringSetValue = setValue as
+                    | Dispatch<SetStateAction<string>>
+                    | ((value: string) => void);
+                  stringSetValue(pathTab.value);
+                } else if (typeof pathTab.value === 'number') {
+                  // number 타입 처리
+                  const numberSetValue = setValue as
+                    | Dispatch<SetStateAction<number>>
+                    | ((value: number) => void);
+                  numberSetValue(pathTab.value);
+                }
               }
             }
           }
@@ -453,7 +473,20 @@ export const Tabs = React.forwardRef(
 
                 // setValue callback이 있는 경우 외부 상태도 업데이트
                 if (setValue) {
-                  setValue(tabValue as T);
+                  // 타입 안전하게 setValue 호출
+                  if (typeof tabValue === 'string') {
+                    // string 타입 처리
+                    const stringSetValue = setValue as
+                      | Dispatch<SetStateAction<string>>
+                      | ((value: string) => void);
+                    stringSetValue(tabValue);
+                  } else if (typeof tabValue === 'number') {
+                    // number 타입 처리
+                    const numberSetValue = setValue as
+                      | Dispatch<SetStateAction<number>>
+                      | ((value: number) => void);
+                    numberSetValue(tabValue);
+                  }
                 }
               }
               break;
@@ -521,9 +554,19 @@ export const Tabs = React.forwardRef(
 
         // 외부 상태 업데이트 (제공된 경우)
         if (setValue) {
-          // Dispatch<SetStateAction<T>> 타입과 호환되도록 처리
-          if (typeof setValue === 'function') {
-            setValue(clickedValue as T);
+          // 타입 안전하게 setValue 호출
+          if (typeof clickedValue === 'string') {
+            // string 타입 처리
+            const stringSetValue = setValue as
+              | Dispatch<SetStateAction<string>>
+              | ((value: string) => void);
+            stringSetValue(clickedValue);
+          } else if (typeof clickedValue === 'number') {
+            // number 타입 처리
+            const numberSetValue = setValue as
+              | Dispatch<SetStateAction<number>>
+              | ((value: number) => void);
+            numberSetValue(clickedValue);
           }
         }
 

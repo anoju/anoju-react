@@ -3,6 +3,10 @@
 @use 'sass:color';
 @use 'sass:math';
 
+.txt {
+  margin: 0.5em 0;
+}
+
 .section {
   + .section {
     margin-top: 80px;
@@ -10,12 +14,15 @@
 }
 
 .showcase {
-  display: flex;
-  gap: 10px;
   padding: 20px;
   flex-wrap: wrap;
   border-radius: 8px;
   border: 1px solid var(--bg-dark-75);
+
+  &:global(.inline) {
+    display: flex;
+    gap: 10px;
+  }
 }
 
 .title {
@@ -32,4 +39,11 @@
 .sub-title {
   margin-top: 20px;
   margin-bottom: 10px;
+}
+
+.control-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
 }

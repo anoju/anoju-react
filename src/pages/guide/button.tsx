@@ -29,7 +29,8 @@ const ButtonGuide = () => {
 
       <section className={styles.section}>
         <h2 className={styles['section-title']}>기본 버튼</h2>
-        <div className={styles.showcase}>
+        <p className={styles.txt}>디자인 클래스는 className 속성으로 지정</p>
+        <div className={styles.showcase + ' inline'}>
           <Button>Default Button</Button>
           <Button className="primary">Primary Button</Button>
           <Button className="secondary">Secondary Button</Button>
@@ -37,8 +38,7 @@ const ButtonGuide = () => {
 
         <h3 className={styles['sub-title']}>참조 소스코드</h3>
         <CodeHighlight
-          code={`// 디자인 클래스는 className 속성으로 지정
-<Button>Default Button</Button>
+          code={`<Button>Default Button</Button>
 <Button className="primary">Primary Button</Button>
 <Button className="secondary">Secondary Button</Button>`}
           language="jsx"
@@ -47,7 +47,8 @@ const ButtonGuide = () => {
 
       <section className={styles.section}>
         <h2 className={styles['section-title']}>a태그 렌더링 필요시</h2>
-        <div className={styles.showcase}>
+        <p className={styles.txt}>anchor 속성사용</p>
+        <div className={styles.showcase + ' inline'}>
           <Button anchor>Default Button</Button>
           <Button anchor className="primary">
             Primary Button
@@ -59,8 +60,7 @@ const ButtonGuide = () => {
 
         <h3 className={styles['sub-title']}>참조 소스코드</h3>
         <CodeHighlight
-          code={`//anchor 속성사용
-<Button anchor>Default Button</Button>
+          code={`<Button anchor>Default Button</Button>f
 <Button anchor className="primary">Primary Button</Button>
 <Button anchor className="secondary">Secondary Button</Button>`}
           language="jsx"
@@ -71,21 +71,22 @@ const ButtonGuide = () => {
         <h2 className={styles['section-title']}>
           버튼 모양 디자인을 안쓸때(다른 디자인을 입히고 싶을때)
         </h2>
-        <div className={styles.showcase}>
-          <Button not>Not Button</Button>
+        <p className={styles.txt}>not 속성 사용</p>
+        <div className={styles.showcase + ' inline'}>
+          <Button not>Not Button Design</Button>
         </div>
 
         <h3 className={styles['sub-title']}>참조 소스코드</h3>
         <CodeHighlight
-          code={`//not 속성사용
-<Button not>Not Button</Button>`}
+          code={`<Button not>Not Button Design</Button>`}
           language="jsx"
         />
       </section>
 
       <section className={styles.section}>
         <h2 className={styles['section-title']}>링크 버튼</h2>
-        <div className={styles.showcase}>
+        <p className={styles.txt}>내부링크 시: to 속성사용</p>
+        <div className={styles.showcase + ' inline'}>
           <Button className="primary" to="/">
             Home Link
           </Button>
@@ -96,8 +97,7 @@ const ButtonGuide = () => {
 
         <h3 className={styles['sub-title']}>참조 소스코드</h3>
         <CodeHighlight
-          code={`// 내부링크 시: to 속성사용
-<Button to="/">Home Link</Button>
+          code={`<Button to="/">Home Link</Button>
 <Button to="/about">About Link</Button>`}
           language="jsx"
         />
@@ -105,7 +105,10 @@ const ButtonGuide = () => {
 
       <section className={styles.section}>
         <h2 className={styles['section-title']}>외부 링크 버튼</h2>
-        <div className={styles.showcase}>
+        <p className={styles.txt}>
+          외부링크 시: href 속성사용 (target 속성은 상황에따라 _blank 사용)
+        </p>
+        <div className={styles.showcase + ' inline'}>
           <Button className="primary" href="https://naver.com" target="_blank">
             External Link
           </Button>
@@ -113,8 +116,7 @@ const ButtonGuide = () => {
 
         <h3 className={styles['sub-title']}>참조 소스코드</h3>
         <CodeHighlight
-          code={`// 외부링크 시: href 속성사용 (target 속성은 상황에따라 _blank 사용)
-<Button className="primary" href="https://naver.com" target="_blank">
+          code={`<Button className="primary" href="https://naver.com" target="_blank">
   External Link
 </Button>`}
           language="jsx"
