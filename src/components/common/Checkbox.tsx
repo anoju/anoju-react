@@ -6,6 +6,7 @@ import React, {
   forwardRef,
   ChangeEvent,
 } from 'react';
+import styles from '@/assets/scss/components/checkbox.module.scss';
 
 // 고유 ID 생성을 위한 유틸리티 함수
 let uniqueIdCounter = 0;
@@ -80,7 +81,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
     };
 
     return (
-      <div className={`checkbox ${className}`}>
+      <div className={`${styles.checkbox} ${className}`}>
         <input
           type="checkbox"
           id={checkboxId}
@@ -92,8 +93,11 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
           ref={ref}
           {...props}
         />
-        <i className={`ico ${iconClassName}`} aria-hidden="true"></i>
-        <label className={`lbl ${labelClassName}`} htmlFor={checkboxId}>
+        <i className={`${styles.ico} ${iconClassName}`} aria-hidden="true"></i>
+        <label
+          className={`${styles.lbl} ${labelClassName}`}
+          htmlFor={checkboxId}
+        >
           {children}
         </label>
       </div>
@@ -155,7 +159,7 @@ export function CheckboxGroup<T extends string | number = string | number>({
 
   return (
     <CheckboxContext.Provider value={contextValue}>
-      <div className={`form-wrap ${className}`} {...props}>
+      <div className={`${styles['form-wrap']} ${className}`} {...props}>
         {options
           ? // Render checkboxes from options array
             options.map((option) => {
