@@ -1,0 +1,92 @@
+// src/assets/scss/components/checkbox.module.scss
+@use '@/assets/scss' as s;
+@use 'sass:color';
+@use 'sass:math';
+
+.checkbox {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 10px;
+  cursor: pointer;
+
+  input[type='checkbox'] {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+  }
+
+  .ico {
+    position: relative;
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    margin-right: 8px;
+    transition: all 0.2s ease;
+
+    @include s.light-mode {
+      background-color: #fff;
+      border-color: #ccc;
+    }
+  }
+
+  input[type='checkbox']:checked + .ico {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+
+    &:after {
+      content: '';
+      position: absolute;
+      left: 7px;
+      top: 3px;
+      width: 5px;
+      height: 10px;
+      border: solid #fff;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+  }
+
+  .lbl {
+    font-size: 14px;
+    user-select: none;
+    color: inherit;
+  }
+
+  &:hover .ico {
+    border-color: var(--primary-color);
+  }
+
+  input[type='checkbox']:focus + .ico {
+    box-shadow: 0 0 0 3px rgba(3, 155, 229, 0.25);
+  }
+
+  input[type='checkbox']:disabled {
+    & + .ico {
+      background-color: #f2f2f2;
+      border-color: #ddd;
+      cursor: not-allowed;
+    }
+
+    & ~ .lbl {
+      color: #999;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.form-wrap {
+  padding: 15px;
+  border: 1px solid #eee;
+  border-radius: 5px;
+  margin-bottom: 20px;
+
+  @include s.light-mode {
+    border-color: #eee;
+  }
+}
