@@ -104,25 +104,25 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
 Checkbox.displayName = 'Checkbox';
 
 // Option type for Checkbox Group
-interface CheckboxOption {
-  value: string | number;
+interface CheckboxOption<T extends string | number = string | number> {
+  value: T;
   label: React.ReactNode;
 }
 
 // Checkbox Group component props
-interface CheckboxGroupProps {
+interface CheckboxGroupProps<T extends string | number = string | number> {
   children?: React.ReactNode;
-  options?: (string | number | CheckboxOption)[];
-  values?: (string | number)[];
-  onChange?: (values: (string | number)[]) => void;
+  options?: (T | CheckboxOption<T>)[];
+  values?: T[];
+  onChange?: (values: T[]) => void;
   className?: string;
   inputClassName?: string;
   iconClassName?: string;
   labelClassName?: string;
 }
 
-// Checkbox Group component
-export const CheckboxGroup: React.FC<CheckboxGroupProps> = ({
+// Checkbox Group component with generic type support
+export function CheckboxGroup<T extends string | number = string | number>({
   children,
   options,
   values = [],
@@ -132,7 +132,7 @@ export const CheckboxGroup: React.FC<CheckboxGroupProps> = ({
   iconClassName = '',
   labelClassName = '',
   ...props
-}) => {
+}: CheckboxGroupProps<T>) {
   const handleCheckboxChange = (
     checkboxValue: string | number,
     isChecked: boolean
@@ -140,7 +140,7 @@ export const CheckboxGroup: React.FC<CheckboxGroupProps> = ({
     if (onChange) {
       if (isChecked) {
         // Add value to array
-        onChange([...values, checkboxValue]);
+        onChange([...values, checkboxValue as T]);
       } else {
         // Remove value from array
         onChange(values.filter((value) => value !== checkboxValue));
@@ -149,7 +149,7 @@ export const CheckboxGroup: React.FC<CheckboxGroupProps> = ({
   };
 
   const contextValue: CheckboxContextType = {
-    values,
+    values: values as (string | number)[],
     onChange: handleCheckboxChange,
   };
 
@@ -162,16 +162,16 @@ export const CheckboxGroup: React.FC<CheckboxGroupProps> = ({
               // Handle both object format { value, label } and string/number format
               const optionValue =
                 typeof option === 'object'
-                  ? (option as CheckboxOption).value
+                  ? (option as CheckboxOption<T>).value
                   : option;
               const optionLabel =
                 typeof option === 'object'
-                  ? (option as CheckboxOption).label
+                  ? (option as CheckboxOption<T>).label
                   : option;
 
               return (
                 <Checkbox
-                  key={optionValue}
+                  key={String(optionValue)}
                   value={optionValue}
                   inputClassName={inputClassName}
                   iconClassName={iconClassName}
@@ -186,11 +186,11 @@ export const CheckboxGroup: React.FC<CheckboxGroupProps> = ({
       </div>
     </CheckboxContext.Provider>
   );
-};
+}
 
 // Static property for Checkbox.Group
-const CheckboxComponent = Object.assign(Checkbox, {
+export const CheckboxWithGroups = Object.assign(Checkbox, {
   Group: CheckboxGroup,
 });
 
-export default CheckboxComponent;
+export default CheckboxWithGroups;
