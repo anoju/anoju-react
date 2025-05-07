@@ -6,7 +6,7 @@ import React, {
   forwardRef,
   ChangeEvent,
 } from 'react';
-import styles from '@/assets/scss/components/checkbox.module.scss';
+import styles from '@/assets/scss/components/checkRadio.module.scss';
 
 // 고유 ID 생성을 위한 유틸리티 함수
 let uniqueIdCounter = 0;
@@ -88,7 +88,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
           value={value}
           checked={isChecked || false}
           onChange={handleChange}
-          className={inputClassName}
+          className={`${styles.inp} ${inputClassName}`}
           disabled={disabled}
           ref={ref}
           {...props}
@@ -159,7 +159,7 @@ export function CheckboxGroup<T extends string | number = string | number>({
 
   return (
     <CheckboxContext.Provider value={contextValue}>
-      <div className={`${styles['form-wrap']} ${className}`} {...props}>
+      <div className={`check-wrap ${className}`} {...props}>
         {options
           ? // Render checkboxes from options array
             options.map((option) => {

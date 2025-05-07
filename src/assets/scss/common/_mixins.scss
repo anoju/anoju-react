@@ -32,3 +32,12 @@
     @content;
   }
 }
+
+@mixin bg-etc($size: contain, $position: center center) {
+  background-repeat: no-repeat;
+  background-position: $position;
+
+  @if $size {
+    background-size: $size;
+  }
+}

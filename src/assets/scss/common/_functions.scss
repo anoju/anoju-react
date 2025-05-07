@@ -1,0 +1,12 @@
+@use 'sass:color';
+@use 'sass:math';
+
+// 색을 약간 밝게 한다
+@function to-light($color, $percentage) {
+  @return color.mix(white, $color, $percentage);
+}
+
+// 색을 약간 어둡게 한다
+@function to-dark($color, $percentage) {
+  @return color.mix(black, $color, $percentage);
+}

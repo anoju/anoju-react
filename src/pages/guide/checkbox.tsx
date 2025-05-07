@@ -48,34 +48,35 @@ import { Checkbox, CheckboxGroup } from '@/components/common';`}
       <section className={styles.section}>
         <h2 className={styles['section-title']}>기본 사용법</h2>
         <div className={styles.showcase}>
-          <Checkbox
-            value="checkbox1"
-            checked={isChecked1}
-            onChange={(e) => setIsChecked1(e.target.checked)}
-          >
-            기본 체크박스
-          </Checkbox>
+          <div className="check-wrap">
+            <Checkbox
+              value="checkbox1"
+              checked={isChecked1}
+              onChange={(e) => setIsChecked1(e.target.checked)}
+            >
+              기본 체크박스
+            </Checkbox>
 
-          <Checkbox
-            value="checkbox2"
-            checked={isChecked2}
-            onChange={(e) => setIsChecked2(e.target.checked)}
-            className="custom-checkbox"
-            inputClassName="custom-input"
-            iconClassName="custom-icon"
-            labelClassName="custom-label"
-          >
-            커스텀 클래스가 적용된 체크박스
-          </Checkbox>
+            <Checkbox
+              value="checkbox2"
+              checked={isChecked2}
+              onChange={(e) => setIsChecked2(e.target.checked)}
+              className="custom-checkbox"
+              inputClassName="custom-input"
+              iconClassName="custom-icon"
+              labelClassName="custom-label"
+            >
+              커스텀 클래스 적용하고 싶을때
+            </Checkbox>
 
-          <Checkbox
-            id="custom-id-3"
-            value="checkbox3"
-            checked={true}
-            disabled={true}
-          >
-            비활성화된 체크박스
-          </Checkbox>
+            <Checkbox value="checkbox3" checked={true} disabled={true}>
+              checked+disabled
+            </Checkbox>
+
+            <Checkbox value="checkbox4" checked={false} disabled={true}>
+              disabled
+            </Checkbox>
+          </div>
         </div>
 
         <h3 className={styles['sub-title']}>참조 소스코드</h3>
@@ -89,7 +90,7 @@ import { Checkbox, CheckboxGroup } from '@/components/common';`}
   기본 체크박스
 </Checkbox>
 
-// 커스텀 클래스가 적용된 체크박스
+// 커스텀 클래스 적용하고 싶을때
 <Checkbox
   value="checkbox2"
   checked={isChecked2}
@@ -99,17 +100,16 @@ import { Checkbox, CheckboxGroup } from '@/components/common';`}
   iconClassName="custom-icon"
   labelClassName="custom-label"
 >
-  커스텀 클래스가 적용된 체크박스
+  커스텀 클래스 적용하고 싶을때
 </Checkbox>
 
 // 비활성화된 체크박스
-<Checkbox
-  id="custom-id-3"
-  value="checkbox3"
-  checked={true}
-  disabled={true}
->
-  비활성화된 체크박스
+<Checkbox value="checkbox3" checked={true} disabled={true}>
+  checked+disabled
+</Checkbox>
+
+<Checkbox value="checkbox4" checked={false} disabled={true}>
+  disabled
 </Checkbox>`}
           language="typescript"
         />
@@ -124,8 +124,8 @@ import { Checkbox, CheckboxGroup } from '@/components/common';`}
             <Checkbox value="option3">옵션 3</Checkbox>
             <Checkbox value="option4">옵션 4</Checkbox>
           </Checkbox.Group>
-
-          <p>선택된 값: {selectedValues.join(', ')}</p>
+          <hr />
+          <p className={styles.txt}>선택된 값: {selectedValues.join(', ')}</p>
         </div>
 
         <h3 className={styles['sub-title']}>참조 소스코드</h3>
@@ -150,15 +150,16 @@ const [selectedValues, setSelectedValues] = useState<(string | number)[]>(['opti
       <section className={styles.section}>
         <h2 className={styles['section-title']}>options 배열 사용</h2>
         <div className={styles.showcase}>
-          <h4>문자열 배열</h4>
+          <h4 className={styles['sub-title']}>문자열 배열</h4>
           <Checkbox.Group
             options={['apple', 'orange', 'banana', 'grape']}
             values={selectedFruits}
             onChange={setSelectedFruits}
+            className="grid"
           />
-          <p>선택된 과일: {selectedFruits.join(', ')}</p>
-
-          <h4>객체 배열 (value/label)</h4>
+          <p className={styles.txt}>선택된 과일: {selectedFruits.join(', ')}</p>
+          <hr />
+          <h4 className={styles['sub-title']}>객체 배열 (value/label)</h4>
           <Checkbox.Group
             options={[
               { value: 'red', label: '빨간색' },
@@ -168,8 +169,9 @@ const [selectedValues, setSelectedValues] = useState<(string | number)[]>(['opti
             ]}
             values={selectedColors}
             onChange={setSelectedColors}
+            className="grid"
           />
-          <p>선택된 색상: {selectedColors.join(', ')}</p>
+          <p className={styles.txt}>선택된 색상: {selectedColors.join(', ')}</p>
         </div>
 
         <h3 className={styles['sub-title']}>참조 소스코드</h3>
