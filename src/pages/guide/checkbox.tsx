@@ -32,6 +32,12 @@ const CheckboxGuide = () => {
   ]);
   const [selectedColors, setSelectedColors] = useState<string[]>(['red']);
 
+  const [booleanValues, setBooleanValues] = useState<boolean[]>([
+    false,
+    true,
+    false,
+  ]);
+
   return (
     <div className="page-inner">
       <h1 className={styles.title}>Checkbox Component</h1>
@@ -51,7 +57,6 @@ import { Checkbox, CheckboxGroup } from '@/components/common';`}
         <div className={styles.showcase}>
           <div className="check-wrap">
             <Checkbox
-              value="checkbox1"
               checked={isChecked1}
               onChange={(e) => setIsChecked1(e.target.checked)}
             >
@@ -59,13 +64,11 @@ import { Checkbox, CheckboxGroup } from '@/components/common';`}
             </Checkbox>
 
             <Checkbox
-              value="checkbox0"
               checked={isChecked0}
               onChange={(e) => setIsChecked0(e.target.checked)}
             />
 
             <Checkbox
-              value="checkbox2"
               checked={isChecked2}
               onChange={(e) => setIsChecked2(e.target.checked)}
               className="custom-checkbox"
@@ -76,11 +79,11 @@ import { Checkbox, CheckboxGroup } from '@/components/common';`}
               커스텀 클래스 적용하고 싶을때
             </Checkbox>
 
-            <Checkbox value="checkbox3" checked={true} disabled={true}>
+            <Checkbox checked={true} disabled={true}>
               checked+disabled
             </Checkbox>
 
-            <Checkbox value="checkbox4" checked={false} disabled={true}>
+            <Checkbox checked={false} disabled={true}>
               disabled
             </Checkbox>
           </div>
@@ -90,7 +93,6 @@ import { Checkbox, CheckboxGroup } from '@/components/common';`}
         <CodeHighlight
           code={`// 기본 체크박스
 <Checkbox
-  value="checkbox1"
   checked={isChecked1}
   onChange={(e) => setIsChecked1(e.target.checked)}
 >
@@ -99,14 +101,12 @@ import { Checkbox, CheckboxGroup } from '@/components/common';`}
 
 // 체크박스만 사용시
 <Checkbox
-  value="checkbox0"
   checked={isChecked0}
   onChange={(e) => setIsChecked0(e.target.checked)}
 />
 
 // 커스텀 클래스 적용하고 싶을때
 <Checkbox
-  value="checkbox2"
   checked={isChecked2}
   onChange={(e) => setIsChecked2(e.target.checked)}
   className="custom-checkbox"
@@ -118,11 +118,11 @@ import { Checkbox, CheckboxGroup } from '@/components/common';`}
 </Checkbox>
 
 // 비활성화된 체크박스
-<Checkbox value="checkbox3" checked={true} disabled={true}>
+<Checkbox checked={true} disabled={true}>
   checked+disabled
 </Checkbox>
 
-<Checkbox value="checkbox4" checked={false} disabled={true}>
+<Checkbox checked={false} disabled={true}>
   disabled
 </Checkbox>`}
           language="typescript"
@@ -186,6 +186,20 @@ const [selectedValues, setSelectedValues] = useState<(string | number)[]>(['opti
             className="grid"
           />
           <p className={styles.txt}>선택된 색상: {selectedColors.join(', ')}</p>
+
+          <hr />
+          <h4 className={styles['sub-title']}>
+            Value 속성 없는 그룹 (Boolean 배열)
+          </h4>
+          <Checkbox.Group values={booleanValues} onChange={setBooleanValues}>
+            <Checkbox>체크박스 1</Checkbox>
+            <Checkbox>체크박스 2</Checkbox>
+            <Checkbox>체크박스 3</Checkbox>
+          </Checkbox.Group>
+          <p className={styles.txt}>
+            Boolean 배열 상태: [
+            {booleanValues.map((v) => (v ? 'true' : 'false')).join(', ')}]
+          </p>
         </div>
 
         <h3 className={styles['sub-title']}>참조 소스코드</h3>
@@ -207,7 +221,17 @@ const [selectedValues, setSelectedValues] = useState<(string | number)[]>(['opti
   ]}
   values={selectedColors}
   onChange={setSelectedColors}
-/>`}
+/>
+
+// Boolean 배열 상태 정의
+const [booleanValues, setBooleanValues] = useState<boolean[]>([false, true, false]);
+
+// Value 속성 없는 그룹 (Boolean 배열 모드)
+<Checkbox.Group values={booleanValues} onChange={setBooleanValues}>
+  <Checkbox>체크박스 1</Checkbox>
+  <Checkbox>체크박스 2</Checkbox>
+  <Checkbox>체크박스 3</Checkbox>
+</Checkbox.Group>`}
           language="typescript"
         />
       </section>
