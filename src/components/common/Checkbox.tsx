@@ -94,12 +94,14 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
           {...props}
         />
         <i className={`${styles.ico} ${iconClassName}`} aria-hidden="true"></i>
-        <label
-          className={`${styles.lbl} ${labelClassName}`}
-          htmlFor={checkboxId}
-        >
-          {children}
-        </label>
+        {children && (
+          <label
+            className={`${styles.lbl} ${labelClassName}`}
+            htmlFor={checkboxId}
+          >
+            {children}
+          </label>
+        )}
       </div>
     );
   }

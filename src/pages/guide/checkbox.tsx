@@ -17,6 +17,7 @@ const CheckboxGuide = () => {
   });
 
   // Individual checkbox states
+  const [isChecked0, setIsChecked0] = useState(false);
   const [isChecked1, setIsChecked1] = useState(false);
   const [isChecked2, setIsChecked2] = useState(true);
 
@@ -58,6 +59,12 @@ import { Checkbox, CheckboxGroup } from '@/components/common';`}
             </Checkbox>
 
             <Checkbox
+              value="checkbox0"
+              checked={isChecked0}
+              onChange={(e) => setIsChecked0(e.target.checked)}
+            />
+
+            <Checkbox
               value="checkbox2"
               checked={isChecked2}
               onChange={(e) => setIsChecked2(e.target.checked)}
@@ -89,6 +96,13 @@ import { Checkbox, CheckboxGroup } from '@/components/common';`}
 >
   기본 체크박스
 </Checkbox>
+
+// 체크박스만 사용시
+<Checkbox
+  value="checkbox0"
+  checked={isChecked0}
+  onChange={(e) => setIsChecked0(e.target.checked)}
+/>
 
 // 커스텀 클래스 적용하고 싶을때
 <Checkbox
