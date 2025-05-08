@@ -15,9 +15,12 @@ const generateUniqueId = (): string => {
   return id;
 };
 
+// 체크박스 값 타입 정의
+type CheckboxValue = string | number | boolean;
+
 // CheckboxContext 타입 정의 - value가 있는 경우와 없는 경우 모두 처리
 interface CheckboxContextType {
-  values: (string | number | boolean)[];
+  values: CheckboxValue[];
   booleanMode: boolean;
   onChange: (
     value: string | number | boolean | undefined,
@@ -85,7 +88,9 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
         isChecked = typeof index === 'number' ? !!context.values[index] : false;
       } else {
         // Value mode
-        isChecked = context.values.includes(value as any);
+        isChecked =
+          value !== undefined &&
+          context.values.includes(value as CheckboxValue);
       }
     }
 
@@ -136,6 +141,18 @@ interface CheckboxOption<T extends string | number = string | number> {
   label: React.ReactNode;
 }
 
+// 체크박스 옵션 가드 함수
+function isCheckboxOption<T extends string | number>(
+  option: unknown
+): option is CheckboxOption<T> {
+  return (
+    typeof option === 'object' &&
+    option !== null &&
+    'value' in option &&
+    'label' in option
+  );
+}
+
 // Checkbox Group component props
 interface CheckboxGroupProps<
   T extends string | number | boolean = string | number,
@@ -166,10 +183,12 @@ export function CheckboxGroup<
 }: CheckboxGroupProps<T>) {
   // value가 없는 경우(boolean 모드) 감지
   const childrenArray = React.Children.toArray(children);
+
+  // 타입 안전하게 isValidElement 및 'props' 접근
   const hasValueProp =
     childrenArray.length > 0 &&
-    React.isValidElement(childrenArray[0]) &&
-    'value' in childrenArray[0].props;
+    React.isValidElement<{ value?: unknown }>(childrenArray[0]) &&
+    childrenArray[0].props.value !== undefined;
 
   const booleanMode = !hasValueProp && options === undefined;
 
@@ -198,7 +217,7 @@ export function CheckboxGroup<
   };
 
   const contextValue: CheckboxContextType = {
-    values: values as (string | number | boolean)[],
+    values: values as CheckboxValue[],
     booleanMode,
     onChange: handleCheckboxChange,
   };
@@ -209,20 +228,27 @@ export function CheckboxGroup<
         {options
           ? // Render checkboxes from options array
             options.map((option, idx) => {
-              // Handle both object format { value, label } and string/number format
-              const optionValue =
-                typeof option === 'object'
-                  ? (option as CheckboxOption<any>).value
-                  : option;
-              const optionLabel =
-                typeof option === 'object'
-                  ? (option as CheckboxOption<any>).label
-                  : option;
+              // 타입 안전한 처리
+              let optionValue: string | number | undefined;
+              let optionLabel: React.ReactNode;
+
+              if (isCheckboxOption<string | number>(option)) {
+                // CheckboxOption 객체인 경우
+                optionValue = option.value;
+                optionLabel = option.label;
+              } else {
+                // 원시 값인 경우
+                optionValue =
+                  typeof option === 'boolean'
+                    ? undefined
+                    : (option as string | number);
+                optionLabel = option;
+              }
 
               return (
                 <Checkbox
-                  key={String(optionValue) + idx}
-                  value={optionValue as string | number}
+                  key={`${String(optionValue || idx)}-${idx}`}
+                  value={optionValue}
                   inputClassName={inputClassName}
                   iconClassName={iconClassName}
                   labelClassName={labelClassName}
@@ -234,18 +260,13 @@ export function CheckboxGroup<
             })
           : // Render children normally, and add index prop for boolean mode
             React.Children.map(children, (child, idx) => {
-              if (React.isValidElement(child)) {
-                return React.cloneElement(
-                  child as React.ReactElement<CheckboxProps>,
-                  {
-                    index: idx,
-                    inputClassName:
-                      child.props.inputClassName || inputClassName,
-                    iconClassName: child.props.iconClassName || iconClassName,
-                    labelClassName:
-                      child.props.labelClassName || labelClassName,
-                  }
-                );
+              if (React.isValidElement<CheckboxProps>(child)) {
+                return React.cloneElement(child, {
+                  index: idx,
+                  inputClassName: child.props.inputClassName || inputClassName,
+                  iconClassName: child.props.iconClassName || iconClassName,
+                  labelClassName: child.props.labelClassName || labelClassName,
+                });
               }
               return child;
             })}

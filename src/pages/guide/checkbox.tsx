@@ -197,8 +197,8 @@ const [selectedValues, setSelectedValues] = useState<(string | number)[]>(['opti
             <Checkbox>체크박스 3</Checkbox>
           </Checkbox.Group>
           <p className={styles.txt}>
-            Boolean 배열 상태: [
-            {booleanValues.map((v) => (v ? 'true' : 'false')).join(', ')}]
+            Boolean 배열 상태:
+            {booleanValues.map((v) => (v ? 'true' : 'false')).join(', ')}
           </p>
         </div>
 
