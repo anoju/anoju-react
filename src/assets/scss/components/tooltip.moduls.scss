@@ -1,0 +1,119 @@
+@use '@/assets/scss' as s;
+@use 'sass:color';
+@use 'sass:math';
+
+// tooltip
+:root {
+  --tooltop-arr-width: 1rem;
+  --tooltop-arr-height: 0.8rem;
+  --tooltop-bg: rgb(0 0 0 / 70%);
+}
+
+.tooltip-wrap {
+  position: relative;
+  display: inline-flex;
+  vertical-align: middle;
+  margin-left: 0.3rem;
+  align-items: center;
+
+  .tooltip-btn {
+    display: block;
+  }
+}
+
+.tooltip-body {
+  display: none;
+  position: fixed;
+  padding-top: 1.2rem;
+  left: 0;
+  top: 100%;
+  z-index: 10;
+  font-size: 1.2rem;
+  font-weight: 400;
+  line-height: 1.5;
+  text-align: left;
+  word-break: normal;
+  word-wrap: break-word;
+  transition:
+    opacity 0.2s,
+    transform 0.2s;
+
+  &.max {
+    max-width: 760px;
+  }
+
+  &.bottom {
+    padding-top: 0;
+    padding-bottom: 1rem;
+
+    .tooltip-arr {
+      top: auto;
+      bottom: 4px;
+      border-top-width: var(--tooltop-arr-height);
+      border-top-color: var(--tooltop-bg);
+      border-bottom-width: 0;
+      border-bottom-color: transparent;
+    }
+  }
+
+  &.show {
+    display: block;
+    opacity: 0;
+    transform: translateY(1rem);
+
+    &.bottom {
+      transform: translateY(-1rem);
+    }
+  }
+
+  &.open {
+    opacity: 1;
+    transform: translateY(0) !important;
+  }
+}
+
+.tooltip-inner {
+  min-height: 5rem;
+  padding: 1.6rem;
+  border-radius: 0.8rem;
+  color: #fff;
+  background-color: var(--tooltop-bg);
+  backdrop-filter: blur(1px);
+
+  @include media-min-width(1024) {
+    @include web-center(true);
+  }
+}
+
+.tooltip-arr {
+  position: absolute;
+  top: 4px;
+  margin-left: calc(var(--tooltop-arr-width) * -0.5);
+  border: 0 solid transparent;
+  border-width: 0 calc(var(--tooltop-arr-width) / 2) var(--tooltop-arr-height);
+  border-bottom-color: var(--tooltop-bg);
+  backdrop-filter: blur(1px);
+}
+
+.tooltip-close {
+  display: block;
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 2.8rem;
+  height: 2.8rem;
+
+  @include bg-etc(1.6rem auto);
+
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4.09514 4.55454C3.96829 4.42768 3.96829 4.222 4.09514 4.09514C4.222 3.96829 4.42768 3.96829 4.55453 4.09514L11.9048 11.4454C12.0316 11.5723 12.0316 11.778 11.9048 11.9048C11.7779 12.0317 11.5722 12.0317 11.4454 11.9048L4.09514 4.55454Z' fill='%23fff'/%3E%3Cpath d='M11.4455 4.09516C11.5723 3.96831 11.778 3.96831 11.9049 4.09516C12.0317 4.22202 12.0317 4.4277 11.9049 4.55456L4.55462 11.9049C4.42776 12.0317 4.22208 12.0317 4.09523 11.9049C3.96837 11.778 3.96837 11.5723 4.09523 11.4455L11.4455 4.09516Z' fill='%23fff'/%3E%3C/svg%3E");
+}
+
+.tooltip-btn {
+  &.button.not {
+    line-height: 1;
+  }
+
+  .i-ico-tooltip {
+    vertical-align: top;
+  }
+}
