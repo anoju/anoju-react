@@ -24,6 +24,10 @@ const GuideLayout: React.FC<GuideLayoutProps> = ({ children }) => {
             to: '/guide/checkbox',
           },
           {
+            label: 'Radio',
+            to: '/guide/radio',
+          },
+          {
             label: 'Input',
             to: '/guide/input',
           },
