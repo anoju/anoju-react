@@ -156,6 +156,7 @@ const TooltipGuide = () => {
             <Tooltip
               head={false}
               bodyShow={showBodyTooltip}
+              setBodyShow={setShowBodyTooltip}
               showTarget={targetButtonRef.current}
             >
               <div>
@@ -373,6 +374,20 @@ const targetButtonRef = useRef<HTMLButtonElement>(null);
               </tr>
               <tr>
                 <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
+                  setBodyShow
+                </td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
+                  function
+                </td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
+                  undefined
+                </td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
+                  툴팁이 닫힐 때 외부 상태를 업데이트하는 콜백 함수
+                </td>
+              </tr>
+              <tr>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
                   showTarget
                 </td>
                 <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
@@ -414,8 +429,12 @@ const targetButtonRef = useRef<HTMLButtonElement>(null);
             </li>
             <li>툴팁 내부 클릭: 내부 버튼 등을 클릭해도 툴팁이 닫히지 않음</li>
             <li>
-              외부 제어: head=false, bodyShow, showTarget 옵션으로 외부에서 툴팁
-              제어 가능
+              외부 제어: head=false, bodyShow, setBodyShow, showTarget 옵션으로
+              외부에서 툴팁 제어 가능
+            </li>
+            <li>
+              마우스 동작 개선: 툴팁 헤더에서 바디로 마우스가 자연스럽게 이동
+              가능
             </li>
           </ul>
         </div>
@@ -476,6 +495,7 @@ function MyComponent() {
       <Tooltip
         head={false}
         bodyShow={showTooltip}
+        setBodyShow={setShowTooltip}
         showTarget={targetRef.current}
       >
         <div>

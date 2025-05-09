@@ -21,6 +21,7 @@ interface TooltipProps {
   btnLabel?: string; // 기본 버튼 사용 시 aria-label
   isMobile?: boolean; // 모바일 동작 모드
   bodyShow?: boolean; // 툴팁 바디 표시 여부
+  setBodyShow?: (isShow: boolean) => void; // 툴팁 바디 표시 여부를 외부에서 제어하기 위한 콜백
   showTarget?: HTMLElement | null; // 툴팁이 표시될 기준 요소
 }
 
@@ -36,6 +37,7 @@ const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(
       btnLabel = '자세한 내용 확인',
       isMobile = false, // 기본값은 PC 모드
       bodyShow = false, // 기본값은 숨김
+      setBodyShow, // 툴팁 바디 표시 여부를 외부에서 제어하기 위한 콜백
       showTarget = null, // 기본값은 null
     },
     ref
@@ -167,8 +169,12 @@ const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(
       // 애니메이션이 완료된 후 완전히 숨김
       setTimeout(() => {
         setIsVisible(false);
+        // 외부 상태 업데이트 콜백이 제공된 경우 호출
+        if (setBodyShow && bodyShow) {
+          setBodyShow(false);
+        }
       }, 300);
-    }, []);
+    }, [setBodyShow, bodyShow]);
 
     // 외부 클릭 감지 - document.body에 이벤트 리스너 추가
     useEffect(() => {
@@ -306,14 +312,19 @@ const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(
           tooltipRef.current = node;
         }}
         className={`${styles['tooltip-wrap']} ${className}`}
+        // head가 있고 모바일 모드가 아닐 때 전체 래퍼에 마우스 이벤트 적용
+        onMouseEnter={
+          !isMobile && head !== false ? handleHeadMouseEnter : undefined
+        }
+        onMouseLeave={
+          !isMobile && head !== false ? handleHeadMouseLeave : undefined
+        }
       >
         {head !== false && (
           <div
             ref={triggerRef}
             className={styles['tooltip-head']}
-            onMouseEnter={handleHeadMouseEnter}
-            onMouseLeave={handleHeadMouseLeave}
-            onClick={handleHeadClick}
+            onClick={handleHeadClick} // 클릭 이벤트는 헤더에만 유지 (모바일 모드용)
           >
             {head === true ? defaultHead : head}
           </div>
