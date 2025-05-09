@@ -5,6 +5,7 @@ import React, {
   useRef,
   forwardRef,
   ChangeEvent,
+  useState,
 } from 'react';
 import styles from '@/assets/scss/components/checkRadio.module.scss';
 
@@ -75,14 +76,18 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
     // Check if inside a CheckboxGroup
     const context = useContext(CheckboxContext);
 
+    // 내부 상태 관리 - checked prop이 undefined일 때만 사용
+    const [internalChecked, setInternalChecked] = useState(false);
+
     // Generate a unique ID if not provided
     const checkboxIdRef = useRef<string>(id || generateUniqueId());
     const checkboxId = checkboxIdRef.current;
 
-    // If inside a group, use the group's state management
-    let isChecked = checked;
+    // 체크 상태 결정 로직
+    let isChecked: boolean;
 
     if (context) {
+      // 그룹 내에서의 체크 상태 결정
       if (context.booleanMode) {
         // Boolean mode (index 기반)
         isChecked = typeof index === 'number' ? !!context.values[index] : false;
@@ -92,17 +97,28 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
           value !== undefined &&
           context.values.includes(value as CheckboxValue);
       }
+    } else if (checked !== undefined) {
+      // 외부에서 제공된 checked prop이 있는 경우
+      isChecked = checked;
+    } else {
+      // 독립형 체크박스로 사용되며 checked prop이 없는 경우, 내부 상태 사용
+      isChecked = internalChecked;
     }
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
       if (context) {
+        // 그룹 내에서의 변경 처리
         if (context.booleanMode) {
           context.onChange(undefined, e.target.checked, index);
         } else {
           context.onChange(value, e.target.checked);
         }
       } else if (onChange) {
+        // 외부 onChange 핸들러가 있는 경우
         onChange(e);
+      } else if (checked === undefined) {
+        // 독립형 체크박스이고 checked prop이 없는 경우, 내부 상태 업데이트
+        setInternalChecked(e.target.checked);
       }
     };
 

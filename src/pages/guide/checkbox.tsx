@@ -16,11 +16,6 @@ const CheckboxGuide = () => {
     ),
   });
 
-  // Individual checkbox states
-  const [isChecked0, setIsChecked0] = useState(false);
-  const [isChecked1, setIsChecked1] = useState(false);
-  const [isChecked2, setIsChecked2] = useState(true);
-
   // Group checkbox states
   const [selectedValues, setSelectedValues] = useState<(string | number)[]>([
     'option1',
@@ -56,21 +51,11 @@ import { Checkbox, CheckboxGroup } from '@/components/common';`}
         <h2 className={styles['section-title']}>기본 사용법</h2>
         <div className={styles.showcase}>
           <div className="check-wrap">
-            <Checkbox
-              checked={isChecked1}
-              onChange={(e) => setIsChecked1(e.target.checked)}
-            >
-              기본 체크박스
-            </Checkbox>
+            <Checkbox>기본 체크박스</Checkbox>
+
+            <Checkbox />
 
             <Checkbox
-              checked={isChecked0}
-              onChange={(e) => setIsChecked0(e.target.checked)}
-            />
-
-            <Checkbox
-              checked={isChecked2}
-              onChange={(e) => setIsChecked2(e.target.checked)}
               className="custom-checkbox"
               inputClassName="custom-input"
               iconClassName="custom-icon"
@@ -92,23 +77,13 @@ import { Checkbox, CheckboxGroup } from '@/components/common';`}
         <h3 className={styles['sub-title']}>참조 소스코드</h3>
         <CodeHighlight
           code={`// 기본 체크박스
-<Checkbox
-  checked={isChecked1}
-  onChange={(e) => setIsChecked1(e.target.checked)}
->
-  기본 체크박스
-</Checkbox>
+<Checkbox>기본 체크박스</Checkbox>
 
 // 체크박스만 사용시
-<Checkbox
-  checked={isChecked0}
-  onChange={(e) => setIsChecked0(e.target.checked)}
-/>
+<Checkbox />
 
 // 커스텀 클래스 적용하고 싶을때
 <Checkbox
-  checked={isChecked2}
-  onChange={(e) => setIsChecked2(e.target.checked)}
   className="custom-checkbox"
   inputClassName="custom-input"
   iconClassName="custom-icon"
