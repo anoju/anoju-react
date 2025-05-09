@@ -159,13 +159,14 @@
       top: 50%;
       border-radius: 50%;
       margin: calc(var(--rdo-size) / -2) 0 0 calc(var(--rdo-size) / -2);
+      background-color: #ccc;
     }
   }
 
   .inp {
     &:checked {
       + .ico {
-        background: #fff;
+        border-color: var(--primary-color);
 
         &::after {
           background-color: var(--primary-color);
@@ -176,16 +177,16 @@
 
     &:disabled {
       &:not(:checked) {
-        + .ico {
-          border-color: #ebebeb;
-          background-color: #fafafa;
+        border-color: s.to-light(#ccc, 40%);
+
+        + .ico::after {
+          background-color: s.to-light(#ccc, 40%);
         }
       }
 
       &:checked {
         + .ico {
-          border-color: #ebebeb;
-          background-color: #fafafa;
+          border-color: s.to-light(s.$primary-color, 40%);
 
           &::after {
             background-color: s.to-light(s.$primary-color, 40%);
