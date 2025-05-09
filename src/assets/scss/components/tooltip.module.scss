@@ -21,6 +21,16 @@
   }
 }
 
+.tooltip-arr {
+  position: absolute;
+  top: 4px;
+  margin-left: calc(var(--tooltop-arr-width) * -0.5);
+  border: 0 solid transparent;
+  border-width: 0 calc(var(--tooltop-arr-width) / 2) var(--tooltop-arr-height);
+  border-bottom-color: var(--tooltop-bg);
+  backdrop-filter: blur(1px);
+}
+
 .tooltip-body {
   display: none;
   position: fixed;
@@ -78,20 +88,6 @@
   border-radius: 0.8rem;
   color: #fff;
   background-color: var(--tooltop-bg);
-  backdrop-filter: blur(1px);
-
-  @include media-min-width(1024) {
-    @include web-center(true);
-  }
-}
-
-.tooltip-arr {
-  position: absolute;
-  top: 4px;
-  margin-left: calc(var(--tooltop-arr-width) * -0.5);
-  border: 0 solid transparent;
-  border-width: 0 calc(var(--tooltop-arr-width) / 2) var(--tooltop-arr-height);
-  border-bottom-color: var(--tooltop-bg);
   backdrop-filter: blur(1px);
 }
 
