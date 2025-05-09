@@ -15,10 +15,30 @@
   vertical-align: middle;
   margin-left: 0.3rem;
   align-items: center;
+}
 
-  .tooltip-btn {
-    display: block;
+.tooltip-head {
+  position: relative;
+  z-index: 1;
+}
+
+.tooltip-btn {
+  display: block;
+
+  &.button.not {
+    line-height: 1;
   }
+}
+
+.i-ico-tooltip {
+  display: inline-block;
+  width: 1.6rem;
+  height: 1.6rem;
+  vertical-align: top;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M8 15C11.866 15 15 11.866 15 8C15 4.13401 11.866 1 8 1C4.13401 1 1 4.13401 1 8C1 11.866 4.13401 15 8 15Z' stroke='%23666' stroke-width='1.5'/%3E%3Cpath d='M8 11.5V7.5' stroke='%23666' stroke-width='1.5' stroke-linecap='round'/%3E%3Ccircle cx='8' cy='5' r='0.5' fill='%23666' stroke='%23666'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
 }
 
 .tooltip-arr {
@@ -47,10 +67,6 @@
   transition:
     opacity 0.2s,
     transform 0.2s;
-
-  &.max {
-    max-width: 760px;
-  }
 
   &.bottom {
     padding-top: 0;
@@ -83,6 +99,7 @@
 }
 
 .tooltip-inner {
+  position: relative;
   min-height: 5rem;
   padding: 1.6rem;
   border-radius: 0.8rem;
@@ -98,18 +115,18 @@
   top: 0;
   width: 2.8rem;
   height: 2.8rem;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
 
-  @include bg-etc(1.6rem auto);
+  @include s.bg-etc(1.6rem auto);
 
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4.09514 4.55454C3.96829 4.42768 3.96829 4.222 4.09514 4.09514C4.222 3.96829 4.42768 3.96829 4.55453 4.09514L11.9048 11.4454C12.0316 11.5723 12.0316 11.778 11.9048 11.9048C11.7779 12.0317 11.5722 12.0317 11.4454 11.9048L4.09514 4.55454Z' fill='%23fff'/%3E%3Cpath d='M11.4455 4.09516C11.5723 3.96831 11.778 3.96831 11.9049 4.09516C12.0317 4.22202 12.0317 4.4277 11.9049 4.55456L4.55462 11.9049C4.42776 12.0317 4.22208 12.0317 4.09523 11.9049C3.96837 11.778 3.96837 11.5723 4.09523 11.4455L11.4455 4.09516Z' fill='%23fff'/%3E%3C/svg%3E");
 }
 
-.tooltip-btn {
-  &.button.not {
-    line-height: 1;
-  }
-
-  .i-ico-tooltip {
-    vertical-align: top;
+// 라이트 모드 스타일 (원하는 경우 추가 가능)
+@include s.light-mode {
+  .tooltip-inner {
+    color: #fff; // 라이트 모드에서도 텍스트는 흰색 유지
   }
 }
