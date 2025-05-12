@@ -32,7 +32,6 @@ export interface InputProps {
   type?: string;
   className?: string;
   style?: React.CSSProperties;
-  wrapperClassName?: string;
   inputClassName?: string;
   // 상태
   disabled?: boolean;
@@ -65,7 +64,6 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       // 기본 속성
       id,
       className = '',
-      wrapperClassName = '',
       inputClassName = '',
       style,
 
@@ -336,10 +334,11 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     };
 
     // 클래스 이름 생성
-    const wrapperClasses = cx(styles.input, wrapperClassName, {
+    const wrapperClasses = cx(styles.input, className, {
       [styles.disabled]: disabled,
       [styles.focused]: isFocused,
       [styles['with-before']]: !!beforeEl,
+      [styles['with-after']]: !!afterEl,
       [styles['with-buttons']]:
         !!(
           isReset &&
@@ -347,11 +346,6 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           !disabled &&
           !readOnly
         ) || !!(type === 'password' && showPassword && !disabled && !readOnly),
-      [styles['with-after']]: !!(
-        afterEl ||
-        (isReset && !disabled && !readOnly) ||
-        (type === 'password' && showPassword && !disabled && !readOnly)
-      ),
     });
 
     // 다중 input 태그 렌더링
@@ -461,7 +455,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         : inputValue;
 
     return (
-      <div className={`${wrapperClasses} ${className}`} style={style}>
+      <div className={wrapperClasses} style={style}>
         {/* 입력 필드 앞에 표시할 요소 */}
         {beforeEl && <div className={styles['inp-before']}>{beforeEl}</div>}
 
