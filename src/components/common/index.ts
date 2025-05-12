@@ -4,3 +4,4 @@ export { default as Tabs, Tab, TabPanel } from './Tabs';
 export { default as Checkbox, CheckboxGroup } from './Checkbox';
 export { default as Radio, RadioGroup } from './Radio';
 export { default as Tooltip } from './Tooltip';
+export { default as Input } from './Input';

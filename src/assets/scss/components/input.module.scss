@@ -1,0 +1,203 @@
+// src/assets/scss/components/input.module.scss
+@use '@/assets/scss' as s;
+@use 'sass:color';
+@use 'sass:math';
+
+// Input 기본 스타일 변수
+:root {
+  --input-height: 4rem;
+  --input-border-color: #d9d9d9;
+  --input-border-color-hover: #4096ff;
+  --input-border-color-focus: var(--primary-color);
+  --input-bg-color: #fff;
+  --input-text-color: rgba(0, 0, 0, 0.88);
+  --input-disabled-bg: #f5f5f5;
+  --input-disabled-color: rgba(0, 0, 0, 0.25);
+  --input-placeholder-color: rgba(0, 0, 0, 0.35);
+  --input-radius: 0.6rem;
+  --input-padding: 0.8rem 1.2rem;
+  --input-icon-size: 1.6rem;
+  --input-side-padding: 3rem; // 아이콘 공간 확보
+  --input-transition: all 0.2s;
+}
+
+// Input 래퍼
+.input-wrap {
+  position: relative;
+  display: inline-flex;
+  width: 100%;
+  min-width: 0;
+  border-radius: var(--input-radius);
+  border: 1px solid var(--input-border-color);
+  background-color: var(--input-bg-color);
+  transition: var(--input-transition);
+  
+  &:hover:not(.disabled) {
+    border-color: var(--input-border-color-hover);
+  }
+  
+  &.focused:not(.disabled) {
+    border-color: var(--input-border-color-focus);
+    box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+    outline: 0;
+  }
+  
+  &.disabled {
+    background-color: var(--input-disabled-bg);
+    border-color: var(--input-border-color);
+    cursor: not-allowed;
+    color: var(--input-disabled-color);
+  }
+  
+  // before와 after 요소가 있을 때 input 패딩 조정
+  &.with-before .input {
+    padding-left: var(--input-side-padding);
+  }
+  
+  &.with-after .input {
+    padding-right: var(--input-side-padding);
+  }
+}
+
+// 실제 입력 필드
+.input {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  min-width: 0;
+  padding: var(--input-padding);
+  color: var(--input-text-color);
+  font-size: 1.4rem;
+  line-height: 1.5;
+  border: none;
+  outline: none;
+  background: none;
+  border-radius: var(--input-radius);
+  
+  &::placeholder {
+    color: var(--input-placeholder-color);
+  }
+  
+  &:focus {
+    outline: none;
+  }
+  
+  &.disabled {
+    cursor: not-allowed;
+    color: var(--input-disabled-color);
+  }
+  
+  // 텍스트 정렬 옵션
+  &.align-left {
+    text-align: left;
+  }
+  
+  &.align-center {
+    text-align: center;
+  }
+  
+  &.align-right {
+    text-align: right;
+  }
+}
+
+// 입력 필드 앞에 표시될 요소 (아이콘 등)
+.input-before {
+  position: absolute;
+  top: 50%;
+  left: 1.2rem;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+// 입력 필드 뒤에 표시될 버튼 영역
+.input-buttons {
+  position: absolute;
+  top: 50%;
+  right: 1rem;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  z-index: 1;
+}
+
+// 추가 요소 (afterEl)
+.input-after {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// 리셋 버튼 스타일
+.input-reset {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--input-icon-size);
+  height: var(--input-icon-size);
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  opacity: 0.5;
+  margin-left: 0.5rem;
+  padding: 0;
+  transition: opacity 0.2s;
+  
+  &:hover {
+    opacity: 0.8;
+  }
+  
+  // X 아이콘 SVG 배경
+  @include s.bg-etc(1.6rem auto);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M8 15C11.866 15 15 11.866 15 8C15 4.13401 11.866 1 8 1C4.13401 1 1 4.13401 1 8C1 11.866 4.13401 15 8 15Z' fill='%23666' fill-opacity='0.2'/%3E%3Cpath d='M10.7071 5.29289C11.0976 5.68342 11.0976 6.31658 10.7071 6.70711L9.41421 8L10.7071 9.29289C11.0976 9.68342 11.0976 10.3166 10.7071 10.7071C10.3166 11.0976 9.68342 11.0976 9.29289 10.7071L8 9.41421L6.70711 10.7071C6.31658 11.0976 5.68342 11.0976 5.29289 10.7071C4.90237 10.3166 4.90237 9.68342 5.29289 9.29289L6.58579 8L5.29289 6.70711C4.90237 6.31658 4.90237 5.68342 5.29289 5.29289C5.68342 4.90237 6.31658 4.90237 6.70711 5.29289L8 6.58579L9.29289 5.29289C9.68342 4.90237 10.3166 4.90237 10.7071 5.29289Z' fill='%23666'/%3E%3C/svg%3E");
+}
+
+// 비밀번호 토글 버튼 스타일
+.password-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--input-icon-size);
+  height: var(--input-icon-size);
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  opacity: 0.5;
+  margin-left: 0.5rem;
+  padding: 0;
+  transition: opacity 0.2s;
+  
+  &:hover {
+    opacity: 0.8;
+  }
+  
+  // 눈 아이콘 (비밀번호 숨김 상태)
+  @include s.bg-etc(1.6rem auto);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M1.66683 8.00004C1.66683 8.00004 4.3335 3.66671 8.00016 3.66671C11.6668 3.66671 14.3335 8.00004 14.3335 8.00004C14.3335 8.00004 11.6668 12.3334 8.00016 12.3334C4.3335 12.3334 1.66683 8.00004 1.66683 8.00004Z' stroke='%23666666' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M8 10C9.10457 10 10 9.10457 10 8C10 6.89543 9.10457 6 8 6C6.89543 6 6 6.89543 6 8C6 9.10457 6.89543 10 8 10Z' stroke='%23666666' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  
+  // 비밀번호 표시 상태
+  &.visible {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M2 2L14 14' stroke='%23666666' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M6.15808 6.15798C5.77797 6.53809 5.55713 7.04771 5.55713 7.57948C5.55713 8.64305 6.41523 9.50115 7.4788 9.50115C8.01057 9.50115 8.52018 9.28031 8.9003 8.90019' stroke='%23666666' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M3.99749 3.99707C2.55249 5.0604 1.57916 6.57707 1.33333 8.00707C1.93333 11.054 4.64666 13.334 8.00666 13.334C9.16 13.334 10.2473 13.0671 11.2023 12.6004' stroke='%23666666' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M14.6667 14.0001C14.8733 13.8067 15.0733 13.6001 15.2667 13.3734C15.4667 13.1401 15.4667 12.8001 15.2667 12.5667C15.2667 12.5667 14.4667 11.3867 13.5333 10.2001' stroke='%23666666' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M14.6667 1.99988C13.5333 4.23988 10.8 7.99988 8 7.99988' stroke='%23666666' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  }
+}
+
+// 라이트/다크 모드 테마 지원
+@include s.light-mode {
+  :root {
+    // 라이트 모드에서 필요한 경우 변수 재정의
+  }
+}
+
+@include s.dark-mode {
+  :root {
+    --input-border-color: #434343;
+    --input-bg-color: #111;
+    --input-text-color: rgba(255, 255, 255, 0.85);
+    --input-disabled-bg: #303030;
+    --input-disabled-color: rgba(255, 255, 255, 0.3);
+    --input-placeholder-color: rgba(255, 255, 255, 0.35);
+  }
+}
