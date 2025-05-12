@@ -259,146 +259,60 @@ const targetButtonRef = useRef<HTMLButtonElement>(null);
       <section className={styles.section}>
         <h2 className={styles['section-title']}>Props</h2>
         <div className={styles.showcase}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <table className={styles.table}>
             <thead>
               <tr>
-                <th
-                  style={{
-                    textAlign: 'left',
-                    padding: '8px',
-                    borderBottom: '1px solid #ddd',
-                  }}
-                >
-                  속성
-                </th>
-                <th
-                  style={{
-                    textAlign: 'left',
-                    padding: '8px',
-                    borderBottom: '1px solid #ddd',
-                  }}
-                >
-                  타입
-                </th>
-                <th
-                  style={{
-                    textAlign: 'left',
-                    padding: '8px',
-                    borderBottom: '1px solid #ddd',
-                  }}
-                >
-                  기본값
-                </th>
-                <th
-                  style={{
-                    textAlign: 'left',
-                    padding: '8px',
-                    borderBottom: '1px solid #ddd',
-                  }}
-                >
-                  설명
-                </th>
+                <th>속성</th>
+                <th>타입</th>
+                <th>기본값</th>
+                <th>설명</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  children
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  ReactNode
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  필수
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  툴팁에 표시할 내용
-                </td>
+                <td>children</td>
+                <td>ReactNode</td>
+                <td>필수</td>
+                <td>툴팁에 표시할 내용</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  head
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  ReactNode | boolean
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  true
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
+                <td>head</td>
+                <td>ReactNode | boolean</td>
+                <td>true</td>
+                <td>
                   툴팁 헤더 (true: 기본 아이콘, false: 헤더 없음, ReactNode:
                   커스텀 헤더)
                 </td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  className
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  string
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  '자세한 내용 확인'
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  기본 버튼 사용 시 접근성을 위한 aria-label
-                </td>
+                <td>className</td>
+                <td>string</td>
+                <td>'자세한 내용 확인'</td>
+                <td>기본 버튼 사용 시 접근성을 위한 aria-label</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  isMobile
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  boolean
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  false
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  모바일 모드 활성화 (클릭으로 동작)
-                </td>
+                <td>isMobile</td>
+                <td>boolean</td>
+                <td>false</td>
+                <td>모바일 모드 활성화 (클릭으로 동작)</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  bodyShow
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  boolean
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  false
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  외부에서 툴팁 바디 표시 여부 제어
-                </td>
+                <td>bodyShow</td>
+                <td>boolean</td>
+                <td>false</td>
+                <td>외부에서 툴팁 바디 표시 여부 제어</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  setBodyShow
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  function
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  undefined
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  툴팁이 닫힐 때 외부 상태를 업데이트하는 콜백 함수
-                </td>
+                <td>setBodyShow</td>
+                <td>function</td>
+                <td>undefined</td>
+                <td>툴팁이 닫힐 때 외부 상태를 업데이트하는 콜백 함수</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  showTarget
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  HTMLElement | null
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  null
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  툴팁이 표시될 기준 요소 (head가 false일 때 사용)
-                </td>
+                <td>showTarget</td>
+                <td>HTMLElement | null</td>
+                <td>null</td>
+                <td>툴팁이 표시될 기준 요소 (head가 false일 때 사용)</td>
               </tr>
             </tbody>
           </table>

@@ -241,313 +241,129 @@ const InputGuide = () => {
       <section className={styles.section}>
         <h2 className={styles['section-title']}>Props 목록</h2>
         <div className={styles.showcase}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <table className={styles.table}>
             <thead>
               <tr>
-                <th
-                  style={{
-                    textAlign: 'left',
-                    padding: '8px',
-                    borderBottom: '1px solid #ddd',
-                  }}
-                >
-                  속성
-                </th>
-                <th
-                  style={{
-                    textAlign: 'left',
-                    padding: '8px',
-                    borderBottom: '1px solid #ddd',
-                  }}
-                >
-                  타입
-                </th>
-                <th
-                  style={{
-                    textAlign: 'left',
-                    padding: '8px',
-                    borderBottom: '1px solid #ddd',
-                  }}
-                >
-                  기본값
-                </th>
-                <th
-                  style={{
-                    textAlign: 'left',
-                    padding: '8px',
-                    borderBottom: '1px solid #ddd',
-                  }}
-                >
-                  설명
-                </th>
+                <th>속성</th>
+                <th>타입</th>
+                <th>기본값</th>
+                <th>설명</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  value
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  string | number
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  -
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  입력 필드의 값
-                </td>
+                <td>value</td>
+                <td>string | number</td>
+                <td>-</td>
+                <td>입력 필드의 값</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  defaultValue
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  string | number
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  -
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  초기 값
-                </td>
+                <td>defaultValue</td>
+                <td>string | number</td>
+                <td>-</td>
+                <td>초기 값</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  placeholder
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  string
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  -
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  입력 필드의 플레이스홀더
-                </td>
+                <td>placeholder</td>
+                <td>string</td>
+                <td>-</td>
+                <td>입력 필드의 플레이스홀더</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  type
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  string
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  'text'
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  입력 필드의 타입
-                </td>
+                <td>type</td>
+                <td>string</td>
+                <td>'text'</td>
+                <td>입력 필드의 타입</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  disabled
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  boolean
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  false
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  비활성화 여부
-                </td>
+                <td>disabled</td>
+                <td>boolean</td>
+                <td>false</td>
+                <td>비활성화 여부</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  readOnly
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  boolean
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  false
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  읽기 전용 여부
-                </td>
+                <td>readOnly</td>
+                <td>boolean</td>
+                <td>false</td>
+                <td>읽기 전용 여부</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  isReset
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  boolean
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  true
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  입력값 초기화 버튼 표시 여부
-                </td>
+                <td>isReset</td>
+                <td>boolean</td>
+                <td>true</td>
+                <td>입력값 초기화 버튼 표시 여부</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  showPassword
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  boolean
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  false
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  비밀번호 표시/숨김 버튼 표시 여부
-                </td>
+                <td>showPassword</td>
+                <td>boolean</td>
+                <td>false</td>
+                <td>비밀번호 표시/숨김 버튼 표시 여부</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  beforeEl
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  ReactNode
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  -
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  입력 필드 앞에 표시될 요소
-                </td>
+                <td>beforeEl</td>
+                <td>ReactNode</td>
+                <td>-</td>
+                <td>입력 필드 앞에 표시될 요소</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  afterEl
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  ReactNode
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  -
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  입력 필드 뒤에 표시될 요소
-                </td>
+                <td>afterEl</td>
+                <td>ReactNode</td>
+                <td>-</td>
+                <td>입력 필드 뒤에 표시될 요소</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  onlyNumber
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  boolean
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  false
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  숫자만 입력 가능 여부
-                </td>
+                <td>onlyNumber</td>
+                <td>boolean</td>
+                <td>false</td>
+                <td>숫자만 입력 가능 여부</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  addComma
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  boolean
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  false
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  천 단위 콤마 추가 여부(onlyNumber가 true일 때만 적용)
-                </td>
+                <td>addComma</td>
+                <td>boolean</td>
+                <td>false</td>
+                <td>천 단위 콤마 추가 여부(onlyNumber가 true일 때만 적용)</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  align
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  'left' | 'center' | 'right'
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  'left'
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  텍스트 정렬 방향
-                </td>
+                <td>align</td>
+                <td>'left' | 'center' | 'right'</td>
+                <td>'left'</td>
+                <td>텍스트 정렬 방향</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  className
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  string
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  ''
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  컴포넌트에 적용할 추가 클래스명
-                </td>
+                <td>className</td>
+                <td>string</td>
+                <td>''</td>
+                <td>컴포넌트에 적용할 추가 클래스명</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  wrapperClassName
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  string
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  ''
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  래퍼 요소에 적용할 추가 클래스명
-                </td>
+                <td>wrapperClassName</td>
+                <td>string</td>
+                <td>''</td>
+                <td>래퍼 요소에 적용할 추가 클래스명</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  inputClassName
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  string
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  ''
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  input 요소에 적용할 추가 클래스명
-                </td>
+                <td>inputClassName</td>
+                <td>string</td>
+                <td>''</td>
+                <td>input 요소에 적용할 추가 클래스명</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  onChange
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  function
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  -
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  값 변경 시 호출되는 함수
-                </td>
+                <td>onChange</td>
+                <td>function</td>
+                <td>-</td>
+                <td>값 변경 시 호출되는 함수</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  onFocus
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  function
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  -
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  포커스 시 호출되는 함수
-                </td>
+                <td>onFocus</td>
+                <td>function</td>
+                <td>-</td>
+                <td>포커스 시 호출되는 함수</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  onBlur
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  function
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  -
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  포커스를 잃을 때 호출되는 함수
-                </td>
+                <td>onBlur</td>
+                <td>function</td>
+                <td>-</td>
+                <td>포커스를 잃을 때 호출되는 함수</td>
               </tr>
             </tbody>
           </table>
