@@ -45,6 +45,13 @@
     .tabs-header {
       border-bottom: none;
       gap: 0.5rem;
+
+      &::after {
+        border-radius: 5rem;
+        height: 100%;
+        opacity: 0.6;
+        z-index: -1;
+      }
     }
 
     .tab {

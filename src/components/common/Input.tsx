@@ -55,20 +55,20 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       wrapperClassName = '',
       inputClassName = '',
       style,
-      
+
       // 상태
       disabled = false,
       readOnly = false,
-      
+
       // 스타일 관련
-      align = 'left',
-      
+      align,
+
       // Input 콘텐츠 관련
       value,
       defaultValue,
       placeholder,
       type = 'text',
-      
+
       // 기능 관련
       isReset = true,
       showPassword = false,
@@ -76,12 +76,12 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       afterEl,
       onlyNumber = false,
       addComma = false,
-      
+
       // 이벤트 핸들러
       onChange,
       onFocus,
       onBlur,
-      
+
       // 나머지 속성
       ...restProps
     },
@@ -92,8 +92,8 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       value !== undefined
         ? String(value)
         : defaultValue !== undefined
-        ? String(defaultValue)
-        : ''
+          ? String(defaultValue)
+          : ''
     );
     const [isFocused, setIsFocused] = useState<boolean>(false);
     const [passwordVisible, setPasswordVisible] = useState<boolean>(false);
@@ -115,19 +115,19 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       if (!disabled && !readOnly) {
         // 내부 상태 업데이트
         setInputValue('');
-        
+
         // ref 사용하여 실제 DOM 업데이트 (리액트 외부 이벤트 발생 모방)
         if (inputRef.current) {
           inputRef.current.value = '';
-          
+
           // 변경 이벤트 발생
           const event = new Event('input', { bubbles: true });
           inputRef.current.dispatchEvent(event);
-          
+
           // 포커스 설정
           inputRef.current.focus();
         }
-        
+
         // onChange 콜백 호출
         if (onChange) {
           const syntheticEvent = {
@@ -149,48 +149,50 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     // 숫자 및 콤마 처리 함수
     const formatNumberWithComma = (value: string): string => {
       if (!value) return '';
-      
+
       // 숫자와 소수점만 허용
       let numberValue = value.replace(/[^\d.]/g, '');
-      
+
       // 소수점이 두 개 이상이면 첫 번째 소수점만 유지
       const decimalCount = numberValue.split('.').length - 1;
       if (decimalCount > 1) {
         const parts = numberValue.split('.');
         numberValue = parts[0] + '.' + parts.slice(1).join('');
       }
-      
+
       // 콤마 추가
       if (addComma) {
         // 소수점이 있는 경우
         if (numberValue.includes('.')) {
           const parts = numberValue.split('.');
-          return parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',') + '.' + parts[1];
+          return (
+            parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',') + '.' + parts[1]
+          );
         }
         // 소수점이 없는 경우
         return numberValue.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
       }
-      
+
       return numberValue;
     };
 
     // 입력 처리 핸들러
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       let newValue = e.target.value;
-      
+
       // 숫자만 입력 처리
       if (onlyNumber) {
         newValue = formatNumberWithComma(newValue);
-        
+
         // DOM 요소 값 직접 업데이트 (controlled input 문제 해결)
         e.target.value = newValue;
       }
-      
+
       // 내부 상태 업데이트 (controlled 여부와 관계없이)
       if (!isControlled) {
         setInputValue(newValue);
       }
-      
+
       // 외부 onChange 콜백 호출
       if (onChange) {
         onChange(e);
@@ -200,7 +202,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     // 포커스 처리 핸들러
     const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
       setIsFocused(true);
-      
+
       if (onFocus) {
         onFocus(e);
       }
@@ -209,51 +211,50 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     // 블러 처리 핸들러
     const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
       setIsFocused(false);
-      
+
       if (onBlur) {
         onBlur(e);
       }
     };
 
     // 최종 input 값 (콤마 추가/제거 처리)
-    const displayValue = isControlled 
-      ? (onlyNumber && addComma && value !== undefined && value !== '' 
-          ? formatNumberWithComma(String(value)) 
-          : value) 
+    const displayValue = isControlled
+      ? onlyNumber && addComma && value !== undefined && value !== ''
+        ? formatNumberWithComma(String(value))
+        : value
       : inputValue;
 
     // 리셋 버튼 렌더링 조건
     const showResetButton = isReset && inputValue && !disabled && !readOnly;
-    
+
     // 비밀번호 토글 버튼 렌더링 조건
-    const showPasswordToggle = type === 'password' && showPassword && !disabled && !readOnly;
+    const showPasswordToggle =
+      type === 'password' && showPassword && !disabled && !readOnly;
 
     // 클래스 이름 생성
-    const wrapperClasses = cx(
-      styles['input-wrap'],
-      wrapperClassName,
-      {
-        [styles.disabled]: disabled,
-        [styles.focused]: isFocused,
-        [styles['with-before']]: !!beforeEl,
-        [styles['with-after']]: !!(afterEl || showResetButton || showPasswordToggle),
-      }
-    );
+    const wrapperClasses = cx(styles.input, wrapperClassName, {
+      [styles.disabled]: disabled,
+      [styles.focused]: isFocused,
+      [styles['with-before']]: !!beforeEl,
+      [styles['with-buttons']]: !!showResetButton || !!showPasswordToggle,
+      [styles['with-after']]: !!(
+        afterEl ||
+        showResetButton ||
+        showPasswordToggle
+      ),
+    });
 
     const inputClasses = cx(
-      styles.input,
+      styles.inp,
       inputClassName,
-      styles[`align-${align}`],
-      {
-        [styles.disabled]: disabled,
-      }
+      styles[`align-${align}`]
     );
 
     return (
       <div className={`${wrapperClasses} ${className}`} style={style}>
         {/* 입력 필드 앞에 표시할 요소 */}
-        {beforeEl && <div className={styles['input-before']}>{beforeEl}</div>}
-        
+        {beforeEl && <div className={styles['inp-before']}>{beforeEl}</div>}
+
         {/* 실제 입력 필드 */}
         <input
           ref={(node) => {
@@ -277,35 +278,38 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           onBlur={handleBlur}
           {...restProps}
         />
-        
+
         {/* 입력 필드 뒤에 표시할 요소들 */}
-        <div className={styles['input-buttons']}>
-          {/* 리셋 버튼 */}
-          {showResetButton && (
-            <button
-              type="button"
-              className={styles['input-reset']}
-              onClick={handleReset}
-              aria-label="입력 내용 지우기"
-            />
-          )}
-          
-          {/* 비밀번호 표시 토글 버튼 */}
-          {showPasswordToggle && (
-            <button
-              type="button"
-              className={cx(
-                styles['password-toggle'],
-                { [styles.visible]: passwordVisible }
-              )}
-              onClick={togglePasswordVisibility}
-              aria-label={passwordVisible ? '비밀번호 숨기기' : '비밀번호 표시'}
-            />
-          )}
-          
-          {/* 사용자 정의 추가 요소 */}
-          {afterEl && <div className={styles['input-after']}>{afterEl}</div>}
-        </div>
+        {(showResetButton || showPasswordToggle) && (
+          <div className={styles['inp-buttons']}>
+            {/* 리셋 버튼 */}
+            {showResetButton && (
+              <button
+                type="button"
+                className={styles['inp-reset']}
+                onClick={handleReset}
+                aria-label="입력 내용 지우기"
+              />
+            )}
+
+            {/* 비밀번호 표시 토글 버튼 */}
+            {showPasswordToggle && (
+              <button
+                type="button"
+                className={cx(styles['password-toggle'], {
+                  [styles.visible]: passwordVisible,
+                })}
+                onClick={togglePasswordVisibility}
+                aria-label={
+                  passwordVisible ? '비밀번호 숨기기' : '비밀번호 표시'
+                }
+              />
+            )}
+          </div>
+        )}
+
+        {/* 사용자 정의 추가 요소 */}
+        {afterEl && <div className={styles['inp-after']}>{afterEl}</div>}
       </div>
     );
   }
