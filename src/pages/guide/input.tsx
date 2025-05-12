@@ -20,11 +20,22 @@ const InputGuide = () => {
   const [textValue, setTextValue] = useState<string>('');
   const [passwordValue, setPasswordValue] = useState<string>('');
   const [numberValue, setNumberValue] = useState<string>('');
+  const [multiValues, setMultiValues] = useState(['값 1', '값 2', '값 3']);
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    index?: number
+  ) => {
+    if (index !== undefined) {
+      const newValues = [...multiValues];
+      newValues[index] = e.target.value;
+      setMultiValues(newValues);
+    }
+  };
 
   return (
     <div className="page-inner">
       <h1 className={styles.title}>Input 컴포넌트</h1>
-
       <section className={styles.section}>
         <h2 className={styles['section-title']}>Import</h2>
         <CodeHighlight
@@ -32,7 +43,6 @@ const InputGuide = () => {
           language="jsx"
         />
       </section>
-
       <section className={styles.section}>
         <h2 className={styles['section-title']}>기본 입력 필드</h2>
         <p className={styles.txt}>
@@ -61,7 +71,6 @@ const InputGuide = () => {
           language="jsx"
         />
       </section>
-
       <section className={styles.section}>
         <h2 className={styles['section-title']}>비밀번호 입력 필드</h2>
         <p className={styles.txt}>
@@ -96,7 +105,6 @@ const InputGuide = () => {
           language="jsx"
         />
       </section>
-
       <section className={styles.section}>
         <h2 className={styles['section-title']}>숫자 전용 입력 필드</h2>
         <p className={styles.txt}>
@@ -133,7 +141,6 @@ const InputGuide = () => {
           language="jsx"
         />
       </section>
-
       <section className={styles.section}>
         <h2 className={styles['section-title']}>BeforeEl 및 AfterEl 활용</h2>
         <p className={styles.txt}>
@@ -163,7 +170,6 @@ const InputGuide = () => {
           language="jsx"
         />
       </section>
-
       <section className={styles.section}>
         <h2 className={styles['section-title']}>정렬 옵션</h2>
         <p className={styles.txt}>
@@ -188,7 +194,6 @@ const InputGuide = () => {
           language="jsx"
         />
       </section>
-
       <section className={styles.section}>
         <h2 className={styles['section-title']}>비활성화 및 읽기 전용</h2>
         <p className={styles.txt}>
@@ -219,7 +224,6 @@ const InputGuide = () => {
           language="jsx"
         />
       </section>
-
       <section className={styles.section}>
         <h2 className={styles['section-title']}>isReset 옵션</h2>
         <p className={styles.txt}>
@@ -237,7 +241,97 @@ const InputGuide = () => {
           language="jsx"
         />
       </section>
+      // src/pages/guide/input.tsx에 추가할 섹션
+      <section className={styles.section}>
+        <h2 className={styles['section-title']}>
+          다중 입력 필드 (Multiple Input Tags)
+        </h2>
+        <p className={styles.txt}>
+          values 속성을 사용하여 하나의 Input 컴포넌트 내에 여러 개의 input
+          태그를 생성할 수 있습니다. 각 input 태그의 속성은 inputFields 배열을
+          통해 개별적으로 설정할 수 있습니다.
+        </p>
 
+        <div className={styles.showcase}>
+          <Input
+            values={multiValues}
+            onChange={handleInputChange}
+            inputFields={[
+              { placeholder: '첫 번째 입력', className: 'input-first' },
+              { placeholder: '두 번째 입력', align: 'center' },
+              { placeholder: '세 번째 입력', disabled: true },
+            ]}
+            beforeEl={<span style={{ fontSize: '14px' }}>📝</span>}
+            afterEl={<span style={{ fontSize: '14px' }}>✓</span>}
+          />
+        </div>
+        <div className={styles.txt}>입력된 값: {multiValues.join(', ')}</div>
+
+        <h3 className={styles['sub-title']}>참조 소스코드</h3>
+        <CodeHighlight
+          code={`// 다중 input 태그 사용
+const [multiValues, setMultiValues] = useState(['값 1', '값 2', '값 3']);
+
+const handleInputChange = (
+  e: React.ChangeEvent<HTMLInputElement>, 
+  index?: number
+) => {
+  if (index !== undefined) {
+    const newValues = [...multiValues];
+    newValues[index] = e.target.value;
+    setMultiValues(newValues);
+  }
+};
+
+<Input
+  values={multiValues}
+  onChange={handleInputChange}
+  inputFields={[
+    { placeholder: '첫 번째 입력', className: 'input-first' },
+    { placeholder: '두 번째 입력', align: 'center' },
+    { placeholder: '세 번째 입력', disabled: true },
+  ]}
+  beforeEl={<span style={{ fontSize: '14px' }}>📝</span>}
+  afterEl={<span style={{ fontSize: '14px' }}>✓</span>}
+/>`}
+          language="jsx"
+        />
+      </section>
+      <section className={styles.section}>
+        <h2 className={styles['section-title']}>다양한 타입의 input 태그</h2>
+        <p className={styles.txt}>
+          inputFields 배열을 통해 여러 종류의 input 태그를 하나의 컴포넌트에
+          혼합하여 사용할 수 있습니다.
+        </p>
+
+        <div className={styles.showcase}>
+          <Input
+            values={['', '', '']}
+            inputFields={[
+              { type: 'text', placeholder: '텍스트 입력' },
+              { type: 'password', placeholder: '비밀번호 입력' },
+              { type: 'number', placeholder: '숫자 입력' },
+            ]}
+            isReset={true}
+            showPassword={true}
+          />
+        </div>
+
+        <h3 className={styles['sub-title']}>참조 소스코드</h3>
+        <CodeHighlight
+          code={`<Input
+  values={['', '', '']}
+  inputFields={[
+    { type: 'text', placeholder: '텍스트 입력' },
+    { type: 'password', placeholder: '비밀번호 입력' },
+    { type: 'number', placeholder: '숫자 입력' },
+  ]}
+  isReset={true}
+  showPassword={true}
+/>`}
+          language="jsx"
+        />
+      </section>
       <section className={styles.section}>
         <h2 className={styles['section-title']}>Props 목록</h2>
         <div className={styles.showcase}>
@@ -364,6 +458,18 @@ const InputGuide = () => {
                 <td>function</td>
                 <td>-</td>
                 <td>포커스를 잃을 때 호출되는 함수</td>
+              </tr>
+              <tr>
+                <td>values</td>
+                <td>(string | number)[]</td>
+                <td>-</td>
+                <td>다중 input 태그를 위한 값 배열</td>
+              </tr>
+              <tr>
+                <td>inputFields</td>
+                <td>InputFieldProps[]</td>
+                <td>[]</td>
+                <td>다중 input 태그의 개별 속성 설정</td>
               </tr>
             </tbody>
           </table>
