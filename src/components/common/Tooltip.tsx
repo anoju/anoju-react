@@ -3,6 +3,7 @@ import {
   useState,
   useRef,
   useEffect,
+  useLayoutEffect,
   forwardRef,
   ReactNode,
   useCallback,
@@ -58,7 +59,7 @@ const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(
           setIsVisible(true);
           // 애니메이션을 위한 약간의 지연
           requestAnimationFrame(() => {
-            adjustPosition();
+            adjustPositionRef.current();
             setTimeout(() => {
               setShowAnimation(true);
             }, 20);
@@ -74,78 +75,86 @@ const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(
       }
     }, [bodyShow]);
 
-    // 툴팁 위치 조정
-    const adjustPosition = useCallback(() => {
-      if (!bodyRef.current || !arrowRef.current) return;
+    // adjustPosition 함수를 저장할 ref
+    const adjustPositionRef = useRef<() => void>(() => {});
 
-      // 기준 요소 결정: 헤더가 있으면 헤더, 없으면 showTarget 사용
-      let targetElement: DOMRect;
-      if (head !== false && triggerRef.current) {
-        targetElement = triggerRef.current.getBoundingClientRect();
-      } else if (showTarget) {
-        targetElement = showTarget.getBoundingClientRect();
-      } else {
-        return; // 기준 요소가 없으면 조정하지 않음
-      }
+    // 툴팁 위치 조정 함수 정의
+    // (adjustPosition 함수는 여기서 정의하고 ref에 저장하여 다른 후크에서 사용함)
+    useLayoutEffect(() => {
+      // 이 함수는 매번 렌더링할 때마다 재정의되지만, ref에 저장되어 순환 의존성 문제를 피함
+      adjustPositionRef.current = () => {
+        if (!bodyRef.current || !arrowRef.current) return;
 
-      const tooltipBody = bodyRef.current;
-      const arrow = arrowRef.current;
+        // 기준 요소 결정: 헤더가 있으면 헤더, 없으면 showTarget 사용
+        let targetElement: DOMRect;
+        if (head !== false && triggerRef.current) {
+          targetElement = triggerRef.current.getBoundingClientRect();
+        } else if (showTarget) {
+          targetElement = showTarget.getBoundingClientRect();
+        } else {
+          return; // 기준 요소가 없으면 조정하지 않음
+        }
 
-      // 툴팁 너비 설정
-      // maxWidth 옵션이 설정된 경우 해당 값을 사용, 아니면 window width - 20px
-      const windowWidth = window.innerWidth - 20; // 여백 10px씩
-      const tooltipMaxWidth = maxWidth
-        ? Math.min(maxWidth, windowWidth)
-        : windowWidth;
-      tooltipBody.style.maxWidth = `${tooltipMaxWidth}px`;
+        const tooltipBody = bodyRef.current;
+        const arrow = arrowRef.current;
 
-      // 기본 위치 설정 (target 요소의 중앙)
-      const targetCenterX = targetElement.left + targetElement.width / 2;
+        // 툴팁 너비 설정
+        // maxWidth 옵션이 설정된 경우 해당 값을 사용, 아니면 window width - 20px
+        const windowWidth = window.innerWidth - 20; // 여백 10px씩
+        const tooltipMaxWidth = maxWidth
+          ? Math.min(maxWidth, windowWidth)
+          : windowWidth;
+        tooltipBody.style.maxWidth = `${tooltipMaxWidth}px`;
 
-      // 툴팁이 보이게 함
-      tooltipBody.classList.add(styles.show);
+        // 기본 위치 설정 (target 요소의 중앙)
+        const targetCenterX = targetElement.left + targetElement.width / 2;
 
-      // 실제 크기를 가져오기 위해 DOM 측정
-      const bodyWidth = tooltipBody.offsetWidth;
+        // 툴팁이 보이게 함
+        tooltipBody.classList.add(styles.show);
 
-      let leftPos = targetCenterX - bodyWidth / 2;
+        // 실제 크기를 가져오기 위해 DOM 측정
+        const bodyWidth = tooltipBody.offsetWidth;
 
-      // 윈도우 왼쪽 경계 체크
-      if (leftPos < 10) {
-        leftPos = 10;
-      }
+        let leftPos = targetCenterX - bodyWidth / 2;
 
-      // 윈도우 오른쪽 경계 체크
-      if (leftPos + bodyWidth > window.innerWidth - 10) {
-        leftPos = window.innerWidth - bodyWidth - 10;
-      }
+        // 윈도우 왼쪽 경계 체크
+        if (leftPos < 10) {
+          leftPos = 10;
+        }
 
-      tooltipBody.style.left = `${leftPos}px`;
+        // 윈도우 오른쪽 경계 체크
+        if (leftPos + bodyWidth > window.innerWidth - 10) {
+          leftPos = window.innerWidth - bodyWidth - 10;
+        }
 
-      // 화살표 위치 조정 (항상 target의 중앙에)
-      const arrowLeftPos = targetCenterX - leftPos;
-      arrow.style.left = `${arrowLeftPos}px`;
+        tooltipBody.style.left = `${leftPos}px`;
 
-      // 세로 위치 결정 (하단 표시가 기본, 공간 부족시 상단으로)
-      const spaceBelow = window.innerHeight - targetElement.bottom;
-      const tooltipHeight = tooltipBody.offsetHeight;
-      const needsTopPosition = spaceBelow < tooltipHeight + 10;
+        // 화살표 위치 조정 (항상 target의 중앙에)
+        const arrowLeftPos = targetCenterX - leftPos;
+        arrow.style.left = `${arrowLeftPos}px`;
 
-      // 현재 설정된 position 속성과 실제 필요한 위치가 다른 경우 변경
-      const newPositionClass = needsTopPosition ? 'bottom' : 'top';
-      if (positionClass !== newPositionClass) {
-        setPositionClass(newPositionClass);
-      }
+        // 세로 위치 결정 (하단 표시가 기본, 공간 부족시 상단으로)
+        const spaceBelow = window.innerHeight - targetElement.bottom;
+        const tooltipHeight = tooltipBody.offsetHeight;
+        const needsTopPosition = spaceBelow < tooltipHeight + 10;
 
-      // 세로 위치 적용
-      if (needsTopPosition) {
-        // 위에 표시
-        tooltipBody.style.top = `${targetElement.top - tooltipHeight}px`;
-      } else {
-        // 아래에 표시
-        tooltipBody.style.top = `${targetElement.bottom}px`;
-      }
-    }, [maxWidth, head, showTarget, positionClass]);
+        // 현재 설정된 position 속성과 실제 필요한 위치가 다른 경우 변경
+        const newPositionClass = needsTopPosition ? 'bottom' : 'top';
+        if (positionClass !== newPositionClass) {
+          setPositionClass(newPositionClass);
+        }
+
+        // 세로 위치 적용
+        if (needsTopPosition) {
+          // 위에 표시
+          tooltipBody.style.top = `${targetElement.top - tooltipHeight}px`;
+        } else {
+          // 아래에 표시
+          tooltipBody.style.top = `${targetElement.bottom}px`;
+        }
+      };
+      // 필요한 모든 값들을 이 후크의 의존성에 포함하여 최신 값으로 유지
+    }, [head, maxWidth, showTarget, positionClass]);
 
     // 툴팁 표시
     const showTooltip = useCallback(() => {
@@ -155,13 +164,13 @@ const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(
 
       // DOM 업데이트 후 애니메이션 적용 및 위치 조정
       requestAnimationFrame(() => {
-        adjustPosition();
+        adjustPositionRef.current();
         // 애니메이션을 위한 약간의 지연
         setTimeout(() => {
           setShowAnimation(true);
         }, 20);
       });
-    }, [isVisible, adjustPosition]);
+    }, [isVisible]);
 
     // 툴팁 숨기기
     const hideTooltip = useCallback(() => {
@@ -210,47 +219,47 @@ const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(
       if (!isVisible) return;
 
       const handleResize = (): void => {
-        adjustPosition();
+        adjustPositionRef.current();
       };
 
       window.addEventListener('resize', handleResize);
       return () => {
         window.removeEventListener('resize', handleResize);
       };
-    }, [isVisible, adjustPosition]);
+    }, [isVisible]);
 
     // 스크롤 시 위치 조정
     useEffect(() => {
       if (!isVisible) return;
 
       const handleScroll = (): void => {
-        adjustPosition();
+        adjustPositionRef.current();
       };
 
       window.addEventListener('scroll', handleScroll, true);
       return () => {
         window.removeEventListener('scroll', handleScroll, true);
       };
-    }, [isVisible, adjustPosition]);
+    }, [isVisible]);
 
     // showTarget이 변경되면 위치 조정
     useEffect(() => {
       if (isVisible && showTarget) {
         // 약간 지연시켜 DOM이 완전히 업데이트된 후 실행
-        setTimeout(adjustPosition, 0);
+        setTimeout(() => adjustPositionRef.current(), 0);
       }
-    }, [showTarget, isVisible, adjustPosition]);
+    }, [showTarget, isVisible]);
 
     // 초기 표시 시 위치 설정
     useEffect(() => {
       if (isVisible) {
         // 첫 렌더링 시 위치 조정
-        adjustPosition();
+        adjustPositionRef.current();
 
         // 약간의 지연 후 다시 조정 (더 안정적인 위치 계산)
-        setTimeout(adjustPosition, 50);
+        setTimeout(() => adjustPositionRef.current(), 50);
       }
-    }, [isVisible, adjustPosition]);
+    }, [isVisible]);
 
     // 기본 헤더 렌더링 (i 아이콘)
     const defaultHead = useMemo(
