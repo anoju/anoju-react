@@ -129,10 +129,7 @@
   align-items: center;
   padding-right: var(--input-padding-y);
   gap: 0.4rem;
-
-  // min-width: 2.6rem; // 버튼 영역의 최소 너비 설정
-  // justify-content: flex-end; // 버튼을 오른쪽에 정렬
-  // transition: opacity 0.2s; // 투명도 트랜지션 추가
+  justify-content: flex-end;
 }
 
 .inp-separator {

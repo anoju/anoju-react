@@ -329,6 +329,54 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       }
     };
 
+    // 컴포넌트 영역 클릭 시 input에 포커스를 주는 핸들러
+    const handleWrapperClick = (e: React.MouseEvent<HTMLDivElement>) => {
+      // 클릭된 요소가 input, button, select 등의 폼 요소가 아닌 경우에만
+      // 요소의 태그명 확인
+      const tagName = (e.target as HTMLElement).tagName.toLowerCase();
+      const isFormControl = [
+        'input',
+        'button',
+        'select',
+        'textarea',
+        'option',
+      ].includes(tagName);
+
+      // 폼 요소가 아니면서 disabled나 readonly가 아닌 상태에서만 포커스 부여
+      if (!isFormControl && !disabled && !readOnly) {
+        if (isMultipleInputs) {
+          // 다중 input의 경우 disabled, readonly가 아닌 첫 번째 요소에 포커스
+          const firstEnabledInputIndex = inputRefs.current.findIndex(
+            (input, index) => {
+              const fieldProps = inputFields[index] || {};
+              const fieldDisabled =
+                fieldProps.disabled !== undefined
+                  ? fieldProps.disabled
+                  : disabled;
+              const fieldReadOnly =
+                fieldProps.readOnly !== undefined
+                  ? fieldProps.readOnly
+                  : readOnly;
+
+              return input && !fieldDisabled && !fieldReadOnly;
+            }
+          );
+
+          if (
+            firstEnabledInputIndex !== -1 &&
+            inputRefs.current[firstEnabledInputIndex]
+          ) {
+            inputRefs.current[firstEnabledInputIndex].focus();
+          }
+        } else {
+          // 단일 input의 경우 해당 input에 포커스
+          if (inputRef.current) {
+            inputRef.current.focus();
+          }
+        }
+      }
+    };
+
     // 클래스 이름 생성
     const wrapperClasses = cx(styles.input, className, {
       [styles.disabled]: disabled,
@@ -504,7 +552,11 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         : inputValue;
 
     return (
-      <div className={wrapperClasses} style={style}>
+      <div
+        className={wrapperClasses}
+        style={style}
+        onClick={handleWrapperClick}
+      >
         {/* 입력 필드 앞에 표시할 요소 */}
         {beforeEl && <div className={styles['inp-before']}>{beforeEl}</div>}
 
