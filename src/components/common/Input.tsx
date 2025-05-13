@@ -52,6 +52,7 @@ export interface InputProps {
   // 다중 input 태그 관련
   values?: (string | number)[];
   inputFields?: InputFieldProps[];
+  separator?: ReactNode; // 입력 필드 사이에 표시할 구분자
   onChange?: (e: ChangeEvent<HTMLInputElement>, index?: number) => void;
   // 이벤트 핸들러 (override)
   onFocus?: (e: FocusEvent<HTMLInputElement>, index?: number) => void;
@@ -91,6 +92,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       // 다중 input 태그 관련
       values,
       inputFields = [],
+      separator,
 
       // 이벤트 핸들러
       onChange,
@@ -343,70 +345,100 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     const renderInputFields = () => {
       if (!isMultipleInputs || !values) return null;
 
-      return values.map((_, index) => {
-        // 개별 input 태그의 속성 가져오기
-        const fieldProps = inputFields[index] || {};
+      // 구분자가 있는 경우, 필드와 구분자를 번갈아가며 표시
+      if (separator && values.length > 1) {
+        const elements: ReactNode[] = [];
 
-        // 현재 input 태그의 값
-        const currentValue = inputValues[index];
+        values.forEach((_, index) => {
+          // 각 필드를 생성
+          const fieldElement = createInputField(index);
+          elements.push(
+            <React.Fragment key={`input-field-${index}`}>
+              {fieldElement}
+            </React.Fragment>
+          );
 
-        // 개별 속성 또는 기본 컴포넌트 속성 사용
-        const fieldType =
-          fieldProps.type !== undefined ? fieldProps.type : type;
-        const fieldAlign =
-          fieldProps.align !== undefined ? fieldProps.align : align;
-        const fieldDisabled =
-          fieldProps.disabled !== undefined ? fieldProps.disabled : disabled;
-        const fieldReadOnly =
-          fieldProps.readOnly !== undefined ? fieldProps.readOnly : readOnly;
-        const fieldPlaceholder =
-          fieldProps.placeholder !== undefined
-            ? fieldProps.placeholder
-            : placeholder;
-        const fieldClassName =
-          fieldProps.className !== undefined
-            ? fieldProps.className
-            : inputClassName;
+          // 마지막 필드가 아니면 구분자 추가
+          if (index < values.length - 1) {
+            elements.push(
+              <div className={styles['inp-separator']} key={`separator-${index}`}>
+                {separator}
+              </div>
+            );
+          }
+        });
 
-        // 비밀번호 표시 상태 결정
-        const fieldActualType =
-          fieldType === 'password' && passwordVisible ? 'text' : fieldType;
+        return elements;
+      }
 
-        // 필드 클래스 이름 생성
-        const inputClasses = cx(
-          styles.inp,
-          fieldClassName,
-          fieldAlign ? styles[`align-${fieldAlign}`] : ''
-        );
+      // 구분자가 없는 경우, 기본 렌더링
+      return values.map((_, index) => createInputField(index));
+    };
 
-        return (
-          <input
-            key={`input-field-${index}`}
-            ref={(el) => {
-              inputRefs.current[index] = el;
-              // 첫 번째 필드의 경우 외부 ref도 연결
-              if (index === 0) {
-                if (typeof ref === 'function') {
-                  ref(el);
-                } else if (ref) {
-                  ref.current = el;
-                }
+    // 개별 입력 필드 생성 함수
+    const createInputField = (index: number) => {
+      // 개별 input 태그의 속성 가져오기
+      const fieldProps = inputFields[index] || {};
+
+      // 현재 input 태그의 값
+      const currentValue = inputValues[index];
+
+      // 개별 속성 또는 기본 컴포넌트 속성 사용
+      const fieldType =
+        fieldProps.type !== undefined ? fieldProps.type : type;
+      const fieldAlign =
+        fieldProps.align !== undefined ? fieldProps.align : align;
+      const fieldDisabled =
+        fieldProps.disabled !== undefined ? fieldProps.disabled : disabled;
+      const fieldReadOnly =
+        fieldProps.readOnly !== undefined ? fieldProps.readOnly : readOnly;
+      const fieldPlaceholder =
+        fieldProps.placeholder !== undefined
+          ? fieldProps.placeholder
+          : placeholder;
+      const fieldClassName =
+        fieldProps.className !== undefined
+          ? fieldProps.className
+          : inputClassName;
+
+      // 비밀번호 표시 상태 결정
+      const fieldActualType =
+        fieldType === 'password' && passwordVisible ? 'text' : fieldType;
+
+      // 필드 클래스 이름 생성
+      const inputClasses = cx(
+        styles.inp,
+        fieldClassName,
+        fieldAlign ? styles[`align-${fieldAlign}`] : ''
+      );
+
+      return (
+        <input
+          key={`input-field-${index}`}
+          ref={(el) => {
+            inputRefs.current[index] = el;
+            // 첫 번째 필드의 경우 외부 ref도 연결
+            if (index === 0) {
+              if (typeof ref === 'function') {
+                ref(el);
+              } else if (ref) {
+                ref.current = el;
               }
-            }}
-            type={fieldActualType}
-            className={inputClasses}
-            value={currentValue}
-            placeholder={fieldPlaceholder}
-            disabled={fieldDisabled}
-            readOnly={fieldReadOnly}
-            onChange={(e) => handleChange(e, index)}
-            onFocus={(e) => handleFocus(e, index)}
-            onBlur={(e) => handleBlur(e, index)}
-            {...restProps}
-            {...(fieldProps.maxLength && { maxLength: fieldProps.maxLength })}
-          />
-        );
-      });
+            }
+          }}
+          type={fieldActualType}
+          className={inputClasses}
+          value={currentValue}
+          placeholder={fieldPlaceholder}
+          disabled={fieldDisabled}
+          readOnly={fieldReadOnly}
+          onChange={(e) => handleChange(e, index)}
+          onFocus={(e) => handleFocus(e, index)}
+          onBlur={(e) => handleBlur(e, index)}
+          {...restProps}
+          {...(fieldProps.maxLength && { maxLength: fieldProps.maxLength })}
+        />
+      );
     };
 
     // 리셋 버튼 렌더링 조건

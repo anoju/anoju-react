@@ -26,8 +26,13 @@ const InputGuide = () => {
     e: React.ChangeEvent<HTMLInputElement>,
     index?: number
   ) => {
-    console.log(`handleInputChange called with index:`, index, `value:`, e.target.value);
-    
+    console.log(
+      `handleInputChange called with index:`,
+      index,
+      `value:`,
+      e.target.value
+    );
+
     // 특수 값 -1은 전체 필드 초기화를 의미
     if (index === -1) {
       console.log('Special reset all fields case detected');
@@ -35,7 +40,7 @@ const InputGuide = () => {
       setMultiValues(['', '', multiValues[2]]);
       return;
     }
-    
+
     if (index !== undefined) {
       // 기존 값을 긴 배열로 복사
       const newValues = [...multiValues];
@@ -46,7 +51,7 @@ const InputGuide = () => {
       setMultiValues(newValues);
     }
   };
-  
+
   // 값 직접 비우기 테스트
   const handleClearValues = () => {
     console.log('Directly clearing all values');
@@ -261,7 +266,6 @@ const InputGuide = () => {
           language="jsx"
         />
       </section>
-
       <section className={styles.section}>
         <h2 className={styles['section-title']}>
           다중 입력 필드 (Multiple Input Tags)
@@ -369,6 +373,103 @@ const handleInputChange = (
           language="jsx"
         />
       </section>
+
+      <section className={styles.section}>
+        <h2 className={styles['section-title']}>구분자(Separator) 사용</h2>
+        <p className={styles.txt}>
+          separator 속성을 사용하면 다중 입력 필드 사이에 구분자를 추가할 수
+          있습니다.
+        </p>
+
+        <div className={styles.showcase}>
+          <h3 className={styles['sub-title']}>기본 텍스트 구분자</h3>
+          <Input
+            values={['', '', '']}
+            separator="-"
+            inputFields={[
+              { placeholder: '천' },
+              { placeholder: '백', align: 'center' },
+              { placeholder: '일', align: 'right' },
+            ]}
+          />
+
+          <h3 className={styles['sub-title']}>커스텀 요소 구분자</h3>
+          <Input
+            values={['010', '', '']}
+            separator={<span style={{ color: '#888' }}>-</span>}
+            inputFields={[
+              { maxLength: 3, align: 'center' },
+              { maxLength: 4, align: 'center' },
+              { maxLength: 4, align: 'center' },
+            ]}
+          />
+
+          <h3 className={styles['sub-title']}>크기가 다른 구분자</h3>
+          <Input
+            values={['010', '', '']}
+            separator={
+              <div
+                style={{
+                  width: '24px',
+                  height: '2px',
+                  backgroundColor: '#999',
+                }}
+              />
+            }
+            inputFields={[
+              { maxLength: 3, align: 'center' },
+              { maxLength: 4, align: 'center' },
+              { maxLength: 4, align: 'center' },
+            ]}
+          />
+        </div>
+
+        <h3 className={styles['sub-title']}>참조 소스코드</h3>
+        <CodeHighlight
+          code={`// 기본 텍스트 구분자
+<Input
+  values={['', '', '']}
+  separator="-"
+  inputFields={[
+    { placeholder: '천' },
+    { placeholder: '백', align: 'center' },
+    { placeholder: '일', align: 'right' },
+  ]}
+/>
+
+// 커스텀 요소 구분자
+<Input
+  values={['010', '', '']}
+  separator={<span style={{ color: '#888' }}>-</span>}
+  inputFields={[
+    { maxLength: 3, align: 'center' },
+    { maxLength: 4, align: 'center' },
+    { maxLength: 4, align: 'center' },
+  ]}
+/>
+
+// 크기가 다른 구분자
+<Input
+  values={['010', '', '']}
+  separator={
+    <div
+      style={{
+        width: '24px',
+        height: '2px',
+        backgroundColor: '#999',
+      }}
+    />
+  }
+  inputFields={[
+    { maxLength: 3, align: 'center' },
+    { maxLength: 4, align: 'center' },
+    { maxLength: 4, align: 'center' },
+  ]}
+/>`}
+          language="jsx"
+        />
+      </section>
+
       <section className={styles.section}>
         <h2 className={styles['section-title']}>Props 목록</h2>
         <div className={styles.showcase}>
@@ -507,6 +608,12 @@ const handleInputChange = (
                 <td>InputFieldProps[]</td>
                 <td>[]</td>
                 <td>다중 input 태그의 개별 속성 설정</td>
+              </tr>
+              <tr>
+                <td>separator</td>
+                <td>ReactNode</td>
+                <td>-</td>
+                <td>다중 입력 필드 사이에 표시할 구분자</td>
               </tr>
             </tbody>
           </table>
