@@ -128,6 +128,11 @@
   display: flex;
   align-items: center;
   padding-right: var(--input-padding-y);
+  gap: 0.4rem;
+
+  // min-width: 2.6rem; // 버튼 영역의 최소 너비 설정
+  // justify-content: flex-end; // 버튼을 오른쪽에 정렬
+  // transition: opacity 0.2s; // 투명도 트랜지션 추가
 }
 
 .inp-separator {
@@ -140,6 +145,7 @@
 
 // 리셋 버튼 스타일
 .inp-reset {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -149,7 +155,6 @@
   background-color: transparent;
   cursor: pointer;
   opacity: 0.5;
-  margin-left: 0.5rem;
   padding: 0;
   transition: opacity 0.2s;
 
@@ -165,6 +170,7 @@
 
 // 비밀번호 토글 버튼 스타일
 .password-toggle {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -174,7 +180,6 @@
   background-color: transparent;
   cursor: pointer;
   opacity: 0.5;
-  margin-left: 0.5rem;
   padding: 0;
   transition: opacity 0.2s;
 

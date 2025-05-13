@@ -4,6 +4,7 @@ import React, {
   useState,
   useRef,
   useEffect,
+  useLayoutEffect,
   ReactNode,
   ChangeEvent,
   FocusEvent,
@@ -116,6 +117,8 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       values ? values.map((val) => (val !== undefined ? String(val) : '')) : []
     );
     const [isFocused, setIsFocused] = useState<boolean>(false);
+    const [buttonsWidth, setButtonsWidth] = useState<number | null>(null);
+    const buttonsRef = useRef<HTMLDivElement>(null);
     const [passwordVisible, setPasswordVisible] = useState<boolean>(false);
     const inputRef = useRef<HTMLInputElement>(null);
     const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -361,7 +364,10 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           // 마지막 필드가 아니면 구분자 추가
           if (index < values.length - 1) {
             elements.push(
-              <div className={styles['inp-separator']} key={`separator-${index}`}>
+              <div
+                className={styles['inp-separator']}
+                key={`separator-${index}`}
+              >
                 {separator}
               </div>
             );
@@ -384,8 +390,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       const currentValue = inputValues[index];
 
       // 개별 속성 또는 기본 컴포넌트 속성 사용
-      const fieldType =
-        fieldProps.type !== undefined ? fieldProps.type : type;
+      const fieldType = fieldProps.type !== undefined ? fieldProps.type : type;
       const fieldAlign =
         fieldProps.align !== undefined ? fieldProps.align : align;
       const fieldDisabled =
@@ -463,6 +468,27 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     const showPasswordToggle =
       type === 'password' && showPassword && !disabled && !readOnly;
 
+    // 버튼 영역 너비 계산을 위한 useLayoutEffect
+    useLayoutEffect(() => {
+      // 버튼 영역이 존재하고, 버튼이 표시될 조건일 때만 너비 계산
+      if (buttonsRef.current && (showResetButton || showPasswordToggle)) {
+        // 현재 버튼 영역의 너비 측정
+        const width = buttonsRef.current.offsetWidth;
+        // 너비가 0보다 크고 현재 저장된 너비와 다른 경우에만 업데이트
+        if (width > 0 && width !== buttonsWidth) {
+          setButtonsWidth(width);
+        }
+      }
+    }, [
+      // 버튼 영역에 영향을 주는 상태들을 의존성 배열에 추가
+      inputValue,
+      inputValues,
+      showResetButton,
+      showPasswordToggle,
+      passwordVisible,
+      buttonsWidth,
+    ]);
+
     const inputClasses = cx(
       styles.inp,
       inputClassName,
@@ -510,34 +536,38 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           />
         )}
 
-        {/* 입력 필드 뒤에 표시할 요소들 */}
-        {(showResetButton || showPasswordToggle) && (
-          <div className={styles['inp-buttons']}>
-            {/* 리셋 버튼 */}
-            {showResetButton && (
-              <button
-                type="button"
-                className={styles['inp-reset']}
-                onClick={handleReset}
-                aria-label="입력 내용 지우기"
-              />
-            )}
+        {/* 입력 필드 뒤에 표시할 요소들 - 항상 렌더링하고 너비 고정 */}
+        <div
+          className={styles['inp-buttons']}
+          ref={buttonsRef}
+          style={{
+            width: buttonsWidth ? `${buttonsWidth}px` : 'auto',
+            visibility:
+              showResetButton || showPasswordToggle ? 'visible' : 'hidden',
+          }}
+        >
+          {/* 리셋 버튼 */}
+          {showResetButton && (
+            <button
+              type="button"
+              className={styles['inp-reset']}
+              onClick={handleReset}
+              aria-label="입력 내용 지우기"
+            />
+          )}
 
-            {/* 비밀번호 표시 토글 버튼 */}
-            {showPasswordToggle && (
-              <button
-                type="button"
-                className={cx(styles['password-toggle'], {
-                  [styles.visible]: passwordVisible,
-                })}
-                onClick={togglePasswordVisibility}
-                aria-label={
-                  passwordVisible ? '비밀번호 숨기기' : '비밀번호 표시'
-                }
-              />
-            )}
-          </div>
-        )}
+          {/* 비밀번호 표시 토글 버튼 */}
+          {showPasswordToggle && (
+            <button
+              type="button"
+              className={cx(styles['password-toggle'], {
+                [styles.visible]: passwordVisible,
+              })}
+              onClick={togglePasswordVisibility}
+              aria-label={passwordVisible ? '비밀번호 숨기기' : '비밀번호 표시'}
+            />
+          )}
+        </div>
 
         {/* 사용자 정의 추가 요소 */}
         {afterEl && <div className={styles['inp-after']}>{afterEl}</div>}
