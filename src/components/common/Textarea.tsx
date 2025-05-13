@@ -65,14 +65,6 @@ const calculateNodeHeight = (
   const paddingTop = parseFloat(paddingTopStr);
   const paddingBottom = parseFloat(paddingBottomStr);
 
-  console.log(
-    'textarea style',
-    lineHeight,
-    fontSize,
-    paddingTop,
-    paddingBottom
-  );
-
   // 총 패딩 높이
   const paddingHeight = paddingTop + paddingBottom;
 
@@ -92,7 +84,17 @@ const calculateNodeHeight = (
   // 스크롤 높이 기반으로 필요한 높이 계산
   node.style.height = 'auto';
   const scrollHeight = node.scrollHeight;
+
+  // 값이 비어있거나 한 줄인 경우 라인 하이트 + 패딩 높이로 조정
+  const isEmpty = !node.value || node.value.trim() === '';
+  const isOnlyOneLine = !node.value.includes('\n');
+
   let height = scrollHeight;
+
+  // autoSize가 true이고 minRows가 지정되지 않은 경우, 빈 값이나 한 줄 값이면 1줄 높이로 설정
+  if (typeof minRows === 'undefined' && (isEmpty || isOnlyOneLine)) {
+    height = lineHeight + paddingHeight; // 1줄 높이로 설정
+  }
 
   // 최소/최대 높이 제한 적용
   if (minHeight) {
@@ -144,14 +146,19 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
     // autoSize 설정 추출
     const { minRows, maxRows } = typeof autoSize === 'object' ? autoSize : {};
 
+    // autoSize가 활성화되어 있을 때는 resize를 'none'으로 강제 설정
+    const effectiveResize = autoSize ? 'none' : resize;
+
     // 텍스트 값이 변경될 때 높이 조정
     const resizeTextarea = useCallback(() => {
       if (!autoSize || !textareaRef.current) return;
 
       const height = calculateNodeHeight(textareaRef.current, minRows, maxRows);
 
-      // 계산된 높이로 설정
-      textareaRef.current.style.height = `${height}px`;
+      // 계산된 높이로 설정 (트랜지션 효과를 위해 transition 스타일 추가)
+      const textareaElement = textareaRef.current;
+      textareaElement.style.transition = 'height 0.2s';
+      textareaElement.style.height = `${height}px`;
     }, [autoSize, minRows, maxRows]);
 
     // 값 변경 핸들러
@@ -203,9 +210,43 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
     // 초기 및 값 변경 시 높이 조정
     useEffect(() => {
       if (autoSize) {
-        resizeTextarea();
+        // setTimeout을 사용해 다음 렌더링 사이클에서 높이 조정
+        setTimeout(resizeTextarea, 0);
       }
     }, [autoSize, textValue, value, resizeTextarea]);
+
+    // 컴포넌트 마운트 시 초기 높이 조정
+    useEffect(() => {
+      if (autoSize && textareaRef.current) {
+        // 초기 높이 조정
+        resizeTextarea();
+
+        // 브라우저 폰트 로딩 후 다시 조정
+        const adjustHeightAfterFontLoad = () => {
+          setTimeout(resizeTextarea, 100);
+        };
+
+        window.addEventListener('load', adjustHeightAfterFontLoad);
+
+        // DOM이 완전히 로드된 후에도 한번 더 실행
+        if (document.readyState === 'complete') {
+          adjustHeightAfterFontLoad();
+        } else {
+          document.addEventListener(
+            'DOMContentLoaded',
+            adjustHeightAfterFontLoad
+          );
+        }
+
+        return () => {
+          window.removeEventListener('load', adjustHeightAfterFontLoad);
+          document.removeEventListener(
+            'DOMContentLoaded',
+            adjustHeightAfterFontLoad
+          );
+        };
+      }
+    }, [autoSize, resizeTextarea]);
 
     // 외부 value 변경 시 처리
     useEffect(() => {
@@ -223,10 +264,10 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
       {
         [styles.focused]: focused,
         [styles.disabled]: disabled,
-        [styles['resize-none']]: resize === 'none',
-        [styles['resize-both']]: resize === 'both',
-        [styles['resize-horizontal']]: resize === 'horizontal',
-        [styles['resize-vertical']]: resize === 'vertical',
+        [styles['resize-none']]: effectiveResize === 'none',
+        [styles['resize-both']]: effectiveResize === 'both',
+        [styles['resize-horizontal']]: effectiveResize === 'horizontal',
+        [styles['resize-vertical']]: effectiveResize === 'vertical',
       },
       className
     );
@@ -239,9 +280,15 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
     const isExceeded =
       maxLength !== undefined && String(displayValue).length > maxLength;
 
+    // 인라인 스타일 확장 (autoSize가 적용된 경우 트랜지션 효과 추가)
+    const combinedStyle: CSSProperties = {
+      ...style,
+      ...(autoSize ? { transition: 'height 0.2s' } : {}),
+    };
+
     return (
       <div>
-        <div className={wrapperClassName} style={style}>
+        <div className={wrapperClassName} style={combinedStyle}>
           <textarea
             ref={(node) => {
               // 내부 ref와 외부 ref 모두 설정
@@ -262,6 +309,11 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
             onBlur={handleBlur}
             onCompositionStart={handleCompositionStart}
             onCompositionEnd={handleCompositionEnd}
+            rows={1} // 초기 rows를 1로 설정하여 1줄 높이에서 시작
+            style={{
+              resize: effectiveResize,
+              transition: autoSize ? 'height 0.2s' : undefined,
+            }}
             {...restProps}
           />
         </div>
