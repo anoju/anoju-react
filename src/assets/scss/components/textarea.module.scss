@@ -1,0 +1,137 @@
+// src/assets/scss/components/textarea.module.scss
+@use '@/assets/scss' as s;
+@use 'sass:color';
+@use 'sass:math';
+
+// Textarea 기본 스타일 변수
+:root {
+  --textarea-border-color: #d9d9d9;
+  --textarea-border-color-hover: #4096ff;
+  --textarea-border-color-focus: var(--primary-color);
+  --textarea-bg-color: #fff;
+  --textarea-text-color: rgb(0 0 0 / 88%);
+  --textarea-disabled-bg: #f5f5f5;
+  --textarea-disabled-color: rgb(0 0 0 / 25%);
+  --textarea-placeholder-color: rgb(0 0 0 / 35%);
+  --textarea-radius: 0.6rem;
+  --textarea-padding-x: 0.8rem;
+  --textarea-padding-y: 1.2rem;
+  --textarea-transition: all 0.2s;
+}
+
+// Textarea 컨테이너
+.textarea {
+  position: relative;
+  display: inline-flex;
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  color: var(--textarea-text-color);
+  font-size: 1.4rem;
+  line-height: 1.5;
+  background-color: var(--textarea-bg-color);
+  border: 1px solid var(--textarea-border-color);
+  border-radius: var(--textarea-radius);
+  transition: var(--textarea-transition);
+
+  &:hover:not(.disabled) {
+    border-color: var(--textarea-border-color-hover);
+  }
+
+  &.focused:not(.disabled) {
+    border-color: var(--textarea-border-color-focus);
+    box-shadow: 0 0 0 2px rgb(24 144 255 / 20%);
+    outline: 0;
+  }
+
+  &.disabled {
+    background-color: var(--textarea-disabled-bg);
+    border-color: var(--textarea-border-color);
+    cursor: not-allowed;
+    color: var(--textarea-disabled-color);
+  }
+
+  &.resize-none {
+    textarea {
+      resize: none;
+    }
+  }
+
+  &.resize-vertical {
+    textarea {
+      resize: vertical;
+    }
+  }
+
+  &.resize-horizontal {
+    textarea {
+      resize: horizontal;
+    }
+  }
+
+  &.resize-both {
+    textarea {
+      resize: both;
+    }
+  }
+}
+
+// 실제 textarea 요소
+.inp {
+  display: block;
+  width: 100%;
+  padding: var(--textarea-padding-x) var(--textarea-padding-y);
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+  background-color: transparent;
+  border: none;
+  outline: none;
+  resize: vertical;
+
+  &::placeholder {
+    color: var(--textarea-placeholder-color);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    color: var(--textarea-disabled-color);
+  }
+}
+
+// 자동 높이 조절 속성을 가진 textarea
+.auto-size {
+  overflow-y: hidden;
+}
+
+// 카운터 텍스트
+.counter {
+  display: inline-block;
+  margin-top: 0.5rem;
+  font-size: 1.2rem;
+  color: var(--bg-dark-60);
+  text-align: right;
+  width: 100%;
+
+  &.exceeded {
+    color: #f5222d;
+  }
+}
+
+// 라이트/다크 모드 테마 지원
+@include s.light-mode {
+  :root {
+    // 라이트 모드에서 필요한 경우 변수 재정의
+  }
+}
+
+@include s.dark-mode {
+  :root {
+    --textarea-border-color: #434343;
+    --textarea-bg-color: #111;
+    --textarea-text-color: rgb(255 255 255 / 85%);
+    --textarea-disabled-bg: #303030;
+    --textarea-disabled-color: rgb(255 255 255 / 30%);
+    --textarea-placeholder-color: rgb(255 255 255 / 35%);
+  }
+}
