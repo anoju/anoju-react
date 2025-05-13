@@ -130,9 +130,10 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           setInputValue(String(value));
         }
         if (values !== undefined) {
-          setInputValues(
-            values.map((val) => (val !== undefined ? String(val) : ''))
+          const newInputValues = values.map((val) =>
+            val !== undefined ? String(val) : ''
           );
+          setInputValues(newInputValues);
         }
       }
     }, [value, values, isControlled]);
@@ -158,20 +159,24 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 
           setInputValues(newValues);
 
-          // 각 input 태그 값 업데이트 (disabled 상태 고려)
-          inputRefs.current.forEach((inputEl, index) => {
-            if (inputEl) {
-              const fieldProps = inputFields[index] || {};
-              const fieldDisabled =
-                fieldProps.disabled !== undefined
-                  ? fieldProps.disabled
-                  : disabled;
+          // multiValues 업데이트
+          if (values) {
+            // 해당 페이지의 handleInputChange 함수를 한 번만 호출
+            // 각각의 인덱스마다 호출하면 오류 발생 가능성이 있음
+            if (onChange) {
+              // 전체 값을 다루는 하나의 이벤트 생성
+              const syntheticEvent = {
+                target: { name: 'reset-all-fields' },
+                currentTarget: { name: 'reset-all-fields' },
+                type: 'reset',
+                preventDefault: () => {},
+                stopPropagation: () => {},
+              } as unknown as React.ChangeEvent<HTMLInputElement>;
 
-              if (!fieldDisabled) {
-                inputEl.value = '';
-              }
+              // 전체 값을 한번에 변경하는 스페셜 콜백 호출
+              onChange(syntheticEvent, -1); // -1은 전체 필드 초기화를 의미
             }
-          });
+          }
 
           // 포커스 설정 - 첫 번째 사용 가능한 필드에 포커스
           const firstEnabledInputIndex = inputRefs.current.findIndex(
@@ -195,20 +200,6 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             inputRefs.current[firstEnabledInputIndex]
           ) {
             inputRefs.current[firstEnabledInputIndex].focus();
-          }
-
-          // onChange 콜백 호출
-          if (onChange && values) {
-            const syntheticEvent = {
-              target: { value: '' },
-              currentTarget: { value: '' },
-            } as React.ChangeEvent<HTMLInputElement>;
-
-            // 첫 번째 사용 가능한 필드의 인덱스로 콜백 호출
-            onChange(
-              syntheticEvent,
-              firstEnabledInputIndex !== -1 ? firstEnabledInputIndex : 0
-            );
           }
         } else {
           // 단일 input 초기화
@@ -291,7 +282,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       }
 
       if (isMultipleInputs && index !== undefined) {
-        // 다중 input 태그 처리
+        // 다중 input 태그 처리, 값을 복사하여 변경
         const newValues = [...inputValues];
         newValues[index] = newValue;
         setInputValues(newValues);

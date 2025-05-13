@@ -26,11 +26,31 @@ const InputGuide = () => {
     e: React.ChangeEvent<HTMLInputElement>,
     index?: number
   ) => {
+    console.log(`handleInputChange called with index:`, index, `value:`, e.target.value);
+    
+    // 특수 값 -1은 전체 필드 초기화를 의미
+    if (index === -1) {
+      console.log('Special reset all fields case detected');
+      // 마지막 필드는 disabled이미로 그대로 유지
+      setMultiValues(['', '', multiValues[2]]);
+      return;
+    }
+    
     if (index !== undefined) {
+      // 기존 값을 긴 배열로 복사
       const newValues = [...multiValues];
+      // 해당 인덱스의 값만 변경
       newValues[index] = e.target.value;
+      console.log(`Updated values array:`, newValues);
+      // 업데이트된 배열로 상태 갱신
       setMultiValues(newValues);
     }
+  };
+  
+  // 값 직접 비우기 테스트
+  const handleClearValues = () => {
+    console.log('Directly clearing all values');
+    setMultiValues(['', '', multiValues[2]]); // 세 번째 값은 disabled이미로 유지
   };
 
   return (
@@ -241,7 +261,7 @@ const InputGuide = () => {
           language="jsx"
         />
       </section>
-      // src/pages/guide/input.tsx에 추가할 섹션
+
       <section className={styles.section}>
         <h2 className={styles['section-title']}>
           다중 입력 필드 (Multiple Input Tags)
@@ -264,6 +284,23 @@ const InputGuide = () => {
             beforeEl={<span style={{ fontSize: '14px' }}>📝</span>}
             afterEl={<span style={{ fontSize: '14px' }}>✓</span>}
           />
+          <p>
+            <Button
+              size="sm"
+              onClick={handleClearValues}
+              style={{ marginRight: '8px' }}
+            >
+              값 직접 초기화
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => {
+                console.log('Current multiValues:', multiValues);
+              }}
+            >
+              현재 값 로그
+            </Button>
+          </p>
         </div>
         <div className={styles.txt}>입력된 값: {multiValues.join(', ')}</div>
 
