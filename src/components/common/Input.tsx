@@ -338,7 +338,6 @@ function useInputValue(props: {
       addComma,
       isMultipleInputs,
       inputValues,
-      isControlled,
       onChange,
       inputFields,
       disabled,
