@@ -398,7 +398,7 @@ const handleInputChange = (
             values={['010', '', '']}
             separator={<span style={{ color: '#888' }}>-</span>}
             inputFields={[
-              { maxLength: 3, align: 'center' },
+              { maxLength: 3, align: 'center', disabled: true },
               { maxLength: 4, align: 'center' },
               { maxLength: 4, align: 'center' },
             ]}
@@ -407,15 +407,7 @@ const handleInputChange = (
           <h3 className={styles['sub-title']}>크기가 다른 구분자</h3>
           <Input
             values={['010', '', '']}
-            separator={
-              <div
-                style={{
-                  width: '24px',
-                  height: '2px',
-                  backgroundColor: '#999',
-                }}
-              />
-            }
+            separator={<span style={{ color: 'red' }}>/</span>}
             inputFields={[
               { maxLength: 3, align: 'center' },
               { maxLength: 4, align: 'center' },
@@ -442,7 +434,7 @@ const handleInputChange = (
   values={['010', '', '']}
   separator={<span style={{ color: '#888' }}>-</span>}
   inputFields={[
-    { maxLength: 3, align: 'center' },
+    { maxLength: 3, align: 'center', disabled: true },
     { maxLength: 4, align: 'center' },
     { maxLength: 4, align: 'center' },
   ]}
@@ -451,15 +443,7 @@ const handleInputChange = (
 // 크기가 다른 구분자
 <Input
   values={['010', '', '']}
-  separator={
-    <div
-      style={{
-        width: '24px',
-        height: '2px',
-        backgroundColor: '#999',
-      }}
-    />
-  }
+  separator={<span style={{ color: 'red' }}>/</span>}
   inputFields={[
     { maxLength: 3, align: 'center' },
     { maxLength: 4, align: 'center' },
