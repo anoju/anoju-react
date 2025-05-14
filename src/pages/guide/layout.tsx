@@ -28,16 +28,16 @@ const GuideLayout: React.FC<GuideLayoutProps> = ({ children }) => {
             to: '/guide/radio',
           },
           {
-            label: 'Input',
-            to: '/guide/input',
+            label: 'Tooltip',
+            to: '/guide/tooltip',
           },
           {
             label: 'Textarea',
             to: '/guide/textarea',
           },
           {
-            label: 'Tooltip',
-            to: '/guide/tooltip',
+            label: 'Input',
+            to: '/guide/input',
           },
           {
             label: 'Modal',
