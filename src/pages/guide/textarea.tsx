@@ -36,7 +36,8 @@ const TextareaGuide = () => {
       <section className={styles.section}>
         <h2 className={styles['section-title']}>기본 텍스트영역</h2>
         <p className={styles.txt}>
-          기본적인 Textarea 컴포넌트로, 사용자 입력을 위한 여러 줄의 텍스트 필드를 제공합니다.
+          기본적인 Textarea 컴포넌트로, 사용자 입력을 위한 여러 줄의 텍스트
+          필드를 제공합니다.
         </p>
         <div className={styles.showcase}>
           <Textarea
@@ -62,7 +63,8 @@ const TextareaGuide = () => {
       <section className={styles.section}>
         <h2 className={styles['section-title']}>자동 높이 조절</h2>
         <p className={styles.txt}>
-          autoSize 속성을 사용하면 내용에 따라 텍스트영역의 높이가 자동으로 조절됩니다.
+          autoSize 속성을 사용하면 내용에 따라 텍스트영역의 높이가 자동으로
+          조절됩니다.
         </p>
         <div className={styles.showcase}>
           <Textarea
@@ -107,7 +109,8 @@ const TextareaGuide = () => {
       <section className={styles.section}>
         <h2 className={styles['section-title']}>글자 수 표시</h2>
         <p className={styles.txt}>
-          maxLength와 showCount 속성을 함께 사용하여 글자 수 제한과 현재 글자 수를 표시할 수 있습니다.
+          maxLength와 showCount 속성을 함께 사용하여 글자 수 제한과 현재 글자
+          수를 표시할 수 있습니다.
         </p>
         <div className={styles.showcase}>
           <Textarea
@@ -137,15 +140,13 @@ const TextareaGuide = () => {
       <section className={styles.section}>
         <h2 className={styles['section-title']}>리사이즈 옵션</h2>
         <p className={styles.txt}>
-          resize 속성으로 사용자가 텍스트영역의 크기를 조절할 수 있는 방향을 제어할 수 있습니다.
+          resize 속성으로 사용자가 텍스트영역의 크기를 조절할 수 있는 방향을
+          제어할 수 있습니다.
         </p>
         <div className={styles.showcase}>
           <div style={{ marginBottom: '1rem' }}>
             <strong>resize: none</strong>
-            <Textarea
-              placeholder="크기 조절 불가"
-              resize="none"
-            />
+            <Textarea placeholder="크기 조절 불가" resize="none" />
           </div>
           <div style={{ marginBottom: '1rem' }}>
             <strong>resize: both</strong>
@@ -163,9 +164,7 @@ const TextareaGuide = () => {
           </div>
           <div>
             <strong>resize: vertical (기본값)</strong>
-            <Textarea
-              placeholder="세로 방향만 크기 조절 가능"
-            />
+            <Textarea placeholder="세로 방향만 크기 조절 가능" />
           </div>
         </div>
 
@@ -199,9 +198,7 @@ const TextareaGuide = () => {
 
       <section className={styles.section}>
         <h2 className={styles['section-title']}>상태 변형</h2>
-        <p className={styles.txt}>
-          disabled, readOnly 상태 옵션을 제공합니다.
-        </p>
+        <p className={styles.txt}>disabled, readOnly 상태 옵션을 제공합니다.</p>
         <div className={styles.showcase}>
           <div style={{ marginBottom: '1rem' }}>
             <Textarea
@@ -241,77 +238,69 @@ const TextareaGuide = () => {
       <section className={styles.section}>
         <h2 className={styles['section-title']}>Props</h2>
         <div className={styles.showcase}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <table className={styles.table}>
             <thead>
               <tr>
-                <th style={{ textAlign: 'left', padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  속성
-                </th>
-                <th style={{ textAlign: 'left', padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  타입
-                </th>
-                <th style={{ textAlign: 'left', padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  기본값
-                </th>
-                <th style={{ textAlign: 'left', padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  설명
-                </th>
+                <th>속성</th>
+                <th>타입</th>
+                <th>기본값</th>
+                <th>설명</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>value</td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>string</td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>-</td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>텍스트영역의 값 (제어 컴포넌트로 사용할 때)</td>
+                <td>value</td>
+                <td>string</td>
+                <td>-</td>
+                <td>텍스트영역의 값 (제어 컴포넌트로 사용할 때)</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>defaultValue</td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>string</td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>-</td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>텍스트영역의 초기 값 (비제어 컴포넌트로 사용할 때)</td>
+                <td>defaultValue</td>
+                <td>string</td>
+                <td>-</td>
+                <td>텍스트영역의 초기 값 (비제어 컴포넌트로 사용할 때)</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>disabled</td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>boolean</td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>false</td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>텍스트영역을 비활성화 상태로 만듭니다</td>
+                <td>disabled</td>
+                <td>boolean</td>
+                <td>false</td>
+                <td>텍스트영역을 비활성화 상태로 만듭니다</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>readOnly</td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>boolean</td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>false</td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>텍스트영역을 읽기 전용 상태로 만듭니다</td>
+                <td>readOnly</td>
+                <td>boolean</td>
+                <td>false</td>
+                <td>텍스트영역을 읽기 전용 상태로 만듭니다</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>autoSize</td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>boolean | {"{ minRows?: number, maxRows?: number }"}</td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>false</td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>내용에 따라 텍스트영역의 높이를 자동으로 조절합니다</td>
+                <td>autoSize</td>
+                <td>boolean | {'{ minRows?: number, maxRows?: number }'}</td>
+                <td>false</td>
+                <td>내용에 따라 텍스트영역의 높이를 자동으로 조절합니다</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>maxLength</td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>number</td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>-</td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>입력 가능한 최대 문자 수</td>
+                <td>maxLength</td>
+                <td>number</td>
+                <td>-</td>
+                <td>입력 가능한 최대 문자 수</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>showCount</td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>boolean</td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>false</td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>현재 글자 수와 최대 글자 수 표시 여부</td>
+                <td>showCount</td>
+                <td>boolean</td>
+                <td>false</td>
+                <td>현재 글자 수와 최대 글자 수 표시 여부</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>resize</td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>'none' | 'both' | 'horizontal' | 'vertical'</td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>'vertical'</td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>텍스트영역의 크기 조절 방향</td>
+                <td>resize</td>
+                <td>'none' | 'both' | 'horizontal' | 'vertical'</td>
+                <td>'vertical'</td>
+                <td>텍스트영역의 크기 조절 방향</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>onChange</td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>(e: ChangeEvent) => void</td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>-</td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>텍스트영역의 값이 변경될 때 호출되는 콜백 함수</td>
+                <td>onChange</td>
+                <td>{'(e: ChangeEvent) => void'}</td>
+                <td>-</td>
+                <td>텍스트영역의 값이 변경될 때 호출되는 콜백 함수</td>
               </tr>
             </tbody>
           </table>

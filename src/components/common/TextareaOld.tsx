@@ -42,22 +42,12 @@ export interface TextareaProps
 const LINE_HEIGHT = 1.5; // em 단위
 const DEFAULT_FONT_SIZE = 1.4; // rem 단위
 
-// 강제 리플로우를 위한 헬퍼 함수 (ESLint 에러 방지)
-const forceReflow = (element: HTMLElement | null): void => {
-  if (element) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-    element.offsetHeight;
-  }
-};
-
 // 스크롤 높이를 기준으로 필요한 행 수 계산
 const calculateNodeHeight = (
   node: HTMLTextAreaElement,
   minRows?: number,
   maxRows?: number
 ): number => {
-  if (!node) return 0;
-
   // 현재 스타일 가져오기
   const style = window.getComputedStyle(node);
   const fontSizeStr =
@@ -91,13 +81,8 @@ const calculateNodeHeight = (
       ? Math.max(maxRows * lineHeight + paddingHeight, 0)
       : Infinity;
 
-  // 스크롤 높이 계산 전 초기화
-  node.style.height = 'auto';
-
-  // 트랜지션 일시 중지 - 계산하는 동안에는 트랜지션 없애기
-  node.style.transition = 'none';
-
   // 스크롤 높이 기반으로 필요한 높이 계산
+  node.style.height = 'auto';
   const scrollHeight = node.scrollHeight;
 
   // 값이 비어있거나 한 줄인 경우 라인 하이트 + 패딩 높이로 조정
@@ -119,7 +104,7 @@ const calculateNodeHeight = (
     height = Math.min(maxHeight, height);
   }
 
-  // 설정 복원
+  // 스크롤 위치 복원
   node.scrollTop = savedScrollTop;
 
   return height;
@@ -137,7 +122,7 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
       autoSize = false,
       maxLength,
       showCount = false,
-      resize = 'none',
+      resize = 'vertical',
       onChange,
       onFocus,
       onBlur,
@@ -157,8 +142,6 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
     const textareaRef = useRef<HTMLTextAreaElement | null>(null);
     const isControlled = value !== undefined;
     const compositionRef = useRef(false); // IME 입력 감지용
-    const resizeTimeoutRef = useRef<number | null>(null);
-    const initializedRef = useRef(false); // 초기화 완료 플래그
 
     // autoSize 설정 추출
     const { minRows, maxRows } = typeof autoSize === 'object' ? autoSize : {};
@@ -166,49 +149,16 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
     // autoSize가 활성화되어 있을 때는 resize를 'none'으로 강제 설정
     const effectiveResize = autoSize ? 'none' : resize;
 
-    // 텍스트 값이 변경될 때 높이 조정 - 트랜지션을 고려한 방식으로 변경
+    // 텍스트 값이 변경될 때 높이 조정
     const resizeTextarea = useCallback(() => {
       if (!autoSize || !textareaRef.current) return;
 
-      const textareaNode = textareaRef.current;
-      const height = calculateNodeHeight(textareaNode, minRows, maxRows);
+      const height = calculateNodeHeight(textareaRef.current, minRows, maxRows);
 
-      if (textareaNode && height > 0) {
-        // 초기화 후에는 트랜지션을 복원
-        if (initializedRef.current) {
-          // 일시적으로 트랜지션 제거
-          textareaNode.style.transition = 'none';
-
-          // 높이 설정
-          textareaNode.style.height = `${height}px`;
-
-          // 강제 리플로우 (reflow) - 표현식으로 사용하여 ESLint 에러 방지
-          forceReflow(textareaNode);
-
-          // 트랜지션 복원 (다음 프레임에서)
-          requestAnimationFrame(() => {
-            if (textareaNode) {
-              textareaNode.style.transition = '';
-            }
-          });
-        } else {
-          // 초기화 중에는 트랜지션 없이 높이만 설정
-          textareaNode.style.height = `${height}px`;
-        }
-      }
+      // 계산된 높이로 설정 (트랜지션 효과를 위해 transition 스타일 추가)
+      const textareaElement = textareaRef.current;
+      textareaElement.style.height = `${height}px`;
     }, [autoSize, minRows, maxRows]);
-
-    // 디바운스 처리를 위한 함수
-    const debounceResize = useCallback(() => {
-      if (resizeTimeoutRef.current !== null) {
-        window.clearTimeout(resizeTimeoutRef.current);
-      }
-
-      resizeTimeoutRef.current = window.setTimeout(() => {
-        resizeTextarea();
-        resizeTimeoutRef.current = null;
-      }, 10); // 약간의 지연 추가
-    }, [resizeTextarea]);
 
     // 값 변경 핸들러
     const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
@@ -217,11 +167,6 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
       // 비제어 컴포넌트일 때만 내부 상태 업데이트
       if (!isControlled) {
         setTextValue(newValue);
-      }
-
-      // 높이 재조정 (즉시 실행)
-      if (autoSize && !compositionRef.current) {
-        debounceResize();
       }
 
       // 외부 onChange 콜백 호출
@@ -257,80 +202,27 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
       compositionRef.current = false;
       // IME 입력 완료 후 높이 재조정
       if (autoSize) {
-        debounceResize();
+        setTimeout(resizeTextarea, 0);
       }
     };
-
-    // 초기화 및 업데이트 후 높이 조절
-    const initResize = useCallback(() => {
-      if (autoSize && textareaRef.current) {
-        // 초기화 시에는 트랜지션 없이 설정
-        if (textareaRef.current) {
-          const oldTransition = textareaRef.current.style.transition;
-          textareaRef.current.style.transition = 'none';
-
-          // 높이가 0으로 표시될 수 있는 경우에 대비해 중첩해서 실행
-          setTimeout(() => {
-            resizeTextarea();
-
-            // 강제 리플로우 - 함수로 호출
-            if (textareaRef.current) {
-              forceReflow(textareaRef.current);
-            }
-
-            // 트랜지션 복원
-            if (textareaRef.current) {
-              setTimeout(() => {
-                if (textareaRef.current) {
-                  textareaRef.current.style.transition = oldTransition;
-                  initializedRef.current = true;
-                }
-              }, 50);
-            }
-          }, 0);
-        }
-      }
-    }, [autoSize, resizeTextarea]);
-
-    // 외부 value 변경 시 처리
-    useEffect(() => {
-      if (isControlled && value !== textValue) {
-        setTextValue(String(value || ''));
-
-        // 값이 변경되면 높이도 다시 조정 (즉시 실행)
-        if (autoSize) {
-          debounceResize();
-        }
-      }
-    }, [isControlled, value, textValue, autoSize, debounceResize]);
 
     // 초기 및 값 변경 시 높이 조정
     useEffect(() => {
       if (autoSize) {
-        if (!initializedRef.current) {
-          initResize();
-        } else {
-          debounceResize();
-        }
+        // setTimeout을 사용해 다음 렌더링 사이클에서 높이 조정
+        setTimeout(resizeTextarea, 0);
       }
-
-      // cleanup 함수
-      return () => {
-        if (resizeTimeoutRef.current !== null) {
-          window.clearTimeout(resizeTimeoutRef.current);
-        }
-      };
-    }, [autoSize, textValue, value, initResize, debounceResize]);
+    }, [autoSize, textValue, value, resizeTextarea]);
 
     // 컴포넌트 마운트 시 초기 높이 조정
     useEffect(() => {
       if (autoSize && textareaRef.current) {
         // 초기 높이 조정
-        initResize();
+        resizeTextarea();
 
         // 브라우저 폰트 로딩 후 다시 조정
         const adjustHeightAfterFontLoad = () => {
-          initResize();
+          setTimeout(resizeTextarea, 100);
         };
 
         window.addEventListener('load', adjustHeightAfterFontLoad);
@@ -353,22 +245,14 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
           );
         };
       }
-    }, [autoSize, initResize]);
+    }, [autoSize, resizeTextarea]);
 
-    // 윈도우 리사이즈 이벤트 처리
+    // 외부 value 변경 시 처리
     useEffect(() => {
-      if (autoSize) {
-        const handleResize = () => {
-          debounceResize();
-        };
-
-        window.addEventListener('resize', handleResize);
-
-        return () => {
-          window.removeEventListener('resize', handleResize);
-        };
+      if (isControlled && value !== textValue) {
+        setTextValue(String(value || ''));
       }
-    }, [autoSize, debounceResize]);
+    }, [isControlled, value, textValue]);
 
     // Textarea 표시 값
     const displayValue = isControlled ? value : textValue;
@@ -407,26 +291,6 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
               } else if (ref) {
                 ref.current = node;
               }
-
-              // ref가 설정된 직후 resize 시도
-              if (node && autoSize) {
-                // 초기화 중에는 트랜지션 없이 높이만 설정
-                node.style.transition = 'none';
-
-                setTimeout(() => {
-                  if (textareaRef.current) {
-                    resizeTextarea();
-
-                    // 0.1초 후 트랜지션 활성화
-                    setTimeout(() => {
-                      if (textareaRef.current) {
-                        textareaRef.current.style.transition = '';
-                        initializedRef.current = true;
-                      }
-                    }, 100);
-                  }
-                }, 0);
-              }
             }}
             className={textareaClassName}
             value={displayValue}
@@ -438,12 +302,7 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
             onBlur={handleBlur}
             onCompositionStart={handleCompositionStart}
             onCompositionEnd={handleCompositionEnd}
-            onInput={() => {
-              if (autoSize && !compositionRef.current) {
-                debounceResize();
-              }
-            }}
-            rows={minRows || 1}
+            rows={1}
             {...restProps}
           />
         </div>

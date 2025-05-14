@@ -79,7 +79,7 @@
 .native {
   display: block;
   width: 100%;
-  padding: var(--textarea-padding-x) var(--textarea-padding-y);
+  padding: var(--textarea-padding-y) var(--textarea-padding-x);
   font-size: inherit;
   line-height: inherit;
   color: inherit;
@@ -99,7 +99,8 @@
 
   // 자동 높이 조절 속성을 가진 textarea
   &.auto-size {
-    transition: height 0.2s;
+    transition: height 0.3s cubic-bezier(0.215, 0.61, 0.355, 1);
+    will-change: height;
   }
 }
 
