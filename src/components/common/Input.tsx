@@ -44,7 +44,7 @@ export interface InputProps {
   defaultValue?: string | number;
   placeholder?: string;
   // 기능 관련
-  isReset?: boolean;
+  showReset?: boolean;
   showPassword?: boolean;
   beforeEl?: ReactNode;
   afterEl?: ReactNode;
@@ -83,7 +83,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       type = 'text',
 
       // 기능 관련
-      isReset = true,
+      showReset = true,
       showPassword = false,
       beforeEl,
       afterEl,
@@ -385,7 +385,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       [styles['with-after']]: !!afterEl,
       [styles['with-buttons']]:
         !!(
-          isReset &&
+          showReset &&
           (inputValue || inputValues.some((val) => val)) &&
           !disabled &&
           !readOnly
@@ -496,7 +496,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 
     // 리셋 버튼 렌더링 조건
     const showResetButton =
-      isReset &&
+      showReset &&
       !disabled &&
       !readOnly &&
       ((isMultipleInputs &&
@@ -515,6 +515,9 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     // 비밀번호 토글 버튼 렌더링 조건
     const showPasswordToggle =
       type === 'password' && showPassword && !disabled && !readOnly;
+
+    // 버튼들이 있는지 확인 (inp-buttons 영역 렌더링 조건)
+    const hasButtons = (showReset && !disabled && !readOnly) || showPasswordToggle;
 
     // 버튼 영역 너비 계산을 위한 useLayoutEffect
     useLayoutEffect(() => {
@@ -588,38 +591,34 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           />
         )}
 
-        {/* 입력 필드 뒤에 표시할 요소들 - 항상 렌더링하고 너비 고정 */}
-        <div
-          className={styles['inp-buttons']}
-          ref={buttonsRef}
-          style={{
-            width: buttonsWidth ? `${buttonsWidth}px` : 'auto',
-            visibility:
-              showResetButton || showPasswordToggle ? 'visible' : 'hidden',
-          }}
-        >
-          {/* 리셋 버튼 */}
-          {showResetButton && (
-            <button
-              type="button"
-              className={styles['inp-reset']}
-              onClick={handleReset}
-              aria-label="입력 내용 지우기"
-            />
-          )}
-
-          {/* 비밀번호 표시 토글 버튼 */}
-          {showPasswordToggle && (
-            <button
-              type="button"
-              className={cx(styles['password-toggle'], {
-                [styles.visible]: passwordVisible,
-              })}
-              onClick={togglePasswordVisibility}
-              aria-label={passwordVisible ? '비밀번호 숨기기' : '비밀번호 표시'}
-            />
-          )}
-        </div>
+        {/* 입력 필드 뒤에 표시할 요소들 - 버튼 영역은 조건부 렌더링 */}
+        {hasButtons && (
+          <div className={styles['inp-buttons']} ref={buttonsRef}>
+            {/* 리셋 버튼 - 항상 렌더링하되 필요할 때만 표시 */}
+            {showReset && (
+              <button
+                type="button"
+                className={`${styles['inp-reset']} ${!showResetButton ? styles['inp-hidden'] : ''}`}
+                onClick={handleReset}
+                aria-label="입력 내용 지우기"
+              />
+            )}
+            
+            {/* 비밀번호 표시 토글 버튼 - 조건부 렌더링 */}
+            {showPasswordToggle && (
+              <button
+                type="button"
+                className={cx(styles['password-toggle'], {
+                  [styles.visible]: passwordVisible,
+                })}
+                onClick={togglePasswordVisibility}
+                aria-label={
+                  passwordVisible ? '비밀번호 숨기기' : '비밀번호 표시'
+                }
+              />
+            )}
+          </div>
+        )}
 
         {/* 사용자 정의 추가 요소 */}
         {afterEl && <div className={styles['inp-after']}>{afterEl}</div>}

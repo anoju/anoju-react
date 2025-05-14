@@ -250,19 +250,19 @@ const InputGuide = () => {
         />
       </section>
       <section className={styles.section}>
-        <h2 className={styles['section-title']}>isReset 옵션</h2>
+        <h2 className={styles['section-title']}>showReset 옵션</h2>
         <p className={styles.txt}>
-          isReset 속성을 false로 설정하면 입력 내용 지우기 버튼이 표시되지
+          showReset 속성을 false로 설정하면 입력 내용 지우기 버튼이 표시되지
           않습니다.
         </p>
 
         <div className={styles.showcase}>
-          <Input placeholder="지우기 버튼 없음" isReset={false} />
+          <Input placeholder="지우기 버튼 없음" showReset={false} />
         </div>
 
         <h3 className={styles['sub-title']}>참조 소스코드</h3>
         <CodeHighlight
-          code={`<Input placeholder="지우기 버튼 없음" isReset={false} />`}
+          code={`<Input placeholder="지우기 버튼 없음" showReset={false} />`}
           language="jsx"
         />
       </section>
@@ -353,7 +353,7 @@ const handleInputChange = (
               { type: 'password', placeholder: '비밀번호 입력' },
               { type: 'number', placeholder: '숫자 입력' },
             ]}
-            isReset={true}
+            showReset={true}
             showPassword={true}
           />
         </div>
@@ -367,7 +367,7 @@ const handleInputChange = (
     { type: 'password', placeholder: '비밀번호 입력' },
     { type: 'number', placeholder: '숫자 입력' },
   ]}
-  isReset={true}
+  showReset={true}
   showPassword={true}
 />`}
           language="jsx"
@@ -520,7 +520,7 @@ const handleInputChange = (
                 <td>읽기 전용 여부</td>
               </tr>
               <tr>
-                <td>isReset</td>
+                <td>showReset</td>
                 <td>boolean</td>
                 <td>true</td>
                 <td>입력값 초기화 버튼 표시 여부</td>
