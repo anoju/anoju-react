@@ -1,8 +1,8 @@
 // src/pages/guide/textarea.tsx
-import { useState } from 'react';
 import { usePageLayout } from '@/hooks/usePageLayout';
 import { Button, CodeHighlight, Textarea } from '@/components/common';
 import styles from '@/assets/scss/pages/guide.module.scss';
+import { useState } from 'react';
 
 const TextareaGuide = () => {
   usePageLayout({
@@ -16,16 +16,17 @@ const TextareaGuide = () => {
     ),
   });
 
-  // 상태 관리
-  const [basicValue, setBasicValue] = useState<string>('');
-  const [autoSizeValue, setAutoSizeValue] = useState<string>('');
-  const [counterValue, setCounterValue] = useState<string>('');
+  // 텍스트 값 상태
+  const [value, setValue] = useState('');
+  const [autoSizeValue, setAutoSizeValue] = useState('');
+  const [countValue, setCountValue] = useState('');
 
   return (
     <div className="page-inner">
-      <h1 className={styles.title}>Textarea 컴포넌트</h1>
+      <h1 className={styles.title}>Textarea Component</h1>
+
       <section className={styles.section}>
-        <h2 className={styles['section-title']}>Import</h2>
+        <h2 className={styles['section-title']}>import</h2>
         <CodeHighlight
           code={`import { Textarea } from '@/components/common';`}
           language="jsx"
@@ -33,330 +34,284 @@ const TextareaGuide = () => {
       </section>
 
       <section className={styles.section}>
-        <h2 className={styles['section-title']}>기본 텍스트 영역</h2>
+        <h2 className={styles['section-title']}>기본 텍스트영역</h2>
         <p className={styles.txt}>
-          가장 기본적인 텍스트 영역입니다. 사용자가 여러 줄의 텍스트를 입력할 수
-          있습니다.
+          기본적인 Textarea 컴포넌트로, 사용자 입력을 위한 여러 줄의 텍스트 필드를 제공합니다.
         </p>
-
         <div className={styles.showcase}>
           <Textarea
-            placeholder="내용을 입력하세요"
-            value={basicValue}
-            onChange={(e) => setBasicValue(e.target.value)}
-            rows={4}
+            placeholder="기본 텍스트영역"
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
           />
-          <div className={styles.txt}>
-            입력된 값: {basicValue ? basicValue : '(아직 입력 없음)'}
-          </div>
         </div>
 
         <h3 className={styles['sub-title']}>참조 소스코드</h3>
         <CodeHighlight
-          code={`const [basicValue, setBasicValue] = useState<string>('');
+          code={`const [value, setValue] = useState('');
 
 <Textarea
-  placeholder="내용을 입력하세요"
-  value={basicValue}
-  onChange={(e) => setBasicValue(e.target.value)}
-  rows={4}
+  placeholder="기본 텍스트영역"
+  value={value}
+  onChange={(e) => setValue(e.target.value)}
 />`}
           language="jsx"
         />
       </section>
 
       <section className={styles.section}>
-        <h2 className={styles['section-title']}>자동 높이 조절 (autoSize)</h2>
+        <h2 className={styles['section-title']}>자동 높이 조절</h2>
         <p className={styles.txt}>
-          autoSize 속성을 사용하면 텍스트 양에 따라 높이가 자동으로 조절됩니다.
-          Boolean 값이나 minRows와 maxRows를 지정하는 객체를 전달할 수 있습니다.
+          autoSize 속성을 사용하면 내용에 따라 텍스트영역의 높이가 자동으로 조절됩니다.
         </p>
-
         <div className={styles.showcase}>
-          <h3 className={styles['sub-title']}>autoSize={`{true}`}</h3>
           <Textarea
-            placeholder="내용을 입력하세요. 텍스트 양에 따라 높이가 조절됩니다."
+            placeholder="내용을 입력하면 높이가 자동으로 조절됩니다."
             value={autoSizeValue}
             onChange={(e) => setAutoSizeValue(e.target.value)}
             autoSize
           />
-
-          <h3 className={styles['sub-title']}>
-            autoSize={`{{ minRows: 2, maxRows: 6 }}`}
-          </h3>
+          <br />
+          <br />
           <Textarea
-            placeholder="내용을 입력하세요. 최소 2줄, 최대 6줄까지 높이가 조절됩니다."
+            placeholder="최소 3줄, 최대 6줄로 제한된 자동 높이 조절"
             value={autoSizeValue}
             onChange={(e) => setAutoSizeValue(e.target.value)}
-            autoSize={{ minRows: 2, maxRows: 6 }}
+            autoSize={{ minRows: 3, maxRows: 6 }}
           />
         </div>
 
         <h3 className={styles['sub-title']}>참조 소스코드</h3>
         <CodeHighlight
-          code={`const [autoSizeValue, setAutoSizeValue] = useState<string>('');
+          code={`const [autoSizeValue, setAutoSizeValue] = useState('');
 
 // 기본 자동 높이 조절
 <Textarea
-  placeholder="내용을 입력하세요. 텍스트 양에 따라 높이가 조절됩니다."
+  placeholder="내용을 입력하면 높이가 자동으로 조절됩니다."
   value={autoSizeValue}
   onChange={(e) => setAutoSizeValue(e.target.value)}
   autoSize
 />
 
-// 최소/최대 높이 지정
+// 최소/최대 행 제한이 있는 자동 높이 조절
 <Textarea
-  placeholder="내용을 입력하세요. 최소 2줄, 최대 6줄까지 높이가 조절됩니다."
+  placeholder="최소 3줄, 최대 6줄로 제한된 자동 높이 조절"
   value={autoSizeValue}
   onChange={(e) => setAutoSizeValue(e.target.value)}
-  autoSize={{ minRows: 2, maxRows: 6 }}
+  autoSize={{ minRows: 3, maxRows: 6 }}
 />`}
           language="jsx"
         />
       </section>
 
       <section className={styles.section}>
-        <h2 className={styles['section-title']}>글자 수 표시 (showCount)</h2>
+        <h2 className={styles['section-title']}>글자 수 표시</h2>
         <p className={styles.txt}>
-          showCount와 maxLength 속성을 함께 사용하면 텍스트 입력 시 글자 수를
-          표시하고 제한할 수 있습니다.
+          maxLength와 showCount 속성을 함께 사용하여 글자 수 제한과 현재 글자 수를 표시할 수 있습니다.
         </p>
-
         <div className={styles.showcase}>
           <Textarea
             placeholder="최대 100자까지 입력 가능합니다."
-            value={counterValue}
-            onChange={(e) => setCounterValue(e.target.value)}
+            value={countValue}
+            onChange={(e) => setCountValue(e.target.value)}
             maxLength={100}
             showCount
-            rows={4}
           />
         </div>
 
         <h3 className={styles['sub-title']}>참조 소스코드</h3>
         <CodeHighlight
-          code={`const [counterValue, setCounterValue] = useState<string>('');
+          code={`const [countValue, setCountValue] = useState('');
 
 <Textarea
   placeholder="최대 100자까지 입력 가능합니다."
-  value={counterValue}
-  onChange={(e) => setCounterValue(e.target.value)}
+  value={countValue}
+  onChange={(e) => setCountValue(e.target.value)}
   maxLength={100}
   showCount
-  rows={4}
 />`}
           language="jsx"
         />
       </section>
 
       <section className={styles.section}>
-        <h2 className={styles['section-title']}>리사이즈 옵션 (resize)</h2>
+        <h2 className={styles['section-title']}>리사이즈 옵션</h2>
         <p className={styles.txt}>
-          resize 속성을 사용하여 사용자가 텍스트 영역의 크기를 조절할 수 있는
-          방향을 지정할 수 있습니다.
+          resize 속성으로 사용자가 텍스트영역의 크기를 조절할 수 있는 방향을 제어할 수 있습니다.
         </p>
-
         <div className={styles.showcase}>
-          <h3 className={styles['sub-title']}>resize="none"</h3>
-          <Textarea placeholder="크기 조절 불가능" rows={3} resize="none" />
-
-          <h3 className={styles['sub-title']}>resize="horizontal"</h3>
-          <Textarea
-            placeholder="가로 방향으로만 크기 조절 가능"
-            rows={3}
-            resize="horizontal"
-          />
-
-          <h3 className={styles['sub-title']}>resize="vertical" (기본값)</h3>
-          <Textarea
-            placeholder="세로 방향으로만 크기 조절 가능"
-            rows={3}
-            resize="vertical"
-          />
-
-          <h3 className={styles['sub-title']}>resize="both"</h3>
-          <Textarea
-            placeholder="모든 방향으로 크기 조절 가능"
-            rows={3}
-            resize="both"
-          />
+          <div style={{ marginBottom: '1rem' }}>
+            <strong>resize: none</strong>
+            <Textarea
+              placeholder="크기 조절 불가"
+              resize="none"
+            />
+          </div>
+          <div style={{ marginBottom: '1rem' }}>
+            <strong>resize: both</strong>
+            <Textarea
+              placeholder="가로, 세로 모두 크기 조절 가능"
+              resize="both"
+            />
+          </div>
+          <div style={{ marginBottom: '1rem' }}>
+            <strong>resize: horizontal</strong>
+            <Textarea
+              placeholder="가로 방향만 크기 조절 가능"
+              resize="horizontal"
+            />
+          </div>
+          <div>
+            <strong>resize: vertical (기본값)</strong>
+            <Textarea
+              placeholder="세로 방향만 크기 조절 가능"
+            />
+          </div>
         </div>
 
         <h3 className={styles['sub-title']}>참조 소스코드</h3>
         <CodeHighlight
-          code={`<Textarea
-  placeholder="크기 조절 불가능"
-  rows={3}
+          code={`// 크기 조절 불가
+<Textarea
+  placeholder="크기 조절 불가"
   resize="none"
 />
 
+// 가로, 세로 모두 크기 조절 가능
 <Textarea
-  placeholder="가로 방향으로만 크기 조절 가능"
-  rows={3}
+  placeholder="가로, 세로 모두 크기 조절 가능"
+  resize="both"
+/>
+
+// 가로 방향만 크기 조절 가능
+<Textarea
+  placeholder="가로 방향만 크기 조절 가능"
   resize="horizontal"
 />
 
+// 세로 방향만 크기 조절 가능 (기본값)
 <Textarea
-  placeholder="세로 방향으로만 크기 조절 가능"
-  rows={3}
-  resize="vertical"
-/>
-
-<Textarea
-  placeholder="모든 방향으로 크기 조절 가능"
-  rows={3}
-  resize="both"
+  placeholder="세로 방향만 크기 조절 가능"
 />`}
           language="jsx"
         />
       </section>
 
       <section className={styles.section}>
-        <h2 className={styles['section-title']}>비활성화 및 읽기 전용</h2>
+        <h2 className={styles['section-title']}>상태 변형</h2>
         <p className={styles.txt}>
-          disabled와 readOnly 속성을 사용하여 각각 비활성화 및 읽기 전용 상태를
-          설정할 수 있습니다.
+          disabled, readOnly 상태 옵션을 제공합니다.
         </p>
-
         <div className={styles.showcase}>
-          <h3 className={styles['sub-title']}>disabled</h3>
-          <Textarea
-            placeholder="비활성화된 텍스트 영역"
-            value="이 텍스트 영역은 비활성화되어 있어 편집할 수 없습니다."
-            disabled
-            rows={3}
-          />
-
-          <h3 className={styles['sub-title']}>readOnly</h3>
-          <Textarea
-            placeholder="읽기 전용 텍스트 영역"
-            value="이 텍스트 영역은 읽기 전용이라 편집할 수 없지만, 선택 및 복사는 가능합니다."
-            readOnly
-            rows={3}
-          />
+          <div style={{ marginBottom: '1rem' }}>
+            <Textarea
+              placeholder="비활성화된 텍스트영역"
+              disabled
+              value="사용자가 편집할 수 없는 비활성화 상태입니다."
+            />
+          </div>
+          <div>
+            <Textarea
+              placeholder="읽기 전용 텍스트영역"
+              readOnly
+              value="사용자가 읽을 수만 있고 편집할 수 없는 상태입니다."
+            />
+          </div>
         </div>
 
         <h3 className={styles['sub-title']}>참조 소스코드</h3>
         <CodeHighlight
-          code={`<Textarea
-  placeholder="비활성화된 텍스트 영역"
-  value="이 텍스트 영역은 비활성화되어 있어 편집할 수 없습니다."
+          code={`// 비활성화 상태
+<Textarea
+  placeholder="비활성화된 텍스트영역"
   disabled
-  rows={3}
+  value="사용자가 편집할 수 없는 비활성화 상태입니다."
 />
 
+// 읽기 전용 상태
 <Textarea
-  placeholder="읽기 전용 텍스트 영역"
-  value="이 텍스트 영역은 읽기 전용이라 편집할 수 없지만, 선택 및 복사는 가능합니다."
+  placeholder="읽기 전용 텍스트영역"
   readOnly
-  rows={3}
+  value="사용자가 읽을 수만 있고 편집할 수 없는 상태입니다."
 />`}
           language="jsx"
         />
       </section>
 
       <section className={styles.section}>
-        <h2 className={styles['section-title']}>Props 목록</h2>
+        <h2 className={styles['section-title']}>Props</h2>
         <div className={styles.showcase}>
-          <table className={styles.table}>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr>
-                <th>속성</th>
-                <th>타입</th>
-                <th>기본값</th>
-                <th>설명</th>
+                <th style={{ textAlign: 'left', padding: '8px', borderBottom: '1px solid #ddd' }}>
+                  속성
+                </th>
+                <th style={{ textAlign: 'left', padding: '8px', borderBottom: '1px solid #ddd' }}>
+                  타입
+                </th>
+                <th style={{ textAlign: 'left', padding: '8px', borderBottom: '1px solid #ddd' }}>
+                  기본값
+                </th>
+                <th style={{ textAlign: 'left', padding: '8px', borderBottom: '1px solid #ddd' }}>
+                  설명
+                </th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td>value</td>
-                <td>string</td>
-                <td>-</td>
-                <td>텍스트 영역의 값</td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>value</td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>string</td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>-</td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>텍스트영역의 값 (제어 컴포넌트로 사용할 때)</td>
               </tr>
               <tr>
-                <td>defaultValue</td>
-                <td>string</td>
-                <td>-</td>
-                <td>초기 값</td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>defaultValue</td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>string</td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>-</td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>텍스트영역의 초기 값 (비제어 컴포넌트로 사용할 때)</td>
               </tr>
               <tr>
-                <td>placeholder</td>
-                <td>string</td>
-                <td>-</td>
-                <td>텍스트 영역의 플레이스홀더</td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>disabled</td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>boolean</td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>false</td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>텍스트영역을 비활성화 상태로 만듭니다</td>
               </tr>
               <tr>
-                <td>disabled</td>
-                <td>boolean</td>
-                <td>false</td>
-                <td>비활성화 여부</td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>readOnly</td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>boolean</td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>false</td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>텍스트영역을 읽기 전용 상태로 만듭니다</td>
               </tr>
               <tr>
-                <td>readOnly</td>
-                <td>boolean</td>
-                <td>false</td>
-                <td>읽기 전용 여부</td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>autoSize</td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>boolean | {"{ minRows?: number, maxRows?: number }"}</td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>false</td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>내용에 따라 텍스트영역의 높이를 자동으로 조절합니다</td>
               </tr>
               <tr>
-                <td>autoSize</td>
-                <td>boolean | {'{ minRows?: number; maxRows?: number }'}</td>
-                <td>false</td>
-                <td>텍스트 양에 따라 높이 자동 조절</td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>maxLength</td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>number</td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>-</td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>입력 가능한 최대 문자 수</td>
               </tr>
               <tr>
-                <td>maxLength</td>
-                <td>number</td>
-                <td>-</td>
-                <td>최대 글자 수 제한</td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>showCount</td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>boolean</td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>false</td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>현재 글자 수와 최대 글자 수 표시 여부</td>
               </tr>
               <tr>
-                <td>showCount</td>
-                <td>boolean</td>
-                <td>false</td>
-                <td>글자 수 표시 여부</td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>resize</td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>'none' | 'both' | 'horizontal' | 'vertical'</td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>'vertical'</td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>텍스트영역의 크기 조절 방향</td>
               </tr>
               <tr>
-                <td>resize</td>
-                <td>'none' | 'both' | 'horizontal' | 'vertical'</td>
-                <td>'vertical'</td>
-                <td>크기 조절 방향</td>
-              </tr>
-              <tr>
-                <td>rows</td>
-                <td>number</td>
-                <td>-</td>
-                <td>텍스트 영역의 행 수</td>
-              </tr>
-              <tr>
-                <td>className</td>
-                <td>string</td>
-                <td>''</td>
-                <td>컴포넌트에 적용할 추가 클래스명</td>
-              </tr>
-              <tr>
-                <td>style</td>
-                <td>CSSProperties</td>
-                <td>-</td>
-                <td>인라인 스타일</td>
-              </tr>
-              <tr>
-                <td>onChange</td>
-                <td>function</td>
-                <td>-</td>
-                <td>값 변경 시 호출되는 함수</td>
-              </tr>
-              <tr>
-                <td>onFocus</td>
-                <td>function</td>
-                <td>-</td>
-                <td>포커스 시 호출되는 함수</td>
-              </tr>
-              <tr>
-                <td>onBlur</td>
-                <td>function</td>
-                <td>-</td>
-                <td>포커스를 잃을 때 호출되는 함수</td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>onChange</td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>(e: ChangeEvent) => void</td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>-</td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>텍스트영역의 값이 변경될 때 호출되는 콜백 함수</td>
               </tr>
             </tbody>
           </table>
