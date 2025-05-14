@@ -61,7 +61,7 @@
   }
 
   &.with-after {
-    .inp,
+    .native,
     .inp-buttons {
       padding-right: calc(var(--input-padding-y) / 2);
     }
@@ -151,18 +151,22 @@
   border: none;
   background-color: transparent;
   cursor: pointer;
-  opacity: 0.5;
+  opacity: 0.8;
   padding: 0;
   transition: opacity 0.2s;
 
-  &:hover {
-    opacity: 0.8;
-  }
-
-  // X 아이콘 SVG 배경
   @include s.bg-etc(1.6rem auto);
 
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M8 15C11.866 15 15 11.866 15 8C15 4.13401 11.866 1 8 1C4.13401 1 1 4.13401 1 8C1 11.866 4.13401 15 8 15Z' fill='%23666' fill-opacity='0.2'/%3E%3Cpath d='M10.7071 5.29289C11.0976 5.68342 11.0976 6.31658 10.7071 6.70711L9.41421 8L10.7071 9.29289C11.0976 9.68342 11.0976 10.3166 10.7071 10.7071C10.3166 11.0976 9.68342 11.0976 9.29289 10.7071L8 9.41421L6.70711 10.7071C6.31658 11.0976 5.68342 11.0976 5.29289 10.7071C4.90237 10.3166 4.90237 9.68342 5.29289 9.29289L6.58579 8L5.29289 6.70711C4.90237 6.31658 4.90237 5.68342 5.29289 5.29289C5.68342 4.90237 6.31658 4.90237 6.70711 5.29289L8 6.58579L9.29289 5.29289C9.68342 4.90237 10.3166 4.90237 10.7071 5.29289Z' fill='%23666'/%3E%3C/svg%3E");
+
+  &:hover {
+    opacity: 1;
+  }
+
+  &.inp-hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
 }
 
 // 비밀번호 토글 버튼 스타일
