@@ -16,6 +16,7 @@
   --textarea-padding-x: 0.8rem;
   --textarea-padding-y: 1.2rem;
   --textarea-transition: all 0.2s;
+  --textarea-line-height: 1.5;
 }
 
 // Textarea 컨테이너
@@ -27,7 +28,7 @@
   padding: 0;
   color: var(--textarea-text-color);
   font-size: 1.4rem;
-  line-height: 1.5;
+  line-height: var(--textarea-line-height);
   background-color: var(--textarea-bg-color);
   border: 1px solid var(--textarea-border-color);
   border-radius: var(--textarea-radius);
@@ -99,8 +100,20 @@
 
   // 자동 높이 조절 속성을 가진 textarea
   &.auto-size {
-    transition: height 0.3s cubic-bezier(0.215, 0.61, 0.355, 1);
+    transition: height 0.2s ease;
     will-change: height;
+  }
+
+  &.hidden-textarea {
+    visibility: hidden;
+    position: absolute;
+    overflow: hidden;
+    height: auto;
+    top: 0;
+    left: 0;
+    transform: translateZ(0);
+    z-index: -1;
+    pointer-events: none;
   }
 }
 

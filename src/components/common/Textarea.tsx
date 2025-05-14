@@ -38,93 +38,6 @@ export interface TextareaProps
   onChange?: (e: ChangeEvent<HTMLTextAreaElement>) => void;
 }
 
-// 한 줄 높이 계산을 위한 상수
-const LINE_HEIGHT = 1.5; // em 단위
-const DEFAULT_FONT_SIZE = 1.4; // rem 단위
-
-// 강제 리플로우를 위한 헬퍼 함수 (ESLint 에러 방지)
-const forceReflow = (element: HTMLElement | null): void => {
-  if (element) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-    element.offsetHeight;
-  }
-};
-
-// 스크롤 높이를 기준으로 필요한 행 수 계산
-const calculateNodeHeight = (
-  node: HTMLTextAreaElement,
-  minRows?: number,
-  maxRows?: number
-): number => {
-  if (!node) return 0;
-
-  // 현재 스타일 가져오기
-  const style = window.getComputedStyle(node);
-  const fontSizeStr =
-    style.getPropertyValue('font-size') || `${DEFAULT_FONT_SIZE}rem`;
-  const lineHeightStr =
-    style.getPropertyValue('line-height') || `${LINE_HEIGHT}`;
-  const paddingTopStr = style.getPropertyValue('padding-top') || '0';
-  const paddingBottomStr = style.getPropertyValue('padding-bottom') || '0';
-
-  // px 단위로 변환
-  const fontSize = parseFloat(fontSizeStr);
-  const lineHeight = lineHeightStr.includes('px')
-    ? parseFloat(lineHeightStr)
-    : fontSize * parseFloat(lineHeightStr);
-  const paddingTop = parseFloat(paddingTopStr);
-  const paddingBottom = parseFloat(paddingBottomStr);
-
-  // 총 패딩 높이
-  const paddingHeight = paddingTop + paddingBottom;
-
-  // 원래 스크롤 높이 저장
-  const savedScrollTop = node.scrollTop;
-
-  // 최소/최대 높이 계산
-  const minHeight =
-    minRows !== undefined
-      ? Math.max(minRows * lineHeight + paddingHeight, 0)
-      : 0;
-  const maxHeight =
-    maxRows !== undefined
-      ? Math.max(maxRows * lineHeight + paddingHeight, 0)
-      : Infinity;
-
-  // 스크롤 높이 계산 전 초기화
-  node.style.height = 'auto';
-
-  // 트랜지션 일시 중지 - 계산하는 동안에는 트랜지션 없애기
-  node.style.transition = 'none';
-
-  // 스크롤 높이 기반으로 필요한 높이 계산
-  const scrollHeight = node.scrollHeight;
-
-  // 값이 비어있거나 한 줄인 경우 라인 하이트 + 패딩 높이로 조정
-  const isEmpty = !node.value || node.value.trim() === '';
-  const isOnlyOneLine = !node.value.includes('\n');
-
-  let height = scrollHeight;
-
-  // autoSize가 true이고 minRows가 지정되지 않은 경우, 빈 값이나 한 줄 값이면 1줄 높이로 설정
-  if (typeof minRows === 'undefined' && (isEmpty || isOnlyOneLine)) {
-    height = lineHeight + paddingHeight; // 1줄 높이로 설정
-  }
-
-  // 최소/최대 높이 제한 적용
-  if (minHeight) {
-    height = Math.max(minHeight, height);
-  }
-  if (maxHeight !== Infinity) {
-    height = Math.min(maxHeight, height);
-  }
-
-  // 설정 복원
-  node.scrollTop = savedScrollTop;
-
-  return height;
-};
-
 const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
   (
     {
@@ -141,6 +54,7 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
       onChange,
       onFocus,
       onBlur,
+      placeholder,
       ...restProps
     },
     ref
@@ -154,11 +68,11 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
           ? String(defaultValue)
           : ''
     );
+    const [textareaHeight, setTextareaHeight] = useState<number | null>(null);
     const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+    const hiddenTextareaRef = useRef<HTMLTextAreaElement | null>(null);
     const isControlled = value !== undefined;
     const compositionRef = useRef(false); // IME 입력 감지용
-    const resizeTimeoutRef = useRef<number | null>(null);
-    const initializedRef = useRef(false); // 초기화 완료 플래그
 
     // autoSize 설정 추출
     const { minRows, maxRows } = typeof autoSize === 'object' ? autoSize : {};
@@ -166,49 +80,87 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
     // autoSize가 활성화되어 있을 때는 resize를 'none'으로 강제 설정
     const effectiveResize = autoSize ? 'none' : resize;
 
-    // 텍스트 값이 변경될 때 높이 조정 - 트랜지션을 고려한 방식으로 변경
-    const resizeTextarea = useCallback(() => {
-      if (!autoSize || !textareaRef.current) return;
+    // 숨겨진 textarea에서 실제 높이 측정
+    const calculateHeight = useCallback(() => {
+      if (!autoSize || !textareaRef.current || !hiddenTextareaRef.current)
+        return null;
 
-      const textareaNode = textareaRef.current;
-      const height = calculateNodeHeight(textareaNode, minRows, maxRows);
+      const mainTextarea = textareaRef.current;
+      const hiddenTextarea = hiddenTextareaRef.current;
 
-      if (textareaNode && height > 0) {
-        // 초기화 후에는 트랜지션을 복원
-        if (initializedRef.current) {
-          // 일시적으로 트랜지션 제거
-          textareaNode.style.transition = 'none';
+      // 주요 Textarea에서 스타일 복사
+      const mainStyle = window.getComputedStyle(mainTextarea);
 
-          // 높이 설정
-          textareaNode.style.height = `${height}px`;
+      // 숨겨진 textarea에 같은 스타일 적용
+      const copyStyles = (source: CSSStyleDeclaration, target: HTMLElement) => {
+        const properties = [
+          'width',
+          'padding',
+          'paddingTop',
+          'paddingRight',
+          'paddingBottom',
+          'paddingLeft',
+          'border',
+          'borderTop',
+          'borderRight',
+          'borderBottom',
+          'borderLeft',
+          'lineHeight',
+          'fontSize',
+          'fontFamily',
+          'fontWeight',
+          'letterSpacing',
+          'boxSizing',
+        ];
 
-          // 강제 리플로우 (reflow) - 표현식으로 사용하여 ESLint 에러 방지
-          forceReflow(textareaNode);
+        properties.forEach((property) => {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore: 동적 스타일 속성 할당
+          target.style[property] = source.getPropertyValue(property);
+        });
+      };
 
-          // 트랜지션 복원 (다음 프레임에서)
-          requestAnimationFrame(() => {
-            if (textareaNode) {
-              textareaNode.style.transition = '';
-            }
-          });
-        } else {
-          // 초기화 중에는 트랜지션 없이 높이만 설정
-          textareaNode.style.height = `${height}px`;
-        }
+      // 스타일 복사 함수 호출
+      copyStyles(mainStyle, hiddenTextarea);
+
+      // 텍스트 값 복사 (줄바꿈 유지를 위한 placeholder 처리)
+      const currentValue = textValue || placeholder || '';
+      hiddenTextarea.value = currentValue;
+
+      // 측정 전 높이 초기화
+      hiddenTextarea.style.height = 'auto';
+
+      // 스크롤 높이 측정
+      let height = hiddenTextarea.scrollHeight;
+
+      // 최소/최대 행 제한 적용
+      const lineHeight = parseFloat(mainStyle.lineHeight) || 22;
+      const paddingTop = parseFloat(mainStyle.paddingTop) || 0;
+      const paddingBottom = parseFloat(mainStyle.paddingBottom) || 0;
+      const paddingHeight = paddingTop + paddingBottom;
+
+      if (minRows !== undefined) {
+        const minHeight = minRows * lineHeight + paddingHeight;
+        height = Math.max(height, minHeight);
       }
-    }, [autoSize, minRows, maxRows]);
 
-    // 디바운스 처리를 위한 함수
-    const debounceResize = useCallback(() => {
-      if (resizeTimeoutRef.current !== null) {
-        window.clearTimeout(resizeTimeoutRef.current);
+      if (maxRows !== undefined) {
+        const maxHeight = maxRows * lineHeight + paddingHeight;
+        height = Math.min(height, maxHeight);
       }
 
-      resizeTimeoutRef.current = window.setTimeout(() => {
-        resizeTextarea();
-        resizeTimeoutRef.current = null;
-      }, 10); // 약간의 지연 추가
-    }, [resizeTextarea]);
+      return height;
+    }, [autoSize, textValue, placeholder, minRows, maxRows]);
+
+    // 높이 업데이트 함수
+    const updateHeight = useCallback(() => {
+      if (!autoSize) return;
+
+      const height = calculateHeight();
+      if (height !== null) {
+        setTextareaHeight(height);
+      }
+    }, [autoSize, calculateHeight]);
 
     // 값 변경 핸들러
     const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
@@ -219,9 +171,9 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         setTextValue(newValue);
       }
 
-      // 높이 재조정 (즉시 실행)
+      // 높이 재조정
       if (autoSize && !compositionRef.current) {
-        debounceResize();
+        updateHeight();
       }
 
       // 외부 onChange 콜백 호출
@@ -233,19 +185,13 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
     // 포커스 이벤트 핸들러
     const handleFocus = (e: React.FocusEvent<HTMLTextAreaElement>) => {
       setFocused(true);
-
-      if (onFocus) {
-        onFocus(e);
-      }
+      if (onFocus) onFocus(e);
     };
 
     // 블러 이벤트 핸들러
     const handleBlur = (e: React.FocusEvent<HTMLTextAreaElement>) => {
       setFocused(false);
-
-      if (onBlur) {
-        onBlur(e);
-      }
+      if (onBlur) onBlur(e);
     };
 
     // IME 입력 이벤트 처리
@@ -257,118 +203,50 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
       compositionRef.current = false;
       // IME 입력 완료 후 높이 재조정
       if (autoSize) {
-        debounceResize();
+        updateHeight();
       }
     };
 
-    // 초기화 및 업데이트 후 높이 조절
-    const initResize = useCallback(() => {
-      if (autoSize && textareaRef.current) {
-        // 초기화 시에는 트랜지션 없이 설정
-        if (textareaRef.current) {
-          const oldTransition = textareaRef.current.style.transition;
-          textareaRef.current.style.transition = 'none';
-
-          // 높이가 0으로 표시될 수 있는 경우에 대비해 중첩해서 실행
-          setTimeout(() => {
-            resizeTextarea();
-
-            // 강제 리플로우 - 함수로 호출
-            if (textareaRef.current) {
-              forceReflow(textareaRef.current);
-            }
-
-            // 트랜지션 복원
-            if (textareaRef.current) {
-              setTimeout(() => {
-                if (textareaRef.current) {
-                  textareaRef.current.style.transition = oldTransition;
-                  initializedRef.current = true;
-                }
-              }, 50);
-            }
-          }, 0);
-        }
+    // 초기 및 값 변경 시 높이 조정
+    useEffect(() => {
+      if (autoSize) {
+        updateHeight();
       }
-    }, [autoSize, resizeTextarea]);
+    }, [autoSize, textValue, updateHeight]);
 
     // 외부 value 변경 시 처리
     useEffect(() => {
       if (isControlled && value !== textValue) {
         setTextValue(String(value || ''));
-
-        // 값이 변경되면 높이도 다시 조정 (즉시 실행)
-        if (autoSize) {
-          debounceResize();
-        }
       }
-    }, [isControlled, value, textValue, autoSize, debounceResize]);
-
-    // 초기 및 값 변경 시 높이 조정
-    useEffect(() => {
-      if (autoSize) {
-        if (!initializedRef.current) {
-          initResize();
-        } else {
-          debounceResize();
-        }
-      }
-
-      // cleanup 함수
-      return () => {
-        if (resizeTimeoutRef.current !== null) {
-          window.clearTimeout(resizeTimeoutRef.current);
-        }
-      };
-    }, [autoSize, textValue, value, initResize, debounceResize]);
+    }, [isControlled, value, textValue]);
 
     // 컴포넌트 마운트 시 초기 높이 조정
     useEffect(() => {
       if (autoSize && textareaRef.current) {
-        // 초기 높이 조정
-        initResize();
+        updateHeight();
 
-        // 브라우저 폰트 로딩 후 다시 조정
-        const adjustHeightAfterFontLoad = () => {
-          initResize();
-        };
-
-        window.addEventListener('load', adjustHeightAfterFontLoad);
-
-        // DOM이 완전히 로드된 후에도 한번 더 실행
+        // DOM이 완전히 로드된 후 한번 더 실행
         if (document.readyState === 'complete') {
-          adjustHeightAfterFontLoad();
+          updateHeight();
         } else {
-          document.addEventListener(
-            'DOMContentLoaded',
-            adjustHeightAfterFontLoad
-          );
+          const handleDomLoaded = () => updateHeight();
+          document.addEventListener('DOMContentLoaded', handleDomLoaded);
+          return () =>
+            document.removeEventListener('DOMContentLoaded', handleDomLoaded);
         }
-
-        return () => {
-          window.removeEventListener('load', adjustHeightAfterFontLoad);
-          document.removeEventListener(
-            'DOMContentLoaded',
-            adjustHeightAfterFontLoad
-          );
-        };
       }
-    }, [autoSize, initResize]);
+    }, [autoSize, updateHeight]);
 
     // 윈도우 리사이즈 이벤트 처리
     useEffect(() => {
       if (autoSize) {
-        const handleResize = () => {
-          debounceResize();
-        };
+        const handleResize = () => updateHeight();
 
         window.addEventListener('resize', handleResize);
-
-        return () => {
-          window.removeEventListener('resize', handleResize);
-        };
+        return () => window.removeEventListener('resize', handleResize);
       }
-    }, [autoSize, debounceResize]);
+    }, [autoSize, updateHeight]);
 
     // Textarea 표시 값
     const displayValue = isControlled ? value : textValue;
@@ -395,6 +273,27 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
     const isExceeded =
       maxLength !== undefined && String(displayValue).length > maxLength;
 
+    // textareaHeight에 따른 인라인 스타일 계산
+    const textareaStyle: CSSProperties = {};
+    if (textareaHeight !== null && autoSize) {
+      textareaStyle.height = `${textareaHeight}px`;
+
+      // 최대 높이에 도달했을 때 스크롤 가능하도록 설정
+      if (maxRows !== undefined && textareaRef.current) {
+        const mainStyle = window.getComputedStyle(textareaRef.current);
+        const lineHeight = parseFloat(mainStyle.lineHeight) || 22;
+        const paddingHeight =
+          (parseFloat(mainStyle.paddingTop) || 0) +
+          (parseFloat(mainStyle.paddingBottom) || 0);
+        const maxHeight = maxRows * lineHeight + paddingHeight;
+
+        textareaStyle.overflowY =
+          textareaHeight >= maxHeight ? 'auto' : 'hidden';
+      } else {
+        textareaStyle.overflowY = 'hidden';
+      }
+    }
+
     return (
       <div>
         <div className={wrapperClassName} style={style}>
@@ -407,28 +306,9 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
               } else if (ref) {
                 ref.current = node;
               }
-
-              // ref가 설정된 직후 resize 시도
-              if (node && autoSize) {
-                // 초기화 중에는 트랜지션 없이 높이만 설정
-                node.style.transition = 'none';
-
-                setTimeout(() => {
-                  if (textareaRef.current) {
-                    resizeTextarea();
-
-                    // 0.1초 후 트랜지션 활성화
-                    setTimeout(() => {
-                      if (textareaRef.current) {
-                        textareaRef.current.style.transition = '';
-                        initializedRef.current = true;
-                      }
-                    }, 100);
-                  }
-                }, 0);
-              }
             }}
             className={textareaClassName}
+            style={textareaStyle}
             value={displayValue}
             disabled={disabled}
             readOnly={readOnly}
@@ -438,14 +318,22 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
             onBlur={handleBlur}
             onCompositionStart={handleCompositionStart}
             onCompositionEnd={handleCompositionEnd}
-            onInput={() => {
-              if (autoSize && !compositionRef.current) {
-                debounceResize();
-              }
-            }}
-            rows={minRows || 1}
+            placeholder={placeholder}
+            rows={1}
             {...restProps}
           />
+
+          {/* 숨겨진 textarea (높이 계산용) */}
+          {autoSize && (
+            <textarea
+              ref={hiddenTextareaRef}
+              aria-hidden="true"
+              tabIndex={-1}
+              className={cx(styles.native, styles['hidden-textarea'])}
+              rows={1}
+              readOnly
+            />
+          )}
         </div>
 
         {/* 글자 수 표시 */}
