@@ -81,6 +81,12 @@ const InputGuide = () => {
             value={textValue}
             onChange={(e) => setTextValue(e.target.value)}
           />
+          <br />
+          <Input
+            placeholder="기본 입력 필드(setValue 사용)"
+            value={textValue}
+            setValue={setTextValue}
+          />
           <div className={styles.txt}>입력된 값: {textValue}</div>
         </div>
 
@@ -92,6 +98,13 @@ const InputGuide = () => {
   placeholder="기본 입력 필드"
   value={textValue}
   onChange={(e) => setTextValue(e.target.value)}
+/>
+
+// 또는 setValue 속성을 사용할 수도 있습니다
+<Input
+  placeholder="기본 입력 필드"
+  value={textValue}
+  setValue={setTextValue}
 />`}
           language="jsx"
         />

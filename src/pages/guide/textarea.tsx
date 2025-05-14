@@ -45,16 +45,30 @@ const TextareaGuide = () => {
             value={value}
             onChange={(e) => setValue(e.target.value)}
           />
+          <br />
+          <Textarea
+            placeholder="기본 텍스트영역(setValue 사용)"
+            value={value}
+            setValue={setValue}
+          />
         </div>
 
         <h3 className={styles['sub-title']}>참조 소스코드</h3>
         <CodeHighlight
           code={`const [value, setValue] = useState('');
 
+// onChange 사용
 <Textarea
   placeholder="기본 텍스트영역"
   value={value}
   onChange={(e) => setValue(e.target.value)}
+/>
+
+// 또는 setValue 속성 사용 (더 간편한 방식)
+<Textarea
+  placeholder="기본 텍스트영역"
+  value={value}
+  setValue={setValue}
 />`}
           language="jsx"
         />
@@ -301,6 +315,12 @@ const TextareaGuide = () => {
                 <td>{'(e: ChangeEvent) => void'}</td>
                 <td>-</td>
                 <td>텍스트영역의 값이 변경될 때 호출되는 콜백 함수</td>
+              </tr>
+              <tr>
+                <td>setValue</td>
+                <td>{'(value: string) => void'}</td>
+                <td>-</td>
+                <td>값을 직접 설정하는 간편한 함수(onChange 대신 사용 가능)</td>
               </tr>
             </tbody>
           </table>

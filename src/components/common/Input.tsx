@@ -44,6 +44,8 @@ export interface InputProps {
   value?: string | number;
   defaultValue?: string | number;
   placeholder?: string;
+  // 값 제어 함수
+  setValue?: (value: string) => void;
   // 기능 관련
   showReset?: boolean;
   showPassword?: boolean;
@@ -53,6 +55,7 @@ export interface InputProps {
   addComma?: boolean;
   // 다중 input 태그 관련
   values?: (string | number)[];
+  setValues?: (values: (string | number)[]) => void;
   inputFields?: InputFieldProps[];
   separator?: ReactNode; // 입력 필드 사이에 표시할 구분자
   onChange?: (e: ChangeEvent<HTMLInputElement>, index?: number) => void;
@@ -70,10 +73,13 @@ interface InputRefs {
 // 커스텀 훅 반환 타입 정의
 interface UseInputValueReturn extends InputRefs {
   inputValue: string;
-  setInputValue: React.Dispatch<React.SetStateAction<string>>;
+  setInputValue: (value: string) => void;
   inputValues: string[];
-  setInputValues: React.Dispatch<React.SetStateAction<string[]>>;
-  handleChange: (e: React.ChangeEvent<HTMLInputElement>, index?: number) => void;
+  setInputValues: (values: (string | number)[]) => void;
+  handleChange: (
+    e: React.ChangeEvent<HTMLInputElement>,
+    index?: number
+  ) => void;
   isControlled: boolean;
   isMultipleInputs: boolean;
 }
@@ -119,6 +125,8 @@ function useInputValue(props: {
   value?: string | number;
   defaultValue?: string | number;
   values?: (string | number)[];
+  setValue?: (value: string) => void;
+  setValues?: (values: (string | number)[]) => void;
   onChange?: (e: ChangeEvent<HTMLInputElement>, index?: number) => void;
   onlyNumber?: boolean;
   addComma?: boolean;
@@ -126,8 +134,20 @@ function useInputValue(props: {
   readOnly?: boolean;
   inputFields?: InputFieldProps[];
 }): UseInputValueReturn {
-  const { value, defaultValue, values, onChange, onlyNumber, addComma, disabled, readOnly, inputFields = [] } = props;
-  
+  const {
+    value,
+    defaultValue,
+    values,
+    setValue,
+    setValues,
+    onChange,
+    onlyNumber,
+    addComma,
+    disabled,
+    readOnly,
+    inputFields = [],
+  } = props;
+
   // 상태 관리
   const [inputValue, setInputValue] = useState<string>(
     value !== undefined
@@ -136,33 +156,60 @@ function useInputValue(props: {
         ? String(defaultValue)
         : ''
   );
-  
+
   const [inputValues, setInputValues] = useState<string[]>(
     values ? values.map((val) => (val !== undefined ? String(val) : '')) : []
   );
-  
+
   // 참조 객체들
   const inputRef = useRef<HTMLInputElement | null>(null);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
-  
+
   const isControlled = value !== undefined || values !== undefined;
   const isMultipleInputs = values !== undefined;
-  
+
+  // 값 직접 설정 함수
+  const handleSetValue = useCallback(
+    (newValue: string) => {
+      setInputValue(newValue);
+
+      // 외부에서 제공한 setValue 호출
+      if (setValue) {
+        setValue(newValue);
+      }
+    },
+    [setValue]
+  );
+
+  // 다중 값 직접 설정 함수
+  const handleSetValues = useCallback(
+    (newValues: (string | number)[]) => {
+      const stringValues = newValues.map((val) =>
+        val !== undefined ? String(val) : ''
+      );
+      setInputValues(stringValues);
+
+      // 외부에서 제공한 setValues 호출
+      if (setValues) {
+        setValues(newValues);
+      }
+    },
+    [setValues]
+  );
+
   // 외부 value/values prop이 변경되면 내부 상태 업데이트
   useEffect(() => {
-    if (isControlled) {
-      if (value !== undefined) {
-        setInputValue(String(value));
-      }
-      if (values !== undefined) {
-        const newInputValues = values.map((val) =>
-          val !== undefined ? String(val) : ''
-        );
-        setInputValues(newInputValues);
-      }
+    if (value !== undefined) {
+      setInputValue(String(value));
     }
-  }, [value, values, isControlled]);
-  
+    if (values !== undefined) {
+      const newInputValues = values.map((val) =>
+        val !== undefined ? String(val) : ''
+      );
+      setInputValues(newInputValues);
+    }
+  }, [value, values]);
+
   // 입력 처리 핸들러
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>, index?: number) => {
@@ -180,13 +227,18 @@ function useInputValue(props: {
         const newValues = [...inputValues];
         newValues[index] = newValue;
         setInputValues(newValues);
-        
+
+        // 외부에서 제공한 setValues 사용
+        if (setValues) {
+          setValues(newValues);
+        }
+
         // 자동 포커스 이동 처리
         const currentInputRef = inputRefs.current[index];
         if (currentInputRef) {
           const currentField = inputFields[index] || {};
           const maxLength = currentField.maxLength || 0;
-          
+
           // 최대 길이에 도달했을 때 다음 필드로 포커스 이동
           if (maxLength > 0 && newValue.length >= maxLength) {
             // 다음 입력 가능한 필드 찾기
@@ -194,17 +246,23 @@ function useInputValue(props: {
             for (let i = index + 1; i < inputRefs.current.length; i++) {
               const nextInput = inputRefs.current[i];
               if (!nextInput) continue;
-              
+
               const fieldProps = inputFields[i] || {};
-              const fieldDisabled = fieldProps.disabled !== undefined ? fieldProps.disabled : disabled;
-              const fieldReadOnly = fieldProps.readOnly !== undefined ? fieldProps.readOnly : readOnly;
-              
+              const fieldDisabled =
+                fieldProps.disabled !== undefined
+                  ? fieldProps.disabled
+                  : disabled;
+              const fieldReadOnly =
+                fieldProps.readOnly !== undefined
+                  ? fieldProps.readOnly
+                  : readOnly;
+
               if (!fieldDisabled && !fieldReadOnly) {
                 nextIndex = i;
                 break;
               }
             }
-            
+
             // 다음 필드로 포커스 이동
             if (nextIndex !== -1) {
               const nextInput = inputRefs.current[nextIndex];
@@ -213,31 +271,41 @@ function useInputValue(props: {
               }
             }
           }
-          
+
           // 값이 비어있고 백스페이스/Delete 키를 눌렀을 때 이전 필드로 포커스 이동
-          else if (newValue.length === 0 && e.nativeEvent instanceof InputEvent && e.nativeEvent.inputType === 'deleteContentBackward') {
+          else if (
+            newValue.length === 0 &&
+            e.nativeEvent instanceof InputEvent &&
+            e.nativeEvent.inputType === 'deleteContentBackward'
+          ) {
             // 이전 입력 가능한 필드 찾기
             let prevIndex = -1;
             for (let i = index - 1; i >= 0; i--) {
               const prevInput = inputRefs.current[i];
               if (!prevInput) continue;
-              
+
               const fieldProps = inputFields[i] || {};
-              const fieldDisabled = fieldProps.disabled !== undefined ? fieldProps.disabled : disabled;
-              const fieldReadOnly = fieldProps.readOnly !== undefined ? fieldProps.readOnly : readOnly;
-              
+              const fieldDisabled =
+                fieldProps.disabled !== undefined
+                  ? fieldProps.disabled
+                  : disabled;
+              const fieldReadOnly =
+                fieldProps.readOnly !== undefined
+                  ? fieldProps.readOnly
+                  : readOnly;
+
               if (!fieldDisabled && !fieldReadOnly) {
                 prevIndex = i;
                 break;
               }
             }
-            
+
             // 이전 필드로 포커스 이동
             if (prevIndex !== -1) {
               const prevInput = inputRefs.current[prevIndex];
               if (prevInput) {
                 prevInput.focus();
-                
+
                 // 이전 필드의 커서를 맨 끝으로 이동
                 const length = prevInput.value.length;
                 setTimeout(() => {
@@ -249,9 +317,15 @@ function useInputValue(props: {
             }
           }
         }
-      } else if (!isControlled) {
-        // 단일 input 태그 처리 (Uncontrolled인 경우만)
+      } else {
+        // 단일 input 태그 처리
+        // Controlled 컴포넌트 상태 업데이트
         setInputValue(newValue);
+
+        // 외부에서 제공한 setValue 사용
+        if (setValue) {
+          setValue(newValue);
+        }
       }
 
       // 외부 onChange 콜백 호출
@@ -259,19 +333,31 @@ function useInputValue(props: {
         onChange(e, index);
       }
     },
-    [onlyNumber, addComma, isMultipleInputs, inputValues, isControlled, onChange, inputFields, disabled, readOnly]
+    [
+      onlyNumber,
+      addComma,
+      isMultipleInputs,
+      inputValues,
+      isControlled,
+      onChange,
+      inputFields,
+      disabled,
+      readOnly,
+      setValue,
+      setValues,
+    ]
   );
-  
+
   return {
     inputValue,
-    setInputValue,
+    setInputValue: handleSetValue,
     inputValues,
-    setInputValues,
+    setInputValues: handleSetValues,
     handleChange,
     isControlled,
     isMultipleInputs,
     inputRef,
-    inputRefs
+    inputRefs,
   };
 }
 
@@ -284,7 +370,7 @@ function useFocusState(props: {
 }) {
   const { onFocus, onBlur } = props;
   const [isFocused, setIsFocused] = useState<boolean>(false);
-  
+
   const handleFocus = useCallback(
     (e: React.FocusEvent<HTMLInputElement>, index?: number) => {
       setIsFocused(true);
@@ -294,7 +380,7 @@ function useFocusState(props: {
     },
     [onFocus]
   );
-  
+
   const handleBlur = useCallback(
     (e: React.FocusEvent<HTMLInputElement>, index?: number) => {
       setIsFocused(false);
@@ -304,7 +390,7 @@ function useFocusState(props: {
     },
     [onBlur]
   );
-  
+
   return { isFocused, handleFocus, handleBlur };
 }
 
@@ -313,42 +399,34 @@ function useFocusState(props: {
 /**
  * 리셋 버튼 컴포넌트
  */
-const ResetButton = React.memo(({ 
-  show, 
-  onClick 
-}: { 
-  show: boolean, 
-  onClick: () => void 
-}) => (
-  <button
-    type="button"
-    className={`${styles['inp-reset']} ${!show ? styles['inp-hidden'] : ''}`}
-    onClick={onClick}
-    aria-label="입력 내용 지우기"
-  />
-));
+const ResetButton = React.memo(
+  ({ show, onClick }: { show: boolean; onClick: () => void }) => (
+    <button
+      type="button"
+      className={`${styles['inp-reset']} ${!show ? styles['inp-hidden'] : ''}`}
+      onClick={onClick}
+      aria-label="입력 내용 지우기"
+    />
+  )
+);
 
 ResetButton.displayName = 'ResetButton';
 
 /**
  * 비밀번호 토글 버튼 컴포넌트
  */
-const PasswordToggleButton = React.memo(({ 
-  isVisible, 
-  onClick 
-}: { 
-  isVisible: boolean, 
-  onClick: () => void 
-}) => (
-  <button
-    type="button"
-    className={cx(styles['password-toggle'], {
-      [styles.visible]: isVisible,
-    })}
-    onClick={onClick}
-    aria-label={isVisible ? '비밀번호 숨기기' : '비밀번호 표시'}
-  />
-));
+const PasswordToggleButton = React.memo(
+  ({ isVisible, onClick }: { isVisible: boolean; onClick: () => void }) => (
+    <button
+      type="button"
+      className={cx(styles['password-toggle'], {
+        [styles.visible]: isVisible,
+      })}
+      onClick={onClick}
+      aria-label={isVisible ? '비밀번호 숨기기' : '비밀번호 표시'}
+    />
+  )
+);
 
 PasswordToggleButton.displayName = 'PasswordToggleButton';
 
@@ -384,6 +462,10 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       onlyNumber = false,
       addComma = false,
 
+      // 값 제어 함수
+      setValue,
+      setValues,
+
       // 다중 input 태그 관련
       values,
       inputFields = [],
@@ -400,34 +482,39 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     ref
   ) => {
     // 입력값 상태 관리 훅
-    const { 
-      inputValue, 
-      setInputValue, 
-      inputValues, 
-      setInputValues, 
-      handleChange, 
-      isControlled, 
+    const {
+      inputValue,
+      setInputValue,
+      inputValues,
+      setInputValues,
+      handleChange,
+      isControlled,
       isMultipleInputs,
       inputRef,
-      inputRefs
+      inputRefs,
     } = useInputValue({
-      value, 
-      defaultValue, 
-      values, 
-      onChange, 
-      onlyNumber, 
+      value,
+      defaultValue,
+      values,
+      onChange,
+      onlyNumber,
       addComma,
       disabled,
       readOnly,
-      inputFields
+      inputFields,
+      setValue,
+      setValues,
     });
-    
+
     // 포커스 상태 관리 훅
-    const { isFocused, handleFocus, handleBlur } = useFocusState({ onFocus, onBlur });
-    
+    const { isFocused, handleFocus, handleBlur } = useFocusState({
+      onFocus,
+      onBlur,
+    });
+
     // 참조 객체들
     const buttonsRef = useRef<HTMLDivElement>(null);
-    
+
     // 비밀번호 표시 상태
     const [passwordVisible, setPasswordVisible] = useState<boolean>(false);
     const actualType = type === 'password' && passwordVisible ? 'text' : type;
@@ -435,7 +522,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     // 입력값 초기화 함수
     const handleReset = useCallback(() => {
       if (disabled || readOnly) return;
-      
+
       if (isMultipleInputs) {
         // 모든 input 필드 초기화 (disabled 상태 유지)
         const newValues = inputValues.map((_, index) => {
@@ -461,7 +548,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             preventDefault: () => {},
             stopPropagation: () => {},
           } as unknown as React.ChangeEvent<HTMLInputElement>;
-          
+
           onChange(syntheticEvent, -1);
         }
 
@@ -469,8 +556,10 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         const nextEnabledInput = inputRefs.current.find((el, idx) => {
           if (!el) return false;
           const fieldProps = inputFields[idx] || {};
-          const fieldDisabled = fieldProps.disabled !== undefined ? fieldProps.disabled : disabled;
-          const fieldReadOnly = fieldProps.readOnly !== undefined ? fieldProps.readOnly : readOnly;
+          const fieldDisabled =
+            fieldProps.disabled !== undefined ? fieldProps.disabled : disabled;
+          const fieldReadOnly =
+            fieldProps.readOnly !== undefined ? fieldProps.readOnly : readOnly;
           return !fieldDisabled && !fieldReadOnly;
         });
 
@@ -500,7 +589,18 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           onChange(syntheticEvent);
         }
       }
-    }, [disabled, readOnly, isMultipleInputs, inputValues, inputFields, setInputValues, onChange, setInputValue, inputRef, inputRefs]);
+    }, [
+      disabled,
+      readOnly,
+      isMultipleInputs,
+      inputValues,
+      inputFields,
+      setInputValues,
+      onChange,
+      setInputValue,
+      inputRef,
+      inputRefs,
+    ]);
 
     // 비밀번호 표시 토글 함수
     const togglePasswordVisibility = useCallback(() => {
@@ -510,88 +610,127 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     }, [disabled, readOnly]);
 
     // 컴포넌트 영역 클릭 시 input에 포커스를 주는 핸들러
-    const handleWrapperClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-      // 클릭된 요소가 폼 요소가 아닌 경우에만 포커스 처리
-      const tagName = (e.target as HTMLElement).tagName.toLowerCase();
-      const isFormControl = [
-        'input',
-        'button',
-        'select',
-        'textarea',
-        'option',
-      ].includes(tagName);
+    const handleWrapperClick = useCallback(
+      (e: React.MouseEvent<HTMLDivElement>) => {
+        // 클릭된 요소가 폼 요소가 아닌 경우에만 포커스 처리
+        const tagName = (e.target as HTMLElement).tagName.toLowerCase();
+        const isFormControl = [
+          'input',
+          'button',
+          'select',
+          'textarea',
+          'option',
+        ].includes(tagName);
 
-      if (isFormControl || disabled || readOnly) return;
+        if (isFormControl || disabled || readOnly) return;
 
-      if (isMultipleInputs) {
-        // 다중 input의 경우 사용 가능한 첫 번째 필드에 포커스
-        const nextEnabledInput = inputRefs.current.find((el, idx) => {
-          if (!el) return false;
-          const fieldProps = inputFields[idx] || {};
-          const fieldDisabled = fieldProps.disabled !== undefined ? fieldProps.disabled : disabled;
-          const fieldReadOnly = fieldProps.readOnly !== undefined ? fieldProps.readOnly : readOnly;
-          return !fieldDisabled && !fieldReadOnly;
-        });
+        if (isMultipleInputs) {
+          // 다중 input의 경우 사용 가능한 첫 번째 필드에 포커스
+          const nextEnabledInput = inputRefs.current.find((el, idx) => {
+            if (!el) return false;
+            const fieldProps = inputFields[idx] || {};
+            const fieldDisabled =
+              fieldProps.disabled !== undefined
+                ? fieldProps.disabled
+                : disabled;
+            const fieldReadOnly =
+              fieldProps.readOnly !== undefined
+                ? fieldProps.readOnly
+                : readOnly;
+            return !fieldDisabled && !fieldReadOnly;
+          });
 
-        if (nextEnabledInput) {
-          nextEnabledInput.focus();
+          if (nextEnabledInput) {
+            nextEnabledInput.focus();
+          }
+        } else if (inputRef.current) {
+          // 단일 input의 경우 직접 포커스
+          inputRef.current.focus();
         }
-      } else if (inputRef.current) {
-        // 단일 input의 경우 직접 포커스
-        inputRef.current.focus();
-      }
-    }, [isMultipleInputs, inputFields, disabled, readOnly, inputRefs, inputRef]);
+      },
+      [isMultipleInputs, inputFields, disabled, readOnly, inputRefs, inputRef]
+    );
 
     // 개별 입력 필드 생성 함수
-    const createInputField = useCallback((index: number) => {
-      // 필드 속성 설정
-      const fieldProps = inputFields[index] || {};
-      const currentValue = inputValues[index];
-      const fieldType = fieldProps.type !== undefined ? fieldProps.type : type;
-      const fieldAlign = fieldProps.align !== undefined ? fieldProps.align : align;
-      const fieldDisabled = fieldProps.disabled !== undefined ? fieldProps.disabled : disabled;
-      const fieldReadOnly = fieldProps.readOnly !== undefined ? fieldProps.readOnly : readOnly;
-      const fieldPlaceholder = fieldProps.placeholder !== undefined ? fieldProps.placeholder : placeholder;
-      const fieldClassName = fieldProps.className !== undefined ? fieldProps.className : inputClassName;
-      
-      // 비밀번호 필드 처리
-      const fieldActualType = fieldType === 'password' && passwordVisible ? 'text' : fieldType;
-      
-      // 스타일 클래스
-      const inputClasses = cx(
-        styles.native,
-        fieldClassName,
-        fieldAlign ? styles[`align-${fieldAlign}`] : ''
-      );
+    const createInputField = useCallback(
+      (index: number) => {
+        // 필드 속성 설정
+        const fieldProps = inputFields[index] || {};
+        const currentValue = inputValues[index];
+        const fieldType =
+          fieldProps.type !== undefined ? fieldProps.type : type;
+        const fieldAlign =
+          fieldProps.align !== undefined ? fieldProps.align : align;
+        const fieldDisabled =
+          fieldProps.disabled !== undefined ? fieldProps.disabled : disabled;
+        const fieldReadOnly =
+          fieldProps.readOnly !== undefined ? fieldProps.readOnly : readOnly;
+        const fieldPlaceholder =
+          fieldProps.placeholder !== undefined
+            ? fieldProps.placeholder
+            : placeholder;
+        const fieldClassName =
+          fieldProps.className !== undefined
+            ? fieldProps.className
+            : inputClassName;
 
-      return (
-        <input
-          key={`input-field-${index}`}
-          ref={(el) => {
-            inputRefs.current[index] = el;
-            // 첫 번째 필드는 외부 ref와 연결
-            if (index === 0 && el) {
-              if (typeof ref === 'function') {
-                ref(el);
-              } else if (ref) {
-                ref.current = el;
+        // 비밀번호 필드 처리
+        const fieldActualType =
+          fieldType === 'password' && passwordVisible ? 'text' : fieldType;
+
+        // 스타일 클래스
+        const inputClasses = cx(
+          styles.native,
+          fieldClassName,
+          fieldAlign ? styles[`align-${fieldAlign}`] : ''
+        );
+
+        return (
+          <input
+            key={`input-field-${index}`}
+            ref={(el) => {
+              inputRefs.current[index] = el;
+              // 첫 번째 필드는 외부 ref와 연결
+              if (index === 0 && el) {
+                if (typeof ref === 'function') {
+                  ref(el);
+                } else if (ref) {
+                  ref.current = el;
+                }
               }
-            }
-          }}
-          type={fieldActualType}
-          className={inputClasses}
-          value={currentValue}
-          placeholder={fieldPlaceholder}
-          disabled={fieldDisabled}
-          readOnly={fieldReadOnly}
-          onChange={(e) => handleChange(e, index)}
-          onFocus={(e) => handleFocus(e, index)}
-          onBlur={(e) => handleBlur(e, index)}
-          {...restProps}
-          {...(fieldProps.maxLength && { maxLength: fieldProps.maxLength })}
-        />
-      );
-    }, [inputValues, type, align, disabled, readOnly, placeholder, inputClassName, passwordVisible, handleChange, handleFocus, handleBlur, inputFields, ref, restProps, inputRefs]);
+            }}
+            type={fieldActualType}
+            className={inputClasses}
+            value={currentValue}
+            placeholder={fieldPlaceholder}
+            disabled={fieldDisabled}
+            readOnly={fieldReadOnly}
+            onChange={(e) => handleChange(e, index)}
+            onFocus={(e) => handleFocus(e, index)}
+            onBlur={(e) => handleBlur(e, index)}
+            {...restProps}
+            {...(fieldProps.maxLength && { maxLength: fieldProps.maxLength })}
+          />
+        );
+      },
+      [
+        inputValues,
+        type,
+        align,
+        disabled,
+        readOnly,
+        placeholder,
+        inputClassName,
+        passwordVisible,
+        handleChange,
+        handleFocus,
+        handleBlur,
+        inputFields,
+        ref,
+        restProps,
+        inputRefs,
+      ]
+    );
 
     // 다중 input 태그 렌더링
     const renderInputFields = useCallback(() => {
@@ -612,7 +751,10 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           // 마지막 필드가 아니면 구분자 추가
           if (index < values.length - 1) {
             elements.push(
-              <div className={styles['inp-separator']} key={`separator-${index}`}>
+              <div
+                className={styles['inp-separator']}
+                key={`separator-${index}`}
+              >
                 {separator}
               </div>
             );
@@ -635,25 +777,30 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         // 다중 입력 필드에서 값이 있는 필드가 하나라도 있는지 확인
         inputValues.some((value, index) => {
           const fieldProps = inputFields[index] || {};
-          const fieldDisabled = fieldProps.disabled !== undefined ? fieldProps.disabled : disabled;
-          const fieldReadOnly = fieldProps.readOnly !== undefined ? fieldProps.readOnly : readOnly;
+          const fieldDisabled =
+            fieldProps.disabled !== undefined ? fieldProps.disabled : disabled;
+          const fieldReadOnly =
+            fieldProps.readOnly !== undefined ? fieldProps.readOnly : readOnly;
           return value && !fieldDisabled && !fieldReadOnly;
         })) ||
         // 단일 입력 필드에서 값이 있는지 확인
         (!isMultipleInputs && !!inputValue));
 
     // 비밀번호 토글 버튼 표시 조건
-    const showPasswordToggle = type === 'password' && showPassword && !disabled && !readOnly;
+    const showPasswordToggle =
+      type === 'password' && showPassword && !disabled && !readOnly;
 
     // 버튼 영역 표시 조건
-    const hasButtons = (showReset && !disabled && !readOnly) || showPasswordToggle;
+    const hasButtons =
+      (showReset && !disabled && !readOnly) || showPasswordToggle;
 
     // 단일 input 태그의 표시 값 계산
-    const displayValue = isControlled && !isMultipleInputs
-      ? onlyNumber && addComma && value !== undefined && value !== ''
-        ? formatNumberWithComma(String(value), true)
-        : value
-      : inputValue;
+    const displayValue =
+      isControlled && !isMultipleInputs
+        ? onlyNumber && addComma && value !== undefined && value !== ''
+          ? formatNumberWithComma(String(value), true)
+          : value
+        : inputValue;
 
     // 클래스 이름 생성
     const wrapperClasses = cx(styles.input, className, {
@@ -715,17 +862,14 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           <div className={styles['inp-buttons']} ref={buttonsRef}>
             {/* 리셋 버튼 */}
             {showReset && (
-              <ResetButton 
-                show={showResetButton} 
-                onClick={handleReset} 
-              />
+              <ResetButton show={showResetButton} onClick={handleReset} />
             )}
-            
+
             {/* 비밀번호 토글 버튼 */}
             {showPasswordToggle && (
-              <PasswordToggleButton 
-                isVisible={passwordVisible} 
-                onClick={togglePasswordVisibility} 
+              <PasswordToggleButton
+                isVisible={passwordVisible}
+                onClick={togglePasswordVisibility}
               />
             )}
           </div>

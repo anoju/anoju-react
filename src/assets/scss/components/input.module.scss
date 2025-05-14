@@ -24,7 +24,7 @@
 // Input 래퍼
 .input {
   position: relative;
-  display: inline-flex;
+  display: flex;
   width: 100%;
   border-radius: var(--input-radius);
   border: 1px solid var(--input-border-color);

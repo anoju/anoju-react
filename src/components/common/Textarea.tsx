@@ -36,6 +36,8 @@ export interface TextareaProps
   resize?: 'none' | 'both' | 'horizontal' | 'vertical';
   // 이벤트 핸들러
   onChange?: (e: ChangeEvent<HTMLTextAreaElement>) => void;
+  // 간편한 값 제어 함수
+  setValue?: (value: string) => void;
 }
 
 const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
@@ -52,6 +54,7 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
       showCount = false,
       resize = 'none',
       onChange,
+      setValue,
       onFocus,
       onBlur,
       placeholder,
@@ -166,10 +169,8 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
     const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
       const newValue = e.target.value;
 
-      // 비제어 컴포넌트일 때만 내부 상태 업데이트
-      if (!isControlled) {
-        setTextValue(newValue);
-      }
+      // 내부 상태 항상 업데이트 (제어/비제어 모두)
+      setTextValue(newValue);
 
       // 높이 재조정
       if (autoSize && !compositionRef.current) {
@@ -179,6 +180,11 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
       // 외부 onChange 콜백 호출
       if (onChange) {
         onChange(e);
+      }
+
+      // setValue 간편 함수 호출
+      if (setValue) {
+        setValue(newValue);
       }
     };
 
@@ -216,10 +222,10 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
 
     // 외부 value 변경 시 처리
     useEffect(() => {
-      if (isControlled && value !== textValue) {
+      if (value !== undefined && value !== textValue) {
         setTextValue(String(value || ''));
       }
-    }, [isControlled, value, textValue]);
+    }, [value, textValue]);
 
     // 컴포넌트 마운트 시 초기 높이 조정
     useEffect(() => {
