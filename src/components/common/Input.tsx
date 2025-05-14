@@ -460,7 +460,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 
       // 필드 클래스 이름 생성
       const inputClasses = cx(
-        styles.inp,
+        styles.native,
         fieldClassName,
         fieldAlign ? styles[`align-${fieldAlign}`] : ''
       );
@@ -538,7 +538,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     ]);
 
     const inputClasses = cx(
-      styles.inp,
+      styles.native,
       inputClassName,
       align ? styles[`align-${align}`] : ''
     );

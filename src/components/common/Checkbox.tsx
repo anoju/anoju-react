@@ -130,7 +130,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
           value={value !== undefined ? String(value) : ''}
           checked={isChecked || false}
           onChange={handleChange}
-          className={`${styles.inp} ${inputClassName}`}
+          className={`${styles.native} ${inputClassName}`}
           disabled={disabled}
           ref={ref}
           {...props}

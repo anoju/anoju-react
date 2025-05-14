@@ -30,7 +30,7 @@
   }
 }
 
-.inp,
+.native,
 .ico {
   position: absolute;
   left: 0;
@@ -39,7 +39,7 @@
   height: var(--chk-size);
 }
 
-.inp {
+.native {
   opacity: 0;
   margin: 0;
   z-index: 2;
@@ -117,7 +117,7 @@
     }
   }
 
-  .inp {
+  .native {
     &:checked {
       + .ico {
         background: var(--primary-color);
@@ -163,7 +163,7 @@
     }
   }
 
-  .inp {
+  .native {
     &:checked {
       + .ico {
         border-color: var(--primary-color);

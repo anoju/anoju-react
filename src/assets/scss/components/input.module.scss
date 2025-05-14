@@ -50,12 +50,12 @@
   }
 
   // before와 after 요소가 있을 때 input 패딩 조정
-  &.with-before .inp {
+  &.with-before .native {
     padding-left: calc(var(--input-padding-y) / 2);
   }
 
   &.with-buttons {
-    .inp {
+    .native {
       padding-right: calc(var(--input-padding-y) / 2);
     }
   }
@@ -69,7 +69,7 @@
 }
 
 // 실제 입력 필드
-.inp {
+.native {
   position: relative;
   display: inline-block;
   width: 100%;
