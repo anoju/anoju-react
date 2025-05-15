@@ -6,6 +6,7 @@ import React, {
   forwardRef,
   ChangeEvent,
   useState,
+  useImperativeHandle,
 } from 'react';
 import styles from '@/assets/scss/components/checkRadio.module.scss';
 
@@ -35,6 +36,11 @@ const CheckboxContext = createContext<CheckboxContextType | undefined>(
   undefined
 );
 
+// 외부에서 호출 가능한 메서드 인터페이스 정의
+export interface CheckboxHandle {
+  focus: () => void;
+}
+
 // Individual Checkbox component props
 interface CheckboxProps
   extends Omit<
@@ -55,7 +61,7 @@ interface CheckboxProps
 }
 
 // Individual Checkbox component
-export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
+export const Checkbox = forwardRef<CheckboxHandle, CheckboxProps>(
   (
     {
       id,
@@ -122,6 +128,18 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
       }
     };
 
+    // input 요소에 대한 참조 생성
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    // useImperativeHandle을 사용하여 외부에서 호출 가능한 메서드 정의
+    useImperativeHandle(ref, () => ({
+      focus: () => {
+        if (inputRef.current) {
+          inputRef.current.focus();
+        }
+      },
+    }));
+
     return (
       <div className={`${styles.checkbox} ${className}`}>
         <input
@@ -132,7 +150,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
           onChange={handleChange}
           className={`${styles.native} ${inputClassName}`}
           disabled={disabled}
-          ref={ref}
+          ref={inputRef}
           {...props}
         />
         <i className={`${styles.ico} ${iconClassName}`} aria-hidden="true"></i>
@@ -155,6 +173,7 @@ Checkbox.displayName = 'Checkbox';
 interface CheckboxOption<T extends string | number = string | number> {
   value: T;
   label: React.ReactNode;
+  disabled?: boolean;
 }
 
 // 체크박스 옵션 가드 함수
@@ -167,6 +186,11 @@ function isCheckboxOption<T extends string | number>(
     'value' in option &&
     'label' in option
   );
+}
+
+// Checkbox Group 핸들 인터페이스
+export interface CheckboxGroupHandle {
+  focus: (index?: number) => void;
 }
 
 // Checkbox Group component props
@@ -183,20 +207,58 @@ interface CheckboxGroupProps<
   labelClassName?: string;
 }
 
-// Checkbox Group component with generic type support
-export function CheckboxGroup<
+// Checkbox Group component
+const CheckboxGroupWithRef = <
   T extends string | number | boolean = string | number,
->({
-  children,
-  options,
-  values = [],
-  onChange,
-  className = '',
-  inputClassName = '',
-  iconClassName = '',
-  labelClassName = '',
-  ...props
-}: CheckboxGroupProps<T>) {
+>(
+  props: CheckboxGroupProps<T> & {
+    ref?: React.ForwardedRef<CheckboxGroupHandle>;
+  }
+) => {
+  const {
+    children,
+    options,
+    values = [],
+    onChange,
+    className = '',
+    inputClassName = '',
+    iconClassName = '',
+    labelClassName = '',
+    ref,
+    ...rest
+  } = props;
+
+  // refs 배열 참조 생성
+  const refs = useRef<(CheckboxHandle | null)[]>([]);
+
+  // ref 노출을 위한 useImperativeHandle 설정
+  useImperativeHandle(ref, () => ({
+    focus: (index?: number) => {
+      // 인덱스가 제공된 경우 해당 체크박스에 포커스
+      if (typeof index === 'number' && refs.current[index]) {
+        refs.current[index]?.focus();
+        return;
+      }
+
+      // 인덱스가 제공되지 않은 경우 첫 번째 사용 가능한 체크박스에 포커스
+      const firstAvailableCheckbox = refs.current.find((_, idx) => {
+        if (options) {
+          const optionObj = options[idx];
+          if (isCheckboxOption<string | number>(optionObj)) {
+            // 옵션이 객체인 경우 disabled 속성 확인
+            return !optionObj.disabled;
+          }
+          return true; // 옵션이 객체가 아닌 경우 기본적으로 활성화 상태
+        }
+        return true; // 옵션이 없는 경우 기본적으로 활성화 상태
+      });
+
+      if (firstAvailableCheckbox) {
+        firstAvailableCheckbox.focus();
+      }
+    },
+  }));
+
   // value가 없는 경우(boolean 모드) 감지
   const childrenArray = React.Children.toArray(children);
 
@@ -218,6 +280,7 @@ export function CheckboxGroup<
     if (booleanMode && typeof index === 'number') {
       // Boolean 모드 처리 (인덱스 기반)
       const newValues = [...values];
+      // 타입 안전성을 위해 검증
       newValues[index] = isChecked as T;
       onChange(newValues);
     } else {
@@ -240,18 +303,20 @@ export function CheckboxGroup<
 
   return (
     <CheckboxContext.Provider value={contextValue}>
-      <div className={`check-wrap ${className}`} {...props}>
+      <div className={`check-wrap ${className}`} {...rest}>
         {options
           ? // Render checkboxes from options array
             options.map((option, idx) => {
               // 타입 안전한 처리
               let optionValue: string | number | undefined;
               let optionLabel: React.ReactNode;
+              let optionDisabled = false;
 
               if (isCheckboxOption<string | number>(option)) {
                 // CheckboxOption 객체인 경우
                 optionValue = option.value;
                 optionLabel = option.label;
+                optionDisabled = !!option.disabled;
               } else {
                 // 원시 값인 경우
                 optionValue =
@@ -265,10 +330,15 @@ export function CheckboxGroup<
                 <Checkbox
                   key={`${String(optionValue || idx)}-${idx}`}
                   value={optionValue}
+                  disabled={optionDisabled}
                   inputClassName={inputClassName}
                   iconClassName={iconClassName}
                   labelClassName={labelClassName}
                   index={idx}
+                  ref={(el) => {
+                    // refs 배열에 참조 저장
+                    refs.current[idx] = el;
+                  }}
                 >
                   {optionLabel}
                 </Checkbox>
@@ -277,11 +347,13 @@ export function CheckboxGroup<
           : // Render children normally, and add index prop for boolean mode
             React.Children.map(children, (child, idx) => {
               if (React.isValidElement<CheckboxProps>(child)) {
+                // 자식 컴포넌트 복제 (ref를 직접 전달하지 않음)
                 return React.cloneElement(child, {
                   index: idx,
                   inputClassName: child.props.inputClassName || inputClassName,
                   iconClassName: child.props.iconClassName || iconClassName,
                   labelClassName: child.props.labelClassName || labelClassName,
+                  key: child.key || `checkbox-child-${idx}`,
                 });
               }
               return child;
@@ -289,7 +361,19 @@ export function CheckboxGroup<
       </div>
     </CheckboxContext.Provider>
   );
-}
+};
+
+// forwardRef로 감싸기
+export const CheckboxGroup = forwardRef(CheckboxGroupWithRef) as <
+  T extends string | number | boolean = string | number,
+>(
+  props: CheckboxGroupProps<T> & {
+    ref?: React.ForwardedRef<CheckboxGroupHandle>;
+  }
+) => React.ReactElement;
+
+// 컴포넌트 이름 설정
+(CheckboxGroup as any).displayName = 'CheckboxGroup';
 
 // Static property for Checkbox.Group
 export const CheckboxWithGroups = Object.assign(Checkbox, {
