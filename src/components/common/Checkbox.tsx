@@ -39,6 +39,12 @@ const CheckboxContext = createContext<CheckboxContextType | undefined>(
 // 외부에서 호출 가능한 메서드 인터페이스 정의
 export interface CheckboxHandle {
   focus: () => void;
+  blur: () => void;
+  isChecked: () => boolean;
+  setValue: (checked: boolean) => void;
+  toggle: () => void;
+  getRootElement: () => HTMLElement | null;
+  getInputElement: () => HTMLInputElement | null;
 }
 
 // Individual Checkbox component props
@@ -131,24 +137,87 @@ export const Checkbox = forwardRef<CheckboxHandle, CheckboxProps>(
     // input 요소에 대한 참조 생성
     const inputRef = useRef<HTMLInputElement>(null);
 
+    // 컨테이너 요소에 대한 참조 생성
+    const rootRef = useRef<HTMLDivElement>(null);
+
     // useImperativeHandle을 사용하여 외부에서 호출 가능한 메서드 정의
-    useImperativeHandle(ref, () => ({
-      focus: () => {
-        if (inputRef.current) {
-          inputRef.current.focus();
+    useImperativeHandle(ref, () => {
+      // 값 설정 함수 - 중복 코드 방지를 위해 변수로 선언
+      const setValue = (checked: boolean) => {
+        // 외부에서 제공된 onChange 함수가 있는 경우 호출
+        if (onChange) {
+          // 포커스 유지를 위해 현재 액티브 요소 저장
+          const activeElement = document.activeElement;
+
+          // 가짜 이벤트 생성
+          const fakeEvent = {
+            target: { checked },
+            currentTarget: { checked },
+            preventDefault: () => {},
+            stopPropagation: () => {},
+          } as unknown as ChangeEvent<HTMLInputElement>;
+
+          onChange(fakeEvent);
+
+          // context가 있는 경우 context에도 변경 알림
+          if (context) {
+            context.onChange(value, checked, index);
+          }
+
+          // 포커스 유지를 위해 현재 액티브 요소가 이 입력요소였다면 다시 포커스 설정
+          if (activeElement === inputRef.current) {
+            setTimeout(() => inputRef.current?.focus(), 0);
+          }
+        } else if (context) {
+          // context만 있는 경우
+          context.onChange(value, checked, index);
+        } else {
+          // 둘 다 없을 경우, 내부 상태 업데이트
+          setInternalChecked(checked);
+
+          // DOM 요소의 checked 값도 직접 변경
+          if (inputRef.current) {
+            inputRef.current.checked = checked;
+          }
         }
-      },
-    }));
+      };
+
+      return {
+        focus: () => {
+          if (inputRef.current) {
+            inputRef.current.focus();
+          }
+        },
+        blur: () => {
+          if (inputRef.current) {
+            inputRef.current.blur();
+          }
+        },
+        isChecked: () => {
+          return isChecked;
+        },
+        setValue,
+        toggle: () => {
+          // 비활성화된 경우 동작하지 않음
+          if (disabled) return;
+
+          // 현재 상태의 반대 값으로 설정
+          setValue(!isChecked);
+        },
+        getRootElement: () => rootRef.current,
+        getInputElement: () => inputRef.current,
+      };
+    }, [onChange, context, value, index, disabled, isChecked]);
 
     return (
-      <div className={`${styles.checkbox} ${className}`}>
+      <div ref={rootRef} className={`${styles.checkbox} ${className}`}>
         <input
           type="checkbox"
           id={checkboxId}
           value={value !== undefined ? String(value) : ''}
           checked={isChecked || false}
           onChange={handleChange}
-          className={`${styles.native} ${inputClassName}`}
+          className={`${styles.inp} ${styles.native} ${inputClassName}`}
           disabled={disabled}
           ref={inputRef}
           {...props}
@@ -191,6 +260,9 @@ function isCheckboxOption<T extends string | number>(
 // Checkbox Group 핸들 인터페이스
 export interface CheckboxGroupHandle {
   focus: (index?: number) => void;
+  blur: (index?: number) => void;
+  getValues: () => CheckboxValue[];
+  setValues: (values: CheckboxValue[]) => void;
 }
 
 // Checkbox Group component props
@@ -231,7 +303,7 @@ const CheckboxGroupWithRef = <
   // refs 배열 참조 생성
   const refs = useRef<(CheckboxHandle | null)[]>([]);
 
-  // ref 노출을 위한 useImperativeHandle 설정
+  // useImperativeHandle을 사용하여 외부에서 호출 가능한 메서드 정의
   useImperativeHandle(ref, () => ({
     focus: (index?: number) => {
       // 인덱스가 제공된 경우 해당 체크박스에 포커스
@@ -255,6 +327,34 @@ const CheckboxGroupWithRef = <
 
       if (firstAvailableCheckbox) {
         firstAvailableCheckbox.focus();
+      }
+    },
+    blur: (index?: number) => {
+      // 인덱스가 제공된 경우 해당 체크박스에서 포커스 해제
+      if (typeof index === 'number' && refs.current[index]) {
+        refs.current[index]?.blur();
+        return;
+      }
+
+      // 현재 포커스된 체크박스가 이 그룹에 속한 것이면 포커스 해제
+      const activeElement = document.activeElement;
+      const activeIndex = refs.current.findIndex(
+        (checkbox) =>
+          checkbox &&
+          checkbox.getInputElement &&
+          checkbox.getInputElement() === activeElement
+      );
+
+      if (activeIndex !== -1 && refs.current[activeIndex]) {
+        refs.current[activeIndex]?.blur();
+      }
+    },
+    getValues: () => {
+      return values as CheckboxValue[];
+    },
+    setValues: (newValues: CheckboxValue[]) => {
+      if (onChange) {
+        onChange(newValues as unknown as T[]);
       }
     },
   }));
@@ -363,17 +463,23 @@ const CheckboxGroupWithRef = <
   );
 };
 
-// forwardRef로 감싸기
-export const CheckboxGroup = forwardRef(CheckboxGroupWithRef) as <
-  T extends string | number | boolean = string | number,
->(
-  props: CheckboxGroupProps<T> & {
-    ref?: React.ForwardedRef<CheckboxGroupHandle>;
-  }
-) => React.ReactElement;
+// 타입 정의를 위한 인터페이스
+interface ForwardRefCheckboxGroup {
+  <T extends string | number | boolean = string | number>(
+    props: CheckboxGroupProps<T> & {
+      ref?: React.ForwardedRef<CheckboxGroupHandle>;
+    }
+  ): React.ReactElement;
+  displayName?: string;
+}
 
-// 컴포넌트 이름 설정
-(CheckboxGroup as any).displayName = 'CheckboxGroup';
+// forwardRef로 감싸기
+export const CheckboxGroup = forwardRef(
+  CheckboxGroupWithRef
+) as ForwardRefCheckboxGroup;
+
+// 컴포넌트 이름 설정 (ESLint 경고 없이)
+CheckboxGroup.displayName = 'CheckboxGroup';
 
 // Static property for Checkbox.Group
 export const CheckboxWithGroups = Object.assign(Checkbox, {

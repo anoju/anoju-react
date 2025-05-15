@@ -1,7 +1,12 @@
 // src/pages/guide/checkbox.tsx
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { usePageLayout } from '@/hooks/usePageLayout';
-import { Button, CodeHighlight, Checkbox } from '@/components/common';
+import {
+  Button,
+  CodeHighlight,
+  Checkbox,
+  CheckboxHandle,
+} from '@/components/common';
 import styles from '@/assets/scss/pages/guide.module.scss';
 
 const CheckboxGuide = () => {
@@ -210,6 +215,261 @@ const [booleanValues, setBooleanValues] = useState<boolean[]>([false, true, fals
           language="typescript"
         />
       </section>
+
+      <section className={styles.section}>
+        <h2 className={styles['section-title']}>외부에서 메서드 호출하기</h2>
+        <p className={styles.txt}>
+          useRef와 ref 속성을 사용하여 체크박스의 메서드를 직접 호출할 수
+          있습니다.
+        </p>
+        <div className={styles.showcase}>
+          <div className="check-wrap">
+            <MyCheckboxWithRef />
+          </div>
+        </div>
+
+        <h3 className={styles['sub-title']}>참조 소스코드</h3>
+        <CodeHighlight
+          code={`// 메서드 호출 예시 컴포넌트
+import { useRef } from 'react';
+import { Checkbox, CheckboxHandle } from '@/components/common';
+
+const MyCheckboxWithRef = () => {
+  // 체크박스에 대한 참조 생성
+  const checkboxRef = useRef<CheckboxHandle>(null);
+  
+  // 버튼 클릭 핸들러
+  const handleFocus = () => {
+    checkboxRef.current?.focus();
+  };
+  
+  const handleBlur = () => {
+    checkboxRef.current?.blur();
+  };
+  
+  const handleIsChecked = () => {
+    alert('현재 체크 상태: ' + (checkboxRef.current?.isChecked() ? '체크됨' : '체크 안됨'));
+  };
+  
+  const handleSetValue = (value: boolean) => {
+    checkboxRef.current?.setValue(value);
+  };
+  
+  const handleToggle = () => {
+    checkboxRef.current?.toggle();
+  };
+  
+  return (
+    <div>
+      <Checkbox ref={checkboxRef}>메서드를 호출할 체크박스</Checkbox>
+      <div style={{ marginTop: '10px', display: 'flex', gap: '5px' }}>
+        <button onClick={handleFocus}>포커스</button>
+        <button onClick={handleBlur}>블러</button>
+        <button onClick={handleIsChecked}>상태 확인</button>
+        <button onClick={() => handleSetValue(true)}>체크하기</button>
+        <button onClick={() => handleSetValue(false)}>체크 해제</button>
+        <button onClick={handleToggle}>토글</button>
+      </div>
+    </div>
+  );
+};
+`}
+          language="typescript"
+        />
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles['section-title']}>사용 가능한 메서드</h2>
+        <div className={styles.showcase}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>메서드</th>
+                <th>설명</th>
+                <th>사용 예시</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>focus()</td>
+                <td>체크박스에 포커스를 줍니다.</td>
+                <td>
+                  <code>checkboxRef.current?.focus()</code>
+                </td>
+              </tr>
+              <tr>
+                <td>blur()</td>
+                <td>체크박스에서 포커스를 제거합니다.</td>
+                <td>
+                  <code>checkboxRef.current?.blur()</code>
+                </td>
+              </tr>
+              <tr>
+                <td>isChecked()</td>
+                <td>현재 체크 상태를 boolean 값으로 반환합니다.</td>
+                <td>
+                  <code>
+                    const isChecked = checkboxRef.current?.isChecked()
+                  </code>
+                </td>
+              </tr>
+              <tr>
+                <td>setValue(checked: boolean)</td>
+                <td>체크 상태를 설정합니다.</td>
+                <td>
+                  <code>checkboxRef.current?.setValue(true)</code>
+                </td>
+              </tr>
+              <tr>
+                <td>toggle()</td>
+                <td>현재 체크 상태를 반대로 전환합니다.</td>
+                <td>
+                  <code>checkboxRef.current?.toggle()</code>
+                </td>
+              </tr>
+              <tr>
+                <td>getRootElement()</td>
+                <td>체크박스 컴포넌트의 루트 DOM 요소를 반환합니다.</td>
+                <td>
+                  <code>
+                    const rootElement = checkboxRef.current?.getRootElement()
+                  </code>
+                </td>
+              </tr>
+              <tr>
+                <td>getInputElement()</td>
+                <td>체크박스의 input DOM 요소를 반환합니다.</td>
+                <td>
+                  <code>
+                    const inputElement = checkboxRef.current?.getInputElement()
+                  </code>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles['section-title']}>CheckboxGroup 메서드</h2>
+        <p className={styles.txt}>
+          Checkbox.Group 컴포넌트도 메서드를 제공합니다. 그룹 단위로 모든
+          체크박스를 제어할 수 있습니다.
+        </p>
+        <div className={styles.showcase}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>메서드</th>
+                <th>설명</th>
+                <th>사용 예시</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>focus(index?: number)</td>
+                <td>
+                  지정된 인덱스의 체크박스에 포커스를 줍니다. 인덱스를 지정하지
+                  않으면 첫 번째 활성화된 체크박스에 포커스를 줍니다.
+                </td>
+                <td>
+                  <code>groupRef.current?.focus(1)</code>
+                </td>
+              </tr>
+              <tr>
+                <td>blur(index?: number)</td>
+                <td>
+                  지정된 인덱스의 체크박스에서 포커스를 제거합니다. 인덱스를
+                  지정하지 않으면 현재 포커스된 체크박스에서 포커스를
+                  제거합니다.
+                </td>
+                <td>
+                  <code>groupRef.current?.blur()</code>
+                </td>
+              </tr>
+              <tr>
+                <td>getValues()</td>
+                <td>현재 선택된 모든 값의 배열을 반환합니다.</td>
+                <td>
+                  <code>const values = groupRef.current?.getValues()</code>
+                </td>
+              </tr>
+              <tr>
+                <td>setValues(values: CheckboxValue[])</td>
+                <td>체크박스 그룹의 값을 설정합니다.</td>
+                <td>
+                  <code>
+                    groupRef.current?.setValues(['option1', 'option3'])
+                  </code>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  );
+};
+
+// 메서드 호출 예시 컴포넌트
+const MyCheckboxWithRef = () => {
+  // 체크박스에 대한 참조 생성
+  const checkboxRef = useRef<CheckboxHandle>(null);
+
+  // 버튼 클릭 핸들러
+  const handleFocus = () => {
+    checkboxRef.current?.focus();
+  };
+
+  const handleBlur = () => {
+    checkboxRef.current?.blur();
+  };
+
+  const handleIsChecked = () => {
+    alert(
+      '현재 체크 상태: ' +
+        (checkboxRef.current?.isChecked() ? '체크됨' : '체크 안됨')
+    );
+  };
+
+  const handleSetValue = (value: boolean) => {
+    checkboxRef.current?.setValue(value);
+  };
+
+  const handleToggle = () => {
+    checkboxRef.current?.toggle();
+  };
+
+  return (
+    <div>
+      <Checkbox ref={checkboxRef}>메서드를 호출할 체크박스</Checkbox>
+      <div
+        style={{
+          marginTop: '10px',
+          display: 'flex',
+          gap: '5px',
+          flexWrap: 'wrap',
+        }}
+      >
+        <Button size="sm" onClick={handleFocus}>
+          포커스
+        </Button>
+        <Button size="sm" onClick={handleBlur}>
+          블러
+        </Button>
+        <Button size="sm" onClick={handleIsChecked}>
+          상태 확인
+        </Button>
+        <Button size="sm" onClick={() => handleSetValue(true)}>
+          체크하기
+        </Button>
+        <Button size="sm" onClick={() => handleSetValue(false)}>
+          체크 해제
+        </Button>
+        <Button size="sm" onClick={handleToggle}>
+          토글
+        </Button>
+      </div>
     </div>
   );
 };

@@ -32,6 +32,11 @@ const RadioContext = createContext<RadioContextType | undefined>(undefined);
 // 외부에서 호출 가능한 메서드 인터페이스 정의
 export interface RadioHandle {
   focus: () => void;
+  blur: () => void;
+  isChecked: () => boolean;
+  select: () => void;
+  getRootElement: () => HTMLElement | null;
+  getInputElement: () => HTMLInputElement | null;
 }
 
 // Individual Radio component props
@@ -94,6 +99,9 @@ export const Radio = forwardRef<RadioHandle, RadioProps>(
 
     // input 요소에 대한 참조 생성
     const inputRef = useRef<HTMLInputElement>(null);
+    
+    // 컨테이너 요소에 대한 참조 생성
+    const rootRef = useRef<HTMLDivElement>(null);
 
     // useImperativeHandle을 사용하여 외부에서 호출 가능한 메서드 정의
     useImperativeHandle(ref, () => ({
@@ -102,17 +110,53 @@ export const Radio = forwardRef<RadioHandle, RadioProps>(
           inputRef.current.focus();
         }
       },
+      blur: () => {
+        if (inputRef.current) {
+          inputRef.current.blur();
+        }
+      },
+      isChecked: () => {
+        return !!isChecked;
+      },
+      select: () => {
+        if (disabled) return; // 비활성화된 경우 동작하지 않음
+        
+        // 이미 선택된 경우 작업 필요 없음
+        if (isChecked) return;
+        
+        // 그룹 내에서의 처리
+        if (context) {
+          context.onChange(value);
+        } else if (onChange && inputRef.current) {
+          // 외부 onChange 호출
+          const fakeEvent = {
+            target: { checked: true },
+            currentTarget: { checked: true },
+            preventDefault: () => {},
+            stopPropagation: () => {},
+          } as unknown as ChangeEvent<HTMLInputElement>;
+          
+          onChange(fakeEvent);
+        }
+        
+        // DOM 요소를 직접 업데이트
+        if (inputRef.current) {
+          inputRef.current.checked = true;
+        }
+      },
+      getRootElement: () => rootRef.current,
+      getInputElement: () => inputRef.current,
     }));
 
     return (
-      <div className={`${styles.radio} ${className}`}>
+      <div ref={rootRef} className={`${styles.radio} ${className}`}>
         <input
           type="radio"
           id={radioId}
           value={String(value)}
           checked={isChecked || false}
           onChange={handleChange}
-          className={`${styles.native} ${inputClassName}`}
+          className={`${styles.inp} ${styles.native} ${inputClassName}`}
           disabled={disabled}
           name={context?.name}
           ref={inputRef}
@@ -289,15 +333,21 @@ const RadioGroupWithRef = <T extends string | number = string | number>(
   );
 };
 
-// forwardRef로 감싸기
-export const RadioGroup = forwardRef(RadioGroupWithRef) as <
-  T extends string | number = string | number,
->(
-  props: RadioGroupProps<T> & { ref?: React.ForwardedRef<RadioGroupHandle> }
-) => React.ReactElement;
+// 타입 정의를 위한 인터페이스
+interface ForwardRefRadioGroup {
+  <T extends string | number = string | number>(
+    props: RadioGroupProps<T> & {
+      ref?: React.ForwardedRef<RadioGroupHandle>;
+    }
+  ): React.ReactElement;
+  displayName?: string;
+}
 
-// 컴포넌트 이름 설정
-(RadioGroup as any).displayName = 'RadioGroup';
+// forwardRef로 감싸기
+export const RadioGroup = forwardRef(RadioGroupWithRef) as ForwardRefRadioGroup;
+
+// 컴포넌트 이름 설정 (ESLint 경고 없이)
+RadioGroup.displayName = 'RadioGroup';
 
 // Static property for Radio.Group
 export const RadioWithGroups = Object.assign(Radio, {
