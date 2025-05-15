@@ -26,8 +26,8 @@ const layouts = import.meta.glob<LayoutModule>('../pages/**/layout.tsx', {
   eager: true,
 });
 
-console.log('Available pages:', Object.keys(pages));
-console.log('Available layouts:', Object.keys(layouts));
+// console.log('Available pages:', Object.keys(pages));
+// console.log('Available layouts:', Object.keys(layouts));
 
 // 페이지 모듈에서 메타데이터 추출
 function getPageMetadata(pageModule: PageModule): PageMetadata {
@@ -544,17 +544,17 @@ function buildRouteTree(): RouteObject[] {
 const routes = buildRouteTree();
 
 // 라우트 구성 로깅
-console.log(
-  'Final routes:',
-  JSON.stringify(
-    routes.map((r) => ({
-      path: r.path,
-      children: r.children?.map((c) => c.path),
-    })),
-    null,
-    2
-  )
-);
+// console.log(
+//   'Final routes:',
+//   JSON.stringify(
+//     routes.map((r) => ({
+//       path: r.path,
+//       children: r.children?.map((c) => c.path),
+//     })),
+//     null,
+//     2
+//   )
+// );
 
 // 라우터 생성
 const router = createBrowserRouter(routes);
