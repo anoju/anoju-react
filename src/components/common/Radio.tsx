@@ -215,136 +215,123 @@ interface RadioGroupProps<T extends string | number = string | number> {
   name?: string;
 }
 
-// Radio Group component
-const RadioGroupWithRef = <T extends string | number = string | number>(
-  props: RadioGroupProps<T> & { ref?: React.ForwardedRef<RadioGroupHandle> }
-) => {
-  const {
-    children,
-    options,
-    value,
-    onChange,
-    className = '',
-    inputClassName = '',
-    iconClassName = '',
-    labelClassName = '',
-    name,
-    ref,
-    ...rest
-  } = props;
-
-  // 자식 라디오 컴포넌트에 대한 참조 배열
-  const refs = useRef<(RadioHandle | null)[]>([]);
-
-  // useImperativeHandle을 사용하여 외부에서 호출 가능한 메서드 정의
-  useImperativeHandle(ref, () => ({
-    focus: (index?: number) => {
-      // 인덱스가 제공된 경우 해당 라디오에 포커스
-      if (typeof index === 'number' && refs.current[index]) {
-        refs.current[index]?.focus();
-        return;
-      }
-
-      // 인덱스가 제공되지 않은 경우 첫 번째 사용 가능한 라디오에 포커스
-      const firstAvailableRadio = refs.current.find((_, idx) => {
-        if (options) {
-          const optionObj = options[idx];
-          if (isRadioOption<string | number>(optionObj)) {
-            // 옵션이 객체인 경우 disabled 속성 확인
-            return !optionObj.disabled;
-          }
-          return true; // 옵션이 객체가 아닌 경우 기본적으로 활성화 상태
-        }
-        return true; // 옵션이 없는 경우 기본적으로 활성화 상태
-      });
-
-      if (firstAvailableRadio) {
-        firstAvailableRadio.focus();
-      }
-    },
-  }));
-
-  const handleRadioChange = (radioValue: string | number) => {
-    if (!onChange) return;
-    onChange(radioValue as T);
-  };
-
-  // 자동 name 생성
-  const nameRef = useRef<string>(name || `radio-group-${generateUniqueId()}`);
-  const groupName = nameRef.current;
-
-  const contextValue: RadioContextType = {
-    value,
-    onChange: handleRadioChange,
-    name: groupName,
-  };
-
-  return (
-    <RadioContext.Provider value={contextValue}>
-      <div className={`check-wrap ${className}`} {...rest}>
-        {options
-          ? // Render radios from options array
-            options.map((option, idx) => {
-              // 타입 안전한 처리
-              let optionValue: string | number;
-              let optionLabel: React.ReactNode;
-              let optionDisabled = false;
-
-              if (isRadioOption<string | number>(option)) {
-                // RadioOption 객체인 경우
-                optionValue = option.value;
-                optionLabel = option.label;
-                optionDisabled = !!option.disabled;
-              } else {
-                // 원시 값인 경우
-                optionValue = option as string | number;
-                optionLabel = option;
-              }
-
-              return (
-                <Radio
-                  key={`${String(optionValue)}-${idx}`}
-                  value={optionValue}
-                  inputClassName={inputClassName}
-                  iconClassName={iconClassName}
-                  labelClassName={labelClassName}
-                  disabled={optionDisabled}
-                  ref={(el) => {
-                    // refs 배열에 참조 저장
-                    refs.current[idx] = el;
-                  }}
-                >
-                  {optionLabel}
-                </Radio>
-              );
-            })
-          : // Render children normally
-            React.Children.map(children, (child, idx) => {
-              if (React.isValidElement<RadioProps>(child)) {
-                // ref를 이용한 직접 수정 방식 대신 필요한 속성만 포함
-                return React.cloneElement(child, {
-                  key: child.key || `radio-child-${idx}`,
-                });
-              }
-              return child;
-            })}
-      </div>
-    </RadioContext.Provider>
-  );
-};
-
-// 타입 정의를 위한 인터페이스
-interface ForwardRefRadioGroup {
+// Radio Group component with generic type support
+export const RadioGroup = forwardRef(
   <T extends string | number = string | number>(
-    props: RadioGroupProps<T> & {
-      ref?: React.ForwardedRef<RadioGroupHandle>;
-    }
-  ): React.ReactElement;
-  displayName?: string;
-}
+    {
+      children,
+      options,
+      value,
+      onChange,
+      className = '',
+      inputClassName = '',
+      iconClassName = '',
+      labelClassName = '',
+      name,
+      ...rest
+    }: RadioGroupProps<T>,
+    ref: React.ForwardedRef<RadioGroupHandle>
+  ) => {
+    // 자식 라디오 컴포넌트에 대한 참조 배열
+    const refs = useRef<(RadioHandle | null)[]>([]);
 
-// forwardRef로 감싸기
-export const RadioGroup = forwardRef(RadioGroupWithRef) as ForwardRefRadioGroup;
+    // useImperativeHandle을 사용하여 외부에서 호출 가능한 메서드 정의
+    useImperativeHandle(ref, () => ({
+      focus: (index?: number) => {
+        // 인덱스가 제공된 경우 해당 라디오에 포커스
+        if (typeof index === 'number' && refs.current[index]) {
+          refs.current[index]?.focus();
+          return;
+        }
+
+        // 인덱스가 제공되지 않은 경우 첫 번째 사용 가능한 라디오에 포커스
+        const firstAvailableRadio = refs.current.find((_, idx) => {
+          if (options) {
+            const optionObj = options[idx];
+            if (isRadioOption<string | number>(optionObj)) {
+              // 옵션이 객체인 경우 disabled 속성 확인
+              return !optionObj.disabled;
+            }
+            return true; // 옵션이 객체가 아닌 경우 기본적으로 활성화 상태
+          }
+          return true; // 옵션이 없는 경우 기본적으로 활성화 상태
+        });
+
+        if (firstAvailableRadio) {
+          firstAvailableRadio.focus();
+        }
+      },
+    }));
+
+    const handleRadioChange = (radioValue: string | number) => {
+      if (!onChange) return;
+      onChange(radioValue as T);
+    };
+
+    // 자동 name 생성
+    const nameRef = useRef<string>(name || `radio-group-${generateUniqueId()}`);
+    const groupName = nameRef.current;
+
+    const contextValue: RadioContextType = {
+      value,
+      onChange: handleRadioChange,
+      name: groupName,
+    };
+
+    return (
+      <RadioContext.Provider value={contextValue}>
+        <div className={`check-wrap ${className}`} {...rest}>
+          {options
+            ? // Render radios from options array
+              options.map((option, idx) => {
+                // 타입 안전한 처리
+                let optionValue: string | number;
+                let optionLabel: React.ReactNode;
+                let optionDisabled = false;
+
+                if (isRadioOption<string | number>(option)) {
+                  // RadioOption 객체인 경우
+                  optionValue = option.value;
+                  optionLabel = option.label;
+                  optionDisabled = !!option.disabled;
+                } else {
+                  // 원시 값인 경우
+                  optionValue = option as string | number;
+                  optionLabel = option;
+                }
+
+                return (
+                  <Radio
+                    key={`${String(optionValue)}-${idx}`}
+                    value={optionValue}
+                    inputClassName={inputClassName}
+                    iconClassName={iconClassName}
+                    labelClassName={labelClassName}
+                    disabled={optionDisabled}
+                    ref={(el) => {
+                      // refs 배열에 참조 저장
+                      refs.current[idx] = el;
+                    }}
+                  >
+                    {optionLabel}
+                  </Radio>
+                );
+              })
+            : // Render children normally
+              React.Children.map(children, (child, idx) => {
+                if (React.isValidElement<RadioProps>(child)) {
+                  // ref를 이용한 직접 수정 방식 대신 필요한 속성만 포함
+                  return React.cloneElement(child, {
+                    key: child.key || `radio-child-${idx}`,
+                  });
+                }
+                return child;
+              })}
+        </div>
+      </RadioContext.Provider>
+    );
+  }
+) as unknown as React.ForwardRefExoticComponent<RadioGroupProps<string | number> & React.RefAttributes<RadioGroupHandle>>;
 
 // 컴포넌트 이름 설정 (ESLint 경고 없이)
 RadioGroup.displayName = 'RadioGroup';
