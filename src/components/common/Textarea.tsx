@@ -5,12 +5,21 @@ import React, {
   useState,
   useEffect,
   useCallback,
+  useImperativeHandle,
   TextareaHTMLAttributes,
   CSSProperties,
   ChangeEvent,
 } from 'react';
 import styles from '@/assets/scss/components/textarea.module.scss';
 import cx from '@/utils/cx';
+
+// 외부에서 호출 가능한 메서드 인터페이스 정의
+export interface TextareaHandle {
+  focus: () => void;
+  blur: () => void;
+  getValue: () => string | undefined;
+  setValue: (value: string) => void;
+}
 
 // autoSize 옵션 타입 정의
 export interface AutoSizeType {
@@ -40,7 +49,7 @@ export interface TextareaProps
   setValue?: (value: string) => void;
 }
 
-const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
+const Textarea = forwardRef<TextareaHandle, TextareaProps>(
   (
     {
       className,
@@ -254,6 +263,27 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
       }
     }, [autoSize, updateHeight]);
 
+    // 외부에서 호출 가능한 메서드 정의
+    useImperativeHandle(ref, () => ({
+      focus: () => {
+        if (textareaRef.current) {
+          textareaRef.current.focus();
+        }
+      },
+      blur: () => {
+        if (textareaRef.current) {
+          textareaRef.current.blur();
+        }
+      },
+      getValue: () => textValue,
+      setValue: (value: string) => {
+        setTextValue(value);
+        if (setValue) {
+          setValue(value);
+        }
+      },
+    }));
+
     // Textarea 표시 값
     const displayValue = isControlled ? value : textValue;
 
@@ -305,13 +335,8 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         <div className={wrapperClassName} style={style}>
           <textarea
             ref={(node) => {
-              // 내부 ref와 외부 ref 모두 설정
+              // 내부 ref 설정 (외부 ref는 useImperativeHandle에서 처리)
               textareaRef.current = node;
-              if (typeof ref === 'function') {
-                ref(node);
-              } else if (ref) {
-                ref.current = node;
-              }
             }}
             className={textareaClassName}
             style={textareaStyle}

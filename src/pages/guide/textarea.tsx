@@ -1,6 +1,12 @@
 // src/pages/guide/textarea.tsx
+import { useRef } from 'react';
 import { usePageLayout } from '@/hooks/usePageLayout';
-import { Button, CodeHighlight, Textarea } from '@/components/common';
+import {
+  Button,
+  CodeHighlight,
+  Textarea,
+  TextareaHandle,
+} from '@/components/common';
 import styles from '@/assets/scss/pages/guide.module.scss';
 import { useState } from 'react';
 
@@ -20,6 +26,14 @@ const TextareaGuide = () => {
   const [value, setValue] = useState('');
   const [autoSizeValue, setAutoSizeValue] = useState('');
   const [countValue, setCountValue] = useState('');
+
+  // 가이드 컴포넌트 내에서
+  const textareaRef = useRef<TextareaHandle>(null);
+
+  // 포커스 버튼 클릭 핸들러
+  const handleFocus = () => {
+    textareaRef.current?.focus();
+  };
 
   return (
     <div className="page-inner">
@@ -245,6 +259,49 @@ const TextareaGuide = () => {
   readOnly
   value="사용자가 읽을 수만 있고 편집할 수 없는 상태입니다."
 />`}
+          language="jsx"
+        />
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles['section-title']}>외부에서 포커스 주기</h2>
+        <p className={styles.txt}>
+          useRef와 InputHandle 인터페이스를 사용하여 외부에서 Input 컴포넌트에
+          포커스를 줄 수 있습니다. 단일 입력 필드는 해당 필드에, 다중 입력
+          필드는 포커스 가능한 첫 번째 필드에 포커스가 적용됩니다.
+        </p>
+
+        <div className={styles.showcase}>
+          <Textarea
+            ref={textareaRef}
+            placeholder="여기에 포커스가 적용됩니다"
+          />
+          <br />
+          <Button className="primary" onClick={handleFocus} size="sm">
+            포커스
+          </Button>
+        </div>
+
+        <h3 className={styles['sub-title']}>참조 소스코드</h3>
+        <CodeHighlight
+          code={`import { useRef } from 'react';
+import { Textarea, TextareaHandle } from '@/components/common';
+
+// 가이드 컴포넌트 내에서
+const textareaRef = useRef<TextareaHandle>(null);
+
+// 포커스 버튼 클릭 핸들러
+const handleFocus = () => {
+  textareaRef.current?.focus();
+};
+
+<Textarea
+  ref={textareaRef}
+  placeholder="여기에 포커스가 적용됩니다"
+/>
+<Button className="primary" onClick={handleFocus} size="sm">
+  포커스
+</Button>`}
           language="jsx"
         />
       </section>
