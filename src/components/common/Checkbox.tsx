@@ -9,6 +9,7 @@ import React, {
   useImperativeHandle,
 } from 'react';
 import styles from '@/assets/scss/components/checkRadio.module.scss';
+import cx from '@/utils/cx';
 
 // 고유 ID 생성을 위한 유틸리티 함수
 let uniqueIdCounter = 0;
@@ -63,6 +64,9 @@ interface CheckboxProps
   iconClassName?: string;
   labelClassName?: string;
   disabled?: boolean;
+  isBtn?: boolean;
+  isSwitch?: boolean;
+  leftLabel?: boolean;
   index?: number; // Group 내에서의 인덱스 (boolean 모드용)
 }
 
@@ -80,9 +84,12 @@ export const Checkbox = forwardRef<CheckboxHandle, CheckboxProps>(
       iconClassName = '',
       labelClassName = '',
       disabled = false,
+      isBtn = false,
+      isSwitch = false,
+      leftLabel = false,
       index,
       ...props
-    },
+    }: CheckboxProps,
     ref
   ) => {
     // Check if inside a CheckboxGroup
@@ -209,8 +216,21 @@ export const Checkbox = forwardRef<CheckboxHandle, CheckboxProps>(
       };
     }, [onChange, context, value, index, disabled, isChecked]);
 
+    const checkboxClasses = cx(styles.checkbox, className, {
+      [styles.btn]: isBtn,
+      [styles.switch]: isSwitch,
+    });
+
     return (
-      <div ref={rootRef} className={`${styles.checkbox} ${className}`}>
+      <div ref={rootRef} className={checkboxClasses}>
+        {children && leftLabel && (
+          <label
+            className={`${styles.lbl} ${labelClassName}`}
+            htmlFor={checkboxId}
+          >
+            {children}
+          </label>
+        )}
         <input
           type="checkbox"
           id={checkboxId}
@@ -223,7 +243,7 @@ export const Checkbox = forwardRef<CheckboxHandle, CheckboxProps>(
           {...props}
         />
         <i className={`${styles.ico} ${iconClassName}`} aria-hidden="true"></i>
-        {children && (
+        {children && !leftLabel && (
           <label
             className={`${styles.lbl} ${labelClassName}`}
             htmlFor={checkboxId}
@@ -277,6 +297,9 @@ interface CheckboxGroupProps<
   inputClassName?: string;
   iconClassName?: string;
   labelClassName?: string;
+  isBtn?: boolean;
+  isSwitch?: boolean;
+  leftLabel?: boolean;
 }
 
 // Checkbox Group component
@@ -296,6 +319,9 @@ const CheckboxGroupWithRef = <
     inputClassName = '',
     iconClassName = '',
     labelClassName = '',
+    isBtn = false,
+    isSwitch = false,
+    leftLabel = false,
     ref,
     ...rest
   } = props;
@@ -435,6 +461,9 @@ const CheckboxGroupWithRef = <
                   iconClassName={iconClassName}
                   labelClassName={labelClassName}
                   index={idx}
+                  isBtn={isBtn}
+                  isSwitch={isSwitch}
+                  leftLabel={leftLabel}
                   ref={(el) => {
                     // refs 배열에 참조 저장
                     refs.current[idx] = el;

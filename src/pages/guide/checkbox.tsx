@@ -38,6 +38,33 @@ const CheckboxGuide = () => {
     false,
   ]);
 
+  // 체크박스에 대한 참조 생성
+  const checkboxRef = useRef<CheckboxHandle>(null);
+
+  // 버튼 클릭 핸들러
+  const handleFocus = () => {
+    checkboxRef.current?.focus();
+  };
+
+  const handleBlur = () => {
+    checkboxRef.current?.blur();
+  };
+
+  const handleIsChecked = () => {
+    alert(
+      '현재 체크 상태: ' +
+        (checkboxRef.current?.isChecked() ? '체크됨' : '체크 안됨')
+    );
+  };
+
+  const handleSetValue = (value: boolean) => {
+    checkboxRef.current?.setValue(value);
+  };
+
+  const handleToggle = () => {
+    checkboxRef.current?.toggle();
+  };
+
   return (
     <div className="page-inner">
       <h1 className={styles.title}>Checkbox Component</h1>
@@ -217,14 +244,144 @@ const [booleanValues, setBooleanValues] = useState<boolean[]>([false, true, fals
       </section>
 
       <section className={styles.section}>
+        <h2 className={styles['section-title']}>스타일 적용</h2>
+        <h3 className={styles['sub-title']}>체크박스 우측배치</h3>
+        <p className={styles.txt}>leftLabel 옵션 true</p>
+        <div className={styles.showcase}>
+          <Checkbox leftLabel>체크박스</Checkbox>
+          <br />
+          <br />
+          <Checkbox.Group
+            leftLabel
+            options={['apple', 'orange', 'banana', 'grape']}
+            values={selectedFruits}
+            onChange={setSelectedFruits}
+          />
+        </div>
+        <CodeHighlight
+          code={`// 단독일때
+<Checkbox leftLabel>체크박스</Checkbox>
+
+//그룹일때
+<Checkbox.Group
+  leftLabel
+  options={['apple', 'orange', 'banana', 'grape']}
+  values={selectedFruits}
+  onChange={setSelectedFruits}
+/>
+`}
+          language="typescript"
+        />
+
+        <br />
+
+        <h3 className={styles['sub-title']}>버튼형</h3>
+        <p className={styles.txt}>
+          isBtn 옵션 true (isSwitch 랑 같이 사용하지 말것)
+        </p>
+        <div className={styles.showcase}>
+          <Checkbox isBtn>체크박스</Checkbox>
+          <br />
+          <br />
+          <Checkbox.Group
+            className="grid"
+            isBtn
+            options={['apple', 'orange', 'banana', 'grape']}
+            values={selectedFruits}
+            onChange={setSelectedFruits}
+          />
+        </div>
+        <h3 className={styles['sub-title']}>참조 소스코드</h3>
+        <CodeHighlight
+          code={`// 단독일때
+<Checkbox isBtn>체크박스</Checkbox>
+
+//그룹일때
+<Checkbox.Group
+  isBtn
+  options={['apple', 'orange', 'banana', 'grape']}
+  values={selectedFruits}
+  onChange={setSelectedFruits}
+/>
+`}
+          language="typescript"
+        />
+
+        <br />
+
+        <h3 className={styles['sub-title']}>스위치</h3>
+        <p className={styles.txt}>
+          isSwitch 옵션 true (isBtn 이이랑 같이 사용하지 말것)
+        </p>
+        <div className={styles.showcase}>
+          <Checkbox isSwitch>체크박스</Checkbox>
+          <br />
+          <br />
+          <Checkbox.Group
+            isSwitch
+            options={['apple', 'orange', 'banana', 'grape']}
+            values={selectedFruits}
+            onChange={setSelectedFruits}
+          />
+        </div>
+        <CodeHighlight
+          code={`// 단독일때
+<Checkbox isSwitch>체크박스</Checkbox>
+
+//그룹일때
+<Checkbox.Group
+  isSwitch
+  options={['apple', 'orange', 'banana', 'grape']}
+  values={selectedFruits}
+  onChange={setSelectedFruits}
+/>
+`}
+          language="typescript"
+        />
+      </section>
+
+      <section className={styles.section}>
         <h2 className={styles['section-title']}>외부에서 메서드 호출하기</h2>
         <p className={styles.txt}>
           useRef와 ref 속성을 사용하여 체크박스의 메서드를 직접 호출할 수
           있습니다.
         </p>
         <div className={styles.showcase}>
-          <div className="check-wrap">
-            <MyCheckboxWithRef />
+          <Checkbox ref={checkboxRef}>메서드를 호출할 체크박스</Checkbox>
+          <div
+            style={{
+              marginTop: '10px',
+              display: 'flex',
+              gap: '5px',
+              flexWrap: 'wrap',
+            }}
+          >
+            <Button className="line" size="sm" onClick={handleFocus}>
+              포커스
+            </Button>
+            <Button className="line" size="sm" onClick={handleBlur}>
+              블러
+            </Button>
+            <Button className="line" size="sm" onClick={handleIsChecked}>
+              상태 확인
+            </Button>
+            <Button
+              className="line"
+              size="sm"
+              onClick={() => handleSetValue(true)}
+            >
+              체크하기
+            </Button>
+            <Button
+              className="line"
+              size="sm"
+              onClick={() => handleSetValue(false)}
+            >
+              체크 해제
+            </Button>
+            <Button className="line" size="sm" onClick={handleToggle}>
+              토글
+            </Button>
           </div>
         </div>
 
@@ -407,69 +564,6 @@ const MyCheckboxWithRef = () => {
           </table>
         </div>
       </section>
-    </div>
-  );
-};
-
-// 메서드 호출 예시 컴포넌트
-const MyCheckboxWithRef = () => {
-  // 체크박스에 대한 참조 생성
-  const checkboxRef = useRef<CheckboxHandle>(null);
-
-  // 버튼 클릭 핸들러
-  const handleFocus = () => {
-    checkboxRef.current?.focus();
-  };
-
-  const handleBlur = () => {
-    checkboxRef.current?.blur();
-  };
-
-  const handleIsChecked = () => {
-    alert(
-      '현재 체크 상태: ' +
-        (checkboxRef.current?.isChecked() ? '체크됨' : '체크 안됨')
-    );
-  };
-
-  const handleSetValue = (value: boolean) => {
-    checkboxRef.current?.setValue(value);
-  };
-
-  const handleToggle = () => {
-    checkboxRef.current?.toggle();
-  };
-
-  return (
-    <div>
-      <Checkbox ref={checkboxRef}>메서드를 호출할 체크박스</Checkbox>
-      <div
-        style={{
-          marginTop: '10px',
-          display: 'flex',
-          gap: '5px',
-          flexWrap: 'wrap',
-        }}
-      >
-        <Button size="sm" onClick={handleFocus}>
-          포커스
-        </Button>
-        <Button size="sm" onClick={handleBlur}>
-          블러
-        </Button>
-        <Button size="sm" onClick={handleIsChecked}>
-          상태 확인
-        </Button>
-        <Button size="sm" onClick={() => handleSetValue(true)}>
-          체크하기
-        </Button>
-        <Button size="sm" onClick={() => handleSetValue(false)}>
-          체크 해제
-        </Button>
-        <Button size="sm" onClick={handleToggle}>
-          토글
-        </Button>
-      </div>
     </div>
   );
 };
