@@ -545,18 +545,18 @@ const MyCheckboxWithRef = () => {
                 </td>
               </tr>
               <tr>
-                <td>getValues()</td>
+                <td>getValue()</td>
                 <td>현재 선택된 모든 값의 배열을 반환합니다.</td>
                 <td>
-                  <code>const values = groupRef.current?.getValues()</code>
+                  <code>const values = groupRef.current?.getValue()</code>
                 </td>
               </tr>
               <tr>
-                <td>setValues(values: CheckboxValue[])</td>
+                <td>setValue(values: CheckboxValue[])</td>
                 <td>체크박스 그룹의 값을 설정합니다.</td>
                 <td>
                   <code>
-                    groupRef.current?.setValues(['option1', 'option3'])
+                    groupRef.current?.setValue(['option1', 'option3'])
                   </code>
                 </td>
               </tr>

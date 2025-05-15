@@ -281,8 +281,8 @@ function isCheckboxOption<T extends string | number>(
 export interface CheckboxGroupHandle {
   focus: (index?: number) => void;
   blur: (index?: number) => void;
-  getValues: () => CheckboxValue[];
-  setValues: (values: CheckboxValue[]) => void;
+  getValue: () => CheckboxValue[];
+  setValue: (values: CheckboxValue[]) => void;
 }
 
 // Checkbox Group component props
@@ -370,10 +370,10 @@ export const CheckboxGroup = forwardRef(
           refs.current[activeIndex]?.blur();
         }
       },
-      getValues: () => {
+      getValue: () => {
         return values as CheckboxValue[];
       },
-      setValues: (newValues: CheckboxValue[]) => {
+      setValue: (newValues: CheckboxValue[]) => {
         if (onChange) {
           onChange(newValues as unknown as T[]);
         }
@@ -474,9 +474,11 @@ export const CheckboxGroup = forwardRef(
                   // 자식 컴포넌트 복제 (ref를 직접 전달하지 않음)
                   return React.cloneElement(child, {
                     index: idx,
-                    inputClassName: child.props.inputClassName || inputClassName,
+                    inputClassName:
+                      child.props.inputClassName || inputClassName,
                     iconClassName: child.props.iconClassName || iconClassName,
-                    labelClassName: child.props.labelClassName || labelClassName,
+                    labelClassName:
+                      child.props.labelClassName || labelClassName,
                     key: child.key || `checkbox-child-${idx}`,
                   });
                 }
@@ -486,7 +488,10 @@ export const CheckboxGroup = forwardRef(
       </CheckboxContext.Provider>
     );
   }
-) as unknown as React.ForwardRefExoticComponent<CheckboxGroupProps<string | number | boolean> & React.RefAttributes<CheckboxGroupHandle>>;
+) as unknown as React.ForwardRefExoticComponent<
+  CheckboxGroupProps<string | number | boolean> &
+    React.RefAttributes<CheckboxGroupHandle>
+>;
 
 // 컴포넌트 이름 설정 (ESLint 경고 없이)
 CheckboxGroup.displayName = 'CheckboxGroup';
