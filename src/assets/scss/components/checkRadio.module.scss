@@ -9,10 +9,11 @@
   --rdo-size: 1.2rem;
   --switch-width: 3.5rem;
   --switch-height: 2rem;
-  --switch-padding: 0.3rem;
-  --switch2-width: 3.5rem;
-  --switch2-height: 2rem;
-  --switch2-padding: 0.2rem;
+  --switch-padding: 0.2rem;
+
+  // --switch-width: 3.5rem;
+  // --switch-height: 2rem;
+  // --switch-padding: 0.3rem;
 }
 
 .checkbox,
@@ -94,17 +95,20 @@
 
       &:checked {
         + .ico {
-          background: none;
+          // background: none;
 
-          &::before {
-            background: var(--primary-color);
-            opacity: 0.4;
-          }
+          // &::before {
+          //   background: var(--primary-color);
+          //   opacity: 0.4;
+          // }
 
           &::after {
-            left: 1.5rem;
+            // left: 1.5rem;
+            // background: var(--primary-color);
+            left: calc(
+              var(--switch-width) - var(--switch-height) + var(--switch-padding)
+            );
             animation: none;
-            background: var(--primary-color);
           }
         }
 
@@ -129,34 +133,56 @@
       height: var(--switch-height);
       padding: var(--switch-padding);
       border: 0 none;
-      border-radius: 0;
-      background: none;
+      overflow: hidden;
 
-      &::before {
-        content: '';
-        display: block;
-        height: calc(var(--switch-height) - (var(--switch-padding) * 2));
-        border-radius: calc(
-          (var(--switch-height) - (var(--switch-padding) * 2)) / 2
-        );
-        background: #b0b0b0;
-        opacity: 1;
-        transition: 0.3s ease;
-      }
+      // border-radius: 0;
+      // background: none;
+
+      border-radius: calc(var(--switch-height) / 2);
+      background-color: var(--input-bg-color);
+      transition: background 0.3s ease;
+
+      // &::before {
+      //   content: '';
+      //   display: block;
+      //   height: calc(var(--switch-height) - (var(--switch-padding) * 2));
+      //   border-radius: calc(
+      //     (var(--switch-height) - (var(--switch-padding) * 2)) / 2
+      //   );
+      //   background: #b0b0b0;
+      //   opacity: 1;
+      //   transition: 0.3s ease;
+      // }
+
+      // &::after {
+      //   width: var(--switch-height);
+      //   height: var(--switch-height);
+      //   margin: 0;
+      //   border: 0 none;
+      //   left: 0;
+      //   top: 0;
+      //   border-radius: 50%;
+      //   background: var(--line-color);
+      //   box-shadow:
+      //     0 0 0.1rem rgb(0 0 0 / 12%),
+      //     0 0.1rem 0.1rem rgb(0 0 0 / 23.8%);
+      //   transition: 0.3s ease;
+      //   transform: none;
+      // }
 
       &::after {
-        width: var(--switch-height);
-        height: var(--switch-height);
+        width: calc(var(--switch-height) - (var(--switch-padding) * 2));
+        height: calc(var(--switch-height) - (var(--switch-padding) * 2));
         margin: 0;
         border: 0 none;
-        left: 0;
-        top: 0;
+        left: var(--switch-padding);
+        top: var(--switch-padding);
         border-radius: 50%;
-        background: var(--line-color);
+        background: #fff;
         box-shadow:
-          0 0 0.1rem rgb(0 0 0 / 12%),
-          0 0.1rem 0.1rem rgb(0 0 0 / 23.8%);
-        transition: 0.3s ease;
+          0 0.3rem 0.8rem rgb(0 0 0 / 15%),
+          0 0.3rem 0.1rem rgb(0 0 0 / 6%);
+        transition: left 0.3s ease;
         transform: none;
       }
 
@@ -168,9 +194,15 @@
     .lbl {
       padding-top: 0;
       padding-bottom: 0;
+      padding-left: 0.6rem;
+      margin-left: var(--switch-width);
       line-height: var(--switch-height);
+      font-size: 1.4rem;
 
       &:first-child {
+        padding-left: 0;
+        padding-right: 0.6rem;
+        margin-left: 0;
         margin-right: var(--switch-width);
       }
     }
