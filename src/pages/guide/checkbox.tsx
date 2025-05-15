@@ -22,21 +22,19 @@ const CheckboxGuide = () => {
   });
 
   // Group checkbox states
-  const [selectedValues, setSelectedValues] = useState<(string | number)[]>([
-    'option1',
-    'option3',
-  ]);
-  const [selectedFruits, setSelectedFruits] = useState<string[]>([
-    'apple',
-    'banana',
-  ]);
-  const [selectedColors, setSelectedColors] = useState<string[]>(['red']);
+  const [selectedValues, setSelectedValues] = useState<
+    (string | number | boolean)[]
+  >(['option1', 'option3']);
+  const [selectedFruits, setSelectedFruits] = useState<
+    (string | number | boolean)[]
+  >(['apple', 'banana']);
+  const [selectedColors, setSelectedColors] = useState<
+    (string | number | boolean)[]
+  >(['red']);
 
-  const [booleanValues, setBooleanValues] = useState<boolean[]>([
-    false,
-    true,
-    false,
-  ]);
+  const [booleanValues, setBooleanValues] = useState<
+    (string | number | boolean)[]
+  >([false, true, false]);
 
   // 체크박스에 대한 참조 생성
   const checkboxRef = useRef<CheckboxHandle>(null);
@@ -139,7 +137,7 @@ import { Checkbox, CheckboxGroup } from '@/components/common';`}
       <section className={styles.section}>
         <h2 className={styles['section-title']}>Checkbox.Group 사용법</h2>
         <div className={styles.showcase}>
-          <Checkbox.Group values={selectedValues} onChange={setSelectedValues}>
+          <Checkbox.Group value={selectedValues} setValue={setSelectedValues}>
             <Checkbox value="option1">옵션 1</Checkbox>
             <Checkbox value="option2">옵션 2</Checkbox>
             <Checkbox value="option3">옵션 3</Checkbox>
@@ -152,12 +150,12 @@ import { Checkbox, CheckboxGroup } from '@/components/common';`}
         <h3 className={styles['sub-title']}>참조 소스코드</h3>
         <CodeHighlight
           code={`// State 정의
-const [selectedValues, setSelectedValues] = useState<(string | number)[]>(['option1', 'option3']);
+const [selectedValues, setSelectedValues] = useState<(string | number | boolean)[]>(['option1', 'option3']);
 
 // JSX
 <Checkbox.Group
-  values={selectedValues}
-  onChange={setSelectedValues}
+  value={selectedValues}
+  setValue={setSelectedValues}
 >
   <Checkbox value="option1">옵션 1</Checkbox>
   <Checkbox value="option2">옵션 2</Checkbox>
@@ -174,8 +172,8 @@ const [selectedValues, setSelectedValues] = useState<(string | number)[]>(['opti
           <h4 className={styles['sub-title']}>문자열 배열</h4>
           <Checkbox.Group
             options={['apple', 'orange', 'banana', 'grape']}
-            values={selectedFruits}
-            onChange={setSelectedFruits}
+            value={selectedFruits}
+            setValue={setSelectedFruits}
             className="grid"
           />
           <p className={styles.txt}>선택된 과일: {selectedFruits.join(', ')}</p>
@@ -188,8 +186,8 @@ const [selectedValues, setSelectedValues] = useState<(string | number)[]>(['opti
               { value: 'green', label: '초록색' },
               { value: 'yellow', label: '노란색' },
             ]}
-            values={selectedColors}
-            onChange={setSelectedColors}
+            value={selectedColors}
+            setValue={setSelectedColors}
             className="grid"
           />
           <p className={styles.txt}>선택된 색상: {selectedColors.join(', ')}</p>
@@ -198,7 +196,7 @@ const [selectedValues, setSelectedValues] = useState<(string | number)[]>(['opti
           <h4 className={styles['sub-title']}>
             Value 속성 없는 그룹 (Boolean 배열)
           </h4>
-          <Checkbox.Group values={booleanValues} onChange={setBooleanValues}>
+          <Checkbox.Group value={booleanValues} setValue={setBooleanValues}>
             <Checkbox>체크박스 1</Checkbox>
             <Checkbox>체크박스 2</Checkbox>
             <Checkbox>체크박스 3</Checkbox>
@@ -214,8 +212,8 @@ const [selectedValues, setSelectedValues] = useState<(string | number)[]>(['opti
           code={`// 문자열 배열
 <Checkbox.Group
   options={['apple', 'orange', 'banana', 'grape']}
-  values={selectedFruits}
-  onChange={setSelectedFruits}
+  value={selectedFruits}
+  setValue={setSelectedFruits}
 />
 
 // 객체 배열 (value/label)
@@ -226,15 +224,15 @@ const [selectedValues, setSelectedValues] = useState<(string | number)[]>(['opti
     { value: 'green', label: '초록색' },
     { value: 'yellow', label: '노란색' }
   ]}
-  values={selectedColors}
-  onChange={setSelectedColors}
+  value={selectedColors}
+  setValue={setSelectedColors}
 />
 
 // Boolean 배열 상태 정의
-const [booleanValues, setBooleanValues] = useState<boolean[]>([false, true, false]);
+const [booleanValues, setBooleanValues] = useState<(string | number | boolean)[]>([false, true, false]);
 
 // Value 속성 없는 그룹 (Boolean 배열 모드)
-<Checkbox.Group values={booleanValues} onChange={setBooleanValues}>
+<Checkbox.Group value={booleanValues} setValue={setBooleanValues}>
   <Checkbox>체크박스 1</Checkbox>
   <Checkbox>체크박스 2</Checkbox>
   <Checkbox>체크박스 3</Checkbox>
@@ -254,8 +252,8 @@ const [booleanValues, setBooleanValues] = useState<boolean[]>([false, true, fals
           <Checkbox.Group
             leftLabel
             options={['apple', 'orange', 'banana', 'grape']}
-            values={selectedFruits}
-            onChange={setSelectedFruits}
+            value={selectedFruits}
+            setValue={setSelectedFruits}
           />
         </div>
         <CodeHighlight
@@ -266,8 +264,8 @@ const [booleanValues, setBooleanValues] = useState<boolean[]>([false, true, fals
 <Checkbox.Group
   leftLabel
   options={['apple', 'orange', 'banana', 'grape']}
-  values={selectedFruits}
-  onChange={setSelectedFruits}
+  value={selectedFruits}
+  setValue={setSelectedFruits}
 />
 `}
           language="typescript"
@@ -287,8 +285,8 @@ const [booleanValues, setBooleanValues] = useState<boolean[]>([false, true, fals
             className="grid"
             isBtn
             options={['apple', 'orange', 'banana', 'grape']}
-            values={selectedFruits}
-            onChange={setSelectedFruits}
+            value={selectedFruits}
+            setValue={setSelectedFruits}
           />
         </div>
         <h3 className={styles['sub-title']}>참조 소스코드</h3>
@@ -300,8 +298,8 @@ const [booleanValues, setBooleanValues] = useState<boolean[]>([false, true, fals
 <Checkbox.Group
   isBtn
   options={['apple', 'orange', 'banana', 'grape']}
-  values={selectedFruits}
-  onChange={setSelectedFruits}
+  value={selectedFruits}
+  setValue={setSelectedFruits}
 />
 `}
           language="typescript"
@@ -320,8 +318,8 @@ const [booleanValues, setBooleanValues] = useState<boolean[]>([false, true, fals
           <Checkbox.Group
             isSwitch
             options={['apple', 'orange', 'banana', 'grape']}
-            values={selectedFruits}
-            onChange={setSelectedFruits}
+            value={selectedFruits}
+            setValue={setSelectedFruits}
           />
         </div>
         <CodeHighlight
@@ -332,8 +330,8 @@ const [booleanValues, setBooleanValues] = useState<boolean[]>([false, true, fals
 <Checkbox.Group
   isSwitch
   options={['apple', 'orange', 'banana', 'grape']}
-  values={selectedFruits}
-  onChange={setSelectedFruits}
+  value={selectedFruits}
+  setValue={setSelectedFruits}
 />
 `}
           language="typescript"
@@ -548,11 +546,11 @@ const MyCheckboxWithRef = () => {
                 <td>getValue()</td>
                 <td>현재 선택된 모든 값의 배열을 반환합니다.</td>
                 <td>
-                  <code>const values = groupRef.current?.getValue()</code>
+                  <code>const value = groupRef.current?.getValue()</code>
                 </td>
               </tr>
               <tr>
-                <td>setValue(values: CheckboxValue[])</td>
+                <td>setValue(value: CheckboxValue[])</td>
                 <td>체크박스 그룹의 값을 설정합니다.</td>
                 <td>
                   <code>

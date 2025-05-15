@@ -7,6 +7,8 @@ import React, {
   ChangeEvent,
   useState,
   useImperativeHandle,
+  Dispatch,
+  SetStateAction,
 } from 'react';
 import styles from '@/assets/scss/components/checkRadio.module.scss';
 import cx from '@/utils/cx';
@@ -20,16 +22,19 @@ const generateUniqueId = (): string => {
 
 // 체크박스 값 타입 정의
 type CheckboxValue = string | number | boolean;
+type SetValueFunction<T> = Dispatch<SetStateAction<T>> | ((value: T) => void);
 
 // CheckboxContext 타입 정의 - value가 있는 경우와 없는 경우 모두 처리
-interface CheckboxContextType {
-  values: CheckboxValue[];
+interface CheckboxContextType<T = CheckboxValue> {
+  value: T[];
   booleanMode: boolean;
-  onChange: (
-    value: string | number | boolean | undefined,
-    checked: boolean,
-    index?: number
-  ) => void;
+  onChange?: (values: T[]) => void;
+  setValue?: SetValueFunction<T[]>;
+}
+
+// 유틸팈티 함수 - 파라미터가 T 타입의 값을 포함하는지 확인
+function includesValue<T>(array: T[], value: unknown): boolean {
+  return array.some((item) => item === value);
 }
 
 // Create a context for the Checkbox Group
@@ -58,6 +63,7 @@ interface CheckboxProps
   value?: string | number; // value를 선택적으로 변경
   checked?: boolean;
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
+  setValue?: SetValueFunction<boolean>; // 상태 업데이트 함수 추가
   children?: React.ReactNode;
   className?: string;
   inputClassName?: string;
@@ -78,6 +84,7 @@ export const Checkbox = forwardRef<CheckboxHandle, CheckboxProps>(
       value,
       checked,
       onChange,
+      setValue,
       children,
       className = '',
       inputClassName = '',
@@ -109,12 +116,10 @@ export const Checkbox = forwardRef<CheckboxHandle, CheckboxProps>(
       // 그룹 내에서의 체크 상태 결정
       if (context.booleanMode) {
         // Boolean mode (index 기반)
-        isChecked = typeof index === 'number' ? !!context.values[index] : false;
+        isChecked = typeof index === 'number' ? !!context.value[index] : false;
       } else {
         // Value mode
-        isChecked =
-          value !== undefined &&
-          context.values.includes(value as CheckboxValue);
+        isChecked = value !== undefined && includesValue(context.value, value);
       }
     } else if (checked !== undefined) {
       // 외부에서 제공된 checked prop이 있는 경우
@@ -125,19 +130,56 @@ export const Checkbox = forwardRef<CheckboxHandle, CheckboxProps>(
     }
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+      const newChecked = e.target.checked;
+
+      // 항상 onChange 핸들러 호출 (제공된 경우)
+      if (onChange) {
+        onChange(e);
+      }
+
+      // 상태 업데이트 처리
       if (context) {
         // 그룹 내에서의 변경 처리
         if (context.booleanMode) {
-          context.onChange(undefined, e.target.checked, index);
+          // Boolean 모드 (인덱스 기반)
+          if (typeof index === 'number') {
+            const newValues = [...context.value];
+            newValues[index] = newChecked;
+
+            // setValue가 있으면 사용, 없으면 onChange 사용
+            if (context.setValue) {
+              context.setValue(newValues);
+            } else if (context.onChange) {
+              context.onChange(newValues);
+            }
+          }
         } else {
-          context.onChange(value, e.target.checked);
+          // Value 모드
+          if (value !== undefined) {
+            let newValues: typeof context.value;
+
+            if (newChecked) {
+              // 값 추가
+              newValues = [...context.value, value];
+            } else {
+              // 값 제거
+              newValues = context.value.filter((v) => v !== value);
+            }
+
+            // setValue가 있으면 사용, 없으면 onChange 사용
+            if (context.setValue) {
+              context.setValue(newValues);
+            } else if (context.onChange) {
+              context.onChange(newValues);
+            }
+          }
         }
-      } else if (onChange) {
-        // 외부 onChange 핸들러가 있는 경우
-        onChange(e);
+      } else if (setValue) {
+        // 외부 setValue 핸들러가 있는 경우
+        setValue(newChecked);
       } else if (checked === undefined) {
         // 독립형 체크박스이고 checked prop이 없는 경우, 내부 상태 업데이트
-        setInternalChecked(e.target.checked);
+        setInternalChecked(newChecked);
       }
     };
 
@@ -166,18 +208,39 @@ export const Checkbox = forwardRef<CheckboxHandle, CheckboxProps>(
 
           onChange(fakeEvent);
 
-          // context가 있는 경우 context에도 변경 알림
-          if (context) {
-            context.onChange(value, checked, index);
-          }
-
           // 포커스 유지를 위해 현재 액티브 요소가 이 입력요소였다면 다시 포커스 설정
           if (activeElement === inputRef.current) {
             setTimeout(() => inputRef.current?.focus(), 0);
           }
         } else if (context) {
           // context만 있는 경우
-          context.onChange(value, checked, index);
+          if (context.booleanMode && typeof index === 'number') {
+            const newValues = [...context.value];
+            newValues[index] = checked;
+
+            if (context.setValue) {
+              context.setValue(newValues);
+            } else if (context.onChange) {
+              context.onChange(newValues);
+            }
+          } else if (value !== undefined) {
+            // Value 모드 처리
+            let newValues: typeof context.value;
+
+            if (checked) {
+              // 값 추가
+              newValues = [...context.value, value];
+            } else {
+              // 값 제거
+              newValues = context.value.filter((v) => v !== value);
+            }
+
+            if (context.setValue) {
+              context.setValue(newValues);
+            } else if (context.onChange) {
+              context.onChange(newValues);
+            }
+          }
         } else {
           // 둘 다 없을 경우, 내부 상태 업데이트
           setInternalChecked(checked);
@@ -281,8 +344,8 @@ function isCheckboxOption<T extends string | number>(
 export interface CheckboxGroupHandle {
   focus: (index?: number) => void;
   blur: (index?: number) => void;
-  getValue: () => CheckboxValue[];
-  setValue: (values: CheckboxValue[]) => void;
+  getValue: () => unknown[];
+  setValue: (values: unknown[]) => void;
 }
 
 // Checkbox Group component props
@@ -291,7 +354,8 @@ interface CheckboxGroupProps<
 > {
   children?: React.ReactNode;
   options?: (T | CheckboxOption<T extends string | number ? T : never>)[];
-  values?: T[];
+  value?: T[];
+  setValue?: SetValueFunction<T[]>;
   onChange?: (values: T[]) => void;
   className?: string;
   inputClassName?: string;
@@ -308,7 +372,8 @@ export const CheckboxGroup = forwardRef(
     {
       children,
       options,
-      values = [],
+      value = [],
+      setValue,
       onChange,
       className = '',
       inputClassName = '',
@@ -371,11 +436,13 @@ export const CheckboxGroup = forwardRef(
         }
       },
       getValue: () => {
-        return values as CheckboxValue[];
+        return value;
       },
-      setValue: (newValues: CheckboxValue[]) => {
-        if (onChange) {
-          onChange(newValues as unknown as T[]);
+      setValue: (newValues: unknown[]) => {
+        if (setValue) {
+          setValue(newValues as T[]);
+        } else if (onChange) {
+          onChange(newValues as T[]);
         }
       },
     }));
@@ -391,36 +458,13 @@ export const CheckboxGroup = forwardRef(
 
     const booleanMode = !hasValueProp && options === undefined;
 
-    const handleCheckboxChange = (
-      checkboxValue: string | number | boolean | undefined,
-      isChecked: boolean,
-      index?: number
-    ) => {
-      if (!onChange) return;
-
-      if (booleanMode && typeof index === 'number') {
-        // Boolean 모드 처리 (인덱스 기반)
-        const newValues = [...values];
-        // 타입 안전성을 위해 검증
-        newValues[index] = isChecked as T;
-        onChange(newValues);
-      } else {
-        // Value 모드 처리
-        if (isChecked) {
-          // Add value to array
-          onChange([...values, checkboxValue as T]);
-        } else {
-          // Remove value from array
-          onChange(values.filter((value) => value !== checkboxValue));
-        }
-      }
-    };
-
-    const contextValue: CheckboxContextType = {
-      values: values as CheckboxValue[],
+    // Use type assertion to ensure compatibility between T and CheckboxValue
+    const contextValue = {
+      value: value as T[],
       booleanMode,
-      onChange: handleCheckboxChange,
-    };
+      onChange,
+      setValue,
+    } as CheckboxContextType<CheckboxValue>;
 
     return (
       <CheckboxContext.Provider value={contextValue}>
