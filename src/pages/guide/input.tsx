@@ -1,7 +1,7 @@
 // src/pages/guide/input.tsx
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import { Button, CodeHighlight, Input, InputHandle } from '@/components/common';
 import { usePageLayout } from '@/hooks/usePageLayout';
-import { Button, CodeHighlight, Input } from '@/components/common';
 import styles from '@/assets/scss/pages/guide.module.scss';
 
 const InputGuide = () => {
@@ -57,6 +57,10 @@ const InputGuide = () => {
     console.log('Directly clearing all values');
     setMultiValues(['', '', multiValues[2]]); // 세 번째 값은 disabled이미로 유지
   };
+
+  // ref 선언
+  const inputRef = useRef<InputHandle>(null);
+  const multiInputRef = useRef<InputHandle>(null);
 
   return (
     <div className="page-inner">
@@ -463,6 +467,97 @@ const handleInputChange = (
     { maxLength: 4, align: 'center' },
   ]}
 />`}
+          language="jsx"
+        />
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles['section-title']}>외부에서 포커스 주기</h2>
+        <p className={styles.txt}>
+          useRef와 InputHandle 인터페이스를 사용하여 외부에서 Input 컴포넌트에
+          포커스를 줄 수 있습니다. 단일 입력 필드는 해당 필드에, 다중 입력
+          필드는 포커스 가능한 첫 번째 필드에 포커스가 적용됩니다.
+        </p>
+
+        <div className={styles.showcase}>
+          <h3 className={styles['sub-title']}>단일 입력 필드 포커스</h3>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              marginBottom: '20px',
+            }}
+          >
+            <Input
+              ref={inputRef}
+              placeholder="여기에 포커스가 적용됩니다"
+              style={{ width: '300px' }}
+            />
+            <Button
+              className="primary"
+              onClick={() => inputRef.current?.focus()}
+              size="sm"
+            >
+              포커스
+            </Button>
+          </div>
+
+          <h3 className={styles['sub-title']}>다중 입력 필드 포커스</h3>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Input
+              ref={multiInputRef}
+              values={['010', '', '']}
+              separator="-"
+              inputFields={[
+                { maxLength: 3, align: 'center', disabled: true },
+                { maxLength: 4, align: 'center' },
+                { maxLength: 4, align: 'center' },
+              ]}
+              style={{ width: '300px' }}
+            />
+            <Button
+              className="primary"
+              onClick={() => multiInputRef.current?.focus()}
+              size="sm"
+            >
+              포커스
+            </Button>
+          </div>
+        </div>
+
+        <h3 className={styles['sub-title']}>참조 소스코드</h3>
+        <CodeHighlight
+          code={`import { useRef } from 'react';
+import { Input, InputHandle } from '@/components/common';
+
+// ref 선언
+const inputRef = useRef<InputHandle>(null);
+const multiInputRef = useRef<InputHandle>(null);
+
+// 단일 입력 필드
+<Input
+  ref={inputRef}
+  placeholder="여기에 포커스가 적용됩니다"
+/>
+<Button className="primary" onClick={() => inputRef.current?.focus()}>
+  포커스
+</Button>
+
+// 다중 입력 필드
+<Input
+  ref={multiInputRef}
+  values={['010', '', '']}
+  separator="-"
+  inputFields={[
+    { maxLength: 3, align: 'center', disabled: true },
+    { maxLength: 4, align: 'center' },
+    { maxLength: 4, align: 'center' },
+  ]}
+/>
+<Button className="primary" onClick={() => multiInputRef.current?.focus()}>
+  포커스
+</Button>`}
           language="jsx"
         />
       </section>

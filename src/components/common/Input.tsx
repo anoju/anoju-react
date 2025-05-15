@@ -8,11 +8,23 @@ import React, {
   ReactNode,
   ChangeEvent,
   FocusEvent,
+  useImperativeHandle,
 } from 'react';
 import styles from '@/assets/scss/components/input.module.scss';
 import cx from '@/utils/cx';
 
 // ---------------------- Types ----------------------
+
+// 외부에서 호출 가능한 메서드 인터페이스 정의
+export interface InputHandle {
+  focus: () => void;
+  blur: () => void;
+  getValue: () => string | undefined;
+  setValue: (value: string) => void;
+  getValues: () => (string | number)[] | undefined;
+  setValues: (values: (string | number)[]) => void;
+  reset: () => void;
+}
 
 // 개별 input 태그의 속성을 위한 타입 정의
 export interface InputFieldProps {
@@ -431,7 +443,7 @@ PasswordToggleButton.displayName = 'PasswordToggleButton';
 
 // ---------------------- Main Component ----------------------
 
-const Input = forwardRef<HTMLInputElement, InputProps>(
+const Input = forwardRef<InputHandle, InputProps>(
   (
     {
       // 기본 속성
@@ -504,6 +516,66 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       setValue,
       setValues,
     });
+
+    // useImperativeHandle을 사용하여 외부에서 호출 가능한 메서드 정의
+    useImperativeHandle(ref, () => ({
+      focus: () => {
+        if (isMultipleInputs) {
+          // 다중 입력 필드인 경우 첫 번째 입력 가능한 필드에 포커스
+          const nextEnabledInput = inputRefs.current.find((el, idx) => {
+            if (!el) return false;
+            const fieldProps = inputFields[idx] || {};
+            const fieldDisabled =
+              fieldProps.disabled !== undefined
+                ? fieldProps.disabled
+                : disabled;
+            const fieldReadOnly =
+              fieldProps.readOnly !== undefined
+                ? fieldProps.readOnly
+                : readOnly;
+            return !fieldDisabled && !fieldReadOnly;
+          });
+
+          if (nextEnabledInput) {
+            nextEnabledInput.focus();
+          }
+        } else if (inputRef.current) {
+          // 단일 입력 필드인 경우
+          inputRef.current.focus();
+        }
+      },
+      blur: () => {
+        if (isMultipleInputs) {
+          // 현재 포커스된 요소가 있다면 blur 처리
+          const activeElement = document.activeElement;
+          const isInputInOurRefs = inputRefs.current.some(
+            (input) => input === activeElement
+          );
+          if (isInputInOurRefs) {
+            (activeElement as HTMLInputElement).blur();
+          }
+        } else if (inputRef.current) {
+          inputRef.current.blur();
+        }
+      },
+      getValue: () => {
+        return isMultipleInputs ? undefined : inputValue;
+      },
+      setValue: (value: string) => {
+        if (!isMultipleInputs) {
+          setInputValue(value);
+        }
+      },
+      getValues: () => {
+        return isMultipleInputs ? inputValues : undefined;
+      },
+      setValues: (values: (string | number)[]) => {
+        if (isMultipleInputs) {
+          setInputValues(values);
+        }
+      },
+      reset: handleReset,
+    }));
 
     // 포커스 상태 관리 훅
     const { isFocused, handleFocus, handleBlur } = useFocusState({
@@ -689,14 +761,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             key={`input-field-${index}`}
             ref={(el) => {
               inputRefs.current[index] = el;
-              // 첫 번째 필드는 외부 ref와 연결
-              if (index === 0 && el) {
-                if (typeof ref === 'function') {
-                  ref(el);
-                } else if (ref) {
-                  ref.current = el;
-                }
-              }
+              // 외부 ref는 useImperativeHandle에서 처리하므로 여기서는 DOM 요소만 저장
             }}
             type={fieldActualType}
             className={inputClasses}
@@ -725,7 +790,6 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         handleFocus,
         handleBlur,
         inputFields,
-        ref,
         restProps,
         inputRefs,
       ]
@@ -832,15 +896,8 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         ) : (
           <input
             ref={(node) => {
-              // 전달된 ref와 내부 ref 모두 설정
-              if (node) {
-                if (typeof ref === 'function') {
-                  ref(node);
-                } else if (ref) {
-                  ref.current = node;
-                }
-                inputRef.current = node;
-              }
+              // 내부 ref만 설정 (외부 ref는 useImperativeHandle에서 처리)
+              inputRef.current = node;
             }}
             id={id}
             type={actualType}
