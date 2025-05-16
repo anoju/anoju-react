@@ -12,6 +12,7 @@ import React, {
   useEffect,
 } from 'react';
 import styles from '@/assets/scss/components/checkRadio.module.scss';
+import cx from '@/utils/cx';
 
 // 고유 ID 생성을 위한 유틸리티 함수
 let uniqueIdCounter = 0;
@@ -29,6 +30,9 @@ interface RadioContextType {
   name?: string;
   disabled?: boolean;
   registerRadio?: (index: number, handle: RadioHandle | null) => void;
+  isBtn?: boolean;
+  isSwitch?: boolean;
+  leftLabel?: boolean;
 }
 
 // RadioContext 생성
@@ -60,6 +64,9 @@ interface RadioProps
   iconClassName?: string;
   labelClassName?: string;
   disabled?: boolean;
+  isBtn?: boolean;
+  isSwitch?: boolean;
+  leftLabel?: boolean;
   index?: number; // Group 내에서의 인덱스 (자동 등록용)
 }
 
@@ -77,6 +84,9 @@ export const Radio = forwardRef<RadioHandle, RadioProps>(
       iconClassName = '',
       labelClassName = '',
       disabled = false,
+      isBtn = false,
+      isSwitch = false,
+      leftLabel = false,
       index,
       ...props
     },
@@ -85,8 +95,11 @@ export const Radio = forwardRef<RadioHandle, RadioProps>(
     // RadioContext 사용
     const context = useContext(RadioContext);
 
-    // 상위 그룹의 disabled 상태 반영
+    // 그룹에서 상속받은 속성 적용
     const mergedDisabled = disabled || context?.disabled;
+    const mergedIsBtn = isBtn || context?.isBtn;
+    const mergedIsSwitch = isSwitch || context?.isSwitch;
+    const mergedLeftLabel = leftLabel || context?.leftLabel;
 
     // Generate a unique ID if not provided
     const radioIdRef = useRef<string>(id || generateUniqueId());
@@ -189,24 +202,38 @@ export const Radio = forwardRef<RadioHandle, RadioProps>(
       return undefined;
     }, [context, index]);
 
+    // 클래스 계산
+    const radioClasses = cx(styles.radio, className, {
+      [styles.btn]: mergedIsBtn,
+      [styles.switch]: mergedIsSwitch,
+    });
+
     return (
-      <div ref={rootRef} className={`${styles.radio} ${className}`}>
+      <div ref={rootRef} className={radioClasses}>
+        {children && mergedLeftLabel && (
+          <label
+            className={cx(styles.lbl, labelClassName)}
+            htmlFor={radioId}
+          >
+            {children}
+          </label>
+        )}
         <input
           type="radio"
           id={radioId}
           value={String(value)}
           checked={!!isChecked}
           onChange={handleChange}
-          className={`${styles.inp} ${styles.native} ${inputClassName}`}
+          className={cx(styles.inp, styles.native, inputClassName)}
           disabled={mergedDisabled}
           name={context?.name}
           ref={inputRef}
           {...props}
         />
-        <i className={`${styles.ico} ${iconClassName}`} aria-hidden="true"></i>
-        {children && (
+        <i className={cx(styles.ico, iconClassName)} aria-hidden="true" />
+        {children && !mergedLeftLabel && (
           <label
-            className={`${styles.lbl} ${labelClassName}`}
+            className={cx(styles.lbl, labelClassName)}
             htmlFor={radioId}
           >
             {children}
@@ -260,6 +287,9 @@ interface RadioGroupProps<T extends string | number = string | number> {
   name?: string;
   disabled?: boolean;
   style?: React.CSSProperties;
+  isBtn?: boolean;
+  isSwitch?: boolean;
+  leftLabel?: boolean;
 }
 
 // Radio Group component with generic type support
@@ -277,6 +307,9 @@ const RadioGroupComponent = forwardRef(
       name,
       disabled = false,
       style,
+      isBtn = false,
+      isSwitch = false,
+      leftLabel = false,
       ...rest
     }: RadioGroupProps<T>,
     ref: React.ForwardedRef<RadioGroupHandle>
@@ -309,8 +342,11 @@ const RadioGroupComponent = forwardRef(
         name: name || `radio-group-${generateUniqueId()}`,
         disabled,
         registerRadio,
+        isBtn,
+        isSwitch,
+        leftLabel,
       }),
-      [value, handleRadioChange, name, disabled, registerRadio]
+      [value, handleRadioChange, name, disabled, registerRadio, isBtn, isSwitch, leftLabel]
     );
 
     // useImperativeHandle을 사용하여 외부에서 호출 가능한 메서드 정의
@@ -383,12 +419,23 @@ const RadioGroupComponent = forwardRef(
             labelClassName={labelClassName}
             disabled={optionDisabled}
             index={idx}
+            isBtn={isBtn}
+            isSwitch={isSwitch}
+            leftLabel={leftLabel}
           >
             {optionLabel}
           </Radio>
         );
       });
-    }, [options, inputClassName, iconClassName, labelClassName]);
+    }, [
+      options,
+      inputClassName,
+      iconClassName,
+      labelClassName,
+      isBtn,
+      isSwitch,
+      leftLabel,
+    ]);
 
     // 자식 요소에 index 속성 추가 (ref 대신 index로 처리)
     const childrenWithIndexes = useMemo(() => {
@@ -405,7 +452,7 @@ const RadioGroupComponent = forwardRef(
 
     return (
       <RadioContext.Provider value={contextValue}>
-        <div className={`check-wrap ${className}`} style={style} {...rest}>
+        <div className={cx('check-wrap', className)} style={style} {...rest}>
           {options ? radioOptions : childrenWithIndexes}
         </div>
       </RadioContext.Provider>

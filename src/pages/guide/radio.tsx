@@ -287,6 +287,141 @@ const [selectedColor, setSelectedColor] = useState<string | number>('blue');
       </section>
 
       <section className={styles.section}>
+        <h2 className={styles['section-title']}>스타일 적용</h2>
+        <h3 className={styles['sub-title']}>체크박스 우측배치</h3>
+        <p className={styles.txt}>leftLabel 옵션 true</p>
+        <div className={styles.showcase}>
+          <Radio leftLabel value="1">
+            라디오
+          </Radio>
+          <br />
+          <br />
+          <Radio.Group
+            leftLabel
+            options={[
+              { value: 'red', label: '빨간색' },
+              { value: 'blue', label: '파란색' },
+              { value: 'green', label: '초록색' },
+              { value: 'yellow', label: '노란색', disabled: true },
+            ]}
+            value={selectedColor}
+            onChange={setSelectedColor}
+          />
+        </div>
+        <CodeHighlight
+          code={`// 단독일때
+<Radio leftLabel value="1">라디오</Radio>
+
+//그룹일때
+<Checkbox.Group
+  leftLabel
+  options={['apple', 'orange', 'banana', 'grape']}
+  value={selectedFruits}
+  setValue={setSelectedFruits}
+/>
+`}
+          language="typescript"
+        />
+
+        <br />
+
+        <h3 className={styles['sub-title']}>버튼형</h3>
+        <p className={styles.txt}>
+          isBtn 옵션 true (isSwitch 랑 같이 사용하지 말것)
+        </p>
+        <div className={styles.showcase}>
+          <Radio isBtn value={'1'} name="rdo1">
+            라디오1
+          </Radio>
+          <Radio isBtn value={'2'} name="rdo1">
+            라디오2
+          </Radio>
+          <br />
+          <br />
+          <Radio.Group
+            isBtn
+            options={[
+              { value: 'red', label: '빨간색' },
+              { value: 'blue', label: '파란색' },
+              { value: 'green', label: '초록색' },
+              { value: 'yellow', label: '노란색', disabled: true },
+            ]}
+            value={selectedColor}
+            onChange={setSelectedColor}
+            className="grid"
+          />
+        </div>
+        <h3 className={styles['sub-title']}>참조 소스코드</h3>
+        <CodeHighlight
+          code={`// 단독일때
+<Radio isBtn value={'1'} name="rdo1">
+  라디오1
+</Radio>
+
+//그룹일때
+<Radio.Group
+  isBtn
+  options={[
+    { value: 'red', label: '빨간색' },
+    { value: 'blue', label: '파란색' },
+    { value: 'green', label: '초록색' },
+    { value: 'yellow', label: '노란색', disabled: true },
+  ]}
+  value={selectedColor}
+  onChange={setSelectedColor}
+  className="grid"
+/>
+`}
+          language="typescript"
+        />
+
+        <br />
+
+        <h3 className={styles['sub-title']}>스위치</h3>
+        <p className={styles.txt}>
+          isSwitch 옵션 true (isBtn 이이랑 같이 사용하지 말것)
+        </p>
+        <div className={styles.showcase}>
+          <Radio isSwitch value={1} name="rdo2">
+            radio1
+          </Radio>
+          <Radio isSwitch value={2} name="rdo2">
+            radio2
+          </Radio>
+          <br />
+          <br />
+          <Radio.Group
+            isSwitch
+            options={[
+              { value: 'red', label: '빨간색' },
+              { value: 'blue', label: '파란색' },
+              { value: 'green', label: '초록색' },
+              { value: 'yellow', label: '노란색', disabled: true },
+            ]}
+            value={selectedColor}
+            onChange={setSelectedColor}
+            className="grid"
+          />
+        </div>
+        <CodeHighlight
+          code={`// 단독일때
+<Radio isSwitch value={1} name="rdo2">
+  radio1
+</Radio>
+
+//그룹일때
+<Checkbox.Group
+  isSwitch
+  options={['apple', 'orange', 'banana', 'grape']}
+  value={selectedFruits}
+  setValue={setSelectedFruits}
+/>
+`}
+          language="typescript"
+        />
+      </section>
+
+      <section className={styles.section}>
         <h2 className={styles['section-title']}>외부에서 메서드 호출하기</h2>
         <p className={styles.txt}>
           useRef와 ref 속성을 사용하여 라디오 버튼의 메서드를 직접 호출할 수
@@ -486,7 +621,7 @@ const MyRadioWithRef = () => {
               marginTop: '10px',
               display: 'flex',
               gap: '5px',
-              flexWrap: 'wrap'
+              flexWrap: 'wrap',
             }}
           >
             <Button size="sm" onClick={handleGetValue}>
@@ -500,7 +635,7 @@ const MyRadioWithRef = () => {
             </Button>
           </div>
 
-          <h3 className={styles['sub-title']} style={{ marginTop: '20px' }}>참조 소스코드</h3>
+          <h3 className={styles['sub-title']}>참조 소스코드</h3>
           <CodeHighlight
             code={`// RadioGroupHandle 타입 가져오기
 import { useRef, useState } from 'react';
@@ -566,9 +701,7 @@ const handleSetValue = (value: string) => {
               </tr>
               <tr>
                 <td>getValue()</td>
-                <td>
-                  현재 선택된 라디오 버튼의 값을 가져옵니다.
-                </td>
+                <td>현재 선택된 라디오 버튼의 값을 가져옵니다.</td>
                 <td>
                   <code>const value = groupRef.current?.getValue()</code>
                 </td>
@@ -591,7 +724,8 @@ const handleSetValue = (value: string) => {
       <section className={styles.section}>
         <h2 className={styles['section-title']}>getValue/setValue 활용 예제</h2>
         <p className={styles.txt}>
-          RadioGroup의 getValue와 setValue 메서드는 다양한 상황에서 유용하게 활용할 수 있습니다.
+          RadioGroup의 getValue와 setValue 메서드는 다양한 상황에서 유용하게
+          활용할 수 있습니다.
         </p>
 
         <div className={styles.showcase}>
