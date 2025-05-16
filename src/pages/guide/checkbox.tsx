@@ -48,10 +48,10 @@ const CheckboxGuide = () => {
     checkboxRef.current?.blur();
   };
 
-  const handleIsChecked = () => {
+  const handleGetValue = () => {
     alert(
       '현재 체크 상태: ' +
-        (checkboxRef.current?.isChecked() ? '체크됨' : '체크 안됨')
+        (checkboxRef.current?.getValue() ? '체크됨' : '체크 안됨')
     );
   };
 
@@ -360,7 +360,7 @@ const [booleanValues, setBooleanValues] = useState<(string | number | boolean)[]
             <Button className="line" size="sm" onClick={handleBlur}>
               블러
             </Button>
-            <Button className="line" size="sm" onClick={handleIsChecked}>
+            <Button className="line" size="sm" onClick={handleGetValue}>
               상태 확인
             </Button>
             <Button
@@ -402,8 +402,8 @@ const MyCheckboxWithRef = () => {
     checkboxRef.current?.blur();
   };
   
-  const handleIsChecked = () => {
-    alert('현재 체크 상태: ' + (checkboxRef.current?.isChecked() ? '체크됨' : '체크 안됨'));
+  const handleGetValue = () => {
+    alert('현재 체크 상태: ' + (checkboxRef.current?.getValue() ? '체크됨' : '체크 안됨'));
   };
   
   const handleSetValue = (value: boolean) => {
@@ -420,7 +420,7 @@ const MyCheckboxWithRef = () => {
       <div style={{ marginTop: '10px', display: 'flex', gap: '5px' }}>
         <button onClick={handleFocus}>포커스</button>
         <button onClick={handleBlur}>블러</button>
-        <button onClick={handleIsChecked}>상태 확인</button>
+        <button onClick={handleGetValue}>상태 확인</button>
         <button onClick={() => handleSetValue(true)}>체크하기</button>
         <button onClick={() => handleSetValue(false)}>체크 해제</button>
         <button onClick={handleToggle}>토글</button>
@@ -460,12 +460,10 @@ const MyCheckboxWithRef = () => {
                 </td>
               </tr>
               <tr>
-                <td>isChecked()</td>
+                <td>getValue()</td>
                 <td>현재 체크 상태를 boolean 값으로 반환합니다.</td>
                 <td>
-                  <code>
-                    const isChecked = checkboxRef.current?.isChecked()
-                  </code>
+                  <code>const getValue = checkboxRef.current?.getValue()</code>
                 </td>
               </tr>
               <tr>

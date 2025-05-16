@@ -55,7 +55,7 @@ const CheckboxContext = createContext<CheckboxContextType | undefined>(
 export interface CheckboxHandle {
   focus: () => void;
   blur: () => void;
-  isChecked: () => boolean;
+  getValue: () => boolean; // isChecked 제거, getValue만 유지
   setValue: (checked: boolean) => void;
   toggle: () => void;
   getRootElement: () => HTMLElement | null;
@@ -255,7 +255,8 @@ export const Checkbox = forwardRef<CheckboxHandle, CheckboxProps>(
             inputRef.current.blur();
           }
         },
-        isChecked: () => {
+        // getValue만 유지
+        getValue: () => {
           return !!isChecked;
         },
         setValue: (checked: boolean) => {
