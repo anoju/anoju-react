@@ -340,8 +340,21 @@ const [selectedColor, setSelectedColor] = useState<string | number>('blue');
         <h3 className={styles['sub-title']}>체크박스 우측배치</h3>
         <p className={styles.txt}>leftLabel 옵션 true</p>
         <div className={styles.showcase}>
-          <Radio leftLabel value="1">
-            라디오
+          <Radio
+            leftLabel
+            value="option1"
+            checked={selected === 'option1'}
+            onChange={(e) => setSelected(e.target.checked ? 'option1' : '')}
+          >
+            라디오1
+          </Radio>
+          <Radio
+            leftLabel
+            value="option2"
+            checked={selected === 'option2'}
+            onChange={(e) => setSelected(e.target.checked ? 'option2' : '')}
+          >
+            라디오2
           </Radio>
           <br />
           <br />
@@ -359,11 +372,67 @@ const [selectedColor, setSelectedColor] = useState<string | number>('blue');
         </div>
         <CodeHighlight
           code={`// 단독일때
-<Radio leftLabel value="1">라디오</Radio>
+<Radio leftLabel>라디오</Radio>
 
 //그룹일때
 <Radio.Group
   leftLabel
+  options={[
+    { value: 'red', label: '빨간색' },
+    { value: 'blue', label: '파란색' },
+    { value: 'green', label: '초록색' },
+    { value: 'yellow', label: '노란색', disabled: true },
+  ]}
+  value={selectedColor}
+  setValue={setSelectedColor}
+/>
+`}
+          language="typescript"
+        />
+
+        <br />
+
+        <h3 className={styles['sub-title']}>체크박스모양</h3>
+        <p className={styles.txt}>isCheckbox 옵션 true</p>
+        <div className={styles.showcase}>
+          <Radio
+            isCheckbox
+            value="option1"
+            checked={selected === 'option1'}
+            onChange={(e) => setSelected(e.target.checked ? 'option1' : '')}
+          >
+            라디오1
+          </Radio>
+          <Radio
+            isCheckbox
+            value="option2"
+            checked={selected === 'option2'}
+            onChange={(e) => setSelected(e.target.checked ? 'option2' : '')}
+          >
+            라디오2
+          </Radio>
+          <br />
+          <br />
+          <br />
+          <Radio.Group
+            isCheckbox
+            options={[
+              { value: 'red', label: '빨간색' },
+              { value: 'blue', label: '파란색' },
+              { value: 'green', label: '초록색' },
+              { value: 'yellow', label: '노란색', disabled: true },
+            ]}
+            value={selectedColor}
+            setValue={setSelectedColor}
+          />
+        </div>
+        <CodeHighlight
+          code={`// 단독일때
+<Radio isCheckbox>라디오</Radio>
+
+//그룹일때
+<Radio.Group
+  isCheckbox
   options={[
     { value: 'red', label: '빨간색' },
     { value: 'blue', label: '파란색' },
@@ -384,13 +453,24 @@ const [selectedColor, setSelectedColor] = useState<string | number>('blue');
           isBtn 옵션 true (isSwitch 랑 같이 사용하지 말것)
         </p>
         <div className={styles.showcase}>
-          <Radio isBtn value={'1'} name="rdo1">
-            라디오1
-          </Radio>
-          <Radio isBtn value={'2'} name="rdo1">
-            라디오2
-          </Radio>
-          <br />
+          <div className="check-wrap">
+            <Radio
+              isBtn
+              value="option1"
+              checked={selected === 'option1'}
+              onChange={(e) => setSelected(e.target.checked ? 'option1' : '')}
+            >
+              라디오1
+            </Radio>
+            <Radio
+              isBtn
+              value="option2"
+              checked={selected === 'option2'}
+              onChange={(e) => setSelected(e.target.checked ? 'option2' : '')}
+            >
+              라디오2
+            </Radio>
+          </div>
           <br />
           <Radio.Group
             isBtn
@@ -408,9 +488,7 @@ const [selectedColor, setSelectedColor] = useState<string | number>('blue');
         <h3 className={styles['sub-title']}>참조 소스코드</h3>
         <CodeHighlight
           code={`// 단독일때
-<Radio isBtn value={'1'} name="rdo1">
-  라디오1
-</Radio>
+<Radio isBtn>라디오1</Radio>
 
 //그룹일때
 <Radio.Group
@@ -436,13 +514,24 @@ const [selectedColor, setSelectedColor] = useState<string | number>('blue');
           isSwitch 옵션 true (isBtn 이이랑 같이 사용하지 말것)
         </p>
         <div className={styles.showcase}>
-          <Radio isSwitch value={1} name="rdo2">
-            radio1
-          </Radio>
-          <Radio isSwitch value={2} name="rdo2">
-            radio2
-          </Radio>
-          <br />
+          <div className="check-wrap">
+            <Radio
+              isSwitch
+              value="option1"
+              checked={selected === 'option1'}
+              onChange={(e) => setSelected(e.target.checked ? 'option1' : '')}
+            >
+              radio1
+            </Radio>
+            <Radio
+              isSwitch
+              value="option2"
+              checked={selected === 'option2'}
+              onChange={(e) => setSelected(e.target.checked ? 'option2' : '')}
+            >
+              radio2
+            </Radio>
+          </div>
           <br />
           <Radio.Group
             isSwitch
@@ -459,9 +548,7 @@ const [selectedColor, setSelectedColor] = useState<string | number>('blue');
         </div>
         <CodeHighlight
           code={`// 단독일때
-<Radio isSwitch value={1} name="rdo2">
-  radio1
-</Radio>
+<Radio isSwitch>radio1</Radio>
 
 //그룹일때
 <Radio.Group

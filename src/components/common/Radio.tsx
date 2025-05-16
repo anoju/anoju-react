@@ -30,6 +30,7 @@ interface RadioContextType {
   name?: string;
   disabled?: boolean;
   registerRadio?: (index: number, handle: RadioHandle | null) => void;
+  isCheckbox?: boolean;
   isBtn?: boolean;
   isSwitch?: boolean;
   leftLabel?: boolean;
@@ -64,6 +65,7 @@ interface RadioProps
   iconClassName?: string;
   labelClassName?: string;
   disabled?: boolean;
+  isCheckbox?: boolean;
   isBtn?: boolean;
   isSwitch?: boolean;
   leftLabel?: boolean;
@@ -84,6 +86,7 @@ export const Radio = forwardRef<RadioHandle, RadioProps>(
       iconClassName = '',
       labelClassName = '',
       disabled = false,
+      isCheckbox = false,
       isBtn = false,
       isSwitch = false,
       leftLabel = false,
@@ -97,6 +100,7 @@ export const Radio = forwardRef<RadioHandle, RadioProps>(
 
     // 그룹에서 상속받은 속성 적용
     const mergedDisabled = disabled || context?.disabled;
+    const mergedIsCheckbox = isCheckbox || context?.isCheckbox;
     const mergedIsBtn = isBtn || context?.isBtn;
     const mergedIsSwitch = isSwitch || context?.isSwitch;
     const mergedLeftLabel = leftLabel || context?.leftLabel;
@@ -203,10 +207,14 @@ export const Radio = forwardRef<RadioHandle, RadioProps>(
     }, [context, index]);
 
     // 클래스 계산
-    const radioClasses = cx(styles.radio, className, {
-      [styles.btn]: mergedIsBtn,
-      [styles.switch]: mergedIsSwitch,
-    });
+    const radioClasses = cx(
+      className,
+      mergedIsCheckbox ? styles.checkbox : styles.radio,
+      {
+        [styles.btn]: mergedIsBtn,
+        [styles.switch]: mergedIsSwitch,
+      }
+    );
 
     return (
       <div ref={rootRef} className={radioClasses}>
@@ -282,6 +290,7 @@ interface RadioGroupProps<T extends string | number = string | number> {
   name?: string;
   disabled?: boolean;
   style?: React.CSSProperties;
+  isCheckbox?: boolean;
   isBtn?: boolean;
   isSwitch?: boolean;
   leftLabel?: boolean;
@@ -303,6 +312,7 @@ const RadioGroupComponent = forwardRef(
       name,
       disabled = false,
       style,
+      isCheckbox = false,
       isBtn = false,
       isSwitch = false,
       leftLabel = false,
@@ -348,6 +358,7 @@ const RadioGroupComponent = forwardRef(
         name: name || `radio-group-${generateUniqueId()}`,
         disabled,
         registerRadio,
+        isCheckbox,
         isBtn,
         isSwitch,
         leftLabel,
@@ -358,6 +369,7 @@ const RadioGroupComponent = forwardRef(
         name,
         disabled,
         registerRadio,
+        isCheckbox,
         isBtn,
         isSwitch,
         leftLabel,
@@ -443,6 +455,7 @@ const RadioGroupComponent = forwardRef(
             labelClassName={labelClassName}
             disabled={optionDisabled}
             index={idx}
+            isCheckbox={isCheckbox}
             isBtn={isBtn}
             isSwitch={isSwitch}
             leftLabel={leftLabel}
@@ -456,6 +469,7 @@ const RadioGroupComponent = forwardRef(
       inputClassName,
       iconClassName,
       labelClassName,
+      isCheckbox,
       isBtn,
       isSwitch,
       leftLabel,
