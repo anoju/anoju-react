@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react';
 import { usePageLayout } from '@/hooks/usePageLayout';
 import { Button, CodeHighlight, Radio, RadioHandle } from '@/components/common';
+import type { RadioGroupHandle } from '@/components/common/Radio';
 import styles from '@/assets/scss/pages/guide.module.scss';
 
 const RadioGuide = () => {
@@ -30,7 +31,11 @@ const RadioGuide = () => {
   const radioRef = useRef<RadioHandle>(null);
   const [selected2, setSelected2] = useState('option1');
 
-  // 버튼 클릭 핸들러
+  // 라디오 그룹에 대한 참조 생성
+  const radioGroupRef = useRef<RadioGroupHandle>(null);
+  const [groupValue, setGroupValue] = useState('option1');
+
+  // 버튼 클릭 핸들러 - 개별 라디오
   const handleFocus = () => {
     radioRef.current?.focus();
   };
@@ -42,12 +47,22 @@ const RadioGuide = () => {
   const handleIsChecked = () => {
     alert(
       '현재 선택 상태: ' +
-        (radioRef.current?.isChecked() ? '선택됨' : '선택 안됨')
+        (radioRef.current?.getValue() ? '선택됨' : '선택 안됨')
     );
   };
 
   const handleSelect = () => {
-    radioRef.current?.select();
+    radioRef.current?.setValue();
+  };
+
+  // RadioGroup 메서드 핸들러
+  const handleGetValue = () => {
+    const value = radioGroupRef.current?.getValue();
+    alert(`현재 선택된 값: ${value}`);
+  };
+
+  const handleSetValue = (value: string) => {
+    radioGroupRef.current?.setValue(value);
   };
 
   return (
@@ -341,11 +356,11 @@ const MyRadioWithRef = () => {
   };
   
   const handleIsChecked = () => {
-    alert('현재 선택 상태: ' + (radioRef.current?.isChecked() ? '선택됨' : '선택 안됨'));
+    alert('현재 선택 상태: ' + (radioRef.current?.getValue() ? '선택됨' : '선택 안됨'));
   };
   
   const handleSelect = () => {
-    radioRef.current?.select();
+    radioRef.current?.setValue();
   };
   
   return (
@@ -410,17 +425,17 @@ const MyRadioWithRef = () => {
                 </td>
               </tr>
               <tr>
-                <td>isChecked()</td>
+                <td>getValue()</td>
                 <td>현재 선택 상태를 boolean 값으로 반환합니다.</td>
                 <td>
-                  <code>const isChecked = radioRef.current?.isChecked()</code>
+                  <code>const isChecked = radioRef.current?.getValue()</code>
                 </td>
               </tr>
               <tr>
-                <td>select()</td>
+                <td>setValue()</td>
                 <td>라디오 버튼을 선택합니다.</td>
                 <td>
-                  <code>radioRef.current?.select()</code>
+                  <code>radioRef.current?.setValue()</code>
                 </td>
               </tr>
               <tr>
@@ -453,6 +468,82 @@ const MyRadioWithRef = () => {
           제어할 수 있습니다.
         </p>
         <div className={styles.showcase}>
+          <Radio.Group
+            ref={radioGroupRef}
+            value={groupValue}
+            onChange={setGroupValue}
+            options={[
+              { value: 'option1', label: '옵션 1' },
+              { value: 'option2', label: '옵션 2' },
+              { value: 'option3', label: '옵션 3' },
+            ]}
+          />
+          <div style={{ marginTop: '10px' }}>
+            <p className={styles.txt}>선택된 값: {groupValue}</p>
+          </div>
+          <div
+            style={{
+              marginTop: '10px',
+              display: 'flex',
+              gap: '5px',
+              flexWrap: 'wrap'
+            }}
+          >
+            <Button size="sm" onClick={handleGetValue}>
+              현재 값 가져오기 (getValue)
+            </Button>
+            <Button size="sm" onClick={() => handleSetValue('option2')}>
+              '옵션 2'로 설정 (setValue)
+            </Button>
+            <Button size="sm" onClick={() => handleSetValue('option3')}>
+              '옵션 3'으로 설정 (setValue)
+            </Button>
+          </div>
+
+          <h3 className={styles['sub-title']} style={{ marginTop: '20px' }}>참조 소스코드</h3>
+          <CodeHighlight
+            code={`// RadioGroupHandle 타입 가져오기
+import { useRef, useState } from 'react';
+import { Radio } from '@/components/common';
+import type { RadioGroupHandle } from '@/components/common/Radio';
+
+// 참조 및 상태 생성
+const radioGroupRef = useRef<RadioGroupHandle>(null);
+const [groupValue, setGroupValue] = useState('option1');
+
+// 메서드 호출 함수
+const handleGetValue = () => {
+  const value = radioGroupRef.current?.getValue();
+  alert(\`현재 선택된 값: \${value}\`);
+};
+
+const handleSetValue = (value: string) => {
+  radioGroupRef.current?.setValue(value);
+};
+
+// JSX 렌더링
+<Radio.Group
+  ref={radioGroupRef}
+  value={groupValue}
+  onChange={setGroupValue}
+  options={[
+    { value: 'option1', label: '옵션 1' },
+    { value: 'option2', label: '옵션 2' },
+    { value: 'option3', label: '옵션 3' },
+  ]}
+/>
+
+<div>
+  <button onClick={handleGetValue}>
+    현재 값 가져오기 (getValue)
+  </button>
+  <button onClick={() => handleSetValue('option2')}>
+    '옵션 2'로 설정 (setValue)
+  </button>
+</div>`}
+            language="typescript"
+          />
+
           <table className={styles.table}>
             <thead>
               <tr>
@@ -473,8 +564,104 @@ const MyRadioWithRef = () => {
                   <code>groupRef.current?.focus(1)</code>
                 </td>
               </tr>
+              <tr>
+                <td>getValue()</td>
+                <td>
+                  현재 선택된 라디오 버튼의 값을 가져옵니다.
+                </td>
+                <td>
+                  <code>const value = groupRef.current?.getValue()</code>
+                </td>
+              </tr>
+              <tr>
+                <td>setValue(value: string | number)</td>
+                <td>
+                  특정 값을 가진 라디오 버튼을 프로그래밍 방식으로 선택합니다.
+                  onChange 콜백이 있는 경우 해당 함수도 호출됩니다.
+                </td>
+                <td>
+                  <code>groupRef.current?.setValue('option2')</code>
+                </td>
+              </tr>
             </tbody>
           </table>
+        </div>
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles['section-title']}>getValue/setValue 활용 예제</h2>
+        <p className={styles.txt}>
+          RadioGroup의 getValue와 setValue 메서드는 다양한 상황에서 유용하게 활용할 수 있습니다.
+        </p>
+
+        <div className={styles.showcase}>
+          <h3 className={styles['sub-title']}>폼 초기화</h3>
+          <CodeHighlight
+            code={`// 여러 개의 RadioGroup을 가진 양식을 초기화하는 예제
+function resetForm() {
+  fruitRadioRef.current?.setValue('apple');
+  colorRadioRef.current?.setValue('red');
+  sizeRadioRef.current?.setValue('medium');
+}`}
+            language="typescript"
+          />
+
+          <h3 className={styles['sub-title']}>변경 전에 현재 값 저장</h3>
+          <CodeHighlight
+            code={`// 값을 변경하기 전에 현재 값을 저장하고, 필요할 때 복원하는 예제
+function handleTemporaryChange() {
+  // 현재 값 저장
+  const previousValue = radioGroupRef.current?.getValue();
+  
+  // 새 값으로 변경
+  radioGroupRef.current?.setValue('option3');
+  
+  // 5초 후 이전 값으로 복원
+  setTimeout(() => {
+    if (previousValue) {
+      radioGroupRef.current?.setValue(previousValue);
+    }
+  }, 5000);
+}`}
+            language="typescript"
+          />
+
+          <h3 className={styles['sub-title']}>조건부 라디오 버튼 선택</h3>
+          <CodeHighlight
+            code={`// 조건에 따라 특정 라디오 버튼 선택
+function selectBasedOnCondition(userRole: string) {
+  if (userRole === 'admin') {
+    roleRadioRef.current?.setValue('fullAccess');
+  } else if (userRole === 'editor') {
+    roleRadioRef.current?.setValue('editAccess');
+  } else {
+    roleRadioRef.current?.setValue('readAccess');
+  }
+}`}
+            language="typescript"
+          />
+
+          <h3 className={styles['sub-title']}>값 검증</h3>
+          <CodeHighlight
+            code={`// 폼 제출 전 라디오 값 검증
+function validateForm() {
+  const selectedOption = radioGroupRef.current?.getValue();
+  
+  if (!selectedOption) {
+    alert('선택해야 합니다!');
+    return false;
+  }
+  
+  // 특정 값에 따른 추가 검증
+  if (selectedOption === 'custom' && customOptionTextRef.current?.value === '') {
+    alert('커스텀 옵션을 설명해주세요!');
+    return false;
+  }
+  
+  return true;
+}`}
+            language="typescript"
+          />
         </div>
       </section>
     </div>

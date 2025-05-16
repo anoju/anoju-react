@@ -38,8 +38,8 @@ const RadioContext = createContext<RadioContextType | undefined>(undefined);
 export interface RadioHandle {
   focus: () => void;
   blur: () => void;
-  isChecked: () => boolean;
-  select: () => void;
+  getValue: () => boolean;
+  setValue: () => void;
   getRootElement: () => HTMLElement | null;
   getInputElement: () => HTMLInputElement | null;
 }
@@ -133,10 +133,10 @@ export const Radio = forwardRef<RadioHandle, RadioProps>(
             inputRef.current.blur();
           }
         },
-        isChecked: () => {
+        getValue: () => {
           return !!isChecked;
         },
-        select: () => {
+        setValue: () => {
           if (mergedDisabled) return; // 비활성화된 경우 동작하지 않음
 
           // 이미 선택된 경우 작업 필요 없음
@@ -243,6 +243,8 @@ function isRadioOption<T extends string | number>(
 // 외부에서 호출 가능한 그룹 메서드 인터페이스 정의
 export interface RadioGroupHandle {
   focus: (index?: number) => void;
+  getValue: () => string | number | undefined;
+  setValue: (value: string | number) => void;
 }
 
 // Radio Group component props
@@ -331,8 +333,18 @@ const RadioGroupComponent = forwardRef(
             firstAvailableRadio.focus();
           }
         },
+        // 현재 선택된 값 반환
+        getValue: () => {
+          return value;
+        },
+        // 새 값 설정
+        setValue: (newValue: string | number) => {
+          if (onChange) {
+            onChange(newValue as T);
+          }
+        },
       }),
-      []
+      [value, onChange]
     );
 
     // 옵션에서 Radio 컴포넌트 생성
