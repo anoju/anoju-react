@@ -6,7 +6,7 @@
  */
 type ClassValue =
   | string
-  | Record<string, boolean>
+  | Record<string, boolean | undefined>
   | null
   | undefined
   | false

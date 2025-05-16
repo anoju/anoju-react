@@ -24,7 +24,7 @@
   min-height: var(--chk-size);
   vertical-align: middle;
   cursor: pointer;
-  margin-right: 0.8rem;
+  margin-right: var(--chk-size);
 
   &:last-child {
     margin-right: 0;
@@ -387,7 +387,7 @@
 :global(.check-wrap) {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.8rem;
+  gap: var(--chk-size);
 
   .checkbox,
   .radio {
@@ -396,6 +396,7 @@
 
   &:global(.grid) {
     display: grid;
+    gap: 0.8rem;
     grid-template-columns: 1fr 1fr;
   }
 }

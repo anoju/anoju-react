@@ -4,13 +4,13 @@ import React, {
   useContext,
   useRef,
   forwardRef,
-  ChangeEvent,
   useState,
-  useEffect,
-  useImperativeHandle,
   useCallback,
-  Dispatch,
-  SetStateAction,
+  useMemo,
+  ReactNode,
+  useImperativeHandle,
+  useEffect,
+  ChangeEvent,
 } from 'react';
 import styles from '@/assets/scss/components/checkRadio.module.scss';
 import cx from '@/utils/cx';
@@ -18,15 +18,21 @@ import cx from '@/utils/cx';
 // 고유 ID 생성을 위한 유틸리티 함수
 let uniqueIdCounter = 0;
 const generateUniqueId = (): string => {
-  const id = `checkbox_${uniqueIdCounter++}_${Math.random().toString(36).substring(2, 9)}`;
-  return id;
+  return `checkbox_${uniqueIdCounter++}_${Math.random().toString(36).slice(2, 9)}`;
 };
 
 // 체크박스 값 타입 정의
 type CheckboxValue = string | number | boolean;
-type SetValueFunction<T> = Dispatch<SetStateAction<T>> | ((value: T) => void);
+type SetValueFunction<T> =
+  | React.Dispatch<React.SetStateAction<T>>
+  | ((value: T) => void);
 
-// CheckboxContext 타입 정의 - value가 있는 경우와 없는 경우 모두 처리
+// 유틸리티 함수 - 파라미터가 T 타입의 값을 포함하는지 확인
+function includesValue<T>(array: T[], value: unknown): boolean {
+  return array.some((item) => item === value);
+}
+
+// CheckboxContext 타입 정의
 interface CheckboxContextType<T = CheckboxValue> {
   value: T[];
   booleanMode: boolean;
@@ -34,14 +40,13 @@ interface CheckboxContextType<T = CheckboxValue> {
   setValue?: SetValueFunction<T[]>;
   name?: string;
   disabled?: boolean;
+  registerCheckbox?: (index: number, handle: CheckboxHandle | null) => void;
+  isBtn?: boolean;
+  isSwitch?: boolean;
+  leftLabel?: boolean;
 }
 
-// 유틸리티 함수 - 파라미터가 T 타입의 값을 포함하는지 확인
-function includesValue<T>(array: T[], value: unknown): boolean {
-  return array.some((item) => item === value);
-}
-
-// Create a context for the Checkbox Group
+// CheckboxContext 생성
 const CheckboxContext = createContext<CheckboxContextType | undefined>(
   undefined
 );
@@ -64,12 +69,12 @@ export interface CheckboxProps
     'onChange' | 'value'
   > {
   id?: string;
-  value?: string | number; // value를 선택적으로 변경
+  value?: string | number;
   checked?: boolean;
   indeterminate?: boolean;
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
-  setValue?: SetValueFunction<boolean>; // 상태 업데이트 함수 추가
-  children?: React.ReactNode;
+  setValue?: SetValueFunction<boolean>;
+  children?: ReactNode;
   className?: string;
   inputClassName?: string;
   iconClassName?: string;
@@ -78,7 +83,7 @@ export interface CheckboxProps
   isBtn?: boolean;
   isSwitch?: boolean;
   leftLabel?: boolean;
-  index?: number; // Group 내에서의 인덱스 (boolean 모드용)
+  index?: number; // Group 내에서의 인덱스 (자동 등록용)
 }
 
 // Individual Checkbox component
@@ -90,7 +95,7 @@ export const Checkbox = forwardRef<CheckboxHandle, CheckboxProps>(
       checked,
       indeterminate = false,
       onChange,
-      setValue,
+      setValue: setValueProp,
       children,
       className = '',
       inputClassName = '',
@@ -105,11 +110,14 @@ export const Checkbox = forwardRef<CheckboxHandle, CheckboxProps>(
     },
     ref
   ) => {
-    // Check if inside a CheckboxGroup
+    // CheckboxContext 사용
     const context = useContext(CheckboxContext);
 
-    // 그룹에서 상속받은 disabled 상태 적용
+    // 그룹에서 상속받은 속성 적용
     const mergedDisabled = disabled || context?.disabled;
+    const mergedIsBtn = isBtn || context?.isBtn;
+    const mergedIsSwitch = isSwitch || context?.isSwitch;
+    const mergedLeftLabel = leftLabel || context?.leftLabel;
 
     // 내부 상태 관리 - checked prop이 undefined일 때만 사용
     const [internalChecked, setInternalChecked] = useState(false);
@@ -121,6 +129,12 @@ export const Checkbox = forwardRef<CheckboxHandle, CheckboxProps>(
     // input 요소에 대한 참조 생성
     const inputRef = useRef<HTMLInputElement>(null);
 
+    // 컨테이너 요소에 대한 참조 생성
+    const rootRef = useRef<HTMLDivElement>(null);
+
+    // 핸들 참조
+    const handleRef = useRef<CheckboxHandle | null>(null);
+
     // indeterminate 상태 적용
     useEffect(() => {
       if (inputRef.current) {
@@ -129,57 +143,49 @@ export const Checkbox = forwardRef<CheckboxHandle, CheckboxProps>(
     }, [indeterminate]);
 
     // 체크 상태 결정 로직
-    let isChecked: boolean;
-
-    if (context) {
-      // 그룹 내에서의 체크 상태 결정
-      if (context.booleanMode) {
-        // Boolean mode (index 기반)
-        isChecked = typeof index === 'number' ? !!context.value[index] : false;
-      } else {
-        // Value mode
-        isChecked = value !== undefined && includesValue(context.value, value);
-      }
-    } else if (checked !== undefined) {
-      // 외부에서 제공된 checked prop이 있는 경우
-      isChecked = checked;
-    } else {
-      // 독립형 체크박스로 사용되며 checked prop이 없는 경우, 내부 상태 사용
-      isChecked = internalChecked;
-    }
-
-    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-      // 비활성화된 경우 무시
-      if (mergedDisabled) {
-        return;
-      }
-
-      const newChecked = e.target.checked;
-
-      // 항상 onChange 핸들러 호출 (제공된 경우)
-      if (onChange) {
-        onChange(e);
-      }
-
-      // 상태 업데이트 처리
+    const isChecked = useMemo(() => {
       if (context) {
-        // 그룹 내에서의 변경 처리
+        // 그룹 내에서의 체크 상태 결정
         if (context.booleanMode) {
-          // Boolean 모드 (인덱스 기반)
-          if (typeof index === 'number') {
-            const newValues = [...context.value];
-            newValues[index] = newChecked;
+          // Boolean mode (index 기반)
+          return typeof index === 'number' ? !!context.value[index] : false;
+        }
+        // Value mode
+        return value !== undefined && includesValue(context.value, value);
+      } else if (checked !== undefined) {
+        // 외부에서 제공된 checked prop이 있는 경우
+        return checked;
+      }
+      // 독립형 체크박스로 사용되며 checked prop이 없는 경우, 내부 상태 사용
+      return internalChecked;
+    }, [context, index, value, checked, internalChecked]);
 
-            // setValue가 있으면 사용, 없으면 onChange 사용
-            if (context.setValue) {
-              context.setValue(newValues);
-            } else if (context.onChange) {
-              context.onChange(newValues);
+    // 상태 변경 처리 함수
+    const updateCheckedState = useCallback(
+      (newChecked: boolean) => {
+        // 비활성화된 경우 무시
+        if (mergedDisabled) {
+          return;
+        }
+
+        // 상태 업데이트 처리
+        if (context) {
+          // 그룹 내에서의 변경 처리
+          if (context.booleanMode) {
+            // Boolean 모드 (인덱스 기반)
+            if (typeof index === 'number') {
+              const newValues = [...context.value];
+              newValues[index] = newChecked;
+
+              // setValue가 있으면 사용, 없으면 onChange 사용
+              if (context.setValue) {
+                context.setValue(newValues);
+              } else if (context.onChange) {
+                context.onChange(newValues);
+              }
             }
-          }
-        } else {
-          // Value 모드
-          if (value !== undefined) {
+          } else if (value !== undefined) {
+            // Value 모드
             let newValues: typeof context.value;
 
             if (newChecked) {
@@ -201,92 +207,44 @@ export const Checkbox = forwardRef<CheckboxHandle, CheckboxProps>(
               context.onChange(newValues);
             }
           }
-        }
-      } else if (setValue) {
-        // 외부 setValue 핸들러가 있는 경우
-        setValue(newChecked);
-      } else if (checked === undefined) {
-        // 독립형 체크박스이고 checked prop이 없는 경우, 내부 상태 업데이트
-        setInternalChecked(newChecked);
-      }
-    };
-
-    // 컨테이너 요소에 대한 참조 생성
-    const rootRef = useRef<HTMLDivElement>(null);
-
-    // useImperativeHandle을 사용하여 외부에서 호출 가능한 메서드 정의
-    useImperativeHandle(ref, () => {
-      // 값 설정 함수 - 중복 코드 방지를 위해 변수로 선언
-      const setValue = (checked: boolean) => {
-        // 비활성화된 경우 무시
-        if (mergedDisabled) {
-          return;
+        } else if (setValueProp) {
+          // 외부 setValue 핸들러가 있는 경우
+          setValueProp(newChecked);
+        } else if (checked === undefined) {
+          // 독립형 체크박스이고 checked prop이 없는 경우, 내부 상태 업데이트
+          setInternalChecked(newChecked);
         }
 
-        // 외부에서 제공된 onChange 함수가 있는 경우 호출
+        // DOM 요소의 checked 값도 직접 변경 (필요한 경우)
+        if (
+          inputRef.current &&
+          checked === undefined &&
+          !context &&
+          !setValueProp
+        ) {
+          inputRef.current.checked = newChecked;
+        }
+      },
+      [context, value, index, mergedDisabled, setValueProp, checked]
+    );
+
+    // 변경 이벤트 핸들러
+    const handleChange = useCallback(
+      (e: ChangeEvent<HTMLInputElement>) => {
+        // 항상 onChange 핸들러 호출 (제공된 경우)
         if (onChange) {
-          // 포커스 유지를 위해 현재 액티브 요소 저장
-          const activeElement = document.activeElement;
-
-          // 가짜 이벤트 생성
-          const fakeEvent = {
-            target: { checked },
-            currentTarget: { checked },
-            preventDefault: () => {},
-            stopPropagation: () => {},
-          } as unknown as ChangeEvent<HTMLInputElement>;
-
-          onChange(fakeEvent);
-
-          // 포커스 유지를 위해 현재 액티브 요소가 이 입력요소였다면 다시 포커스 설정
-          if (activeElement === inputRef.current) {
-            setTimeout(() => inputRef.current?.focus(), 0);
-          }
-        } else if (context) {
-          // context만 있는 경우
-          if (context.booleanMode && typeof index === 'number') {
-            const newValues = [...context.value];
-            newValues[index] = checked;
-
-            if (context.setValue) {
-              context.setValue(newValues);
-            } else if (context.onChange) {
-              context.onChange(newValues);
-            }
-          } else if (value !== undefined) {
-            // Value 모드 처리
-            let newValues: typeof context.value;
-
-            if (checked) {
-              // 값 추가 (중복 방지)
-              if (includesValue(context.value, value)) {
-                newValues = [...context.value];
-              } else {
-                newValues = [...context.value, value];
-              }
-            } else {
-              // 값 제거
-              newValues = context.value.filter((v) => v !== value);
-            }
-
-            if (context.setValue) {
-              context.setValue(newValues);
-            } else if (context.onChange) {
-              context.onChange(newValues);
-            }
-          }
-        } else {
-          // 둘 다 없을 경우, 내부 상태 업데이트
-          setInternalChecked(checked);
-
-          // DOM 요소의 checked 값도 직접 변경
-          if (inputRef.current) {
-            inputRef.current.checked = checked;
-          }
+          onChange(e);
         }
-      };
 
-      return {
+        // 체크 상태 업데이트
+        updateCheckedState(e.target.checked);
+      },
+      [onChange, updateCheckedState]
+    );
+
+    // 외부에서 호출 가능한 메서드 정의
+    useImperativeHandle(ref, () => {
+      const handle: CheckboxHandle = {
         focus: () => {
           if (inputRef.current) {
             inputRef.current.focus();
@@ -298,32 +256,80 @@ export const Checkbox = forwardRef<CheckboxHandle, CheckboxProps>(
           }
         },
         isChecked: () => {
-          return isChecked;
+          return !!isChecked;
         },
-        setValue,
+        setValue: (checked: boolean) => {
+          // 비활성화된 경우 무시
+          if (mergedDisabled) {
+            return;
+          }
+
+          if (onChange) {
+            // 포커스 유지를 위해 현재 액티브 요소 저장
+            const activeElement = document.activeElement;
+
+            // 가짜 이벤트 생성
+            const fakeEvent = {
+              target: { checked },
+              currentTarget: { checked },
+              preventDefault: () => {},
+              stopPropagation: () => {},
+            } as unknown as ChangeEvent<HTMLInputElement>;
+
+            onChange(fakeEvent);
+
+            // 포커스 유지
+            if (activeElement === inputRef.current) {
+              setTimeout(() => inputRef.current?.focus(), 0);
+            }
+          }
+
+          // 체크 상태 업데이트
+          updateCheckedState(checked);
+        },
         toggle: () => {
           // 비활성화된 경우 동작하지 않음
           if (mergedDisabled) return;
 
           // 현재 상태의 반대 값으로 설정
-          setValue(!isChecked);
+          handle.setValue(!isChecked);
         },
         getRootElement: () => rootRef.current,
         getInputElement: () => inputRef.current,
       };
-    }, [onChange, context, value, index, mergedDisabled, isChecked]);
 
+      handleRef.current = handle;
+      return handle;
+    }, [onChange, mergedDisabled, isChecked, updateCheckedState]);
+
+    // CheckboxGroup에 자동 등록 (index가 제공된 경우)
+    useEffect(() => {
+      if (
+        typeof index === 'number' &&
+        context?.registerCheckbox &&
+        handleRef.current
+      ) {
+        context.registerCheckbox(index, handleRef.current);
+
+        // 정리 함수
+        return () => {
+          if (context.registerCheckbox) {
+            context.registerCheckbox(index, null);
+          }
+        };
+      }
+      return undefined;
+    }, [context, index]);
+
+    // 클래스 계산
     const checkboxClasses = cx(styles.checkbox, className, {
-      [styles.btn]: isBtn,
-      [styles.switch]: isSwitch,
-      // [styles.disabled]: mergedDisabled,
-      // [styles.checked]: isChecked,
-      // [styles.indeterminate]: indeterminate,
+      [styles.btn]: mergedIsBtn,
+      [styles.switch]: mergedIsSwitch,
     });
 
     return (
       <div ref={rootRef} className={checkboxClasses}>
-        {children && leftLabel && (
+        {children && mergedLeftLabel && (
           <label
             className={cx(styles.lbl, labelClassName)}
             htmlFor={checkboxId}
@@ -335,15 +341,15 @@ export const Checkbox = forwardRef<CheckboxHandle, CheckboxProps>(
           type="checkbox"
           id={checkboxId}
           value={value !== undefined ? String(value) : ''}
-          checked={isChecked || false}
+          checked={!!isChecked}
           onChange={handleChange}
-          className={cx(styles.native, inputClassName)}
+          className={cx(styles.inp, styles.native, inputClassName)}
           disabled={mergedDisabled}
           ref={inputRef}
           {...props}
         />
         <i className={cx(styles.ico, iconClassName)} aria-hidden="true" />
-        {children && !leftLabel && (
+        {children && !mergedLeftLabel && (
           <label
             className={cx(styles.lbl, labelClassName)}
             htmlFor={checkboxId}
@@ -361,7 +367,7 @@ Checkbox.displayName = 'Checkbox';
 // Option type for Checkbox Group
 export interface CheckboxOption<T extends string | number = string | number> {
   value: T;
-  label: React.ReactNode;
+  label: ReactNode;
   disabled?: boolean;
   style?: React.CSSProperties;
   className?: string;
@@ -392,7 +398,7 @@ export interface CheckboxGroupHandle {
 export interface CheckboxGroupProps<
   T extends string | number | boolean = string | number,
 > {
-  children?: React.ReactNode;
+  children?: ReactNode;
   options?: (T | CheckboxOption<T extends string | number ? T : never>)[];
   value?: T[];
   onChange?: (values: T[]) => void;
@@ -410,7 +416,7 @@ export interface CheckboxGroupProps<
 }
 
 // Checkbox Group component with generic type support
-export const CheckboxGroup = forwardRef(
+const CheckboxGroupComponent = forwardRef(
   <T extends string | number | boolean = string | number>(
     {
       children,
@@ -432,34 +438,92 @@ export const CheckboxGroup = forwardRef(
     }: CheckboxGroupProps<T>,
     ref: React.ForwardedRef<CheckboxGroupHandle>
   ) => {
-    // refs 배열 참조 생성
+    // 자식 체크박스 컴포넌트에 대한 참조 배열
     const refs = useRef<(CheckboxHandle | null)[]>([]);
 
     // value가 없는 경우(boolean 모드) 감지
-    const childrenArray = React.Children.toArray(children);
+    const booleanMode = useMemo(() => {
+      // 옵션이 제공된 경우 boolean 모드 아님
+      if (options) return false;
 
-    // 타입 안전하게 isValidElement 및 'props' 접근
-    const hasValueProp =
-      childrenArray.length > 0 &&
-      React.isValidElement<{ value?: unknown }>(childrenArray[0]) &&
-      childrenArray[0].props.value !== undefined;
+      // 자식을 배열로 변환
+      const childrenArray = React.Children.toArray(children);
 
-    const booleanMode = !hasValueProp && options === undefined;
+      // 자식이 없으면 기본값으로 false
+      if (childrenArray.length === 0) return false;
 
-    // 그룹 값이 변경될 때 호출되는 함수 - useCallback으로 래핑하여 불필요한 재생성 방지
+      // 첫 번째 자식이 유효한 React 엘리먼트인지 체크
+      if (!React.isValidElement(childrenArray[0])) return false;
+
+      // 첫 번째 자식 엘리먼트에서 value prop이 있는지 확인
+      const firstChild = childrenArray[0] as React.ReactElement<{
+        value?: unknown;
+      }>;
+      return firstChild.props.value === undefined;
+    }, [children, options]);
+
+    // Checkbox 컴포넌트 등록 함수
+    const registerCheckbox = useCallback(
+      (index: number, handle: CheckboxHandle | null) => {
+        refs.current[index] = handle;
+      },
+      []
+    );
+
+    // 그룹 값이 변경될 때 호출되는 함수
     const handleGroupValueChange = useCallback(
-      (newValue: T[]) => {
+      (newValues: CheckboxValue[]) => {
+        // 타입 안전한 변환
+        const typedValues = newValues.filter((v): v is T => {
+          return (
+            typeof v === 'string' ||
+            typeof v === 'number' ||
+            typeof v === 'boolean'
+          );
+        });
+
         // 외부 상태 업데이트
         if (setValue) {
-          setValue(newValue);
+          setValue(typedValues);
         }
 
         // onChange 콜백 호출
         if (onChange) {
-          onChange(newValue);
+          onChange(typedValues);
         }
       },
       [setValue, onChange]
+    );
+
+    // context 값 메모이제이션
+    const contextValue = useMemo<CheckboxContextType>(
+      () => ({
+        value: value as CheckboxValue[],
+        booleanMode,
+        onChange: (newValues: CheckboxValue[]) => {
+          handleGroupValueChange(newValues);
+        },
+        setValue: (newValues: CheckboxValue[]) => {
+          handleGroupValueChange(newValues);
+        },
+        name,
+        disabled,
+        registerCheckbox,
+        isBtn,
+        isSwitch,
+        leftLabel,
+      }),
+      [
+        value,
+        booleanMode,
+        handleGroupValueChange,
+        name,
+        disabled,
+        registerCheckbox,
+        isBtn,
+        isSwitch,
+        leftLabel,
+      ]
     );
 
     // useImperativeHandle을 사용하여 외부에서 호출 가능한 메서드 정의
@@ -474,20 +538,9 @@ export const CheckboxGroup = forwardRef(
           }
 
           // 인덱스가 제공되지 않은 경우 첫 번째 사용 가능한 체크박스에 포커스
-          const firstAvailableCheckbox = refs.current.find((checkbox, idx) => {
-            if (!checkbox) return false;
-
-            if (options) {
-              const optionObj = options[idx];
-              if (isCheckboxOption<string | number>(optionObj)) {
-                // 옵션이 객체인 경우 disabled 속성 확인
-                return !optionObj.disabled;
-              }
-              return true; // 옵션이 객체가 아닌 경우 기본적으로 활성화 상태
-            }
-            return true; // 옵션이 없는 경우 기본적으로 활성화 상태
-          });
-
+          const firstAvailableCheckbox = refs.current.find(
+            (checkbox) => !!checkbox
+          );
           if (firstAvailableCheckbox) {
             firstAvailableCheckbox.focus();
           }
@@ -513,19 +566,10 @@ export const CheckboxGroup = forwardRef(
           }
         },
         getValue: () => {
-          return value;
+          return value as CheckboxValue[];
         },
         setValue: (newValues: CheckboxValue[]) => {
-          // Safely convert CheckboxValue[] to T[] since T extends CheckboxValue
-          const typedValues = newValues.filter((v): v is T => {
-            // This runtime check ensures we only include values that match the constraints of T
-            return (
-              typeof v === 'string' ||
-              typeof v === 'number' ||
-              typeof v === 'boolean'
-            );
-          });
-          handleGroupValueChange(typedValues);
+          handleGroupValueChange(newValues);
         },
         toggleAll: (checked: boolean) => {
           if (options) {
@@ -542,12 +586,14 @@ export const CheckboxGroup = forwardRef(
               .filter((val): val is string | number => val !== null);
 
             // 새 값 생성
-            const newValues = checked ? (allValues as T[]) : [];
+            const newValues = checked ? (allValues as CheckboxValue[]) : [];
             handleGroupValueChange(newValues);
           } else if (booleanMode) {
             // 불리언 모드: 모든 체크박스를 checked 값으로 설정
             const checkboxCount = React.Children.count(children);
-            const newValues = Array(checkboxCount).fill(checked) as T[];
+            const newValues = Array(checkboxCount).fill(
+              checked
+            ) as CheckboxValue[];
             handleGroupValueChange(newValues);
           }
         },
@@ -555,101 +601,98 @@ export const CheckboxGroup = forwardRef(
       [options, children, booleanMode, value, handleGroupValueChange]
     );
 
-    // Create context value with proper type handling
-    const contextValue: CheckboxContextType<CheckboxValue> = {
-      // Safe to cast T[] to CheckboxValue[] since T extends CheckboxValue
-      value: value as unknown as CheckboxValue[],
-      booleanMode,
-      onChange: (newValues: CheckboxValue[]) => {
-        // Convert CheckboxValue[] to T[] for the handler
-        const typedValues = newValues.filter((v): v is T => {
-          return (
-            typeof v === 'string' ||
-            typeof v === 'number' ||
-            typeof v === 'boolean'
+    // 옵션에서 Checkbox 컴포넌트 생성
+    const checkboxOptions = useMemo(() => {
+      if (!options) return null;
+
+      return options.map((option, idx) => {
+        // 옵션 값 처리
+        let optionValue: string | number | undefined;
+        let optionLabel: ReactNode;
+        let optionDisabled = false;
+        let optionStyle: React.CSSProperties | undefined;
+        let optionClassName = '';
+
+        if (isCheckboxOption<string | number>(option)) {
+          // CheckboxOption 객체인 경우
+          optionValue = option.value;
+          optionLabel = option.label;
+          optionDisabled = !!option.disabled;
+          optionStyle = option.style;
+          optionClassName = option.className || '';
+        } else {
+          // 원시 값인 경우
+          optionValue =
+            typeof option === 'boolean'
+              ? undefined
+              : (option as string | number);
+          optionLabel = String(option);
+        }
+
+        return (
+          <Checkbox
+            key={`${String(optionValue || idx)}-${idx}`}
+            value={optionValue}
+            disabled={optionDisabled}
+            inputClassName={inputClassName}
+            iconClassName={iconClassName}
+            labelClassName={labelClassName}
+            className={optionClassName}
+            style={optionStyle}
+            index={idx}
+            isBtn={isBtn}
+            isSwitch={isSwitch}
+            leftLabel={leftLabel}
+          >
+            {optionLabel}
+          </Checkbox>
+        );
+      });
+    }, [
+      options,
+      inputClassName,
+      iconClassName,
+      labelClassName,
+      isBtn,
+      isSwitch,
+      leftLabel,
+    ]);
+
+    // 자식 요소에 index 속성 추가
+    const childrenWithIndexes = useMemo(() => {
+      return React.Children.map(children, (child, idx) => {
+        if (React.isValidElement(child) && child.type === Checkbox) {
+          return React.cloneElement(
+            child as React.ReactElement<CheckboxProps>,
+            {
+              ...(typeof child.props === 'object' ? child.props : {}),
+              index: idx,
+            }
           );
-        });
-        handleGroupValueChange(typedValues);
-      },
-      setValue: (newValues: CheckboxValue[]) => {
-        // Convert CheckboxValue[] to T[] for the handler
-        const typedValues = newValues.filter((v): v is T => {
-          return (
-            typeof v === 'string' ||
-            typeof v === 'number' ||
-            typeof v === 'boolean'
-          );
-        });
-        handleGroupValueChange(typedValues);
-      },
-      name,
-      disabled,
-    };
+        }
+        return child;
+      });
+    }, [children]);
 
     return (
       <CheckboxContext.Provider value={contextValue}>
         <div className={cx('check-wrap', className)} style={style} {...rest}>
-          {options
-            ? // Render checkboxes from options array
-              options.map((option, idx) => {
-                // 타입 안전한 처리
-                let optionValue: string | number | undefined;
-                let optionLabel: React.ReactNode;
-                let optionDisabled = false;
-                let optionStyle: React.CSSProperties | undefined;
-                let optionClassName = '';
-
-                if (isCheckboxOption<string | number>(option)) {
-                  // CheckboxOption 객체인 경우
-                  optionValue = option.value;
-                  optionLabel = option.label;
-                  optionDisabled = !!option.disabled;
-                  optionStyle = option.style;
-                  optionClassName = option.className || '';
-                } else {
-                  // 원시 값인 경우
-                  optionValue =
-                    typeof option === 'boolean'
-                      ? undefined
-                      : (option as string | number);
-                  optionLabel = option;
-                }
-
-                return (
-                  <Checkbox
-                    key={`${String(optionValue || idx)}-${idx}`}
-                    value={optionValue}
-                    disabled={optionDisabled}
-                    inputClassName={inputClassName}
-                    iconClassName={iconClassName}
-                    labelClassName={labelClassName}
-                    className={optionClassName}
-                    style={optionStyle}
-                    index={idx}
-                    isBtn={isBtn}
-                    isSwitch={isSwitch}
-                    leftLabel={leftLabel}
-                    ref={(el) => {
-                      // refs 배열에 참조 저장
-                      refs.current[idx] = el;
-                    }}
-                  >
-                    {optionLabel}
-                  </Checkbox>
-                );
-              })
-            : children}
+          {options ? checkboxOptions : childrenWithIndexes}
         </div>
       </CheckboxContext.Provider>
     );
   }
-) as unknown as React.ForwardRefExoticComponent<
-  CheckboxGroupProps<string | number | boolean> &
-    React.RefAttributes<CheckboxGroupHandle>
->;
+);
 
-// 컴포넌트 이름 설정 (ESLint 경고 없이)
-CheckboxGroup.displayName = 'CheckboxGroup';
+// 컴포넌트 이름 설정
+CheckboxGroupComponent.displayName = 'CheckboxGroup';
+
+// 타입 캐스팅을 사용하여 제네릭 타입 지원
+export const CheckboxGroup = CheckboxGroupComponent as unknown as <
+  T extends string | number | boolean = string | number,
+>(
+  props: CheckboxGroupProps<T> & { ref?: React.Ref<CheckboxGroupHandle> }
+) => React.ReactElement;
 
 // Static property for Checkbox.Group
 const CheckboxWithGroup = Object.assign(Checkbox, {

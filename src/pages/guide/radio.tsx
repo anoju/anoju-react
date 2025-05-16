@@ -23,8 +23,8 @@ const RadioGuide = () => {
   const [selectedValue, setSelectedValue] = useState<string | number>(
     'option1'
   );
-  const [selectedFruit, setSelectedFruit] = useState<string>('apple');
-  const [selectedColor, setSelectedColor] = useState<string>('blue');
+  const [selectedFruit, setSelectedFruit] = useState<string | number>('apple');
+  const [selectedColor, setSelectedColor] = useState<string | number>('blue');
 
   // 라디오 버튼에 대한 참조 생성
   const radioRef = useRef<RadioHandle>(null);
@@ -214,8 +214,8 @@ const [selectedValue, setSelectedValue] = useState<string | number>('option1');
         <h3 className={styles['sub-title']}>참조 소스코드</h3>
         <CodeHighlight
           code={`// 상태 정의
-const [selectedFruit, setSelectedFruit] = useState<string>('apple');
-const [selectedColor, setSelectedColor] = useState<string>('blue');
+const [selectedFruit, setSelectedFruit] = useState<string | number>('apple');
+const [selectedColor, setSelectedColor] = useState<string | number>('blue');
 
 // 문자열 배열 사용
 <Radio.Group
