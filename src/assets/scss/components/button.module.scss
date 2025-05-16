@@ -18,6 +18,8 @@
   font-size: 1.6rem;
   font-weight: 500;
   opacity: 1;
+  position: relative;
+  overflow: hidden;
   transition:
     0.3s,
     visibility 0s,
@@ -76,5 +78,26 @@
   &.xl {
     height: 5.2rem;
     border-radius: 1.2rem;
+  }
+}
+
+// 리플 효과 관련 스타일
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background-color: rgb(255 255 255 / 35%);
+  transform: scale(0);
+  animation: ripple-animation 0.6s linear;
+  pointer-events: none;
+
+  @include s.light-mode {
+    background-color: rgb(0 0 0 / 15%);
+  }
+}
+
+@keyframes ripple-animation {
+  to {
+    transform: scale(4);
+    opacity: 0;
   }
 }
