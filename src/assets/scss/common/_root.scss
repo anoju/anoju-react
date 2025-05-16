@@ -11,7 +11,9 @@
 
   // color
   --primary-color: #{s.$primary-color};
+  --primary-color-rgb: 52, 152, 219; // primary-color의 RGB 값
   --secondary-color: #{s.$secondary-color};
+  --secondary-color-rgb: 46, 204, 113; // secondary-color의 RGB 값
 
   @for $i from 0 through 20 {
     // 흰색에서 검은색으로 (light에서 dark로)
