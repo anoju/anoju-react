@@ -20,7 +20,8 @@
     {
       "files": ["**/*.module.scss"],
       "rules": {
-        "no-descending-specificity": null
+        "no-descending-specificity": null,
+        "number-max-precision": null
       }
     }
   ]

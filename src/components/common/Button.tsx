@@ -19,7 +19,7 @@ interface CustomTouchEvent {
 type ButtonSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
 // 버튼 효과 타입 정의
-type ButtonEffect = 'ripple' | 'pulse' | 'scale' | 'shadow' | false;
+type ButtonEffect = 'ripple' | 'pulse' | 'scale' | 'shadow' | 'rotate' | 'shake' | 'jello' | false;
 
 // 리플 효과 타입 정의
 interface RippleEffect {
@@ -82,6 +82,9 @@ const Button = React.forwardRef<HTMLElement, ButtonProps>((props, ref) => {
       size && styles[size], // size 클래스 추가
       effect === 'pulse' && styles['button-pulse'],
       effect === 'shadow' && styles['button-shadow'],
+      effect === 'rotate' && styles['button-rotate'],
+      effect === 'shake' && styles['button-shake'],
+      effect === 'jello' && styles['button-jello'],
       className,
     ].filter(Boolean);
 

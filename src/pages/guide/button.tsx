@@ -83,6 +83,18 @@ const ButtonGuide = () => {
               그림자 효과
             </Button>
 
+            <Button className="primary" effect="rotate" onClick={handleClick}>
+              회전 효과
+            </Button>
+
+            <Button className="primary" effect="shake" onClick={handleClick}>
+              좌우 흔들림
+            </Button>
+
+            <Button className="primary" effect="jello" onClick={handleClick}>
+              젤루 효과
+            </Button>
+
             <Button className="primary" effect={false} onClick={handleClick}>
               효과 없음
             </Button>
@@ -106,9 +118,17 @@ const ButtonGuide = () => {
 // 그림자 효과
 <Button className="primary" effect="shadow">그림자 효과</Button>
 
+// 회전 효과
+<Button className="primary" effect="rotate">회전 효과</Button>
+
+// 좌우 흔들림 효과
+<Button className="primary" effect="shake">좌우 흔들림</Button>
+
+// 젤루 효과 (기하학적 변형)
+<Button className="primary" effect="jello">젤루 효과</Button>
+
 // 효과 없음
-<Button className="primary" effect={false}>효과 없음</Button>
-`}
+<Button className="primary" effect={false}>효과 없음</Button>`}
           language="jsx"
         />
       </section>
@@ -266,7 +286,10 @@ const ButtonGuide = () => {
               </tr>
               <tr>
                 <td>effect</td>
-                <td>'ripple' | 'pulse' | 'scale' | 'shadow' | false</td>
+                <td>
+                  'ripple' | 'pulse' | 'scale' | 'shadow' | 'rotate' | 'shake' |
+                  'jello' | false
+                </td>
                 <td>'ripple'</td>
                 <td>인터랙션 효과 유형</td>
               </tr>
