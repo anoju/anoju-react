@@ -211,10 +211,7 @@ export const Radio = forwardRef<RadioHandle, RadioProps>(
     return (
       <div ref={rootRef} className={radioClasses}>
         {children && mergedLeftLabel && (
-          <label
-            className={cx(styles.lbl, labelClassName)}
-            htmlFor={radioId}
-          >
+          <label className={cx(styles.lbl, labelClassName)} htmlFor={radioId}>
             {children}
           </label>
         )}
@@ -232,10 +229,7 @@ export const Radio = forwardRef<RadioHandle, RadioProps>(
         />
         <i className={cx(styles.ico, iconClassName)} aria-hidden="true" />
         {children && !mergedLeftLabel && (
-          <label
-            className={cx(styles.lbl, labelClassName)}
-            htmlFor={radioId}
-          >
+          <label className={cx(styles.lbl, labelClassName)} htmlFor={radioId}>
             {children}
           </label>
         )}
@@ -279,6 +273,7 @@ interface RadioGroupProps<T extends string | number = string | number> {
   children?: ReactNode;
   options?: (T | RadioOption<T>)[];
   value?: T;
+  setValue?: ((value: T) => void) | React.Dispatch<React.SetStateAction<T>>;
   onChange?: (value: T) => void;
   className?: string;
   inputClassName?: string;
@@ -299,6 +294,7 @@ const RadioGroupComponent = forwardRef(
       children,
       options,
       value,
+      setValue,
       onChange,
       className = '',
       inputClassName = '',
@@ -320,10 +316,20 @@ const RadioGroupComponent = forwardRef(
     // 라디오 변경 핸들러
     const handleRadioChange = useCallback(
       (radioValue: RadioValue) => {
-        if (!onChange) return;
-        onChange(radioValue as T);
+        // setValue가 있으면 호출
+        if (setValue) {
+          // setValue가 React.Dispatch<React.SetStateAction<T>> 타입인지 확인
+          if (typeof setValue === 'function') {
+            setValue(radioValue as T);
+          }
+        }
+
+        // onChange도 있으면 호출
+        if (onChange) {
+          onChange(radioValue as T);
+        }
       },
-      [onChange]
+      [onChange, setValue]
     );
 
     // Radio 컴포넌트 등록 함수
@@ -346,7 +352,16 @@ const RadioGroupComponent = forwardRef(
         isSwitch,
         leftLabel,
       }),
-      [value, handleRadioChange, name, disabled, registerRadio, isBtn, isSwitch, leftLabel]
+      [
+        value,
+        handleRadioChange,
+        name,
+        disabled,
+        registerRadio,
+        isBtn,
+        isSwitch,
+        leftLabel,
+      ]
     );
 
     // useImperativeHandle을 사용하여 외부에서 호출 가능한 메서드 정의
@@ -375,12 +390,21 @@ const RadioGroupComponent = forwardRef(
         },
         // 새 값 설정
         setValue: (newValue: string | number) => {
+          // setValue가 있으면 호출
+          if (setValue) {
+            // setState 형식이나 일반 함수 형식 모두 지원
+            if (typeof setValue === 'function') {
+              setValue(newValue as T);
+            }
+          }
+
+          // onChange도 있으면 호출
           if (onChange) {
             onChange(newValue as T);
           }
         },
       }),
-      [value, onChange]
+      [value, onChange, setValue]
     );
 
     // 옵션에서 Radio 컴포넌트 생성

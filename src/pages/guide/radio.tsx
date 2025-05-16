@@ -173,7 +173,7 @@ const [selected, setSelected] = useState('option1');
       <section className={styles.section}>
         <h2 className={styles['section-title']}>Radio.Group 사용법</h2>
         <div className={styles.showcase}>
-          <Radio.Group value={selectedValue} onChange={setSelectedValue}>
+          <Radio.Group value={selectedValue} setValue={setSelectedValue}>
             <Radio value="option1">옵션 1</Radio>
             <Radio value="option2">옵션 2</Radio>
             <Radio value="option3">옵션 3</Radio>
@@ -189,11 +189,60 @@ const [selected, setSelected] = useState('option1');
 const [selectedValue, setSelectedValue] = useState<string | number>('option1');
 
 // JSX
-<Radio.Group value={selectedValue} onChange={setSelectedValue}>
+<Radio.Group value={selectedValue} setValue={setSelectedValue}>
   <Radio value="option1">옵션 1</Radio>
   <Radio value="option2">옵션 2</Radio>
   <Radio value="option3">옵션 3</Radio>
   <Radio value="option4">옵션 4</Radio>
+</Radio.Group>`}
+          language="typescript"
+        />
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles['section-title']}>setValue 속성 사용</h2>
+        <p className={styles.txt}>
+          setValue 속성을 사용하면 상태 업데이트 함수를 직접 전달할 수 있습니다.
+        </p>
+        <div className={styles.showcase}>
+          <Radio.Group value={selectedValue} setValue={setSelectedValue}>
+            <Radio value="option1">옵션 1</Radio>
+            <Radio value="option2">옵션 2</Radio>
+            <Radio value="option3">옵션 3</Radio>
+            <Radio value="option4">옵션 4</Radio>
+          </Radio.Group>
+          <hr />
+          <p className={styles.txt}>선택된 값: {selectedValue}</p>
+          <p className={styles.txt}>
+            onChange와 setValue를 함께 사용할 수도 있습니다. 두 가지 모두
+            지정하면 값이 변경될 때 둘 다 호출됩니다.
+          </p>
+        </div>
+
+        <h3 className={styles['sub-title']}>참조 소스코드</h3>
+        <CodeHighlight
+          code={`// State 정의
+const [selectedValue, setSelectedValue] = useState<string | number>('option1');
+
+// JSX - setValue 속성 사용
+<Radio.Group value={selectedValue} setValue={setSelectedValue}>
+  <Radio value="option1">옵션 1</Radio>
+  <Radio value="option2">옵션 2</Radio>
+  <Radio value="option3">옵션 3</Radio>
+  <Radio value="option4">옵션 4</Radio>
+</Radio.Group>
+
+// onChange와 함께 사용 예시
+<Radio.Group 
+  value={selectedValue} 
+  setValue={setSelectedValue}
+  onChange={(value) => {
+    // 값이 변경될 때 추가적인 로직 수행
+    console.log('값이 변경됨:', value);
+  }}
+>
+  <Radio value="option1">옵션 1</Radio>
+  <Radio value="option2">옵션 2</Radio>
 </Radio.Group>`}
           language="typescript"
         />
@@ -206,7 +255,7 @@ const [selectedValue, setSelectedValue] = useState<string | number>('option1');
           <Radio.Group
             options={['apple', 'orange', 'banana', 'grape']}
             value={selectedFruit}
-            onChange={setSelectedFruit}
+            setValue={setSelectedFruit}
             className="grid"
           />
           <p className={styles.txt}>선택된 과일: {selectedFruit}</p>
@@ -220,7 +269,7 @@ const [selectedValue, setSelectedValue] = useState<string | number>('option1');
               { value: 'yellow', label: '노란색', disabled: true },
             ]}
             value={selectedColor}
-            onChange={setSelectedColor}
+            setValue={setSelectedColor}
             className="grid"
           />
           <p className={styles.txt}>선택된 색상: {selectedColor}</p>
@@ -236,7 +285,7 @@ const [selectedColor, setSelectedColor] = useState<string | number>('blue');
 <Radio.Group
   options={['apple', 'orange', 'banana', 'grape']}
   value={selectedFruit}
-  onChange={setSelectedFruit}
+  setValue={setSelectedFruit}
   className="grid"
 />
 
@@ -249,7 +298,7 @@ const [selectedColor, setSelectedColor] = useState<string | number>('blue');
     { value: 'yellow', label: '노란색', disabled: true },
   ]}
   value={selectedColor}
-  onChange={setSelectedColor}
+  setValue={setSelectedColor}
   className="grid"
 />`}
           language="typescript"
@@ -266,7 +315,7 @@ const [selectedColor, setSelectedColor] = useState<string | number>('blue');
         <div className={styles.showcase}>
           <Radio.Group
             value={selectedColor}
-            onChange={setSelectedColor}
+            setValue={setSelectedColor}
             name="color-group"
           >
             <Radio value="red">빨간색</Radio>
@@ -277,7 +326,7 @@ const [selectedColor, setSelectedColor] = useState<string | number>('blue');
 
         <h3 className={styles['sub-title']}>참조 소스코드</h3>
         <CodeHighlight
-          code={`<Radio.Group value={selectedColor} onChange={setSelectedColor} name="color-group">
+          code={`<Radio.Group value={selectedColor} setValue={setSelectedColor} name="color-group">
   <Radio value="red">빨간색</Radio>
   <Radio value="blue">파란색</Radio>
   <Radio value="green">초록색</Radio>
@@ -305,7 +354,7 @@ const [selectedColor, setSelectedColor] = useState<string | number>('blue');
               { value: 'yellow', label: '노란색', disabled: true },
             ]}
             value={selectedColor}
-            onChange={setSelectedColor}
+            setValue={setSelectedColor}
           />
         </div>
         <CodeHighlight
@@ -313,11 +362,16 @@ const [selectedColor, setSelectedColor] = useState<string | number>('blue');
 <Radio leftLabel value="1">라디오</Radio>
 
 //그룹일때
-<Checkbox.Group
+<Radio.Group
   leftLabel
-  options={['apple', 'orange', 'banana', 'grape']}
-  value={selectedFruits}
-  setValue={setSelectedFruits}
+  options={[
+    { value: 'red', label: '빨간색' },
+    { value: 'blue', label: '파란색' },
+    { value: 'green', label: '초록색' },
+    { value: 'yellow', label: '노란색', disabled: true },
+  ]}
+  value={selectedColor}
+  setValue={setSelectedColor}
 />
 `}
           language="typescript"
@@ -347,7 +401,7 @@ const [selectedColor, setSelectedColor] = useState<string | number>('blue');
               { value: 'yellow', label: '노란색', disabled: true },
             ]}
             value={selectedColor}
-            onChange={setSelectedColor}
+            setValue={setSelectedColor}
             className="grid"
           />
         </div>
@@ -368,7 +422,7 @@ const [selectedColor, setSelectedColor] = useState<string | number>('blue');
     { value: 'yellow', label: '노란색', disabled: true },
   ]}
   value={selectedColor}
-  onChange={setSelectedColor}
+  setValue={setSelectedColor}
   className="grid"
 />
 `}
@@ -399,7 +453,7 @@ const [selectedColor, setSelectedColor] = useState<string | number>('blue');
               { value: 'yellow', label: '노란색', disabled: true },
             ]}
             value={selectedColor}
-            onChange={setSelectedColor}
+            setValue={setSelectedColor}
             className="grid"
           />
         </div>
@@ -410,11 +464,17 @@ const [selectedColor, setSelectedColor] = useState<string | number>('blue');
 </Radio>
 
 //그룹일때
-<Checkbox.Group
+<Radio.Group
   isSwitch
-  options={['apple', 'orange', 'banana', 'grape']}
-  value={selectedFruits}
-  setValue={setSelectedFruits}
+  options={[
+    { value: 'red', label: '빨간색' },
+    { value: 'blue', label: '파란색' },
+    { value: 'green', label: '초록색' },
+    { value: 'yellow', label: '노란색', disabled: true },
+  ]}
+  value={selectedColor}
+  setValue={setSelectedColor}
+  className="grid"
 />
 `}
           language="typescript"
@@ -606,7 +666,7 @@ const MyRadioWithRef = () => {
           <Radio.Group
             ref={radioGroupRef}
             value={groupValue}
-            onChange={setGroupValue}
+            setValue={setGroupValue}
             options={[
               { value: 'option1', label: '옵션 1' },
               { value: 'option2', label: '옵션 2' },
@@ -656,11 +716,11 @@ const handleSetValue = (value: string) => {
   radioGroupRef.current?.setValue(value);
 };
 
-// JSX 렌더링
+// JSX 렌더링 - setValue 사용
 <Radio.Group
   ref={radioGroupRef}
   value={groupValue}
-  onChange={setGroupValue}
+  setValue={setGroupValue} // onChange 대신 useState의 setter 함수를 직접 전달
   options={[
     { value: 'option1', label: '옵션 1' },
     { value: 'option2', label: '옵션 2' },
