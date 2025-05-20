@@ -1,0 +1,160 @@
+// src/components/common/Select.tsx - 다섯번째 부분 (스크롤 처리)
+  return (
+    <div
+      ref={selectRef}
+      className={selectClassName}
+      style={style}
+      tabIndex={disabled || loading ? -1 : 0}
+      onClick={toggleDropdown}
+      onKeyDown={handleKeyDown}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
+      role="combobox"
+      aria-haspopup="listbox"
+      aria-expanded={isOpen}
+      aria-disabled={disabled || loading}
+      aria-controls={`${selectId.current}-dropdown`}
+      aria-labelledby={`${selectId.current}-label`}
+    >
+      <div className={styles.selectInner}>
+        {isMultiple && selectedOptions.length > 0 ? (
+          <div 
+            className={styles.value} 
+            id={`${selectId.current}-label`}
+            title={selectedValueText}
+          >
+            {selectedValueText}
+          </div>
+        ) : selectedOption ? (
+          <div 
+            className={styles.value} 
+            id={`${selectId.current}-label`}
+            title={getOptionLabel(selectedOption)}
+          >
+            {getOptionLabel(selectedOption)}
+          </div>
+        ) : (
+          <div 
+            className={styles.placeholder} 
+            id={`${selectId.current}-label`}
+          >
+            {placeholder}
+          </div>
+        )}
+
+        <div className={styles.suffixWrapper}>
+          {allowClear && hasValue && (
+            <button
+              type="button"
+              className={styles.clearBtn}
+              onClick={handleClear}
+              aria-label="지우기"
+              tabIndex={-1}
+            >
+              <span className={styles.clearIcon} aria-hidden="true" />
+            </button>
+          )}
+
+          {loading ? (
+            <span className={styles.loadingIcon} aria-hidden="true" />
+          ) : (
+            <span
+              className={cx(styles.arrow, { [styles.arrowActive]: isOpen })}
+              aria-hidden="true"
+            />
+          )}
+        </div>
+      </div>
+
+      {isOpen && (
+        <div
+          ref={dropdownRef}
+          className={cx(styles.dropdown, dropdownClassName)}
+          id={`${selectId.current}-dropdown`}
+          role="listbox"
+          aria-labelledby={`${selectId.current}-label`}
+          style={{
+            ...dropdownStyle,
+            position: 'fixed',
+            ...dropdownPosition,
+          }}
+        >
+          {showSearch && (
+            <div className={styles.searchWrapper}>
+              <input
+                ref={searchInputRef}
+                type="text"
+                className={styles.searchInput}
+                value={searchValue}
+                onChange={handleSearchInput}
+                placeholder="검색..."
+                onClick={(e) => e.stopPropagation()}
+                aria-label="옵션 검색"
+              />
+            </div>
+          )}
+
+          {filteredOptions.length > 0 ? (
+            <div className={styles.optionsWrapper}>
+              {groupedOptions.map((group, groupIndex) => (
+                <React.Fragment key={`group-${groupIndex}`}>
+                  {group.group && (
+                    <div className={styles.optionGroup}>
+                      {group.group.label}
+                    </div>
+                  )}
+                  <ul className={styles.options}>
+                    {group.options.map((option, index) => {
+                      const isSelected = isOptionSelected(option);
+                      const globalIndex = filteredOptions.findIndex(
+                        (opt) => opt.value === option.value
+                      );
+                      
+                      return (
+                        <li
+                          key={`${index}-${String(option.value)}`}
+                          className={cx(styles.option, {
+                            [styles.optionSelected]: isSelected,
+                            [styles.optionActive]: globalIndex === activeIndex,
+                            [styles.optionDisabled]: option.disabled,
+                          })}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (!option.disabled) {
+                              toggleOption(option);
+                            }
+                          }}
+                          onMouseEnter={() => setActiveIndex(globalIndex)}
+                          role="option"
+                          aria-selected={isSelected}
+                          aria-disabled={option.disabled}
+                        >
+                          {isMultiple && (
+                            <span className={styles.optionCheckMark} />
+                          )}
+                          {getOptionLabel(option)}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </React.Fragment>
+              ))}
+            </div>
+          ) : (
+            <div className={styles.empty}>목록이 없습니다</div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// 컴포넌트 이름 설정
+Select.displayName = 'Select';
+
+// 타입 캐스팅을 사용하여 제네릭 타입 지원
+const SelectWithRef = forwardRef(Select) as <T = string | number>(
+  props: SelectProps<T> & { ref?: React.ForwardedRef<SelectHandle> }
+) => React.ReactElement;
+
+export default SelectWithRef;

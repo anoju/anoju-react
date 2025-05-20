@@ -1,0 +1,119 @@
+// src/components/common/Select.tsx - 첫 번째 부분
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  forwardRef,
+  useCallback,
+  useMemo,
+  ReactNode,
+  KeyboardEvent,
+  MouseEvent,
+  Dispatch,
+  SetStateAction,
+  ChangeEvent,
+} from 'react';
+import styles from '@/assets/scss/components/select.module.scss';
+import cx from '@/utils/cx';
+
+// Option Group 타입 정의
+export interface SelectOptionGroup<T = string | number> {
+  label: ReactNode;
+  key: string | number;
+  options: SelectOption<T>[];
+  disabled?: boolean;
+}
+
+// 옵션 아이템 타입 정의
+export interface SelectOption<T = string | number> {
+  value: T;
+  label: ReactNode;
+  disabled?: boolean;
+  groupKey?: string | number; // 그룹 키 (옵션이 그룹의 일부인 경우)
+}
+
+// 셀렉트 컴포넌트 Props 타입 정의
+export interface SelectProps<T = string | number> {
+  // 옵션 관련
+  options: (SelectOption<T> | T | SelectOptionGroup<T>)[];
+  optionFilterProp?: string; // 검색 시 필터링할 속성 (기본값: 'label')
+  optionLabelProp?: string; // 표시될 레이블 속성 (기본값: 'label')
+  
+  // 값 관련
+  value?: T | T[];
+  defaultValue?: T | T[];
+  onChange?: ((value: T | T[]) => void) | Dispatch<SetStateAction<T | T[]>>;
+  
+  // 플레이스홀더
+  placeholder?: string;
+  
+  // 상태 관련
+  disabled?: boolean;
+  loading?: boolean;
+  status?: 'error' | 'warning' | 'success';
+  
+  // 외관 관련
+  className?: string;
+  style?: React.CSSProperties;
+  dropdownClassName?: string;
+  dropdownStyle?: React.CSSProperties;
+  size?: 'small' | 'medium' | 'large';
+  
+  // 기능 관련
+  allowClear?: boolean;
+  showSearch?: boolean;
+  open?: boolean;
+  defaultOpen?: boolean;
+  
+  // 다중 선택 관련
+  mode?: 'multiple';
+  separator?: string; // 다중 선택 시 separator (기본값: ', ')
+  maxCount?: number; // 최대 선택 가능 개수
+  
+  // 이벤트 핸들러
+  onDropdownVisibleChange?: (open: boolean) => void;
+  onSearch?: (value: string) => void;
+  onClear?: () => void;
+}
+
+// 핸들 인터페이스 정의
+export interface SelectHandle {
+  focus: () => void;
+  blur: () => void;
+  getValue: () => unknown;
+  setValue: (value: unknown) => void;
+  getRootElement: () => HTMLElement | null;
+  openDropdown: () => void;
+  closeDropdown: () => void;
+}
+
+// 옵션이 SelectOption 타입인지 확인하는 타입 가드
+function isSelectOption<T>(
+  option: SelectOption<T> | T | SelectOptionGroup<T>
+): option is SelectOption<T> {
+  return (
+    typeof option === 'object' &&
+    option !== null &&
+    'value' in option &&
+    'label' in option &&
+    !('options' in option)
+  );
+}
+
+// 옵션이 SelectOptionGroup 타입인지 확인하는 타입 가드
+function isSelectOptionGroup<T>(
+  option: SelectOption<T> | T | SelectOptionGroup<T>
+): option is SelectOptionGroup<T> {
+  return (
+    typeof option === 'object' &&
+    option !== null &&
+    'options' in option &&
+    'label' in option
+  );
+}
+
+// 고유 ID 생성을 위한 유틸리티 함수
+let uniqueIdCounter = 0;
+const generateUniqueId = (): string => {
+  return `select_${uniqueIdCounter++}_${Math.random().toString(36).substring(2, 9)}`;
+};

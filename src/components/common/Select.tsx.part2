@@ -1,0 +1,152 @@
+// src/components/common/Select.tsx - 두 번째 부분 (optionLabelProp 사용 추가)
+// Select 컴포넌트
+function Select<T = string | number>(
+  {
+    options,
+    optionFilterProp = 'label',
+    optionLabelProp = 'label',
+    value,
+    defaultValue,
+    onChange,
+    placeholder = '선택해주세요',
+    disabled = false,
+    loading = false,
+    status,
+    className = '',
+    style,
+    dropdownClassName = '',
+    dropdownStyle,
+    allowClear = false,
+    size = 'medium',
+    showSearch = false,
+    open: controlledOpen,
+    defaultOpen = false,
+    mode,
+    separator = ', ',
+    maxCount,
+    onDropdownVisibleChange,
+    onSearch,
+    onClear,
+  }: SelectProps<T>,
+  ref: React.ForwardedRef<SelectHandle>
+) {
+  // 내부 상태 관리
+  const [internalValue, setInternalValue] = useState<T | T[] | undefined>(
+    value !== undefined ? value : defaultValue
+  );
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+  const [activeIndex, setActiveIndex] = useState<number>(-1);
+  const [searchValue, setSearchValue] = useState<string>('');
+  const [dropdownPosition, setDropdownPosition] = useState<{
+    top?: string;
+    bottom?: string;
+    left: string;
+    width: string;
+  }>({ left: '0', width: '0' });
+
+  // 다중 선택 모드인지 확인
+  const isMultiple = mode === 'multiple';
+
+  // DOM 요소 참조
+  const selectRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const selectId = useRef<string>(generateUniqueId());
+
+  // 포커스 관리
+  const [isFocused, setIsFocused] = useState(false);
+
+  // 옵션 데이터 정규화 - 그룹 및 기본 옵션 처리
+  const normalizedOptionsData = useMemo(() => {
+    // 플랫한 옵션 목록 (그룹 내 옵션 포함)
+    const flatOptions: SelectOption<T>[] = [];
+    
+    // 그룹 맵 (그룹 키 -> 그룹 정보)
+    const groupMap = new Map<string | number, SelectOptionGroup<T>>();
+    
+    // 옵션 처리 함수
+    options.forEach((item) => {
+      if (isSelectOptionGroup<T>(item)) {
+        // 그룹인 경우
+        groupMap.set(item.key, item);
+        
+        // 그룹의 각 옵션에 그룹 키 추가
+        item.options.forEach((option) => {
+          flatOptions.push({
+            ...option,
+            groupKey: item.key,
+            disabled: option.disabled || item.disabled,
+          });
+        });
+      } else if (isSelectOption<T>(item)) {
+        // 단일 옵션인 경우
+        flatOptions.push(item);
+      } else {
+        // 기본 값인 경우 (문자열, 숫자 등)
+        flatOptions.push({
+          value: item,
+          label: String(item),
+        });
+      }
+    });
+
+    return { flatOptions, groupMap };
+  }, [options]);
+
+  // 필터링된 옵션 목록 (검색어 적용)
+  const filteredOptions = useMemo(() => {
+    const { flatOptions } = normalizedOptionsData;
+    
+    if (!showSearch || !searchValue.trim()) {
+      return flatOptions;
+    }
+    
+    const lowerSearchValue = searchValue.toLowerCase();
+    
+    // optionFilterProp을 활용한 검색 (기본값: 'label')
+    return flatOptions.filter((option) => {
+      // 검색 대상 속성 값 가져오기
+      const optionText = String(option[optionFilterProp as keyof typeof option] || option.label).toLowerCase();
+      return optionText.includes(lowerSearchValue);
+    });
+  }, [normalizedOptionsData, searchValue, showSearch, optionFilterProp]);
+
+  // 현재 선택된 옵션 찾기 (단일 선택 모드)
+  const selectedOption = useMemo(() => {
+    if (isMultiple || internalValue === undefined) return undefined;
+    
+    return normalizedOptionsData.flatOptions.find(
+      (option) => option.value === internalValue
+    );
+  }, [internalValue, normalizedOptionsData.flatOptions, isMultiple]);
+
+  // 현재 선택된 옵션들 찾기 (다중 선택 모드)
+  const selectedOptions = useMemo(() => {
+    if (!isMultiple || !internalValue) return [];
+    
+    const selectedValues = Array.isArray(internalValue) ? internalValue : [internalValue];
+    
+    return normalizedOptionsData.flatOptions.filter((option) =>
+      selectedValues.includes(option.value)
+    );
+  }, [internalValue, normalizedOptionsData.flatOptions, isMultiple]);
+
+  // 선택된 옵션의 레이블 표시에 사용할 함수
+  const getOptionLabel = useCallback((option: SelectOption<T>) => {
+    // optionLabelProp을 활용해 레이블 속성 결정
+    return String(option[optionLabelProp as keyof typeof option] || option.label);
+  }, [optionLabelProp]);
+
+  // 외부 제어 모드일 경우 value prop이 변경되면 내부 상태 업데이트
+  useEffect(() => {
+    if (value !== undefined) {
+      setInternalValue(value);
+    }
+  }, [value]);
+
+  // 외부 제어 모드일 경우 open prop이 변경되면 내부 상태 업데이트
+  useEffect(() => {
+    if (controlledOpen !== undefined) {
+      setIsOpen(controlledOpen);
+    }
+  }, [controlledOpen]);

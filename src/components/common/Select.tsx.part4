@@ -1,0 +1,290 @@
+// src/components/common/Select.tsx - 네 번째 부분 (스크롤 이벤트 핸들러 수정)
+  // 키보드 조작 함수
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLDivElement>) => {
+      if (disabled || loading) return;
+
+      switch (e.key) {
+        case 'Enter':
+        case ' ':
+          e.preventDefault();
+          if (isOpen) {
+            if (activeIndex >= 0 && activeIndex < filteredOptions.length) {
+              // 현재 활성화된 옵션 선택
+              const option = filteredOptions[activeIndex];
+              if (!option.disabled) {
+                toggleOption(option);
+              }
+            }
+          } else {
+            // 드롭다운 열기
+            openDropdown();
+          }
+          break;
+
+        case 'ArrowDown':
+          e.preventDefault();
+          if (!isOpen) {
+            openDropdown();
+          } else {
+            // 다음 활성화 가능한 옵션으로 이동
+            let nextIndex = activeIndex;
+            do {
+              nextIndex = (nextIndex + 1) % filteredOptions.length;
+              if (nextIndex === activeIndex) break; // 모든 옵션이 비활성화된 경우 무한 루프 방지
+            } while (
+              filteredOptions[nextIndex].disabled &&
+              nextIndex !== activeIndex
+            );
+            
+            if (!filteredOptions[nextIndex].disabled) {
+              setActiveIndex(nextIndex);
+              scrollOptionIntoView(nextIndex);
+            }
+          }
+          break;
+
+        case 'ArrowUp':
+          e.preventDefault();
+          if (!isOpen) {
+            openDropdown();
+          } else {
+            // 이전 활성화 가능한 옵션으로 이동
+            let prevIndex = activeIndex;
+            do {
+              prevIndex =
+                prevIndex <= 0 ? filteredOptions.length - 1 : prevIndex - 1;
+              if (prevIndex === activeIndex) break; // 모든 옵션이 비활성화된 경우 무한 루프 방지
+            } while (
+              filteredOptions[prevIndex].disabled &&
+              prevIndex !== activeIndex
+            );
+            
+            if (!filteredOptions[prevIndex].disabled) {
+              setActiveIndex(prevIndex);
+              scrollOptionIntoView(prevIndex);
+            }
+          }
+          break;
+
+        case 'Escape':
+          e.preventDefault();
+          if (isOpen) {
+            closeDropdown();
+          }
+          break;
+
+        case 'Tab':
+          if (isOpen) {
+            closeDropdown();
+          }
+          break;
+
+        case 'Backspace':
+          if (isMultiple && Array.isArray(internalValue) && internalValue.length > 0 && !searchValue) {
+            // 검색어가 없을 때 Backspace를 누르면 마지막 선택 항목 제거
+            const newValues = [...internalValue];
+            newValues.pop();
+            updateValue(newValues);
+          }
+          break;
+
+        default:
+          break;
+      }
+    },
+    [
+      disabled,
+      loading,
+      isOpen,
+      activeIndex,
+      filteredOptions,
+      toggleOption,
+      openDropdown,
+      closeDropdown,
+      scrollOptionIntoView,
+      isMultiple,
+      internalValue,
+      searchValue,
+      updateValue,
+    ]
+  );
+
+  // 외부 클릭 감지
+  useEffect(() => {
+    const handleClickOutside = (event: Event) => {
+      if (
+        selectRef.current &&
+        !selectRef.current.contains(event.target as Node) &&
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node) &&
+        isOpen
+      ) {
+        closeDropdown();
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen, closeDropdown]);
+
+  // 드롭다운 위치 조정 (열릴 때)
+  useEffect(() => {
+    if (!isOpen) return;
+
+    // 초기 위치 설정
+    updateDropdownPosition();
+
+    // 스크롤 및 리사이즈 이벤트 핸들러
+    const handleResize = () => {
+      updateDropdownPosition();
+    };
+    
+    const handleScroll = () => {
+      updateDropdownPosition();
+    };
+
+    // 이벤트 리스너 등록
+    window.addEventListener('resize', handleResize);
+    // 전체 문서의 스크롤 이벤트 감지
+    document.addEventListener('scroll', handleScroll, true); // true는 캡처 단계에서 이벤트 처리
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      document.removeEventListener('scroll', handleScroll, true);
+    };
+  }, [isOpen, updateDropdownPosition]);
+
+  // 외부 메서드 정의
+  React.useImperativeHandle(ref, () => {
+    return {
+      focus: () => {
+        selectRef.current?.focus();
+      },
+      blur: () => {
+        selectRef.current?.blur();
+      },
+      getValue: () => {
+        return internalValue;
+      },
+      setValue: (value: unknown) => {
+        updateValue(value as T | T[]);
+      },
+      getRootElement: () => {
+        return selectRef.current;
+      },
+      openDropdown: () => {
+        openDropdown();
+      },
+      closeDropdown: () => {
+        closeDropdown();
+      },
+    };
+  }, [internalValue, updateValue, openDropdown, closeDropdown]);
+
+  // 클래스 이름 생성
+  const selectClassName = cx(
+    styles.select,
+    styles[size],
+    {
+      [styles.disabled]: disabled,
+      [styles.loading]: loading,
+      [styles.open]: isOpen,
+      [styles.focused]: isFocused,
+      [styles.error]: status === 'error',
+      [styles.warning]: status === 'warning',
+      [styles.success]: status === 'success',
+      [styles.multiple]: isMultiple,
+    },
+    className
+  );
+
+  // 포커스 이벤트 핸들러
+  const handleFocus = () => {
+    setIsFocused(true);
+  };
+
+  const handleBlur = () => {
+    setIsFocused(false);
+  };
+
+  // 다중 선택 모드에서 현재 선택된 값 텍스트 생성
+  const selectedValueText = useMemo(() => {
+    if (!isMultiple || !selectedOptions.length) return '';
+    
+    return selectedOptions
+      .map((option) => getOptionLabel(option))
+      .join(separator);
+  }, [isMultiple, selectedOptions, separator, getOptionLabel]);
+
+  // 선택된 값이 있는지 확인 (클리어 버튼 표시 여부)
+  const hasValue = useMemo(() => {
+    if (isMultiple) {
+      return Array.isArray(internalValue) && internalValue.length > 0;
+    }
+    return internalValue !== undefined;
+  }, [isMultiple, internalValue]);
+
+  // 옵션 그룹화
+  const groupedOptions = useMemo(() => {
+    if (filteredOptions.length === 0) return [];
+    
+    const { groupMap } = normalizedOptionsData;
+    
+    // 그룹별 옵션 맵
+    const groups = new Map<string | number | undefined, SelectOption<T>[]>();
+    
+    // 각 옵션을 그룹에 따라 분류
+    filteredOptions.forEach((option) => {
+      const groupKey = option.groupKey;
+      
+      if (!groups.has(groupKey)) {
+        groups.set(groupKey, []);
+      }
+      
+      groups.get(groupKey)?.push(option);
+    });
+    
+    // 결과를 그룹별로 구성
+    const result: {
+      group?: SelectOptionGroup<T>;
+      options: SelectOption<T>[];
+    }[] = [];
+    
+    // 그룹이 없는 옵션 먼저 처리
+    if (groups.has(undefined)) {
+      result.push({
+        options: groups.get(undefined) || [],
+      });
+    }
+    
+    // 그룹이 있는 옵션 처리
+    Array.from(groups.keys())
+      .filter((key) => key !== undefined)
+      .forEach((groupKey) => {
+        if (groupKey !== undefined) {
+          result.push({
+            group: groupMap.get(groupKey),
+            options: groups.get(groupKey) || [],
+          });
+        }
+      });
+    
+    return result;
+  }, [filteredOptions, normalizedOptionsData]);
+
+  // 옵션이 현재 선택되어 있는지 확인하는 함수
+  const isOptionSelected = (option: SelectOption<T>) => {
+    if (isMultiple) {
+      // 다중 선택 모드
+      if (Array.isArray(internalValue)) {
+        return internalValue.includes(option.value);
+      }
+      return false;
+    } else {
+      // 단일 선택 모드
+      return option.value === internalValue;
+    }
+  };
