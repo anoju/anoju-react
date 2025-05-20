@@ -42,7 +42,7 @@ export interface SelectProps<T = string | number> {
   // 값 관련
   value?: T | T[];
   defaultValue?: T | T[];
-  onChange?: ((value: T | T[]) => void) | Dispatch<SetStateAction<T | T[]>>;
+  onChange?: unknown; // 어떤 타입의 콜백이든 받을 수 있도록 범용적으로 설정
 
   // 플레이스홀더
   placeholder?: string;
@@ -411,9 +411,25 @@ function Select<T = string | number>(
 
       // 외부 onChange 콜백 호출 (newValue가 있는 경우만)
       if (onChange && newValue !== undefined) {
-        // as를 사용한 안전한 타입 캐스팅
+        // 일반 함수인 경우
         if (typeof onChange === 'function') {
-          (onChange as (value: T | T[]) => void)(newValue);
+          try {
+            // 단일 값인지 배열인지 확인
+            if (Array.isArray(newValue)) {
+              // 다중 선택일 경우
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (onChange as any)(newValue);
+            } else {
+              // 단일 선택일 경우
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (onChange as any)(newValue);
+            }
+          } catch (error) {
+            console.error('Select onChange error:', error);
+            // 오류 발생 시 기본 실행 방법
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (onChange as any)(newValue);
+          }
         }
       }
     },
@@ -480,14 +496,29 @@ function Select<T = string | number>(
           try {
             if (isMultiple) {
               // 다중 선택일 경우 빈 배열로 설정
-              (onChange as (value: T[]) => void)([] as unknown as T[]);
+              const emptyArray = [] as unknown as T[];
+              (
+                onChange as
+                  | ((value: T[]) => void)
+                  | Dispatch<SetStateAction<T[]>>
+              )(emptyArray);
             } else {
-              // 단일 선택일 경우 undefined로 설정
+              // 단일 선택일 경우
+              // 일반 함수로 처리하고, 타입 캐스팅을 통해 안전하게 처리
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (onChange as any)(undefined);
+              // 단일 선택 모드에서 null이나 undefined는 React.useState에서도 잘 처리됨
+            }
+          } catch (error) {
+            console.error('Select clear value failed', error);
+            // 오류 발생 시 기본 실행 방법
+            if (isMultiple) {
+              const emptyArray = [] as unknown as T[];
+              (onChange as (value: T[]) => void)(emptyArray);
+            } else {
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               (onChange as any)(undefined);
             }
-          } catch (error) {
-            console.log('Select clear value failed', error);
           }
         }
       }

@@ -42,7 +42,7 @@ export interface SelectProps<T = string | number> {
   // 값 관련
   value?: T | T[];
   defaultValue?: T | T[];
-  onChange?: ((value: T | T[]) => void) | Dispatch<SetStateAction<T | T[]>>;
+  onChange?: unknown; // 어떤 타입의 콜백이든 받을 수 있도록 범용적으로 설정
   
   // 플레이스홀더
   placeholder?: string;

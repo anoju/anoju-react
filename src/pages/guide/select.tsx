@@ -17,10 +17,10 @@ const SelectGuide = () => {
   });
 
   // 상태 관리
-  const [basicValue, setBasicValue] = useState<string>('apple');
-  const [sizeValue, setSizeValue] = useState<string>('medium');
-  const [statusValue, setStatusValue] = useState<string>('default');
-  const [externalValue, setExternalValue] = useState<string>('2');
+  const [basicValue, setBasicValue] = useState('apple');
+  const [sizeValue, setSizeValue] = useState('medium');
+  const [statusValue, setStatusValue] = useState('default');
+  const [externalValue, setExternalValue] = useState('2');
   const [open, setOpen] = useState<boolean>(false);
 
   return (
@@ -483,271 +483,111 @@ const [open, setOpen] = useState<boolean>(false);
       <section className={styles.section}>
         <h2 className={styles['section-title']}>Props</h2>
         <div className={styles.showcase}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <table>
             <thead>
               <tr>
-                <th
-                  style={{
-                    textAlign: 'left',
-                    padding: '8px',
-                    borderBottom: '1px solid #ddd',
-                  }}
-                >
-                  속성
-                </th>
-                <th
-                  style={{
-                    textAlign: 'left',
-                    padding: '8px',
-                    borderBottom: '1px solid #ddd',
-                  }}
-                >
-                  타입
-                </th>
-                <th
-                  style={{
-                    textAlign: 'left',
-                    padding: '8px',
-                    borderBottom: '1px solid #ddd',
-                  }}
-                >
-                  기본값
-                </th>
-                <th
-                  style={{
-                    textAlign: 'left',
-                    padding: '8px',
-                    borderBottom: '1px solid #ddd',
-                  }}
-                >
-                  설명
-                </th>
+                <th>속성</th>
+                <th>타입</th>
+                <th>기본값</th>
+                <th>설명</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  options
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  (SelectOption | string | number)[]
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  필수
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  셀렉트 옵션 배열
-                </td>
+                <td>options</td>
+                <td>(SelectOption | string | number)[]</td>
+                <td>필수</td>
+                <td>셀렉트 옵션 배열</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  value
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  string | number
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  -
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  현재 선택된 값
-                </td>
+                <td>value</td>
+                <td>string | number</td>
+                <td>-</td>
+                <td>현재 선택된 값</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  defaultValue
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  string | number
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  -
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  초기 선택값
-                </td>
+                <td>defaultValue</td>
+                <td>string | number</td>
+                <td>-</td>
+                <td>초기 선택값</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  onChange
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  {'(value: string | number) => void'}
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  -
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  선택값 변경 콜백
-                </td>
+                <td>onChange</td>
+                <td>{'(value: string | number) => void'}</td>
+                <td>-</td>
+                <td>선택값 변경 콜백</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  placeholder
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  string
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  선택해주세요
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  플레이스홀더 텍스트
-                </td>
+                <td>placeholder</td>
+                <td>string</td>
+                <td>선택해주세요</td>
+                <td>플레이스홀더 텍스트</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  disabled
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  boolean
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  false
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  비활성화 여부
-                </td>
+                <td>disabled</td>
+                <td>boolean</td>
+                <td>false</td>
+                <td>비활성화 여부</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  className
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  string
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  -
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  셀렉트 컨테이너 클래스명
-                </td>
+                <td>className</td>
+                <td>string</td>
+                <td>-</td>
+                <td>셀렉트 컨테이너 클래스명</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  style
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  CSSProperties
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  -
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  셀렉트 컨테이너 인라인 스타일
-                </td>
+                <td>style</td>
+                <td>CSSProperties</td>
+                <td>-</td>
+                <td>셀렉트 컨테이너 인라인 스타일</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  dropdownClassName
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  string
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  -
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  드롭다운 클래스명
-                </td>
+                <td>dropdownClassName</td>
+                <td>string</td>
+                <td>-</td>
+                <td>드롭다운 클래스명</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  allowClear
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  boolean
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  false
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  값 지우기 버튼 표시 여부
-                </td>
+                <td>allowClear</td>
+                <td>boolean</td>
+                <td>false</td>
+                <td>값 지우기 버튼 표시 여부</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  size
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  'small' | 'medium' | 'large'
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  medium
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  셀렉트 크기
-                </td>
+                <td>size</td>
+                <td>'small' | 'medium' | 'large'</td>
+                <td>medium</td>
+                <td>셀렉트 크기</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  loading
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  boolean
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  false
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  로딩 상태 표시 여부
-                </td>
+                <td>loading</td>
+                <td>boolean</td>
+                <td>false</td>
+                <td>로딩 상태 표시 여부</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  status
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  'error' | 'warning'
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  -
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  검증 상태
-                </td>
+                <td>status</td>
+                <td>'error' | 'warning'</td>
+                <td>-</td>
+                <td>검증 상태</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  open
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  boolean
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  -
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  드롭다운 열림 여부
-                </td>
+                <td>open</td>
+                <td>boolean</td>
+                <td>-</td>
+                <td>드롭다운 열림 여부</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  defaultOpen
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  boolean
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  false
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  초기 드롭다운 열림 여부
-                </td>
+                <td>defaultOpen</td>
+                <td>boolean</td>
+                <td>false</td>
+                <td>초기 드롭다운 열림 여부</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  onDropdownVisibleChange
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  {'(open: boolean) => void'}
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  -
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  드롭다운 열림/닫힘 콜백
-                </td>
+                <td>onDropdownVisibleChange</td>
+                <td>{'(open: boolean) => void'}</td>
+                <td>-</td>
+                <td>드롭다운 열림/닫힘 콜백</td>
               </tr>
             </tbody>
           </table>
