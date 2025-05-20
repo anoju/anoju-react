@@ -64,6 +64,7 @@ export interface SelectProps<T = string | number> {
   showSearch?: boolean;
   open?: boolean;
   defaultOpen?: boolean;
+  scrollDropdown?: boolean; // 스크롤 시 드롭다운 위치 조정 여부 (true: 위치 조정, false: 드롭다운 닫기)
 
   // 다중 선택 관련
   mode?: 'multiple';
@@ -141,6 +142,7 @@ function Select<T = string | number>(
     showSearch = false,
     open: controlledOpen,
     defaultOpen = false,
+    scrollDropdown = false, // 기본값은 false로 설정
     mode,
     separator = ', ',
     maxCount,
@@ -655,13 +657,26 @@ function Select<T = string | number>(
     // 초기 위치 설정
     updateDropdownPosition();
 
-    // 스크롤 및 리사이즈 이벤트 핸들러
+    // 리사이즈 이벤트 핸들러
     const handleResize = () => {
-      updateDropdownPosition();
+      if (scrollDropdown) {
+        // scrollDropdown이 true인 경우: 드롭다운 위치 조정
+        updateDropdownPosition();
+      } else {
+        // scrollDropdown이 false인 경우: 드롭다운 닫기
+        closeDropdown();
+      }
     };
 
+    // 스크롤 이벤트 핸들러
     const handleScroll = () => {
-      updateDropdownPosition();
+      if (scrollDropdown) {
+        // scrollDropdown이 true인 경우: 드롭다운 위치 조정
+        updateDropdownPosition();
+      } else {
+        // scrollDropdown이 false인 경우: 드롭다운 닫기
+        closeDropdown();
+      }
     };
 
     // 이벤트 리스너 등록
@@ -673,7 +688,7 @@ function Select<T = string | number>(
       window.removeEventListener('resize', handleResize);
       document.removeEventListener('scroll', handleScroll, true);
     };
-  }, [isOpen, updateDropdownPosition]);
+  }, [isOpen, updateDropdownPosition, scrollDropdown, closeDropdown]);
 
   // 외부 메서드 정의
   React.useImperativeHandle(ref, () => {

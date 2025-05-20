@@ -21,6 +21,7 @@ function Select<T = string | number>(
     showSearch = false,
     open: controlledOpen,
     defaultOpen = false,
+    scrollDropdown = false, // 기본값은 false로 설정
     mode,
     separator = ', ',
     maxCount,

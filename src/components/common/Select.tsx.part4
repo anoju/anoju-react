@@ -137,13 +137,26 @@
     // 초기 위치 설정
     updateDropdownPosition();
 
-    // 스크롤 및 리사이즈 이벤트 핸들러
+    // 리사이즈 이벤트 핸들러
     const handleResize = () => {
-      updateDropdownPosition();
+      if (scrollDropdown) {
+        // scrollDropdown이 true인 경우: 드롭다운 위치 조정
+        updateDropdownPosition();
+      } else {
+        // scrollDropdown이 false인 경우: 드롭다운 닫기
+        closeDropdown();
+      }
     };
     
+    // 스크롤 이벤트 핸들러
     const handleScroll = () => {
-      updateDropdownPosition();
+      if (scrollDropdown) {
+        // scrollDropdown이 true인 경우: 드롭다운 위치 조정
+        updateDropdownPosition();
+      } else {
+        // scrollDropdown이 false인 경우: 드롭다운 닫기
+        closeDropdown();
+      }
     };
 
     // 이벤트 리스너 등록
@@ -155,7 +168,7 @@
       window.removeEventListener('resize', handleResize);
       document.removeEventListener('scroll', handleScroll, true);
     };
-  }, [isOpen, updateDropdownPosition]);
+  }, [isOpen, updateDropdownPosition, scrollDropdown, closeDropdown]);
 
   // 외부 메서드 정의
   React.useImperativeHandle(ref, () => {

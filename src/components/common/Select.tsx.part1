@@ -64,6 +64,7 @@ export interface SelectProps<T = string | number> {
   showSearch?: boolean;
   open?: boolean;
   defaultOpen?: boolean;
+  scrollDropdown?: boolean; // 스크롤 시 드롭다운 위치 조정 여부 (true: 위치 조정, false: 드롭다운 닫기)
   
   // 다중 선택 관련
   mode?: 'multiple';

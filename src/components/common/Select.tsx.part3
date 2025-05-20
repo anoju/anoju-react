@@ -32,7 +32,7 @@
     if (spaceBelow >= dropdownHeight || spaceBelow >= spaceAbove) {
       // 아래에 표시
       setDropdownPosition({
-        top: `${scrollY + selectRect.bottom}px`,
+        top: `${selectRect.bottom}px`,
         bottom: 'auto',
         left,
         width,
