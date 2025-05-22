@@ -16,10 +16,18 @@ interface CustomTouchEvent {
 }
 
 // 버튼 사이즈 타입 정의
-type ButtonSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+type ButtonSize = 'xs' | 'sm' | '' | 'lg' | 'xl';
 
 // 버튼 효과 타입 정의
-type ButtonEffect = 'ripple' | 'pulse' | 'scale' | 'shadow' | 'rotate' | 'shake' | 'jello' | false;
+type ButtonEffect =
+  | 'ripple'
+  | 'pulse'
+  | 'scale'
+  | 'shadow'
+  | 'rotate'
+  | 'shake'
+  | 'jello'
+  | false;
 
 // 리플 효과 타입 정의
 interface RippleEffect {

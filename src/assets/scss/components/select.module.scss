@@ -5,19 +5,21 @@
 
 :root {
   --select-border-radius: 0.6rem;
-  --select-height-small: 3.2rem;
-  --select-height-medium: 4rem;
-  --select-height-large: 4.8rem;
+  --select-height-small: 3.8rem;
+  --select-height-medium: 4.5rem;
+  --select-height-lg: 5.2rem;
   --select-border-color: #d9d9d9;
   --select-hover-border-color: var(--primary-color);
   --select-active-border-color: var(--primary-color);
   --select-focus-shadow: 0 0 0 2px rgb(var(--primary-color-rgb) / 20%);
-  --select-dropdown-shadow: 0 6px 16px 0 rgb(0 0 0 / 8%), 0 3px 6px -4px rgb(0 0 0 / 12%), 0 9px 28px 8px rgb(0 0 0 / 5%);
+  --select-dropdown-shadow:
+    0 6px 16px 0 rgb(0 0 0 / 8%), 0 3px 6px -4px rgb(0 0 0 / 12%),
+    0 9px 28px 8px rgb(0 0 0 / 5%);
   --select-error-color: #ff4d4f;
   --select-warning-color: #faad14;
   --select-success-color: #52c41a;
   --select-disabled-bg: #f5f5f5;
-  --select-disabled-color: rgba(0, 0, 0, 0.25);
+  --select-disabled-color: rgb(0 0 0 / 25%);
 }
 
 .select {
@@ -31,83 +33,97 @@
   background-color: #fff;
   transition: all 0.3s;
   user-select: none;
-  font-size: 1.4rem;
+  height: var(--select-height-medium);
+  font-size: 1.6rem;
   outline: none;
 
-  &:hover:not(.disabled):not(.loading) {
+  &:hover:not(.disabled, .loading) {
     border-color: var(--select-hover-border-color);
   }
-  
-  &.focused:not(.disabled):not(.loading) {
+
+  &.focused:not(.disabled, .loading) {
     border-color: var(--select-active-border-color);
     box-shadow: var(--select-focus-shadow);
   }
-  
-  &.open:not(.disabled):not(.loading) {
+
+  &.open:not(.disabled, .loading) {
     border-color: var(--select-active-border-color);
     box-shadow: var(--select-focus-shadow);
   }
 
   // 사이즈 스타일
-  &.small {
-    height: var(--select-height-small);
-    font-size: 1.2rem;
+  &.xs {
+    height: 3.2rem;
+    padding: 0 0.8rem;
+    font-size: 1.3rem;
+    border-radius: 0.4rem;
   }
-  
-  &.medium {
-    height: var(--select-height-medium);
+
+  &.sm {
+    height: var(--select-height-small);
     font-size: 1.4rem;
   }
-  
-  &.large {
-    height: var(--select-height-large);
-    font-size: 1.6rem;
+
+  &.lg {
+    height: var(--select-height-lg);
+  }
+
+  &.xl {
+    height: 6rem;
+    font-size: 1.8rem;
+    border-radius: 0.8rem;
   }
 
   // 상태 스타일
   &.error {
     border-color: var(--select-error-color);
-    
-    &:hover:not(.disabled):not(.loading) {
+
+    &:hover:not(.disabled, .loading) {
       border-color: var(--select-error-color);
     }
-    
-    &.focused, &.open {
+
+    &.focused,
+    &.open {
       box-shadow: 0 0 0 2px rgb(255 77 79 / 20%);
     }
   }
-  
+
   &.warning {
     border-color: var(--select-warning-color);
-    
-    &:hover:not(.disabled):not(.loading) {
+
+    &:hover:not(.disabled, .loading) {
       border-color: var(--select-warning-color);
     }
-    
-    &.focused, &.open {
+
+    &.focused,
+    &.open {
       box-shadow: 0 0 0 2px rgb(250 173 20 / 20%);
     }
   }
 
   &.success {
     border-color: var(--select-success-color);
-    
-    &:hover:not(.disabled):not(.loading) {
+
+    &:hover:not(.disabled, .loading) {
       border-color: var(--select-success-color);
     }
-    
-    &.focused, &.open {
+
+    &.focused,
+    &.open {
       box-shadow: 0 0 0 2px rgb(82 196 26 / 20%);
     }
   }
-  
-  &.disabled, &.loading {
+
+  &.disabled,
+  &.loading {
     color: var(--select-disabled-color);
     background-color: var(--select-disabled-bg);
     cursor: not-allowed;
     border-color: var(--select-border-color);
-    
-    .arrow, .value, .placeholder {
+
+    .arrow,
+    .value,
+    .placeholder {
       opacity: 0.5;
     }
   }
@@ -162,7 +178,7 @@
   background-position: center;
   background-size: contain;
   transition: transform 0.3s;
-  
+
   &.arrowActive {
     transform: rotate(180deg);
   }
@@ -179,7 +195,7 @@
   background: transparent;
   padding: 0;
   cursor: pointer;
-  
+
   &:hover .clearIcon {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M6 11.25C8.89949 11.25 11.25 8.89949 11.25 6C11.25 3.10051 8.89949 0.75 6 0.75C3.10051 0.75 0.75 3.10051 0.75 6C0.75 8.89949 3.10051 11.25 6 11.25Z' fill='%23595959'/%3E%3Cpath d='M8.25 3.75L3.75 8.25M8.25 8.25L3.75 3.75' stroke='white' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
   }
@@ -212,7 +228,7 @@
   border: 1px solid #f0f0f0;
   z-index: 1050;
   overflow: hidden;
-  
+
   &.dropdownUp {
     transform-origin: center bottom;
   }
@@ -232,7 +248,7 @@
   outline: none;
   font-size: 1.4rem;
   transition: all 0.3s;
-  
+
   &:focus {
     border-color: var(--select-active-border-color);
     box-shadow: var(--select-focus-shadow);
@@ -268,15 +284,15 @@
   font-size: 1.4rem;
   line-height: 1.5;
   cursor: pointer;
-  
+
   &:hover:not(.optionDisabled) {
     background-color: #f5f5f5;
   }
-  
+
   &.optionSelected {
     font-weight: 500;
     background-color: #e6f7ff;
-    
+
     &:hover {
       background-color: #dcf4ff;
     }
@@ -285,17 +301,17 @@
       opacity: 1;
       background-color: var(--primary-color);
       border-color: var(--primary-color);
-      
+
       &::after {
         transform: translate(-50%, -50%) scale(1);
       }
     }
   }
-  
+
   &.optionActive {
     background-color: #f5f5f5;
   }
-  
+
   &.optionDisabled {
     color: var(--select-disabled-color);
     cursor: not-allowed;
@@ -314,7 +330,7 @@
   flex-shrink: 0;
   opacity: 0.5;
   transition: all 0.3s;
-  
+
   &::after {
     content: '';
     position: absolute;
@@ -349,14 +365,14 @@
   :root {
     --select-border-color: #434343;
     --select-disabled-bg: #262626;
-    --select-disabled-color: rgba(255, 255, 255, 0.3);
+    --select-disabled-color: rgb(255 255 255 / 30%);
   }
-  
+
   .select {
     background-color: #1f1f1f;
     border-color: var(--select-border-color);
   }
-  
+
   .dropdown {
     background-color: #1f1f1f;
     border-color: #434343;
@@ -371,20 +387,20 @@
     border-color: #434343;
     color: #fff;
   }
-  
+
   .option {
     &:hover:not(.optionDisabled) {
       background-color: #303030;
     }
-    
+
     &.optionSelected {
       background-color: #111b26;
-      
+
       &:hover {
         background-color: #173047;
       }
     }
-    
+
     &.optionActive {
       background-color: #303030;
     }
@@ -393,8 +409,9 @@
   .optionGroup {
     background-color: #262626;
   }
-  
-  .placeholder, .empty {
+
+  .placeholder,
+  .empty {
     color: #666;
   }
 }

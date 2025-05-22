@@ -32,10 +32,10 @@ function Home() {
   return (
     <div className={styles.home}>
       <div>
-        <Button href="https://vite.dev" target="_blank">
+        <Button href="https://vite.dev" target="_blank" not>
           <img src={viteLogo} className={styles.logo} alt="Vite logo" />
         </Button>
-        <Button href="https://react.dev" target="_blank">
+        <Button href="https://react.dev" target="_blank" not>
           <img
             src={reactLogo}
             className={`${styles.logo} ${styles.react}`}

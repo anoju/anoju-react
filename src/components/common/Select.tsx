@@ -57,7 +57,7 @@ export interface SelectProps<T = string | number> {
   style?: React.CSSProperties;
   dropdownClassName?: string;
   dropdownStyle?: React.CSSProperties;
-  size?: 'small' | 'medium' | 'large';
+  size?: 'xs' | 'sm' | '' | 'lg' | 'xl';
 
   // 기능 관련
   allowClear?: boolean;
@@ -138,7 +138,7 @@ function Select<T = string | number>(
     dropdownClassName = '',
     dropdownStyle,
     allowClear = false,
-    size = 'medium',
+    size = '',
     showSearch = false,
     open: controlledOpen,
     defaultOpen = false,

@@ -137,8 +137,8 @@ const [basicValue, setBasicValue] = useState<string>('apple');
       <section className={styles.section}>
         <h2 className={styles['section-title']}>크기 조절</h2>
         <p className={styles.txt}>
-          size 속성을 통해 크기를 조절할 수 있습니다. 'small', 'medium', 'large'
-          세 가지 옵션이 있습니다.
+          size 속성을 통해 크기를 조절할 수 있습니다. 'small', 'medium', 'lg' 세
+          가지 옵션이 있습니다.
         </p>
 
         <div className={styles.showcase}>
@@ -148,27 +148,61 @@ const [basicValue, setBasicValue] = useState<string>('apple');
             <div>
               <h3 className={styles['sub-title']}>크기 옵션</h3>
               <div
-                style={{ display: 'flex', gap: '20px', marginBottom: '10px' }}
+                style={{
+                  display: 'flex',
+                  gap: '8px',
+                  margin: '10px 0',
+                  alignItems: 'center',
+                }}
               >
                 <Select
                   options={[
-                    { value: 'small', label: '작게' },
-                    { value: 'medium', label: '중간' },
-                    { value: 'large', label: '크게' },
+                    { value: 'xs', label: '더작게' },
+                    { value: 'sm', label: '작게' },
+                    { value: '', label: '기본' },
+                    { value: 'lg', label: '크게' },
+                    { value: 'xl', label: '더크게' },
                   ]}
                   value={sizeValue}
                   onChange={setSizeValue}
+                  size={sizeValue as 'xs' | 'sm' | '' | 'lg' | 'xl'}
                   placeholder="크기를 선택하세요"
                 />
 
-                <Button onClick={() => setSizeValue('small')} size="sm">
-                  작게
+                <Button
+                  className={sizeValue === 'xs' ? 'primary' : 'line'}
+                  onClick={() => setSizeValue('xs')}
+                  size={sizeValue as 'xs' | 'sm' | '' | 'lg' | 'xl'}
+                >
+                  xs
                 </Button>
-                <Button onClick={() => setSizeValue('medium')} size="sm">
-                  중간
+                <Button
+                  className={sizeValue === 'sm' ? 'primary' : 'line'}
+                  onClick={() => setSizeValue('sm')}
+                  size={sizeValue as 'xs' | 'sm' | '' | 'lg' | 'xl'}
+                >
+                  sm
                 </Button>
-                <Button onClick={() => setSizeValue('large')} size="sm">
-                  크게
+                <Button
+                  className={sizeValue === '' ? 'primary' : 'line'}
+                  onClick={() => setSizeValue('')}
+                  size={sizeValue as 'xs' | 'sm' | '' | 'lg' | 'xl'}
+                >
+                  기본
+                </Button>
+                <Button
+                  className={sizeValue === 'lg' ? 'primary' : 'line'}
+                  onClick={() => setSizeValue('lg')}
+                  size={sizeValue as 'xs' | 'sm' | '' | 'lg' | 'xl'}
+                >
+                  lg
+                </Button>
+                <Button
+                  className={sizeValue === 'xl' ? 'primary' : 'line'}
+                  onClick={() => setSizeValue('xl')}
+                  size={sizeValue as 'xs' | 'sm' | '' | 'lg' | 'xl'}
+                >
+                  xl
                 </Button>
               </div>
 
@@ -178,22 +212,35 @@ const [basicValue, setBasicValue] = useState<string>('apple');
                 <Select
                   options={['apple', 'banana', 'orange', 'pear', 'grape']}
                   defaultValue="apple"
-                  size="small"
-                  style={{ width: '150px' }}
+                  size="xs"
+                  style={{ width: '100px' }}
+                />
+
+                <Select
+                  options={['apple', 'banana', 'orange', 'pear', 'grape']}
+                  defaultValue="apple"
+                  size="sm"
+                  style={{ width: '100px' }}
                 />
 
                 <Select
                   options={['apple', 'banana', 'orange', 'pear', 'grape']}
                   defaultValue="banana"
-                  size="medium"
-                  style={{ width: '150px' }}
+                  style={{ width: '100px' }}
                 />
 
                 <Select
                   options={['apple', 'banana', 'orange', 'pear', 'grape']}
                   defaultValue="orange"
-                  size="large"
-                  style={{ width: '150px' }}
+                  size="lg"
+                  style={{ width: '100px' }}
+                />
+
+                <Select
+                  options={['apple', 'banana', 'orange', 'pear', 'grape']}
+                  defaultValue="orange"
+                  size="xl"
+                  style={{ width: '100px' }}
                 />
               </div>
             </div>
@@ -222,7 +269,7 @@ const [basicValue, setBasicValue] = useState<string>('apple');
 <Select
   options={['apple', 'banana', 'orange', 'pear', 'grape']}
   defaultValue="orange"
-  size="large"
+  size="lg"
   style={{ width: '150px' }}
 />`}
           language="jsx"
@@ -555,7 +602,7 @@ const [open, setOpen] = useState<boolean>(false);
               </tr>
               <tr>
                 <td>size</td>
-                <td>'small' | 'medium' | 'large'</td>
+                <td>'small' | 'medium' | 'lg'</td>
                 <td>medium</td>
                 <td>셀렉트 크기</td>
               </tr>
