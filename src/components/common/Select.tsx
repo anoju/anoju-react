@@ -24,12 +24,14 @@ export interface SelectOptionGroup<T = string | number> {
   disabled?: boolean;
 }
 
-// 옵션 아이템 타입 정의
+// 옵션 아이템 타입 정의 - 인덱스 시그니처 추가
 export interface SelectOption<T = string | number> {
   value: T;
   label: ReactNode;
   disabled?: boolean;
   groupKey?: string | number; // 그룹 키 (옵션이 그룹의 일부인 경우)
+  searchText?: string; // 검색용 텍스트 추가
+  [key: string]: unknown; // 인덱스 시그니처 추가로 동적 속성 접근 허용
 }
 
 // 셀렉트 컴포넌트 Props 타입 정의
@@ -227,11 +229,18 @@ function Select<T = string | number>(
 
     // optionFilterProp을 활용한 검색 (기본값: 'label')
     return flatOptions.filter((option) => {
-      // 검색 대상 속성 값 가져오기
-      const optionText = String(
-        option[optionFilterProp as keyof typeof option] || option.label
-      ).toLowerCase();
-      return optionText.includes(lowerSearchValue);
+      // searchText가 있으면 우선 사용, 없으면 optionFilterProp 사용
+      let searchTarget: string;
+
+      if (option.searchText) {
+        searchTarget = option.searchText;
+      } else if (optionFilterProp in option) {
+        searchTarget = String(option[optionFilterProp]);
+      } else {
+        searchTarget = String(option.label);
+      }
+
+      return searchTarget.toLowerCase().includes(lowerSearchValue);
     });
   }, [normalizedOptionsData, searchValue, showSearch, optionFilterProp]);
 
@@ -261,9 +270,10 @@ function Select<T = string | number>(
   const getOptionLabel = useCallback(
     (option: SelectOption<T>) => {
       // optionLabelProp을 활용해 레이블 속성 결정
-      return String(
-        option[optionLabelProp as keyof typeof option] || option.label
-      );
+      if (optionLabelProp in option) {
+        return String(option[optionLabelProp]);
+      }
+      return String(option.label);
     },
     [optionLabelProp]
   );
@@ -330,7 +340,7 @@ function Select<T = string | number>(
         left,
         width,
       });
-      dropdownRef.current.classList.add(styles['dropdown-up']);
+      dropdownRef.current.classList.add(styles.dropdownUp);
     }
   }, []);
 
@@ -961,6 +971,16 @@ function Select<T = string | number>(
                         (opt) => opt.value === option.value
                       );
 
+                      // maxCount에 도달했는지 확인
+                      const isMaxCountReached =
+                        isMultiple &&
+                        maxCount !== undefined &&
+                        Array.isArray(internalValue) &&
+                        internalValue.length >= maxCount &&
+                        !isSelected; // 이미 선택된 항목은 제외
+
+                      const isDisabled = option.disabled || isMaxCountReached;
+
                       return (
                         <li
                           key={`${index}-${String(option.value)}`}
@@ -968,18 +988,27 @@ function Select<T = string | number>(
                             [styles['option-selected']]: isSelected,
                             [styles['option-active']]:
                               globalIndex === activeIndex,
-                            [styles['option-disabled']]: option.disabled,
+                            [styles['option-disabled']]: isDisabled,
                           })}
                           onClick={(e) => {
                             e.stopPropagation();
-                            if (!option.disabled) {
+                            if (!isDisabled) {
                               toggleOption(option);
                             }
                           }}
-                          onMouseEnter={() => setActiveIndex(globalIndex)}
+                          onMouseEnter={() => {
+                            if (!isDisabled) {
+                              setActiveIndex(globalIndex);
+                            }
+                          }}
                           role="option"
                           aria-selected={isSelected}
-                          aria-disabled={option.disabled}
+                          aria-disabled={isDisabled}
+                          title={
+                            isMaxCountReached
+                              ? `최대 ${maxCount}개까지 선택 가능합니다`
+                              : undefined
+                          }
                         >
                           {isMultiple && (
                             <span className={styles['option-check']} />

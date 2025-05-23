@@ -24,12 +24,14 @@ export interface SelectOptionGroup<T = string | number> {
   disabled?: boolean;
 }
 
-// 옵션 아이템 타입 정의
+// 옵션 아이템 타입 정의 - 인덱스 시그니처 추가
 export interface SelectOption<T = string | number> {
   value: T;
   label: ReactNode;
   disabled?: boolean;
   groupKey?: string | number; // 그룹 키 (옵션이 그룹의 일부인 경우)
+  searchText?: string; // 검색용 텍스트 추가
+  [key: string]: unknown; // 인덱스 시그니처 추가로 동적 속성 접근 허용
 }
 
 // 셀렉트 컴포넌트 Props 타입 정의

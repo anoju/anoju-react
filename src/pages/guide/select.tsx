@@ -44,9 +44,7 @@ const SelectGuide = () => {
         </p>
 
         <div className={styles.showcase}>
-          <div
-            style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}
-          >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <div>
               <h3 className={styles['sub-title']}>문자열 옵션</h3>
               <Select
@@ -143,9 +141,7 @@ const [basicValue, setBasicValue] = useState<string>('apple');
         </p>
 
         <div className={styles.showcase}>
-          <div
-            style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}
-          >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <div>
               <h3 className={styles['sub-title']}>크기 옵션</h3>
               <div
@@ -208,7 +204,7 @@ const [basicValue, setBasicValue] = useState<string>('apple');
               </div>
 
               <div
-                style={{ display: 'flex', gap: '20px', alignItems: 'center' }}
+                style={{ display: 'flex', gap: '8px', alignItems: 'center' }}
               >
                 <Select
                   options={['apple', 'banana', 'orange', 'pear', 'grape']}
@@ -293,9 +289,7 @@ const [basicValue, setBasicValue] = useState<string>('apple');
         </p>
 
         <div className={styles.showcase}>
-          <div
-            style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}
-          >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <div>
               <h3 className={styles['sub-title']}>옵션 그룹 사용</h3>
               <Select
@@ -453,9 +447,7 @@ const [basicValue, setBasicValue] = useState<string>('apple');
         </p>
 
         <div className={styles.showcase}>
-          <div
-            style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}
-          >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <div>
               <h3 className={styles['sub-title']}>기본 다중 선택</h3>
               <Select
@@ -554,10 +546,10 @@ const [basicValue, setBasicValue] = useState<string>('apple');
                     { value: 'purple', label: '보라 🟣' },
                   ]}
                   value={selectedColors} // 상태에서 값을 가져옴
-                  onChange={(values) => {
+                  onChange={(values: { value: string; label: string }[]) => {
                     console.log('선택된 색상:', values);
-                    // 실제 사용시 상태 업데이트 함수 호출
-                    setSelectedColors(values);
+                    // Extract only the value strings from the selected options
+                    setSelectedColors(values.map((option) => option.value));
                   }}
                   placeholder="색상을 선택하세요"
                   style={{ width: '300px' }}
@@ -722,9 +714,7 @@ const [selectedColors, setSelectedColors] = useState(['red', 'blue']);
         </p>
 
         <div className={styles.showcase}>
-          <div
-            style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}
-          >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <div>
               <h3 className={styles['sub-title']}>기본 검색</h3>
               <Select
@@ -923,9 +913,7 @@ const [selectedColors, setSelectedColors] = useState(['red', 'blue']);
         </p>
 
         <div className={styles.showcase}>
-          <div
-            style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}
-          >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <div>
               <h3 className={styles['sub-title']}>
                 스크롤 시 드롭다운 위치 유지
@@ -1006,19 +994,18 @@ const [selectedColors, setSelectedColors] = useState(['red', 'blue']);
       </section>
 
       <section className={styles.section}>
-        <h2 className={styles['section-title']}>성공 상태</h2>
+        <h2 className={styles['section-title']}>검증 상태</h2>
         <p className={styles.txt}>
-          status="success" 속성을 사용하여 성공 상태를 표시할 수 있습니다.
+          status 속성을 통해 error, warning, success 등의 상태를 표시할 수
+          있습니다.
         </p>
 
         <div className={styles.showcase}>
-          <div
-            style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}
-          >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <div>
               <h3 className={styles['sub-title']}>성공 상태 추가</h3>
               <div
-                style={{ display: 'flex', gap: '20px', marginBottom: '10px' }}
+                style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}
               >
                 <Button
                   className={statusValue === '' ? 'primary' : 'line'}
@@ -1051,13 +1038,15 @@ const [selectedColors, setSelectedColors] = useState(['red', 'blue']);
               </div>
 
               <div
-                style={{ display: 'flex', gap: '20px', alignItems: 'center' }}
+                style={{ display: 'flex', gap: '8px', alignItems: 'center' }}
               >
                 <Select
-                  options={['apple', 'banana', 'orange', 'pear', 'grape']}
-                  defaultValue="apple"
+                  options={['error', 'warning', 'success']}
+                  placeholder="상태값을 선택해주세요"
+                  value={statusValue}
+                  onChange={setStatusValue}
                   status={
-                    statusValue === 'default'
+                    statusValue === ''
                       ? undefined
                       : (statusValue as 'error' | 'warning' | 'success')
                   }
@@ -1065,23 +1054,37 @@ const [selectedColors, setSelectedColors] = useState(['red', 'blue']);
                 />
               </div>
               <p className={styles.txt}>
-                현재 상태: <strong>{statusValue}</strong>
+                현재 상태:
+                <strong>{statusValue ? statusValue : 'default'}</strong>
               </p>
             </div>
 
             <div>
               <h3 className={styles['sub-title']}>단일 상태 예제</h3>
               <div
-                style={{ display: 'flex', gap: '20px', alignItems: 'center' }}
+                style={{ display: 'flex', gap: '8px', alignItems: 'center' }}
               >
                 <Select
-                  options={[
-                    { value: 'phone', label: '전화번호 인증됨 ✓' },
-                    { value: 'email', label: '이메일 인증됨 ✓' },
-                    { value: 'kakao', label: '카카오 인증됨 ✓' },
-                  ]}
-                  defaultValue="phone"
+                  options={['error', 'warning', 'success']}
+                  placeholder="상태값을 선택해주세요"
+                  defaultValue="success"
                   status="success"
+                  style={{ width: '250px' }}
+                />
+
+                <Select
+                  options={['error', 'warning', 'success']}
+                  placeholder="상태값을 선택해주세요"
+                  defaultValue="warning"
+                  status="warning"
+                  style={{ width: '250px' }}
+                />
+
+                <Select
+                  options={['error', 'warning', 'success']}
+                  placeholder="상태값을 선택해주세요"
+                  defaultValue="error"
+                  status="error"
                   style={{ width: '250px' }}
                 />
               </div>
@@ -1126,10 +1129,12 @@ const [statusValue, setStatusValue] = useState<string>('default');
 
 // 상태 적용 Select
 <Select
-  options={['apple', 'banana', 'orange', 'pear', 'grape']}
-  defaultValue="apple"
+  options={['error', 'warning', 'success']}
+  placeholder="상태값을 선택해주세요"
+  value={statusValue}
+  onChange={setStatusValue}
   status={
-    statusValue === 'default'
+    statusValue === ''
       ? undefined
       : (statusValue as 'error' | 'warning' | 'success')
   }
@@ -1138,13 +1143,28 @@ const [statusValue, setStatusValue] = useState<string>('default');
 
 // 성공 상태 예제
 <Select
-  options={[
-    { value: 'phone', label: '전화번호 인증됨 ✓' },
-    { value: 'email', label: '이메일 인증됨 ✓' },
-    { value: 'kakao', label: '카카오 인증됨 ✓' },
-  ]}
-  defaultValue="phone"
+  options={['error', 'warning', 'success']}
+  placeholder="상태값을 선택해주세요"
+  defaultValue="success"
   status="success"
+  style={{ width: '250px' }}
+/>
+
+// 경고 상태 예제
+<Select
+  options={['error', 'warning', 'success']}
+  placeholder="상태값을 선택해주세요"
+  defaultValue="warning"
+  status="warning"
+  style={{ width: '250px' }}
+/>
+
+// 오류 상태 예제
+<Select
+  options={['error', 'warning', 'success']}
+  placeholder="상태값을 선택해주세요"
+  defaultValue="error"
+  status="error"
   style={{ width: '250px' }}
 />`}
           language="jsx"
@@ -1158,9 +1178,7 @@ const [statusValue, setStatusValue] = useState<string>('default');
         </p>
 
         <div className={styles.showcase}>
-          <div
-            style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}
-          >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <div>
               <h3 className={styles['sub-title']}>값 지우기 (allowClear)</h3>
               <Select
@@ -1223,98 +1241,17 @@ const [statusValue, setStatusValue] = useState<string>('default');
       </section>
 
       <section className={styles.section}>
-        <h2 className={styles['section-title']}>검증 상태</h2>
-        <p className={styles.txt}>
-          status 속성을 통해 error, warning 등의 상태를 표시할 수 있습니다.
-        </p>
-
-        <div className={styles.showcase}>
-          <div
-            style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}
-          >
-            <div>
-              <h3 className={styles['sub-title']}>상태 설정</h3>
-              <div
-                style={{ display: 'flex', gap: '20px', marginBottom: '10px' }}
-              >
-                <Select
-                  options={[
-                    { value: 'default', label: '기본' },
-                    { value: 'error', label: '오류' },
-                    { value: 'warning', label: '경고' },
-                  ]}
-                  value={statusValue}
-                  onChange={setStatusValue}
-                  placeholder="상태를 선택하세요"
-                />
-
-                <Button onClick={() => setStatusValue('default')} size="sm">
-                  기본
-                </Button>
-                <Button onClick={() => setStatusValue('error')} size="sm">
-                  오류
-                </Button>
-                <Button onClick={() => setStatusValue('warning')} size="sm">
-                  경고
-                </Button>
-              </div>
-
-              <div
-                style={{ display: 'flex', gap: '20px', alignItems: 'center' }}
-              >
-                <Select
-                  options={['apple', 'banana', 'orange', 'pear', 'grape']}
-                  defaultValue="apple"
-                  status={
-                    statusValue === 'default'
-                      ? undefined
-                      : (statusValue as 'error' | 'warning')
-                  }
-                  style={{ width: '250px' }}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <h3 className={styles['sub-title']}>참조 소스코드</h3>
-        <CodeHighlight
-          code={`// 상태 관리
-const [statusValue, setStatusValue] = useState<string>('default');
-
-// 오류 상태의 Select
-<Select
-  options={['apple', 'banana', 'orange', 'pear', 'grape']}
-  defaultValue="apple"
-  status="error"
-  style={{ width: '250px' }}
-/>
-
-// 경고 상태의 Select
-<Select
-  options={['apple', 'banana', 'orange', 'pear', 'grape']}
-  defaultValue="apple"
-  status="warning"
-  style={{ width: '250px' }}
-/>`}
-          language="jsx"
-        />
-      </section>
-
-      <section className={styles.section}>
         <h2 className={styles['section-title']}>외부 제어</h2>
         <p className={styles.txt}>
           value, open 등의 속성을 통해 셀렉트를 외부에서 제어할 수 있습니다.
         </p>
 
         <div className={styles.showcase}>
-          <div
-            style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}
-          >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <div>
               <h3 className={styles['sub-title']}>외부에서 값 제어</h3>
               <div
-                style={{ display: 'flex', gap: '20px', marginBottom: '10px' }}
+                style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}
               >
                 <Select
                   options={[
@@ -1344,7 +1281,7 @@ const [statusValue, setStatusValue] = useState<string>('default');
             <div>
               <h3 className={styles['sub-title']}>외부에서 열기/닫기 제어</h3>
               <div
-                style={{ display: 'flex', gap: '20px', marginBottom: '10px' }}
+                style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}
               >
                 <Select
                   options={[

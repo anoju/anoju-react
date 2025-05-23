@@ -106,9 +106,18 @@ function Select<T = string | number>(
     
     // optionFilterProp을 활용한 검색 (기본값: 'label')
     return flatOptions.filter((option) => {
-      // 검색 대상 속성 값 가져오기
-      const optionText = String(option[optionFilterProp as keyof typeof option] || option.label).toLowerCase();
-      return optionText.includes(lowerSearchValue);
+      // searchText가 있으면 우선 사용, 없으면 optionFilterProp 사용
+      let searchTarget: string;
+      
+      if (option.searchText) {
+        searchTarget = option.searchText;
+      } else if (optionFilterProp in option) {
+        searchTarget = String(option[optionFilterProp]);
+      } else {
+        searchTarget = String(option.label);
+      }
+      
+      return searchTarget.toLowerCase().includes(lowerSearchValue);
     });
   }, [normalizedOptionsData, searchValue, showSearch, optionFilterProp]);
 
@@ -135,7 +144,10 @@ function Select<T = string | number>(
   // 선택된 옵션의 레이블 표시에 사용할 함수
   const getOptionLabel = useCallback((option: SelectOption<T>) => {
     // optionLabelProp을 활용해 레이블 속성 결정
-    return String(option[optionLabelProp as keyof typeof option] || option.label);
+    if (optionLabelProp in option) {
+      return String(option[optionLabelProp]);
+    }
+    return String(option.label);
   }, [optionLabelProp]);
 
   // 외부 제어 모드일 경우 value prop이 변경되면 내부 상태 업데이트

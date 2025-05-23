@@ -110,24 +110,38 @@
                         (opt) => opt.value === option.value
                       );
                       
+                      // maxCount에 도달했는지 확인
+                      const isMaxCountReached = isMultiple && 
+                        maxCount !== undefined && 
+                        Array.isArray(internalValue) && 
+                        internalValue.length >= maxCount &&
+                        !isSelected; // 이미 선택된 항목은 제외
+                      
+                      const isDisabled = option.disabled || isMaxCountReached;
+                      
                       return (
                         <li
                           key={`${index}-${String(option.value)}`}
                           className={cx(styles.option, {
                             [styles['option-selected']]: isSelected,
                             [styles['option-active']]: globalIndex === activeIndex,
-                            [styles['option-disabled']]: option.disabled,
+                            [styles['option-disabled']]: isDisabled,
                           })}
                           onClick={(e) => {
                             e.stopPropagation();
-                            if (!option.disabled) {
+                            if (!isDisabled) {
                               toggleOption(option);
                             }
                           }}
-                          onMouseEnter={() => setActiveIndex(globalIndex)}
+                          onMouseEnter={() => {
+                            if (!isDisabled) {
+                              setActiveIndex(globalIndex);
+                            }
+                          }}
                           role="option"
                           aria-selected={isSelected}
-                          aria-disabled={option.disabled}
+                          aria-disabled={isDisabled}
+                          title={isMaxCountReached ? `최대 ${maxCount}개까지 선택 가능합니다` : undefined}
                         >
                           {isMultiple && (
                             <span className={styles['option-check']} />
@@ -158,4 +172,3 @@ const SelectWithRef = forwardRef(Select) as <T = string | number>(
 ) => React.ReactElement;
 
 export default SelectWithRef;
-
