@@ -249,28 +249,36 @@ const [basicValue, setBasicValue] = useState<string>('apple');
 
         <h3 className={styles['sub-title']}>참조 소스코드</h3>
         <CodeHighlight
-          code={`// 작은 크기
+          code={`// xs
 <Select
   options={['apple', 'banana', 'orange', 'pear', 'grape']}
   defaultValue="apple"
-  size="small"
-  style={{ width: '150px' }}
+  size="xs"
+  style={{ width: '100px' }}
 />
 
-// 중간 크기 (기본값)
+// sm
 <Select
   options={['apple', 'banana', 'orange', 'pear', 'grape']}
-  defaultValue="banana"
-  size="medium"
-  style={{ width: '150px' }}
+  defaultValue="apple"
+  size="sm"
+  style={{ width: '100px' }}
 />
 
-// 큰 크기
+// lg
 <Select
   options={['apple', 'banana', 'orange', 'pear', 'grape']}
   defaultValue="orange"
   size="lg"
-  style={{ width: '150px' }}
+  style={{ width: '100px' }}
+/>
+
+// xl
+<Select
+  options={['apple', 'banana', 'orange', 'pear', 'grape']}
+  defaultValue="orange"
+  size="xl"
+  style={{ width: '100px' }}
 />`}
           language="jsx"
         />

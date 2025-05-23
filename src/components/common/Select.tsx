@@ -321,7 +321,7 @@ function Select<T = string | number>(
         left,
         width,
       });
-      dropdownRef.current.classList.remove(styles.dropdownUp);
+      dropdownRef.current.classList.remove(styles['dropdown-up']);
     } else {
       // 위에 표시
       setDropdownPosition({
@@ -330,7 +330,7 @@ function Select<T = string | number>(
         left,
         width,
       });
-      dropdownRef.current.classList.add(styles.dropdownUp);
+      dropdownRef.current.classList.add(styles['dropdown-up']);
     }
   }, []);
 
@@ -339,7 +339,7 @@ function Select<T = string | number>(
     if (!dropdownRef.current) return;
 
     const optionElements = dropdownRef.current.querySelectorAll(
-      `.${styles.option}:not(.${styles.optionDisabled})`
+      `.${styles.option}:not(.${styles['option-disabled']})`
     );
 
     if (index >= 0 && index < optionElements.length) {
@@ -871,7 +871,7 @@ function Select<T = string | number>(
       aria-controls={`${selectId.current}-dropdown`}
       aria-labelledby={`${selectId.current}-label`}
     >
-      <div className={styles.selectInner}>
+      <div className={styles['select-inner']}>
         {isMultiple && selectedOptions.length > 0 ? (
           <div
             className={styles.value}
@@ -894,24 +894,24 @@ function Select<T = string | number>(
           </div>
         )}
 
-        <div className={styles.suffixWrapper}>
+        <div className={styles['suffix-wrap']}>
           {allowClear && hasValue && (
             <button
               type="button"
-              className={styles.clearBtn}
+              className={styles['btn-clear']}
               onClick={handleClear}
               aria-label="지우기"
               tabIndex={-1}
             >
-              <span className={styles.clearIcon} aria-hidden="true" />
+              <span className={styles['ico-clear']} aria-hidden="true" />
             </button>
           )}
 
           {loading ? (
-            <span className={styles.loadingIcon} aria-hidden="true" />
+            <span className={styles['ico-loading']} aria-hidden="true" />
           ) : (
             <span
-              className={cx(styles.arrow, { [styles.arrowActive]: isOpen })}
+              className={cx(styles.arrow, { [styles['arrow-active']]: isOpen })}
               aria-hidden="true"
             />
           )}
@@ -932,11 +932,11 @@ function Select<T = string | number>(
           }}
         >
           {showSearch && (
-            <div className={styles.searchWrapper}>
+            <div className={styles['search-wrap']}>
               <input
                 ref={searchInputRef}
                 type="text"
-                className={styles.searchInput}
+                className={styles['search-input']}
                 value={searchValue}
                 onChange={handleSearchInput}
                 placeholder="검색..."
@@ -947,15 +947,15 @@ function Select<T = string | number>(
           )}
 
           {filteredOptions.length > 0 ? (
-            <div className={styles.optionsWrapper}>
+            <div className={styles['options-wrap']}>
               {groupedOptions.map((group, groupIndex) => (
                 <React.Fragment key={`group-${groupIndex}`}>
                   {group.group && (
-                    <div className={styles.optionGroup}>
+                    <div className={styles['option-group']}>
                       {group.group.label}
                     </div>
                   )}
-                  <ul className={styles.options}>
+                  <ul className={styles['options-list']}>
                     {group.options.map((option, index) => {
                       const isSelected = isOptionSelected(option);
                       const globalIndex = filteredOptions.findIndex(
@@ -966,9 +966,10 @@ function Select<T = string | number>(
                         <li
                           key={`${index}-${String(option.value)}`}
                           className={cx(styles.option, {
-                            [styles.optionSelected]: isSelected,
-                            [styles.optionActive]: globalIndex === activeIndex,
-                            [styles.optionDisabled]: option.disabled,
+                            [styles['option-selected']]: isSelected,
+                            [styles['option-active']]:
+                              globalIndex === activeIndex,
+                            [styles['option-disabled']]: option.disabled,
                           })}
                           onClick={(e) => {
                             e.stopPropagation();
@@ -982,7 +983,7 @@ function Select<T = string | number>(
                           aria-disabled={option.disabled}
                         >
                           {isMultiple && (
-                            <span className={styles.optionCheckMark} />
+                            <span className={styles['option-check']} />
                           )}
                           {getOptionLabel(option)}
                         </li>

@@ -37,7 +37,7 @@
         left,
         width,
       });
-      dropdownRef.current.classList.remove(styles.dropdownUp);
+      dropdownRef.current.classList.remove(styles['dropdown-up']);
     } else {
       // 위에 표시
       setDropdownPosition({
@@ -55,7 +55,7 @@
     if (!dropdownRef.current) return;
 
     const optionElements = dropdownRef.current.querySelectorAll(
-      `.${styles.option}:not(.${styles.optionDisabled})`
+      `.${styles.option}:not(.${styles['option-disabled']})`
     );
     
     if (index >= 0 && index < optionElements.length) {
