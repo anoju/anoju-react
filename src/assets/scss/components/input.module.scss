@@ -3,67 +3,49 @@
 @use 'sass:color';
 @use 'sass:math';
 
-// Input 기본 스타일 변수
-:root {
-  --input-height: 4rem;
-  --input-border-color: #d9d9d9;
-  --input-border-color-hover: #4096ff;
-  --input-border-color-focus: var(--primary-color);
-  --input-bg-color: #fff;
-  --input-text-color: rgb(0 0 0 / 88%);
-  --input-disabled-bg: #f5f5f5;
-  --input-disabled-color: rgb(0 0 0 / 25%);
-  --input-placeholder-color: rgb(0 0 0 / 35%);
-  --input-radius: 0.6rem;
-  --input-padding-x: 1.2rem;
-  --input-padding-y: 1.2rem;
-  --input-icon-size: 1.6rem;
-  --input-transition: all 0.2s;
-}
-
 // Input 래퍼
 .input {
   position: relative;
   display: flex;
   width: 100%;
-  border-radius: var(--input-radius);
-  border: 1px solid var(--input-border-color);
-  background-color: var(--input-bg-color);
-  transition: var(--input-transition);
+  border-radius: var(--form-radius);
+  border: 1px solid var(--form-border-color);
+  background-color: var(--form-bg-color);
+  transition: var(--form-transition);
   align-items: center;
 
   &:hover:not(.disabled) {
-    border-color: var(--input-border-color-hover);
+    border-color: var(--form-border-color-hover);
   }
 
   &.focused:not(.disabled) {
-    border-color: var(--input-border-color-focus);
+    border-color: var(--form-border-color-focus);
     box-shadow: 0 0 0 2px rgb(24 144 255 / 20%);
     outline: 0;
   }
 
   &.disabled {
-    background-color: var(--input-disabled-bg);
-    border-color: var(--input-border-color);
+    background-color: var(--form-disabled-bg);
+    border-color: var(--form-border-color);
     cursor: not-allowed;
-    color: var(--input-disabled-color);
+    color: var(--form-disabled-color);
   }
 
   // before와 after 요소가 있을 때 input 패딩 조정
   &.with-before .native {
-    padding-left: calc(var(--input-padding-x) / 2);
+    padding-left: calc(var(--form-padding-x) / 2);
   }
 
   &.with-buttons {
     .native {
-      padding-right: calc(var(--input-padding-x) / 2);
+      padding-right: calc(var(--form-padding-x) / 2);
     }
   }
 
   &.with-after {
     .native,
     .inp-buttons {
-      padding-right: calc(var(--input-padding-x) / 2);
+      padding-right: calc(var(--form-padding-x) / 2);
     }
   }
 }
@@ -74,17 +56,17 @@
   display: inline-block;
   width: 100%;
   min-width: 0;
-  padding: var(--input-padding-x) var(--input-padding-y);
-  color: var(--input-text-color);
-  font-size: 1.4rem;
+  padding: var(--form-padding-x) var(--form-padding-y);
+  color: var(--form-text-color);
+  font-size: var(--form-font-size);
   line-height: 1.5;
   border: none;
   outline: none;
   background: none;
-  border-radius: var(--input-radius);
+  border-radius: var(--form-radius);
 
   &::placeholder {
-    color: var(--input-placeholder-color);
+    color: var(--form-placeholder-color);
   }
 
   &:focus {
@@ -93,7 +75,7 @@
 
   &:disabled {
     cursor: not-allowed;
-    color: var(--input-disabled-color);
+    color: var(--form-disabled-color);
   }
 
   // 텍스트 정렬 옵션
@@ -113,13 +95,13 @@
 // 입력 필드 앞에 표시될 요소 (아이콘 등)
 .inp-before {
   flex-shrink: 0;
-  padding-left: var(--input-padding-x);
+  padding-left: var(--form-padding-x);
 }
 
 // 추가 요소 (afterEl)
 .inp-after {
   flex-shrink: 0;
-  padding-right: var(--input-padding-x);
+  padding-right: var(--form-padding-x);
 }
 
 // 입력 필드 뒤에 표시될 버튼 영역
@@ -127,7 +109,7 @@
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  padding-right: var(--input-padding-x);
+  padding-right: var(--form-padding-x);
   gap: 0.4rem;
   justify-content: flex-end;
 }
@@ -146,8 +128,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: var(--input-icon-size);
-  height: var(--input-icon-size);
+  width: var(--form-icon-size);
+  height: var(--form-icon-size);
   border: none;
   background-color: transparent;
   cursor: pointer;
@@ -175,8 +157,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: var(--input-icon-size);
-  height: var(--input-icon-size);
+  width: var(--form-icon-size);
+  height: var(--form-icon-size);
   border: none;
   background-color: transparent;
   cursor: pointer;
@@ -196,23 +178,5 @@
   // 비밀번호 표시 상태
   &.visible {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M2 2L14 14' stroke='%23666666' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M6.15808 6.15798C5.77797 6.53809 5.55713 7.04771 5.55713 7.57948C5.55713 8.64305 6.41523 9.50115 7.4788 9.50115C8.01057 9.50115 8.52018 9.28031 8.9003 8.90019' stroke='%23666666' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M3.99749 3.99707C2.55249 5.0604 1.57916 6.57707 1.33333 8.00707C1.93333 11.054 4.64666 13.334 8.00666 13.334C9.16 13.334 10.2473 13.0671 11.2023 12.6004' stroke='%23666666' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M14.6667 14.0001C14.8733 13.8067 15.0733 13.6001 15.2667 13.3734C15.4667 13.1401 15.4667 12.8001 15.2667 12.5667C15.2667 12.5667 14.4667 11.3867 13.5333 10.2001' stroke='%23666666' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M14.6667 1.99988C13.5333 4.23988 10.8 7.99988 8 7.99988' stroke='%23666666' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  }
-}
-
-// 라이트/다크 모드 테마 지원
-@include s.light-mode {
-  :root {
-    // 라이트 모드에서 필요한 경우 변수 재정의
-  }
-}
-
-@include s.dark-mode {
-  :root {
-    --input-border-color: #434343;
-    --input-bg-color: #111;
-    --input-text-color: rgb(255 255 255 / 85%);
-    --input-disabled-bg: #303030;
-    --input-disabled-color: rgb(255 255 255 / 30%);
-    --input-placeholder-color: rgb(255 255 255 / 35%);
   }
 }

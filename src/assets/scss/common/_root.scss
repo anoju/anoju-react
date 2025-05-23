@@ -27,4 +27,66 @@
   --side-padding: 2.4rem;
   --line-color: #d6dbe1;
   --strong-txt-color: #333;
+
+  //// form
+  // form-border
+  --form-border-color: #d9d9d9;
+  --form-border-color-hover: var(--primary-color);
+  --form-border-color-focus: var(--primary-color);
+  --form-border-color-active: var(--primary-color);
+
+  // form-shadow
+  --form-dropdown-shadow:
+    0 6px 16px 0 rgb(0 0 0 / 8%), 0 3px 6px -4px rgb(0 0 0 / 12%),
+    0 9px 28px 8px rgb(0 0 0 / 5%);
+  --form-shadow-focus: 0 0 0 2px rgb(var(--primary-color-rgb) / 20%);
+
+  // form-state
+  --form-error-color: #ff4d4f;
+  --form-warning-color: #faad14;
+  --form-success-color: #52c41a;
+
+  // form-color
+  --form-bg-color: #fff;
+  --form-text-color: rgb(0 0 0 / 88%);
+  --form-disabled-bg: #f5f5f5;
+  --form-disabled-color: rgb(0 0 0 / 25%);
+  --form-placeholder-color: rgb(0 0 0 / 35%);
+
+  // form-radius
+  --form-radius: 0.6rem;
+  --form-radius-xs: 0.4rem;
+  --form-radius-xl: 0.8rem;
+
+  // form-padding
+  --form-padding-x: 1.2rem;
+  --form-padding-y: 1.2rem;
+
+  // form-etc
+  --form-icon-size: 1.6rem;
+  --form-transition: all 0.2s;
+
+  // form-height
+  --form-height: 4.5rem;
+  --form-height-xs: 3.2rem;
+  --form-height-sm: 3.8rem;
+  --form-height-lg: 5.2rem;
+  --form-height-xl: 6rem;
+
+  // form-font-size
+  --form-font-size: 1.5rem;
+  --form-font-size-xs: 1.3rem;
+  --form-font-size-sm: 1.4rem;
+  --form-font-size-xl: 1.8rem;
+}
+
+@include s.dark-mode {
+  :root {
+    --form-border-color: #434343;
+    --form-bg-color: #111;
+    --form-text-color: rgb(255 255 255 / 85%);
+    --form-disabled-bg: #303030;
+    --form-disabled-color: rgb(255 255 255 / 30%);
+    --form-placeholder-color: rgb(255 255 255 / 35%);
+  }
 }

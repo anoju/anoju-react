@@ -3,83 +3,64 @@
 @use 'sass:color';
 @use 'sass:math';
 
-:root {
-  --select-border-radius: 0.6rem;
-  --select-height-small: 3.8rem;
-  --select-height-medium: 4.5rem;
-  --select-height-lg: 5.2rem;
-  --select-border-color: #d9d9d9;
-  --select-hover-border-color: var(--primary-color);
-  --select-active-border-color: var(--primary-color);
-  --select-focus-shadow: 0 0 0 2px rgb(var(--primary-color-rgb) / 20%);
-  --select-dropdown-shadow:
-    0 6px 16px 0 rgb(0 0 0 / 8%), 0 3px 6px -4px rgb(0 0 0 / 12%),
-    0 9px 28px 8px rgb(0 0 0 / 5%);
-  --select-error-color: #ff4d4f;
-  --select-warning-color: #faad14;
-  --select-success-color: #52c41a;
-  --select-disabled-bg: #f5f5f5;
-  --select-disabled-color: rgb(0 0 0 / 25%);
-}
-
 .select {
   position: relative;
   display: inline-block;
   width: 100%;
   min-width: 6rem;
   cursor: pointer;
-  border: 1px solid var(--select-border-color);
-  border-radius: var(--select-border-radius);
-  background-color: #fff;
+  border: 1px solid var(--form-border-color);
+  border-radius: var(--form-radius);
+  background-color: var(--form-bg-color);
   transition: all 0.3s;
   user-select: none;
-  height: var(--select-height-medium);
-  font-size: 1.6rem;
+  height: var(--form-height);
+  font-size: var(--form-font-size);
   outline: none;
+  color: var(--form-text-color);
 
   &:hover:not(.disabled, .loading) {
-    border-color: var(--select-hover-border-color);
+    border-color: var(--form-border-color-hover);
   }
 
   &.focused:not(.disabled, .loading) {
-    border-color: var(--select-active-border-color);
-    box-shadow: var(--select-focus-shadow);
+    border-color: var(--form-border-color-focus);
+    box-shadow: var(--form-shadow-focus);
   }
 
   &.open:not(.disabled, .loading) {
-    border-color: var(--select-active-border-color);
-    box-shadow: var(--select-focus-shadow);
+    border-color: var(--form-border-color-active);
+    box-shadow: var(--form-shadow-focus);
   }
 
   // 사이즈 스타일
   &.xs {
-    height: 3.2rem;
-    padding: 0 0.8rem;
-    font-size: 1.3rem;
-    border-radius: 0.4rem;
+    height: var(--form-height-xs);
+    font-size: var(--form-font-size-xs);
+    border-radius: var(--form-radius-xs);
   }
 
   &.sm {
-    height: var(--select-height-small);
-    font-size: 1.4rem;
+    height: var(--form-height-sm);
+    font-size: var(--form-font-size-sm);
   }
 
   &.lg {
-    height: var(--select-height-lg);
+    height: var(--form-height-lg);
   }
 
   &.xl {
-    height: 6rem;
-    font-size: 1.8rem;
-    border-radius: 0.8rem;
+    height: var(--form-height-xl);
+    font-size: var(--form-font-size-xl);
+    border-radius: var(--form-radius-xl);
   }
 
   // 상태 스타일
   &.error {
-    border-color: var(--select-error-color);
+    border-color: var(--form-error-color);
 
     &:hover:not(.disabled, .loading) {
-      border-color: var(--select-error-color);
+      border-color: var(--form-error-color);
     }
 
     &.focused,
@@ -89,10 +70,10 @@
   }
 
   &.warning {
-    border-color: var(--select-warning-color);
+    border-color: var(--form-warning-color);
 
     &:hover:not(.disabled, .loading) {
-      border-color: var(--select-warning-color);
+      border-color: var(--form-warning-color);
     }
 
     &.focused,
@@ -102,10 +83,10 @@
   }
 
   &.success {
-    border-color: var(--select-success-color);
+    border-color: var(--form-success-color);
 
     &:hover:not(.disabled, .loading) {
-      border-color: var(--select-success-color);
+      border-color: var(--form-success-color);
     }
 
     &.focused,
@@ -116,10 +97,10 @@
 
   &.disabled,
   &.loading {
-    color: var(--select-disabled-color);
-    background-color: var(--select-disabled-bg);
+    color: var(--form-disabled-color);
+    background-color: var(--form-disabled-bg);
     cursor: not-allowed;
-    border-color: var(--select-border-color);
+    border-color: var(--form-border-color);
 
     .arrow,
     .value,
@@ -223,8 +204,8 @@
 
 .dropdown {
   background-color: #fff;
-  border-radius: var(--select-border-radius);
-  box-shadow: var(--select-dropdown-shadow);
+  border-radius: var(--form-radius);
+  box-shadow: var(--form-dropdown-shadow);
   border: 1px solid #f0f0f0;
   z-index: 1050;
   overflow: hidden;
@@ -244,14 +225,14 @@
   height: 3.2rem;
   padding: 0 0.8rem;
   border: 1px solid #d9d9d9;
-  border-radius: var(--select-border-radius);
+  border-radius: var(--form-radius);
   outline: none;
   font-size: 1.4rem;
   transition: all 0.3s;
 
   &:focus {
-    border-color: var(--select-active-border-color);
-    box-shadow: var(--select-focus-shadow);
+    border-color: var(--form-border-color-focus);
+    box-shadow: var(--form-shadow-focus);
   }
 }
 
@@ -313,7 +294,7 @@
   }
 
   &.optionDisabled {
-    color: var(--select-disabled-color);
+    color: var(--form-disabled-color);
     cursor: not-allowed;
   }
 }
@@ -363,14 +344,14 @@
 // 다크 모드 스타일 (필요시 추가)
 @include s.dark-mode {
   :root {
-    --select-border-color: #434343;
-    --select-disabled-bg: #262626;
-    --select-disabled-color: rgb(255 255 255 / 30%);
+    --form-border-color: #434343;
+    --form-disabled-bg: #262626;
+    --form-disabled-color: rgb(255 255 255 / 30%);
   }
 
   .select {
     background-color: #1f1f1f;
-    border-color: var(--select-border-color);
+    border-color: var(--form-border-color);
   }
 
   .dropdown {

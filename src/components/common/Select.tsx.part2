@@ -17,7 +17,7 @@ function Select<T = string | number>(
     dropdownClassName = '',
     dropdownStyle,
     allowClear = false,
-    size = 'medium',
+    size = '',
     showSearch = false,
     open: controlledOpen,
     defaultOpen = false,
