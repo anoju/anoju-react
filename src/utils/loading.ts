@@ -6,6 +6,7 @@ let loadingContext: {
   showLoading: (config?: LoadingConfig) => void;
   hideLoading: () => void;
   setLoading: (loading: boolean, config?: LoadingConfig) => void;
+  getLoading: () => boolean;
 } | null = null;
 
 // LoadingProvider에서 호출되는 함수로 전역 함수에서 사용할 컨텍스트 설정
@@ -13,6 +14,7 @@ export const setLoadingContext = (context: {
   showLoading: (config?: LoadingConfig) => void;
   hideLoading: () => void;
   setLoading: (loading: boolean, config?: LoadingConfig) => void;
+  getLoading: () => boolean;
 }) => {
   loadingContext = context;
 };
@@ -41,6 +43,16 @@ export const setGlobalLoading = (loading: boolean, config?: LoadingConfig) => {
     loadingContext.setLoading(loading, config);
   } else {
     console.warn('LoadingProvider가 설정되지 않았습니다.');
+  }
+};
+
+// 전역 로딩 상태 가져오기 함수
+export const getGlobalLoading = (): boolean => {
+  if (loadingContext) {
+    return loadingContext.getLoading();
+  } else {
+    console.warn('LoadingProvider가 설정되지 않았습니다.');
+    return false;
   }
 };
 

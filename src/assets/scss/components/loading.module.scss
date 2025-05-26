@@ -38,6 +38,11 @@
   position: relative;
 }
 
+.loading-icon {
+  display: inline-block;
+  position: relative;
+}
+
 .loading-svg {
   display: block;
   animation: loading-rotate 2s linear infinite;

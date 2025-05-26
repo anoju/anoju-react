@@ -31,8 +31,11 @@ const layouts = import.meta.glob<LayoutModule>('../pages/**/layout.tsx', {
 
 // 페이지 모듈에서 메타데이터 추출
 function getPageMetadata(pageModule: PageModule): PageMetadata {
-  // PageModule.default에 직접 접근하여 metadata 확인
-  return pageModule.default.metadata || {};
+  // PageModule.default가 존재하고 metadata가 있는 경우에만 접근
+  if (pageModule?.default && typeof pageModule.default === 'function') {
+    return (pageModule.default as any).metadata || {};
+  }
+  return {};
 }
 
 // 페이지 경로 추출 및 정규화 함수

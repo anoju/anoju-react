@@ -9,4 +9,5 @@ export const LoadingContext = createContext<LoadingContextProps>({
   showLoading: () => {},
   hideLoading: () => {},
   setLoading: () => {},
+  getLoading: () => false,
 });

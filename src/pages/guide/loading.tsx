@@ -7,6 +7,7 @@ import {
   showGlobalLoading,
   hideGlobalLoading,
   setGlobalLoading,
+  getGlobalLoading,
   withLoading,
   wrapWithLoading,
 } from '@/utils/loading';
@@ -25,9 +26,10 @@ const LoadingGuide = () => {
   });
 
   // Hook을 사용한 로딩 제어
-  const { isLoading, showLoading, hideLoading, setLoading } = useLoading();
+  const { isLoading, showLoading, hideLoading, setLoading, getLoading } =
+    useLoading();
 
-  const [simulateLoading, setSimulateLoading] = useState(false);
+  const [callbackMessage, setCallbackMessage] = useState('');
 
   // 비동기 작업 시뮬레이션
   const simulateAsyncWork = async (
@@ -45,34 +47,44 @@ const LoadingGuide = () => {
     text: '데이터를 처리하고 있습니다...',
   });
 
+  // Promise와 함께 사용하는 예시
   const handleAsyncWithLoading = async () => {
     try {
-      setSimulateLoading(true);
       const result = await withLoading(simulateAsyncWork(3000), {
         text: '서버와 통신 중입니다...',
       });
       alert(result);
     } catch (error) {
       console.error('에러 발생:', error);
-    } finally {
-      setSimulateLoading(false);
     }
   };
 
   const handleWrappedFunction = async () => {
     try {
-      setSimulateLoading(true);
       const result = await wrappedAsyncWork(2500);
       alert(result);
     } catch (error) {
       console.error('에러 발생:', error);
-    } finally {
-      setSimulateLoading(false);
     }
   };
 
+  // 커스텀 아이콘 예시
+  const CustomLoadingIcon = () => (
+    <div style={{ fontSize: '40px', animation: 'spin 1s linear infinite' }}>
+      🔄
+    </div>
+  );
+
   return (
     <div className="page-inner">
+      <style>
+        {`
+          @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+          }
+        `}
+      </style>
       <h1 className={styles.title}>Loading Component</h1>
 
       <section className={styles.section}>
@@ -86,6 +98,7 @@ import {
   showGlobalLoading, 
   hideGlobalLoading, 
   setGlobalLoading,
+  getGlobalLoading, // 새로 추가!
   withLoading,
   wrapWithLoading 
 } from '@/utils/loading';`}
@@ -102,12 +115,7 @@ import {
 
         <div className={styles.showcase}>
           <div className={styles['control-buttons']}>
-            <Button
-              size="sm"
-              className="primary"
-              onClick={() => showLoading()}
-              disabled={simulateLoading}
-            >
+            <Button size="sm" className="primary" onClick={() => showLoading()}>
               기본 로딩 표시
             </Button>
 
@@ -119,7 +127,6 @@ import {
                   text: '커스텀 메시지와 함께 로딩 중...',
                 })
               }
-              disabled={simulateLoading}
             >
               커스텀 메시지
             </Button>
@@ -133,23 +140,8 @@ import {
                   delay: 2000,
                 })
               }
-              disabled={simulateLoading}
             >
               지연 표시 (2초)
-            </Button>
-
-            <Button
-              size="sm"
-              className="primary"
-              onClick={() =>
-                showLoading({
-                  text: '스피너 없이 표시',
-                  spinning: false,
-                })
-              }
-              disabled={simulateLoading}
-            >
-              스피너 없음
             </Button>
 
             <Button
@@ -169,45 +161,24 @@ import {
             >
               로딩 토글
             </Button>
+
+            <Button
+              size="sm"
+              className="line"
+              onClick={() => {
+                const currentState = getLoading();
+                alert(`현재 로딩 상태: ${currentState}`);
+              }}
+              style={{ zIndex: 10000 }}
+            >
+              상태 확인
+            </Button>
           </div>
 
           <p className={styles.txt}>
             현재 로딩 상태: {isLoading ? '표시됨' : '숨김'}
           </p>
         </div>
-
-        <h3 className={styles['sub-title']}>참조 소스코드</h3>
-        <CodeHighlight
-          code={`// Hook 사용 예시
-import { useLoading } from '@/hooks';
-
-const { isLoading, showLoading, hideLoading, setLoading } = useLoading();
-
-// 기본 로딩 표시
-const handleShowLoading = () => {
-  showLoading();
-};
-
-// 커스텀 설정으로 로딩 표시
-const handleCustomLoading = () => {
-  showLoading({
-    text: '커스텀 메시지와 함께 로딩 중...',
-    delay: 1000, // 1초 후 표시
-    spinning: true, // 스피너 표시 여부
-  });
-};
-
-// 로딩 숨기기
-const handleHideLoading = () => {
-  hideLoading();
-};
-
-// 로딩 상태 토글
-const handleToggleLoading = () => {
-  setLoading(!isLoading);
-};`}
-          language="typescript"
-        />
       </section>
 
       <section className={styles.section}>
@@ -223,23 +194,9 @@ const handleToggleLoading = () => {
             <Button
               size="sm"
               className="primary"
-              onClick={() => showGlobalLoading()}
-              disabled={simulateLoading}
+              onClick={() => showGlobalLoading({ text: '전역 함수로 표시' })}
             >
               전역 로딩 표시
-            </Button>
-
-            <Button
-              size="sm"
-              className="primary"
-              onClick={() =>
-                showGlobalLoading({
-                  text: '전역 함수로 표시되는 로딩',
-                })
-              }
-              disabled={simulateLoading}
-            >
-              전역 커스텀 메시지
             </Button>
 
             <Button
@@ -255,46 +212,174 @@ const handleToggleLoading = () => {
               size="sm"
               className="primary"
               onClick={() =>
-                setGlobalLoading(true, {
-                  text: '전역 상태로 설정된 로딩',
-                })
+                setGlobalLoading(true, { text: '전역 상태로 설정' })
               }
               style={{ zIndex: 10000 }}
-              disabled={simulateLoading}
             >
               전역 상태 설정
             </Button>
+
+            <Button
+              size="sm"
+              className="line"
+              onClick={() => {
+                const state = getGlobalLoading();
+                alert(`전역 로딩 상태: ${state}`);
+              }}
+              style={{ zIndex: 10000 }}
+            >
+              전역 상태 확인
+            </Button>
           </div>
         </div>
+      </section>
 
-        <h3 className={styles['sub-title']}>참조 소스코드</h3>
-        <CodeHighlight
-          code={`import { 
-  showGlobalLoading, 
-  hideGlobalLoading, 
-  setGlobalLoading 
-} from '@/utils/loading';
+      <section className={styles.section}>
+        <h2 className={styles['section-title']}>커스텀 아이콘</h2>
+        <p className={styles.txt}>
+          icon 속성을 사용하여 기본 스피너 대신 커스텀 아이콘을 사용할 수
+          있습니다.
+        </p>
 
-// 전역 로딩 표시
-const handleGlobalShow = () => {
-  showGlobalLoading({
-    text: '전역 함수로 표시되는 로딩',
-  });
-};
+        <div className={styles.showcase}>
+          <div className={styles['control-buttons']}>
+            <Button
+              size="sm"
+              className="primary"
+              onClick={() =>
+                showLoading({
+                  text: '커스텀 아이콘으로 표시',
+                  icon: <CustomLoadingIcon />,
+                })
+              }
+            >
+              커스텀 아이콘
+            </Button>
 
-// 전역 로딩 숨기기
-const handleGlobalHide = () => {
-  hideGlobalLoading();
-};
+            <Button
+              size="sm"
+              className="primary"
+              onClick={() =>
+                showLoading({
+                  text: '텍스트 아이콘 사용',
+                  icon: <div style={{ fontSize: '30px' }}>⏳</div>,
+                })
+              }
+            >
+              텍스트 아이콘
+            </Button>
 
-// 전역 로딩 상태 설정
-const handleGlobalSet = () => {
-  setGlobalLoading(true, {
-    text: '전역 상태로 설정된 로딩',
-  });
-};`}
-          language="typescript"
-        />
+            <Button
+              size="sm"
+              className="primary"
+              onClick={() =>
+                showLoading({
+                  text: '아이콘 없이 표시',
+                  icon: null,
+                })
+              }
+            >
+              아이콘 없음
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles['section-title']}>Body 스크롤 잠금</h2>
+        <p className={styles.txt}>
+          bodyLock 옵션을 true로 설정하면 로딩 중에 페이지 스크롤이
+          비활성화됩니다.
+        </p>
+
+        <div className={styles.showcase}>
+          <div className={styles['control-buttons']}>
+            <Button
+              size="sm"
+              className="primary"
+              onClick={() =>
+                showLoading({
+                  text: '스크롤이 잠긴 상태입니다',
+                  bodyLock: true,
+                })
+              }
+            >
+              Body Lock 활성화
+            </Button>
+
+            <Button
+              size="sm"
+              className="primary"
+              onClick={() =>
+                showLoading({
+                  text: '스크롤이 가능한 상태입니다',
+                  bodyLock: false,
+                })
+              }
+            >
+              Body Lock 비활성화
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles['section-title']}>콜백 함수</h2>
+        <p className={styles.txt}>
+          onShow와 onHide 콜백 함수를 사용하여 로딩 표시/숨기기 후 추가 작업을
+          수행할 수 있습니다.
+        </p>
+
+        <div className={styles.showcase}>
+          <div className={styles['control-buttons']}>
+            <Button
+              size="sm"
+              className="primary"
+              onClick={() =>
+                showLoading({
+                  text: '콜백 함수가 실행됩니다',
+                  onShow: () => {
+                    setCallbackMessage('로딩이 시작되었습니다!');
+                    console.log('로딩 시작!');
+                  },
+                  onHide: () => {
+                    setCallbackMessage('로딩이 종료되었습니다!');
+                    console.log('로딩 종료!');
+                  },
+                })
+              }
+            >
+              콜백 함수 테스트
+            </Button>
+
+            <Button
+              size="sm"
+              className="primary"
+              onClick={() =>
+                showLoading({
+                  text: '3초 후 자동으로 숨겨집니다',
+                  onShow: () => {
+                    setCallbackMessage('로딩 시작 - 3초 후 자동 종료');
+                    setTimeout(() => {
+                      hideLoading();
+                    }, 3000);
+                  },
+                  onHide: () => {
+                    setCallbackMessage('자동으로 로딩이 종료되었습니다');
+                  },
+                })
+              }
+            >
+              자동 종료 (3초)
+            </Button>
+          </div>
+
+          {callbackMessage && (
+            <div className={styles.txt} style={{ marginTop: '1rem' }}>
+              콜백 메시지: {callbackMessage}
+            </div>
+          )}
+        </div>
       </section>
 
       <section className={styles.section}>
@@ -309,7 +394,6 @@ const handleGlobalSet = () => {
               size="sm"
               className="primary"
               onClick={handleAsyncWithLoading}
-              disabled={simulateLoading}
             >
               withLoading 사용 (3초)
             </Button>
@@ -318,56 +402,15 @@ const handleGlobalSet = () => {
               size="sm"
               className="primary"
               onClick={handleWrappedFunction}
-              disabled={simulateLoading}
             >
               wrapWithLoading 사용 (2.5초)
             </Button>
-
-            <Button
-              size="sm"
-              className="primary"
-              onClick={async () => {
-                setSimulateLoading(true);
-                try {
-                  // API 호출 시뮬레이션
-                  await withLoading(
-                    fetch('/api/data').then(() => {
-                      // 실제로는 존재하지 않는 API이므로 에러가 발생하지만
-                      // 로딩은 정상적으로 동작함을 보여주기 위한 예시
-                      return new Promise((resolve) => {
-                        setTimeout(() => resolve('API 응답'), 2000);
-                      });
-                    }),
-                    { text: 'API 데이터를 가져오는 중...' }
-                  );
-                  alert('API 데이터 로드 완료!');
-                } catch (error) {
-                  console.error('API 에러:', error);
-                  alert('API 에러 발생 (시뮬레이션)');
-                } finally {
-                  setSimulateLoading(false);
-                }
-              }}
-              disabled={simulateLoading}
-            >
-              API 호출 시뮬레이션
-            </Button>
           </div>
-
-          <p className={styles.txt}>
-            시뮬레이션 상태: {simulateLoading ? '실행 중' : '대기 중'}
-          </p>
         </div>
 
         <h3 className={styles['sub-title']}>참조 소스코드</h3>
         <CodeHighlight
           code={`import { withLoading, wrapWithLoading } from '@/utils/loading';
-
-// 비동기 작업 함수
-const fetchData = async (): Promise<string> => {
-  const response = await fetch('/api/data');
-  return response.json();
-};
 
 // withLoading 사용 - Promise를 래핑
 const handleFetchWithLoading = async () => {
@@ -385,134 +428,7 @@ const handleFetchWithLoading = async () => {
 // wrapWithLoading 사용 - 함수를 래핑
 const wrappedFetchData = wrapWithLoading(fetchData, {
   text: '데이터 처리 중...',
-});
-
-const handleWrappedFetch = async () => {
-  try {
-    const result = await wrappedFetchData();
-    console.log(result);
-  } catch (error) {
-    console.error('에러:', error);
-  }
-};`}
-          language="typescript"
-        />
-      </section>
-
-      <section className={styles.section}>
-        <h2 className={styles['section-title']}>실제 사용 예시</h2>
-        <p className={styles.txt}>
-          실제 프로젝트에서 자주 사용되는 패턴들을 보여드립니다.
-        </p>
-
-        <h3 className={styles['sub-title']}>1. API 호출 시</h3>
-        <CodeHighlight
-          code={`// API 서비스 함수
-const apiService = {
-  // withLoading을 사용한 방법
-  async getUserData(userId: string) {
-    return withLoading(
-      fetch(\`/api/users/\${userId}\`).then(res => res.json()),
-      { text: '사용자 정보를 가져오는 중...' }
-    );
-  },
-
-  // wrapWithLoading을 사용한 방법
-  updateUser: wrapWithLoading(
-    async (userId: string, data: UserData) => {
-      const response = await fetch(\`/api/users/\${userId}\`, {
-        method: 'PUT',
-        body: JSON.stringify(data),
-      });
-      return response.json();
-    },
-    { text: '사용자 정보를 업데이트하는 중...' }
-  ),
-};
-
-// 컴포넌트에서 사용
-const UserProfile = () => {
-  const handleSave = async () => {
-    try {
-      await apiService.updateUser(userId, userData);
-      alert('저장 완료!');
-    } catch (error) {
-      alert('저장 실패');
-    }
-  };
-
-  return (
-    <Button onClick={handleSave}>저장</Button>
-  );
-};`}
-          language="typescript"
-        />
-
-        <h3 className={styles['sub-title']}>2. 폼 제출 시</h3>
-        <CodeHighlight
-          code={`const ContactForm = () => {
-  const { showLoading, hideLoading } = useLoading();
-
-  const handleSubmit = async (formData: FormData) => {
-    try {
-      showLoading({ text: '메시지를 전송하는 중...' });
-      
-      await fetch('/api/contact', {
-        method: 'POST',
-        body: formData,
-      });
-      
-      alert('메시지가 전송되었습니다!');
-    } catch (error) {
-      alert('전송 실패');
-    } finally {
-      hideLoading();
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit}>
-      {/* 폼 필드들 */}
-      <Button type="submit">전송</Button>
-    </form>
-  );
-};`}
-          language="typescript"
-        />
-
-        <h3 className={styles['sub-title']}>3. 페이지 전환 시</h3>
-        <CodeHighlight
-          code={`import { useNavigate } from 'react-router-dom';
-import { showGlobalLoading, hideGlobalLoading } from '@/utils/loading';
-
-const Navigation = () => {
-  const navigate = useNavigate();
-
-  const handleNavigate = async (path: string) => {
-    showGlobalLoading({ text: '페이지를 로드하는 중...' });
-    
-    // 페이지 데이터 미리 로드
-    try {
-      await preloadPageData(path);
-      navigate(path);
-    } catch (error) {
-      alert('페이지 로드 실패');
-    } finally {
-      hideGlobalLoading();
-    }
-  };
-
-  return (
-    <nav>
-      <Button onClick={() => handleNavigate('/dashboard')}>
-        대시보드
-      </Button>
-      <Button onClick={() => handleNavigate('/profile')}>
-        프로필
-      </Button>
-    </nav>
-  );
-};`}
+});`}
           language="typescript"
         />
       </section>
@@ -520,121 +436,54 @@ const Navigation = () => {
       <section className={styles.section}>
         <h2 className={styles['section-title']}>설정 옵션</h2>
         <div className={styles.showcase}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <table className={styles.table}>
             <thead>
               <tr>
-                <th
-                  style={{
-                    textAlign: 'left',
-                    padding: '8px',
-                    borderBottom: '1px solid #ddd',
-                  }}
-                >
-                  속성
-                </th>
-                <th
-                  style={{
-                    textAlign: 'left',
-                    padding: '8px',
-                    borderBottom: '1px solid #ddd',
-                  }}
-                >
-                  타입
-                </th>
-                <th
-                  style={{
-                    textAlign: 'left',
-                    padding: '8px',
-                    borderBottom: '1px solid #ddd',
-                  }}
-                >
-                  기본값
-                </th>
-                <th
-                  style={{
-                    textAlign: 'left',
-                    padding: '8px',
-                    borderBottom: '1px solid #ddd',
-                  }}
-                >
-                  설명
-                </th>
+                <th>속성</th>
+                <th>타입</th>
+                <th>기본값</th>
+                <th>설명</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  text
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  string
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  '로딩 중...'
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  로딩 시 표시할 텍스트
-                </td>
+                <td>text</td>
+                <td>string</td>
+                <td>'로딩 중...'</td>
+                <td>로딩 시 표시할 텍스트</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  delay
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  number
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  0
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  로딩 표시 지연 시간 (밀리초)
-                </td>
+                <td>delay</td>
+                <td>number</td>
+                <td>0</td>
+                <td>로딩 표시 지연 시간 (밀리초)</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  spinning
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  boolean
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  true
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  스피너 표시 여부
-                </td>
+                <td>icon</td>
+                <td>ReactNode</td>
+                <td>기본 스피너</td>
+                <td>커스텀 로딩 아이콘 (null이면 아이콘 없음)</td>
+              </tr>
+              <tr>
+                <td>bodyLock</td>
+                <td>boolean</td>
+                <td>false</td>
+                <td>body 스크롤 잠금 여부</td>
+              </tr>
+              <tr>
+                <td>onShow</td>
+                <td>function</td>
+                <td>undefined</td>
+                <td>로딩 표시 후 실행할 함수</td>
+              </tr>
+              <tr>
+                <td>onHide</td>
+                <td>function</td>
+                <td>undefined</td>
+                <td>로딩 숨기기 후 실행할 함수</td>
               </tr>
             </tbody>
           </table>
-        </div>
-      </section>
-
-      <section className={styles.section}>
-        <h2 className={styles['section-title']}>사용 방법 요약</h2>
-        <div className={styles.showcase}>
-          <ol style={{ paddingLeft: '20px', lineHeight: '1.8' }}>
-            <li>
-              <strong>Hook 방식</strong>: 컴포넌트 내에서 로딩 상태를 관리할 때
-              사용
-            </li>
-            <li>
-              <strong>전역 함수 방식</strong>: 유틸리티 함수나 서비스 레이어에서
-              사용
-            </li>
-            <li>
-              <strong>withLoading</strong>: 기존 Promise를 로딩과 함께 실행
-            </li>
-            <li>
-              <strong>wrapWithLoading</strong>: 함수를 미리 래핑하여 재사용
-            </li>
-            <li>
-              <strong>설정 옵션</strong>: text, delay, spinning으로 커스터마이징
-            </li>
-            <li>
-              <strong>자동 관리</strong>: try-finally 블록 없이 자동으로 로딩
-              상태 관리
-            </li>
-          </ol>
         </div>
       </section>
     </div>
