@@ -17,3 +17,4 @@ export { default as Input, type InputHandle } from './Input';
 export { default as Textarea, type TextareaHandle } from './Textarea';
 export { default as Tooltip } from './Tooltip';
 export { default as Select } from './Select';
+export { default as Loading } from './Loading';
