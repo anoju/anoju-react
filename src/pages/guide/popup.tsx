@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { usePageLayout } from '@/hooks/usePageLayout';
 import { Button, CodeHighlight } from '@/components/common';
-import { Popup, usePopup, usePopups } from '@/components/common/Popup';
+import { Popup } from '@/components/common/Popup';
 import styles from '@/assets/scss/pages/guide.module.scss';
 
 const PopupGuide = () => {
@@ -17,16 +17,16 @@ const PopupGuide = () => {
     ),
   });
 
-  // 단일 팝업 관리
-  const basicPopup = usePopup();
-  const fullPopup = usePopup();
-  const bottomPopup = usePopup();
-
-  // 여러 팝업 관리
-  const multiPopups = usePopups();
-
-  // 커스텀 푸터 팝업
+  // 팝업 상태 관리
+  const [basicPopupVisible, setBasicPopupVisible] = useState(false);
+  const [fullPopupVisible, setFullPopupVisible] = useState(false);
+  const [bottomPopupVisible, setBottomPopupVisible] = useState(false);
   const [footerPopupVisible, setFooterPopupVisible] = useState(false);
+  
+  // 여러 팝업 상태
+  const [popup1Visible, setPopup1Visible] = useState(false);
+  const [popup2Visible, setPopup2Visible] = useState(false);
+  const [popup3Visible, setPopup3Visible] = useState(false);
 
   // 콜백 이벤트 확인용
   const [eventLog, setEventLog] = useState<string[]>([]);
@@ -42,7 +42,9 @@ const PopupGuide = () => {
       <section className={styles.section}>
         <h2 className={styles['section-title']}>import</h2>
         <CodeHighlight
-          code={`import { Popup, usePopup, usePopups } from '@/components/common/Popup';`}
+          code={`import { Popup } from '@/components/common/Popup';
+// 또는
+import { Popup } from '@/components/common';`}
           language="typescript"
         />
       </section>
@@ -50,34 +52,35 @@ const PopupGuide = () => {
       <section className={styles.section}>
         <h2 className={styles['section-title']}>기본 사용법 (Modal)</h2>
         <div className={styles.showcase}>
-          <Button className="primary" onClick={basicPopup.open}>
+          <Button className="primary" onClick={() => setBasicPopupVisible(true)}>
             기본 팝업 열기
           </Button>
 
           <Popup
             title="기본 팝업"
-            visible={basicPopup.visible}
-            onClose={basicPopup.close}
+            visible={basicPopupVisible}
+            onClose={() => setBasicPopupVisible(false)}
           >
             <p>기본 모달 팝업입니다.</p>
             <p>ESC 키를 누르거나 외부 영역을 클릭하면 닫힙니다.</p>
+            <p>팝업은 #root 요소 밖에 렌더링됩니다.</p>
           </Popup>
         </div>
 
         <h3 className={styles['sub-title']}>참조 소스코드</h3>
         <CodeHighlight
-          code={`// usePopup 훅 사용
-const basicPopup = usePopup();
+          code={`// 상태 관리
+const [basicPopupVisible, setBasicPopupVisible] = useState(false);
 
 // JSX
-<Button onClick={basicPopup.open}>
+<Button onClick={() => setBasicPopupVisible(true)}>
   기본 팝업 열기
 </Button>
 
 <Popup
   title="기본 팝업"
-  visible={basicPopup.visible}
-  onClose={basicPopup.close}
+  visible={basicPopupVisible}
+  onClose={() => setBasicPopupVisible(false)}
 >
   <p>기본 모달 팝업입니다.</p>
   <p>ESC 키를 누르거나 외부 영역을 클릭하면 닫힙니다.</p>
@@ -89,20 +92,24 @@ const basicPopup = usePopup();
       <section className={styles.section}>
         <h2 className={styles['section-title']}>풀 팝업 (Full)</h2>
         <div className={styles.showcase}>
-          <Button className="primary" onClick={fullPopup.open}>
+          <Button className="primary" onClick={() => setFullPopupVisible(true)}>
             풀 팝업 열기
           </Button>
 
           <Popup
             type="full"
             title="풀 팝업"
-            visible={fullPopup.visible}
-            onClose={fullPopup.close}
+            visible={fullPopupVisible}
+            onClose={() => setFullPopupVisible(false)}
           >
             <div style={{ padding: '20px' }}>
               <h2>전체 화면 팝업</h2>
               <p>화면 전체를 차지하는 풀 팝업입니다.</p>
               <p>모바일 환경에서 유용합니다.</p>
+              <br />
+              <Button className="primary" onClick={() => setFullPopupVisible(false)}>
+                닫기
+              </Button>
             </div>
           </Popup>
         </div>
@@ -112,8 +119,8 @@ const basicPopup = usePopup();
           code={`<Popup
   type="full"
   title="풀 팝업"
-  visible={fullPopup.visible}
-  onClose={fullPopup.close}
+  visible={fullPopupVisible}
+  onClose={() => setFullPopupVisible(false)}
 >
   <div style={{ padding: '20px' }}>
     <h2>전체 화면 팝업</h2>
@@ -127,15 +134,15 @@ const basicPopup = usePopup();
       <section className={styles.section}>
         <h2 className={styles['section-title']}>바텀시트 (Bottom)</h2>
         <div className={styles.showcase}>
-          <Button className="primary" onClick={bottomPopup.open}>
+          <Button className="primary" onClick={() => setBottomPopupVisible(true)}>
             바텀시트 열기
           </Button>
 
           <Popup
             type="bottom"
             title="바텀시트"
-            visible={bottomPopup.visible}
-            onClose={bottomPopup.close}
+            visible={bottomPopupVisible}
+            onClose={() => setBottomPopupVisible(false)}
           >
             <div style={{ padding: '20px' }}>
               <h3>바텀시트 팝업</h3>
@@ -145,6 +152,8 @@ const basicPopup = usePopup();
                 <li>옵션 1</li>
                 <li>옵션 2</li>
                 <li>옵션 3</li>
+                <li>옵션 4</li>
+                <li>옵션 5</li>
               </ul>
             </div>
           </Popup>
@@ -155,8 +164,8 @@ const basicPopup = usePopup();
           code={`<Popup
   type="bottom"
   title="바텀시트"
-  visible={bottomPopup.visible}
-  onClose={bottomPopup.close}
+  visible={bottomPopupVisible}
+  onClose={() => setBottomPopupVisible(false)}
 >
   <div style={{ padding: '20px' }}>
     <h3>바텀시트 팝업</h3>
@@ -199,19 +208,48 @@ const basicPopup = usePopup();
             <p>이 작업은 되돌릴 수 없습니다.</p>
           </Popup>
         </div>
+
+        <h3 className={styles['sub-title']}>참조 소스코드</h3>
+        <CodeHighlight
+          code={`<Popup
+  title="확인이 필요한 팝업"
+  visible={footerPopupVisible}
+  onClose={() => setFooterPopupVisible(false)}
+  footer={
+    <>
+      <Button className="line" onClick={() => setFooterPopupVisible(false)}>
+        취소
+      </Button>
+      <Button 
+        className="primary" 
+        onClick={() => {
+          alert('확인되었습니다!');
+          setFooterPopupVisible(false);
+        }}
+      >
+        확인
+      </Button>
+    </>
+  }
+>
+  <p>정말로 삭제하시겠습니까?</p>
+  <p>이 작업은 되돌릴 수 없습니다.</p>
+</Popup>`}
+          language="typescript"
+        />
       </section>
 
       <section className={styles.section}>
         <h2 className={styles['section-title']}>여러 팝업 관리</h2>
         <div className={styles.showcase}>
           <div className={styles['control-buttons']}>
-            <Button className="primary" onClick={() => multiPopups.open('popup1')}>
+            <Button className="primary" onClick={() => setPopup1Visible(true)}>
               팝업 1 열기
             </Button>
-            <Button className="primary" onClick={() => multiPopups.open('popup2')}>
+            <Button className="primary" onClick={() => setPopup2Visible(true)}>
               팝업 2 열기
             </Button>
-            <Button className="primary" onClick={() => multiPopups.open('popup3')}>
+            <Button className="primary" onClick={() => setPopup3Visible(true)}>
               팝업 3 열기
             </Button>
           </div>
@@ -219,13 +257,13 @@ const basicPopup = usePopup();
           <Popup
             id="popup1"
             title="첫 번째 팝업"
-            visible={multiPopups.isOpen('popup1')}
-            onClose={() => multiPopups.close('popup1')}
+            visible={popup1Visible}
+            onClose={() => setPopup1Visible(false)}
           >
             <p>첫 번째 팝업입니다.</p>
             <Button 
               className="primary" 
-              onClick={() => multiPopups.open('popup2')}
+              onClick={() => setPopup2Visible(true)}
             >
               두 번째 팝업 열기
             </Button>
@@ -234,14 +272,14 @@ const basicPopup = usePopup();
           <Popup
             id="popup2"
             title="두 번째 팝업"
-            visible={multiPopups.isOpen('popup2')}
-            onClose={() => multiPopups.close('popup2')}
+            visible={popup2Visible}
+            onClose={() => setPopup2Visible(false)}
           >
             <p>두 번째 팝업입니다.</p>
             <p>첫 번째 팝업 위에 표시됩니다.</p>
             <Button 
               className="primary" 
-              onClick={() => multiPopups.open('popup3')}
+              onClick={() => setPopup3Visible(true)}
             >
               세 번째 팝업 열기
             </Button>
@@ -250,13 +288,41 @@ const basicPopup = usePopup();
           <Popup
             id="popup3"
             title="세 번째 팝업"
-            visible={multiPopups.isOpen('popup3')}
-            onClose={() => multiPopups.close('popup3')}
+            visible={popup3Visible}
+            onClose={() => setPopup3Visible(false)}
           >
             <p>세 번째 팝업입니다.</p>
             <p>가장 위에 표시됩니다.</p>
           </Popup>
         </div>
+
+        <h3 className={styles['sub-title']}>참조 소스코드</h3>
+        <CodeHighlight
+          code={`// 각 팝업의 상태 관리
+const [popup1Visible, setPopup1Visible] = useState(false);
+const [popup2Visible, setPopup2Visible] = useState(false);
+const [popup3Visible, setPopup3Visible] = useState(false);
+
+// JSX
+<Popup
+  id="popup1"
+  title="첫 번째 팝업"
+  visible={popup1Visible}
+  onClose={() => setPopup1Visible(false)}
+>
+  <p>첫 번째 팝업입니다.</p>
+</Popup>
+
+<Popup
+  id="popup2"
+  title="두 번째 팝업"
+  visible={popup2Visible}
+  onClose={() => setPopup2Visible(false)}
+>
+  <p>두 번째 팝업입니다.</p>
+</Popup>`}
+          language="typescript"
+        />
       </section>
 
       <section className={styles.section}>
@@ -266,7 +332,7 @@ const basicPopup = usePopup();
             className="primary" 
             onClick={() => {
               setEventLog([]);
-              basicPopup.open();
+              setBasicPopupVisible(true);
             }}
           >
             이벤트 확인 팝업 열기
@@ -274,10 +340,10 @@ const basicPopup = usePopup();
 
           <Popup
             title="이벤트 확인 팝업"
-            visible={basicPopup.visible}
+            visible={basicPopupVisible}
             onClose={() => {
               addLog('onClose 호출됨');
-              basicPopup.close();
+              setBasicPopupVisible(false);
             }}
             afterOpen={() => {
               addLog('afterOpen 호출됨');
@@ -301,6 +367,27 @@ const basicPopup = usePopup();
             </div>
           )}
         </div>
+
+        <h3 className={styles['sub-title']}>참조 소스코드</h3>
+        <CodeHighlight
+          code={`<Popup
+  title="이벤트 확인 팝업"
+  visible={visible}
+  onClose={() => {
+    console.log('팝업 닫기 전');
+    setVisible(false);
+  }}
+  afterOpen={() => {
+    console.log('팝업 열린 후');
+  }}
+  afterClose={() => {
+    console.log('팝업 닫힌 후');
+  }}
+>
+  <p>콜백 이벤트 확인</p>
+</Popup>`}
+          language="typescript"
+        />
       </section>
     </div>
   );

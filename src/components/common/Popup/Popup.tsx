@@ -39,7 +39,6 @@ export interface PopupProps {
   showCloseButton?: boolean;
   maskClosable?: boolean;
   keyboard?: boolean;
-  getContainer?: HTMLElement | (() => HTMLElement) | false;
   focusTriggerAfterClose?: boolean;
 }
 
@@ -68,11 +67,10 @@ const Popup: React.FC<PopupProps> = ({
   showCloseButton = true,
   maskClosable = true,
   keyboard = true,
-  getContainer,
   focusTriggerAfterClose = true,
 }) => {
-  const [isVisible, setIsVisible] = useState(visible);
-  const [shouldRender, setShouldRender] = useState(visible);
+  const [isMounted, setIsMounted] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
   const [animationClass, setAnimationClass] = useState('');
   const [popupZIndex, setPopupZIndex] = useState(zIndex || 1000);
   
@@ -80,10 +78,33 @@ const Popup: React.FC<PopupProps> = ({
   const previousFocusRef = useRef<HTMLElement | null>(null);
   const titleIdRef = useRef<string>(id ? `${id}-title` : `popup-title-${Date.now()}`);
   const popupIdRef = useRef<string>(id || `popup-${Date.now()}`);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  // 포털 컨테이너 생성 및 관리
+  useEffect(() => {
+    if (visible && !containerRef.current) {
+      // 컨테이너 생성
+      const container = document.createElement('div');
+      container.id = `popup-container-${popupIdRef.current}`;
+      document.body.appendChild(container);
+      containerRef.current = container;
+    }
+
+    // 클린업
+    return () => {
+      if (containerRef.current && !visible) {
+        // 애니메이션이 끝난 후 제거
+        setTimeout(() => {
+          containerRef.current?.remove();
+          containerRef.current = null;
+        }, 300);
+      }
+    };
+  }, [visible]);
 
   // 팝업이 열릴 때 포커스 처리
   const handleFocus = useCallback(() => {
-    if (visible && popupRef.current) {
+    if (isVisible && popupRef.current) {
       // 현재 포커스된 요소 저장
       previousFocusRef.current = document.activeElement as HTMLElement;
       
@@ -98,7 +119,7 @@ const Popup: React.FC<PopupProps> = ({
         popupRef.current.focus();
       }
     }
-  }, [visible]);
+  }, [isVisible]);
 
   // 팝업이 닫힐 때 포커스 복원
   const restoreFocus = useCallback(() => {
@@ -113,9 +134,7 @@ const Popup: React.FC<PopupProps> = ({
     
     setTimeout(() => {
       setIsVisible(false);
-      if (destroyOnClose) {
-        setShouldRender(false);
-      }
+      setIsMounted(false);
       
       // 팝업 매니저에서 제거
       PopupManager.unregister(popupIdRef.current);
@@ -127,7 +146,7 @@ const Popup: React.FC<PopupProps> = ({
       onClose?.();
       afterClose?.();
     }, 300); // 애니메이션 시간과 동일
-  }, [destroyOnClose, onClose, afterClose, restoreFocus]);
+  }, [onClose, afterClose, restoreFocus]);
 
   // ESC 키 핸들러
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
@@ -149,24 +168,27 @@ const Popup: React.FC<PopupProps> = ({
 
   // visible prop 변경 감지
   useEffect(() => {
-    if (visible) {
+    if (visible && !isMounted) {
       // 팝업 매니저에 등록
       const newZIndex = PopupManager.register(popupIdRef.current);
       setPopupZIndex(zIndex || newZIndex);
       
-      setShouldRender(true);
-      setIsVisible(true);
-      setAnimationClass('opening');
-      
-      // 애니메이션 완료 후 콜백 실행
-      setTimeout(() => {
-        setAnimationClass('');
-        afterOpen?.();
-      }, 300);
-    } else if (isVisible) {
+      setIsMounted(true);
+      // 다음 프레임에서 애니메이션 시작
+      requestAnimationFrame(() => {
+        setIsVisible(true);
+        setAnimationClass('opening');
+        
+        // 애니메이션 완료 후 콜백 실행
+        setTimeout(() => {
+          setAnimationClass('');
+          afterOpen?.();
+        }, 300);
+      });
+    } else if (!visible && isMounted) {
       handleClose();
     }
-  }, [visible, isVisible, handleClose, afterOpen, zIndex]);
+  }, [visible, isMounted, handleClose, afterOpen, zIndex]);
 
   // 키보드 이벤트 리스너
   useEffect(() => {
@@ -214,7 +236,8 @@ const Popup: React.FC<PopupProps> = ({
     }
   }, [isVisible, calculateMaxHeight]);
 
-  if (!shouldRender) return null;
+  // 렌더링하지 않음
+  if (!isMounted || !containerRef.current) return null;
 
   // 팝업 클래스 조합
   const popupClass = [
@@ -238,22 +261,6 @@ const Popup: React.FC<PopupProps> = ({
   if (height && type !== 'full') {
     contentStyle.height = typeof height === 'number' ? `${height}px` : height;
   }
-
-  // 렌더링할 컨테이너 결정
-  const getPortalContainer = () => {
-    if (getContainer === false) {
-      return null;
-    }
-    if (typeof getContainer === 'function') {
-      return getContainer();
-    }
-    if (getContainer) {
-      return getContainer;
-    }
-    return document.body;
-  };
-
-  const container = getPortalContainer();
 
   const popupContent = (
     <div
@@ -296,13 +303,8 @@ const Popup: React.FC<PopupProps> = ({
     </div>
   );
 
-  // 컨테이너가 없으면 일반 렌더링
-  if (!container) {
-    return popupContent;
-  }
-
   // 포털을 통한 렌더링
-  return createPortal(popupContent, container);
+  return createPortal(popupContent, containerRef.current);
 };
 
 export default Popup;
