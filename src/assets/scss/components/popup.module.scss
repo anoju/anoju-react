@@ -1,0 +1,320 @@
+// src/assets/scss/components/popup.module.scss
+@use '@/assets/scss' as s;
+@use 'sass:color';
+@use 'sass:math';
+
+// 팝업 오버레이
+.popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgb(0 0 0 / 45%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+
+  // 열리는 애니메이션
+  &.opening {
+    animation: popupFadeIn 0.3s ease forwards;
+
+    .pop-wrap {
+      animation: popupSlideIn 0.3s ease forwards;
+    }
+  }
+
+  // 닫히는 애니메이션
+  &.closing {
+    animation: popupFadeOut 0.3s ease forwards;
+
+    .pop-wrap {
+      animation: popupSlideOut 0.3s ease forwards;
+    }
+  }
+
+  // 모달 타입 (기본)
+  &.modal {
+    .pop-wrap {
+      width: 100%;
+      max-width: 520px;
+      margin: auto;
+    }
+  }
+
+  // 풀 팝업 타입
+  &.full {
+    padding: 0;
+
+    .pop-wrap {
+      width: 100%;
+      height: 100%;
+      max-width: 100%;
+      max-height: 100% !important;
+      border-radius: 0;
+    }
+  }
+
+  // 바텀시트 타입
+  &.bottom {
+    align-items: flex-end;
+    padding: 0;
+
+    .pop-wrap {
+      width: 100%;
+      max-width: 100%;
+      margin: 0;
+      border-radius: 16px 16px 0 0;
+      max-height: 90vh !important;
+    }
+
+    &.opening .pop-wrap {
+      animation: bottomSlideIn 0.3s ease forwards;
+    }
+
+    &.closing .pop-wrap {
+      animation: bottomSlideOut 0.3s ease forwards;
+    }
+  }
+}
+
+// 팝업 컨테이너
+.pop-wrap {
+  position: relative;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgb(0 0 0 / 15%);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform: scale(0.9);
+  opacity: 0;
+
+  @include s.light-mode {
+    background-color: #fff;
+  }
+
+  @include s.dark-mode {
+    background-color: #1f1f1f;
+  }
+}
+
+// 팝업 헤더
+.pop-head {
+  flex-shrink: 0;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--bg-dark-10);
+
+  > div {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--strong-txt-color);
+    word-break: break-word;
+    padding-right: 40px;
+  }
+
+  @include s.light-mode {
+    border-bottom-color: #f0f0f0;
+  }
+}
+
+// 팝업 닫기 버튼
+.pop-close {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 2px;
+    background-color: #999;
+    transition: background-color 0.2s ease;
+  }
+
+  &::before {
+    transform: rotate(45deg);
+  }
+
+  &::after {
+    transform: rotate(-45deg);
+  }
+
+  &:hover {
+    background-color: rgb(0 0 0 / 4%);
+
+    &::before,
+    &::after {
+      background-color: #666;
+    }
+  }
+
+  @include s.dark-mode {
+    &:hover {
+      background-color: rgb(255 255 255 / 8%);
+    }
+
+    &::before,
+    &::after {
+      background-color: #ccc;
+    }
+  }
+}
+
+// 팝업 바디
+.pop-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  -webkit-overflow-scrolling: touch;
+
+  // 스크롤바 스타일
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgb(0 0 0 / 15%);
+    border-radius: 3px;
+
+    &:hover {
+      background: rgb(0 0 0 / 25%);
+    }
+  }
+
+  @include s.dark-mode {
+    &::-webkit-scrollbar-thumb {
+      background: rgb(255 255 255 / 15%);
+
+      &:hover {
+        background: rgb(255 255 255 / 25%);
+      }
+    }
+  }
+}
+
+// 팝업 푸터
+.pop-foot {
+  flex-shrink: 0;
+  padding: 16px 24px;
+  border-top: 1px solid var(--bg-dark-10);
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+
+  @include s.light-mode {
+    border-top-color: #f0f0f0;
+  }
+
+  // 버튼들이 모바일에서는 세로 정렬
+  @media (width <= 480px) {
+    flex-direction: column;
+
+    button {
+      width: 100%;
+    }
+  }
+}
+
+// 애니메이션 키프레임
+@keyframes popupFadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes popupFadeOut {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes popupSlideIn {
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes popupSlideOut {
+  to {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+}
+
+@keyframes bottomSlideIn {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes bottomSlideOut {
+  to {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+// 반응형
+@media (width <= 768px) {
+  .popup {
+    padding: 10px;
+
+    &.modal {
+      .pop-wrap {
+        max-width: 100%;
+      }
+    }
+  }
+
+  .pop-head {
+    padding: 16px 20px;
+
+    h1 {
+      font-size: 18px;
+    }
+  }
+
+  .pop-body {
+    padding: 20px;
+  }
+
+  .pop-foot {
+    padding: 12px 20px;
+  }
+}
