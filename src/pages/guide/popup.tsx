@@ -22,7 +22,8 @@ const PopupGuide = () => {
   const [fullPopupVisible, setFullPopupVisible] = useState(false);
   const [bottomPopupVisible, setBottomPopupVisible] = useState(false);
   const [footerPopupVisible, setFooterPopupVisible] = useState(false);
-  
+  const [eventPopupVisible, setEventPopupVisible] = useState(false);
+
   // 여러 팝업 상태
   const [popup1Visible, setPopup1Visible] = useState(false);
   const [popup2Visible, setPopup2Visible] = useState(false);
@@ -32,7 +33,10 @@ const PopupGuide = () => {
   const [eventLog, setEventLog] = useState<string[]>([]);
 
   const addLog = (message: string) => {
-    setEventLog((prev) => [...prev, `${new Date().toLocaleTimeString()}: ${message}`]);
+    setEventLog((prev) => [
+      ...prev,
+      `${new Date().toLocaleTimeString()}: ${message}`,
+    ]);
   };
 
   return (
@@ -52,7 +56,10 @@ import { Popup } from '@/components/common';`}
       <section className={styles.section}>
         <h2 className={styles['section-title']}>기본 사용법 (Modal)</h2>
         <div className={styles.showcase}>
-          <Button className="primary" onClick={() => setBasicPopupVisible(true)}>
+          <Button
+            className="primary"
+            onClick={() => setBasicPopupVisible(true)}
+          >
             기본 팝업 열기
           </Button>
 
@@ -107,7 +114,10 @@ const [basicPopupVisible, setBasicPopupVisible] = useState(false);
               <p>화면 전체를 차지하는 풀 팝업입니다.</p>
               <p>모바일 환경에서 유용합니다.</p>
               <br />
-              <Button className="primary" onClick={() => setFullPopupVisible(false)}>
+              <Button
+                className="primary"
+                onClick={() => setFullPopupVisible(false)}
+              >
                 닫기
               </Button>
             </div>
@@ -134,7 +144,10 @@ const [basicPopupVisible, setBasicPopupVisible] = useState(false);
       <section className={styles.section}>
         <h2 className={styles['section-title']}>바텀시트 (Bottom)</h2>
         <div className={styles.showcase}>
-          <Button className="primary" onClick={() => setBottomPopupVisible(true)}>
+          <Button
+            className="primary"
+            onClick={() => setBottomPopupVisible(true)}
+          >
             바텀시트 열기
           </Button>
 
@@ -179,7 +192,10 @@ const [basicPopupVisible, setBasicPopupVisible] = useState(false);
       <section className={styles.section}>
         <h2 className={styles['section-title']}>커스텀 푸터</h2>
         <div className={styles.showcase}>
-          <Button className="primary" onClick={() => setFooterPopupVisible(true)}>
+          <Button
+            className="primary"
+            onClick={() => setFooterPopupVisible(true)}
+          >
             푸터가 있는 팝업
           </Button>
 
@@ -189,11 +205,14 @@ const [basicPopupVisible, setBasicPopupVisible] = useState(false);
             onClose={() => setFooterPopupVisible(false)}
             footer={
               <>
-                <Button className="line" onClick={() => setFooterPopupVisible(false)}>
+                <Button
+                  className="line"
+                  onClick={() => setFooterPopupVisible(false)}
+                >
                   취소
                 </Button>
-                <Button 
-                  className="primary" 
+                <Button
+                  className="primary"
                   onClick={() => {
                     alert('확인되었습니다!');
                     setFooterPopupVisible(false);
@@ -261,10 +280,7 @@ const [basicPopupVisible, setBasicPopupVisible] = useState(false);
             onClose={() => setPopup1Visible(false)}
           >
             <p>첫 번째 팝업입니다.</p>
-            <Button 
-              className="primary" 
-              onClick={() => setPopup2Visible(true)}
-            >
+            <Button className="primary" onClick={() => setPopup2Visible(true)}>
               두 번째 팝업 열기
             </Button>
           </Popup>
@@ -277,10 +293,7 @@ const [basicPopupVisible, setBasicPopupVisible] = useState(false);
           >
             <p>두 번째 팝업입니다.</p>
             <p>첫 번째 팝업 위에 표시됩니다.</p>
-            <Button 
-              className="primary" 
-              onClick={() => setPopup3Visible(true)}
-            >
+            <Button className="primary" onClick={() => setPopup3Visible(true)}>
               세 번째 팝업 열기
             </Button>
           </Popup>
@@ -328,8 +341,8 @@ const [popup3Visible, setPopup3Visible] = useState(false);
       <section className={styles.section}>
         <h2 className={styles['section-title']}>콜백 이벤트</h2>
         <div className={styles.showcase}>
-          <Button 
-            className="primary" 
+          <Button
+            className="primary"
             onClick={() => {
               setEventLog([]);
               setBasicPopupVisible(true);
@@ -340,10 +353,10 @@ const [popup3Visible, setPopup3Visible] = useState(false);
 
           <Popup
             title="이벤트 확인 팝업"
-            visible={basicPopupVisible}
+            visible={eventPopupVisible}
             onClose={() => {
               addLog('onClose 호출됨');
-              setBasicPopupVisible(false);
+              setEventPopupVisible(false);
             }}
             afterOpen={() => {
               addLog('afterOpen 호출됨');
@@ -357,7 +370,14 @@ const [popup3Visible, setPopup3Visible] = useState(false);
           </Popup>
 
           {eventLog.length > 0 && (
-            <div style={{ marginTop: '20px', padding: '10px', background: '#f5f5f5', borderRadius: '4px' }}>
+            <div
+              style={{
+                marginTop: '20px',
+                padding: '10px',
+                background: '#f5f5f5',
+                borderRadius: '4px',
+              }}
+            >
               <h4>이벤트 로그:</h4>
               {eventLog.map((log, index) => (
                 <div key={index} style={{ fontSize: '12px', marginTop: '4px' }}>
