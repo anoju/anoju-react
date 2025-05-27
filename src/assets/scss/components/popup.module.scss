@@ -18,7 +18,7 @@
 
   // 열리는 애니메이션
   &.opening {
-    animation: popupFadeIn 0.3s ease forwards;
+    animation: ani-pop-fade-in 0.3s ease forwards;
 
     .pop-wrap {
       animation: popupSlideIn 0.3s ease forwards;
@@ -27,7 +27,7 @@
 
   // 닫히는 애니메이션
   &.closing {
-    animation: popupFadeOut 0.3s ease forwards;
+    animation: ani-pop-fade-out 0.3s ease forwards;
 
     .pop-wrap {
       animation: popupSlideOut 0.3s ease forwards;
@@ -236,33 +236,33 @@
 }
 
 // 애니메이션 키프레임
-@keyframes popupFadeIn {
+@keyframes ani-pop-fade-in {
   to {
     opacity: 1;
   }
 }
 
-@keyframes popupFadeOut {
+@keyframes ani-pop-fade-out {
   to {
     opacity: 0;
   }
 }
 
-@keyframes popupSlideIn {
+@keyframes ani-pop-slide-in {
   to {
     transform: scale(1);
     opacity: 1;
   }
 }
 
-@keyframes popupSlideOut {
+@keyframes ani-pop-slide-out {
   to {
     transform: scale(0.9);
     opacity: 0;
   }
 }
 
-@keyframes bottomSlideIn {
+@keyframes ani-pop-bottom-slide-in {
   from {
     transform: translateY(100%);
     opacity: 0;
@@ -274,7 +274,7 @@
   }
 }
 
-@keyframes bottomSlideOut {
+@keyframes ani-pop-bottom-slide-out {
   to {
     transform: translateY(100%);
     opacity: 0;
