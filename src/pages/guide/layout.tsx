@@ -51,10 +51,6 @@ const GuideLayout: React.FC<GuideLayoutProps> = ({ children }) => {
             label: 'Popup',
             to: '/guide/popup',
           },
-          {
-            label: 'Modal',
-            to: '/guide/modal',
-          },
         ]}
       />
       {children}

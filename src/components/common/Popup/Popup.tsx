@@ -34,7 +34,7 @@ export interface PopupProps {
   showCloseButton?: boolean;
   keyboard?: boolean;
   focusTriggerAfterClose?: boolean;
-  dimmClose?: boolean;
+  maskClosable?: boolean;
 }
 
 const Popup: React.FC<PopupProps> = ({
@@ -57,7 +57,7 @@ const Popup: React.FC<PopupProps> = ({
   showCloseButton = true,
   keyboard = true,
   focusTriggerAfterClose = true,
-  dimmClose = true,
+  maskClosable = true,
 }) => {
   const [isRendered, setIsRendered] = useState(false);
   const [animationClass, setAnimationClass] = useState('');
@@ -69,7 +69,7 @@ const Popup: React.FC<PopupProps> = ({
   const titleIdRef = useRef<string>(
     id ? `${id}-title` : `popup-title-${Date.now()}`
   );
-  const popupIdRef = useRef<string>(id || `popup-${Date.now()}`);
+  const popupIdRef = useRef<string>(id || Date.now().toString());
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   // 포털 컨테이너 생성 및 관리
@@ -89,18 +89,17 @@ const Popup: React.FC<PopupProps> = ({
       setIsRendered(true);
 
       // 다음 프레임에서 애니메이션 시작
-      requestAnimationFrame(() => {
-        setAnimationClass('opening');
+      setTimeout(() => {
+        setAnimationClass('show');
 
         // 애니메이션 완료 후 처리
         setTimeout(() => {
-          // setAnimationClass('');
           onOpen?.();
         }, 300);
       });
     } else if (!visible && isRendered) {
       // 닫기 애니메이션 시작
-      setAnimationClass('closing');
+      setAnimationClass('');
 
       setTimeout(() => {
         setIsRendered(false);
@@ -171,10 +170,10 @@ const Popup: React.FC<PopupProps> = ({
 
   // 딤 영역 클릭 핸들러
   const handleDimmClick = useCallback(() => {
-    if (dimmClose) {
+    if (maskClosable) {
       handleClose();
     }
-  }, [dimmClose, handleClose]);
+  }, [maskClosable, handleClose]);
 
   // 최상위 팝업 확인 및 before 클래스 관리
   useEffect(() => {
@@ -220,10 +219,12 @@ const Popup: React.FC<PopupProps> = ({
   const calculateMaxHeight = useCallback(() => {
     if (popupRef.current) {
       const popWrap = popupRef.current.querySelector(`.${styles['pop-wrap']}`);
-      if (popWrap) {
-        const windowHeight = window.innerHeight;
-        const padding = type === 'full' ? 0 : 40; // full 타입이 아닐 때만 패딩 적용
-        const maxHeight = windowHeight - padding;
+      if (popWrap && type !== 'full') {
+        const popupHeight = popupRef.current?.offsetHeight;
+        const style = window.getComputedStyle(popupRef.current);
+        const padding =
+          parseInt(style.paddingTop) + parseInt(style.paddingBottom);
+        const maxHeight = popupHeight - padding;
         (popWrap as HTMLElement).style.maxHeight = `${maxHeight}px`;
       }
     }
@@ -280,7 +281,7 @@ const Popup: React.FC<PopupProps> = ({
       aria-labelledby={titleIdRef.current}
       tabIndex={-1}
     >
-      <div className={styles['pop-dimm']} onClick={handleDimmClick} />
+      <div className={styles['pop-mask']} onClick={handleDimmClick} />
       <article className={styles['pop-wrap']} style={contentStyle}>
         <div className={styles['pop-head']}>
           <div>
@@ -311,7 +312,7 @@ const Popup: React.FC<PopupProps> = ({
               .filter(Boolean)
               .join(' ')}
           >
-            {footer}
+            <div>{footer}</div>
           </div>
         )}
       </article>

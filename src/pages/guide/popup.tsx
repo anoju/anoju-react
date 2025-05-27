@@ -1,8 +1,7 @@
 // src/pages/guide/popup.tsx
 import { useState } from 'react';
 import { usePageLayout } from '@/hooks/usePageLayout';
-import { Button, CodeHighlight } from '@/components/common';
-import { Popup } from '@/components/common/Popup';
+import { Button, CodeHighlight, Popup } from '@/components/common';
 import styles from '@/assets/scss/pages/guide.module.scss';
 
 const PopupGuide = () => {
@@ -109,18 +108,16 @@ const [basicPopupVisible, setBasicPopupVisible] = useState(false);
             visible={fullPopupVisible}
             onClose={() => setFullPopupVisible(false)}
           >
-            <div style={{ padding: '20px' }}>
-              <h2>전체 화면 팝업</h2>
-              <p>화면 전체를 차지하는 풀 팝업입니다.</p>
-              <p>모바일 환경에서 유용합니다.</p>
-              <br />
-              <Button
-                className="primary"
-                onClick={() => setFullPopupVisible(false)}
-              >
-                닫기
-              </Button>
-            </div>
+            <h2>전체 화면 팝업</h2>
+            <p>화면 전체를 차지하는 풀 팝업입니다.</p>
+            <p>모바일 환경에서 유용합니다.</p>
+            <br />
+            <Button
+              className="primary"
+              onClick={() => setFullPopupVisible(false)}
+            >
+              닫기
+            </Button>
           </Popup>
         </div>
 
@@ -132,10 +129,8 @@ const [basicPopupVisible, setBasicPopupVisible] = useState(false);
   visible={fullPopupVisible}
   onClose={() => setFullPopupVisible(false)}
 >
-  <div style={{ padding: '20px' }}>
-    <h2>전체 화면 팝업</h2>
-    <p>화면 전체를 차지하는 풀 팝업입니다.</p>
-  </div>
+  <h2>전체 화면 팝업</h2>
+  <p>화면 전체를 차지하는 풀 팝업입니다.</p>
 </Popup>`}
           language="typescript"
         />
@@ -157,18 +152,16 @@ const [basicPopupVisible, setBasicPopupVisible] = useState(false);
             visible={bottomPopupVisible}
             onClose={() => setBottomPopupVisible(false)}
           >
-            <div style={{ padding: '20px' }}>
-              <h3>바텀시트 팝업</h3>
-              <p>화면 하단에서 올라오는 바텀시트입니다.</p>
-              <p>모바일 UI에서 자주 사용됩니다.</p>
-              <ul>
-                <li>옵션 1</li>
-                <li>옵션 2</li>
-                <li>옵션 3</li>
-                <li>옵션 4</li>
-                <li>옵션 5</li>
-              </ul>
-            </div>
+            <h3>바텀시트 팝업</h3>
+            <p>화면 하단에서 올라오는 바텀시트입니다.</p>
+            <p>모바일 UI에서 자주 사용됩니다.</p>
+            <ul>
+              <li>옵션 1</li>
+              <li>옵션 2</li>
+              <li>옵션 3</li>
+              <li>옵션 4</li>
+              <li>옵션 5</li>
+            </ul>
           </Popup>
         </div>
 
@@ -180,10 +173,8 @@ const [basicPopupVisible, setBasicPopupVisible] = useState(false);
   visible={bottomPopupVisible}
   onClose={() => setBottomPopupVisible(false)}
 >
-  <div style={{ padding: '20px' }}>
-    <h3>바텀시트 팝업</h3>
-    <p>화면 하단에서 올라오는 바텀시트입니다.</p>
-  </div>
+  <h3>바텀시트 팝업</h3>
+  <p>화면 하단에서 올라오는 바텀시트입니다.</p>
 </Popup>`}
           language="typescript"
         />
