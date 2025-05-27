@@ -10,7 +10,10 @@ import {
   getGlobalLoading,
   withLoading,
   wrapWithLoading,
+  $loading,
 } from '@/utils/loading';
+// 또는
+// import $loading from '@/utils/loading';
 import styles from '@/assets/scss/pages/guide.module.scss';
 
 const LoadingGuide = () => {
@@ -68,6 +71,31 @@ const LoadingGuide = () => {
     }
   };
 
+  // $loading API를 사용한 예시
+  const handleAsyncWith$Loading = async () => {
+    try {
+      const result = await $loading.with(simulateAsyncWork(2000), {
+        text: '$loading.with() 사용 중...',
+      });
+      alert(result);
+    } catch (error) {
+      console.error('에러 발생:', error);
+    }
+  };
+
+  const wrapped$LoadingFunction = $loading.wrap(simulateAsyncWork, {
+    text: '$loading.wrap()으로 래핑된 함수',
+  });
+
+  const handleWrapped$LoadingFunction = async () => {
+    try {
+      const result = await wrapped$LoadingFunction(1500);
+      alert(result);
+    } catch (error) {
+      console.error('에러 발생:', error);
+    }
+  };
+
   // 커스텀 아이콘 예시
   const CustomLoadingIcon = () => (
     <div style={{ fontSize: '40px', animation: 'spin 1s linear infinite' }}>
@@ -98,10 +126,14 @@ import {
   showGlobalLoading, 
   hideGlobalLoading, 
   setGlobalLoading,
-  getGlobalLoading, // 새로 추가!
+  getGlobalLoading,
   withLoading,
-  wrapWithLoading 
-} from '@/utils/loading';`}
+  wrapWithLoading,
+  $loading // 새로 추가된 간결한 API!
+} from '@/utils/loading';
+
+// 또는 기본 import로 사용
+import $loading from '@/utils/loading';`}
           language="typescript"
         />
       </section>
@@ -183,10 +215,101 @@ import {
 
       <section className={styles.section}>
         <h2 className={styles['section-title']}>
-          전역 함수를 사용한 로딩 제어
+          $loading 객체를 사용한 간결한 로딩 제어 (추천)
         </h2>
         <p className={styles.txt}>
-          전역 함수를 사용하여 어디서든 로딩 상태를 제어할 수 있습니다.
+          $loading 객체를 사용하여 더 간결하고 직관적인 API로 로딩을 제어할 수 있습니다.
+        </p>
+
+        <div className={styles.showcase}>
+          <div className={styles['control-buttons']}>
+            <Button
+              size="sm"
+              className="primary"
+              onClick={() => $loading.show({ text: '$loading으로 표시' })}
+            >
+              $loading.show()
+            </Button>
+
+            <Button
+              size="sm"
+              className="secondary"
+              onClick={() => $loading.hide()}
+              style={{ zIndex: 10000 }}
+            >
+              $loading.hide()
+            </Button>
+
+            <Button
+              size="sm"
+              className="primary"
+              onClick={() => $loading.set(true, { text: '$loading으로 설정' })}
+              style={{ zIndex: 10000 }}
+            >
+              $loading.set()
+            </Button>
+
+            <Button
+              size="sm"
+              className="line"
+              onClick={() => {
+                const state = $loading.get();
+                alert(`$loading 상태: ${state}`);
+              }}
+              style={{ zIndex: 10000 }}
+            >
+              $loading.get()
+            </Button>
+
+            <Button
+              size="sm"
+              className="line"
+              onClick={() => $loading.toggle({ text: '토글된 상태' })}
+              style={{ zIndex: 10000 }}
+            >
+              $loading.toggle()
+            </Button>
+          </div>
+        </div>
+
+        <h3 className={styles['sub-title']}>참조 소스코드</h3>
+        <CodeHighlight
+          code={`import { $loading } from '@/utils/loading';
+// 또는
+import $loading from '@/utils/loading';
+
+// 기본 사용법
+$loading.show(); // 기본 로딩 표시
+$loading.show({ text: '커스텀 메시지' }); // 커스텀 메시지와 함께
+$loading.hide(); // 로딩 숨기기
+
+// 상태 제어
+$loading.set(true, { text: '로딩 설정' }); // 상태 설정
+$loading.toggle({ text: '토글 메시지' }); // 상태 토글
+
+// 상태 확인
+const isLoading = $loading.get(); // 현재 상태 가져오기
+
+// Promise와 함께 사용
+const result = await $loading.with(
+  fetchData(),
+  { text: '데이터 로딩 중...' }
+);
+
+// 함수 래핑
+const wrappedFn = $loading.wrap(fetchData, {
+  text: '처리 중...'
+});`}
+          language="typescript"
+        />
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles['section-title']}>
+          전역 함수를 사용한 로딩 제어 (레거시)
+        </h2>
+        <p className={styles.txt}>
+          기존 전역 함수를 사용하여 어디서든 로딩 상태를 제어할 수 있습니다.
         </p>
 
         <div className={styles.showcase}>
@@ -393,25 +516,60 @@ import {
             <Button
               size="sm"
               className="primary"
-              onClick={handleAsyncWithLoading}
+              onClick={handleAsyncWith$Loading}
             >
-              withLoading 사용 (3초)
+              $loading.with() (2초)
             </Button>
 
             <Button
               size="sm"
               className="primary"
+              onClick={handleWrapped$LoadingFunction}
+            >
+              $loading.wrap() (1.5초)
+            </Button>
+
+            <Button
+              size="sm"
+              className="line"
+              onClick={handleAsyncWithLoading}
+            >
+              withLoading() (3초)
+            </Button>
+
+            <Button
+              size="sm"
+              className="line"
               onClick={handleWrappedFunction}
             >
-              wrapWithLoading 사용 (2.5초)
+              wrapWithLoading() (2.5초)
             </Button>
           </div>
         </div>
 
         <h3 className={styles['sub-title']}>참조 소스코드</h3>
         <CodeHighlight
-          code={`import { withLoading, wrapWithLoading } from '@/utils/loading';
+          code={`import { $loading, withLoading, wrapWithLoading } from '@/utils/loading';
 
+// $loading API 사용 (추천)
+const handleFetchWith$Loading = async () => {
+  try {
+    const result = await $loading.with(
+      fetchData(),
+      { text: '데이터 로딩 중...' }
+    );
+    console.log(result);
+  } catch (error) {
+    console.error('에러:', error);
+  }
+};
+
+// 함수 래핑
+const wrapped$LoadingFn = $loading.wrap(fetchData, {
+  text: '처리 중...',
+});
+
+// 기존 API (레거시)
 // withLoading 사용 - Promise를 래핑
 const handleFetchWithLoading = async () => {
   try {

@@ -79,3 +79,77 @@ export const wrapWithLoading = <T extends unknown[], R>(
     return withLoading(fn(...args), config);
   };
 };
+
+// $loading 객체 - 더 간결한 API 제공
+export const $loading = {
+  /**
+   * 로딩을 표시합니다
+   * @param config 로딩 설정 옵션
+   */
+  show: (config?: LoadingConfig) => {
+    showGlobalLoading(config);
+  },
+
+  /**
+   * 로딩을 숨깁니다
+   */
+  hide: () => {
+    hideGlobalLoading();
+  },
+
+  /**
+   * 로딩 상태를 설정합니다
+   * @param loading 표시 여부
+   * @param config 로딩 설정 옵션
+   */
+  set: (loading: boolean, config?: LoadingConfig) => {
+    setGlobalLoading(loading, config);
+  },
+
+  /**
+   * 현재 로딩 상태를 가져옵니다
+   * @returns 현재 로딩 상태
+   */
+  get: (): boolean => {
+    return getGlobalLoading();
+  },
+
+  /**
+   * 로딩 상태를 토글합니다
+   * @param config 로딩 설정 옵션 (표시할 때만 적용)
+   */
+  toggle: (config?: LoadingConfig) => {
+    const isCurrentlyLoading = getGlobalLoading();
+    if (isCurrentlyLoading) {
+      hideGlobalLoading();
+    } else {
+      showGlobalLoading(config);
+    }
+  },
+
+  /**
+   * Promise와 함께 로딩을 자동 관리합니다
+   * @param promise 실행할 Promise
+   * @param config 로딩 설정 옵션
+   * @returns Promise 결과
+   */
+  with: async <T>(promise: Promise<T>, config?: LoadingConfig): Promise<T> => {
+    return withLoading(promise, config);
+  },
+
+  /**
+   * 비동기 함수를 래핑하여 로딩을 자동 관리합니다
+   * @param fn 래핑할 비동기 함수
+   * @param config 로딩 설정 옵션
+   * @returns 래핑된 함수
+   */
+  wrap: <T extends unknown[], R>(
+    fn: (...args: T) => Promise<R>,
+    config?: LoadingConfig
+  ) => {
+    return wrapWithLoading(fn, config);
+  },
+};
+
+// 기본 export로도 제공
+export default $loading;
