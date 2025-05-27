@@ -358,11 +358,8 @@ const [popup3Visible, setPopup3Visible] = useState(false);
               addLog('onClose 호출됨');
               setEventPopupVisible(false);
             }}
-            afterOpen={() => {
-              addLog('afterOpen 호출됨');
-            }}
-            afterClose={() => {
-              addLog('afterClose 호출됨');
+            onOpen={() => {
+              addLog('onOpen 호출됨');
             }}
           >
             <p>팝업 열기/닫기 시 콜백 이벤트가 발생합니다.</p>
@@ -397,10 +394,10 @@ const [popup3Visible, setPopup3Visible] = useState(false);
     console.log('팝업 닫기 전');
     setVisible(false);
   }}
-  afterOpen={() => {
+  onOpen={() => {
     console.log('팝업 열린 후');
   }}
-  afterClose={() => {
+  onClose={() => {
     console.log('팝업 닫힌 후');
   }}
 >

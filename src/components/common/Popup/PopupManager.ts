@@ -4,17 +4,20 @@ class PopupManagerClass {
   private popups: Map<string, number> = new Map();
   private baseZIndex: number = 1000;
   private currentZIndex: number = this.baseZIndex;
+  private listeners: Set<() => void> = new Set();
 
   // 팝업 등록 및 z-index 반환
   register(id: string): number {
     this.currentZIndex += 10;
     this.popups.set(id, this.currentZIndex);
+    this.notifyListeners();
     return this.currentZIndex;
   }
 
   // 팝업 등록 해제
   unregister(id: string): void {
     this.popups.delete(id);
+    this.notifyListeners();
     
     // 모든 팝업이 닫히면 z-index 초기화
     if (this.popups.size === 0) {
@@ -46,6 +49,22 @@ class PopupManagerClass {
   closeAll(): void {
     this.popups.clear();
     this.currentZIndex = this.baseZIndex;
+    this.notifyListeners();
+  }
+
+  // 리스너 등록
+  addListener(listener: () => void): void {
+    this.listeners.add(listener);
+  }
+
+  // 리스너 제거
+  removeListener(listener: () => void): void {
+    this.listeners.delete(listener);
+  }
+
+  // 리스너들에게 알림
+  private notifyListeners(): void {
+    this.listeners.forEach(listener => listener());
   }
 }
 

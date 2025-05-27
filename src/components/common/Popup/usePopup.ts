@@ -1,6 +1,5 @@
 // src/components/common/Popup/usePopup.ts
-import { useState, useCallback, useRef } from 'react';
-import { PopupProps } from './Popup';
+import { useState, useCallback } from 'react';
 
 export interface UsePopupReturn {
   visible: boolean;
