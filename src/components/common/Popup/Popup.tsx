@@ -7,6 +7,7 @@ import React, {
   ReactNode,
   CSSProperties,
 } from 'react';
+import { isMobile } from '@/utils/device';
 import { createPortal } from 'react-dom';
 import PopupManager from './PopupManager';
 import styles from '@/assets/scss/components/popup.module.scss';
@@ -62,6 +63,8 @@ const Popup: React.FC<PopupProps> = ({
   focusTriggerAfterClose = true,
   maskClosable = true,
 }) => {
+  const isMobileDevice = isMobile();
+
   const [isRendered, setIsRendered] = useState(false);
   const [animationClass, setAnimationClass] = useState('');
   const [isBeforePopup, setIsBeforePopup] = useState(false);
@@ -74,7 +77,9 @@ const Popup: React.FC<PopupProps> = ({
   const titleIdRef = useRef<string>(
     id ? `${id}-title` : `popup-title-${Date.now()}`
   );
-  const popupIdRef = useRef<string>(id || `popup-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`);
+  const popupIdRef = useRef<string>(
+    id || `popup-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
+  );
   const containerRef = useRef<HTMLDivElement | null>(null);
   const isRegisteredRef = useRef<boolean>(false);
 
@@ -105,7 +110,12 @@ const Popup: React.FC<PopupProps> = ({
 
   // 팝업이 렌더링된 직후 z-index 설정 및 PopupManager 등록
   useEffect(() => {
-    if (isRendered && popupRef.current && popupZIndex === undefined && !isRegisteredRef.current) {
+    if (
+      isRendered &&
+      popupRef.current &&
+      popupZIndex === undefined &&
+      !isRegisteredRef.current
+    ) {
       // 실제 DOM 요소에서 computed style로 기본 z-index 가져오기
       const computedStyle = getComputedStyle(popupRef.current);
       const currentZIndex = computedStyle.zIndex;
@@ -119,7 +129,7 @@ const Popup: React.FC<PopupProps> = ({
         popupIdRef.current,
         handlePopupStateChange
       );
-      
+
       isRegisteredRef.current = true;
 
       // 최종 z-index 계산 및 설정
@@ -349,7 +359,8 @@ const Popup: React.FC<PopupProps> = ({
       className={popupClass}
       style={popupStyle}
       role="dialog"
-      aria-hidden={isBeforePopup ? true : undefined}
+      aria-hidden={isBeforePopup && isMobileDevice ? true : undefined}
+      inert={isBeforePopup && !isMobileDevice ? true : undefined}
       aria-labelledby={titleIdRef.current}
       tabIndex={hideHeader || !title ? -1 : undefined}
     >
