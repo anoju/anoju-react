@@ -164,7 +164,7 @@ const Popup: React.FC<PopupProps> = ({
         clearTimeout(timeoutId);
       };
     }
-  }, [isRegisteredRef.current]);
+  }, []);
 
   // 팝업 닫기 처리
   useEffect(() => {
