@@ -11,6 +11,7 @@ import { createPortal } from 'react-dom';
 import PopupManager from './PopupManager';
 import styles from '@/assets/scss/components/popup.module.scss';
 import { Button } from '@/components/common';
+import cx from '@/utils/cx';
 
 export type PopupType = 'modal' | 'full' | 'bottom';
 
@@ -18,6 +19,7 @@ export interface PopupProps {
   id?: string;
   title?: ReactNode;
   children?: ReactNode;
+  header?: ReactNode;
   footer?: ReactNode;
   type?: PopupType;
   visible?: boolean;
@@ -25,13 +27,14 @@ export interface PopupProps {
   onOpen?: () => void;
   closeOnEsc?: boolean;
   width?: string | number;
-  height?: string | number;
   className?: string;
+  headerClassName?: string;
   bodyClassName?: string;
   footerClassName?: string;
   style?: CSSProperties;
   zIndex?: number;
-  showCloseButton?: boolean;
+  hideHeader?: boolean;
+  hideCloseButton?: boolean;
   keyboard?: boolean;
   focusTriggerAfterClose?: boolean;
   maskClosable?: boolean;
@@ -39,8 +42,9 @@ export interface PopupProps {
 
 const Popup: React.FC<PopupProps> = ({
   id,
-  title = '팝업',
+  title = '',
   children,
+  header = null,
   footer = null,
   type = 'modal',
   visible = false,
@@ -48,13 +52,14 @@ const Popup: React.FC<PopupProps> = ({
   onOpen,
   closeOnEsc = true,
   width,
-  height,
   className = '',
+  headerClassName = '',
   bodyClassName = '',
   footerClassName = '',
   style,
   zIndex,
-  showCloseButton = true,
+  hideHeader = false,
+  hideCloseButton = false,
   keyboard = true,
   focusTriggerAfterClose = true,
   maskClosable = true,
@@ -65,6 +70,7 @@ const Popup: React.FC<PopupProps> = ({
   const [popupZIndex, setPopupZIndex] = useState(zIndex || 1000);
 
   const popupRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
   const titleIdRef = useRef<string>(
     id ? `${id}-title` : `popup-title-${Date.now()}`
@@ -245,15 +251,13 @@ const Popup: React.FC<PopupProps> = ({
   if (!isRendered || !containerRef.current) return null;
 
   // 팝업 클래스 조합
-  const popupClass = [
+  const popupClass = cx(
     styles.popup,
     styles[type],
     animationClass ? styles[animationClass] : '',
     isBeforePopup ? styles.before : '',
-    className,
-  ]
-    .filter(Boolean)
-    .join(' ');
+    className
+  );
 
   // 팝업 스타일 조합
   const popupStyle: CSSProperties = {
@@ -266,9 +270,6 @@ const Popup: React.FC<PopupProps> = ({
   if (width) {
     contentStyle.width = typeof width === 'number' ? `${width}px` : width;
   }
-  if (height && type !== 'full') {
-    contentStyle.height = typeof height === 'number' ? `${height}px` : height;
-  }
 
   const popupContent = (
     <div
@@ -279,39 +280,44 @@ const Popup: React.FC<PopupProps> = ({
       role="dialog"
       aria-hidden={!isRendered}
       aria-labelledby={titleIdRef.current}
-      tabIndex={-1}
+      tabIndex={hideHeader || !title ? -1 : undefined}
     >
       <div className={styles['pop-mask']} onClick={handleDimmClick} />
-      <article className={styles['pop-wrap']} style={contentStyle}>
-        <div className={styles['pop-head']}>
-          <div>
-            <h1 id={titleIdRef.current}>{title}</h1>
-            {showCloseButton && (
-              <Button
-                not
-                type="button"
-                className={styles['pop-close']}
-                onClick={handleClose}
-                aria-label="팝업창 닫기"
-              />
-            )}
+      <article className={cx(styles['pop-wrap'])} style={contentStyle}>
+        {!hideHeader && (
+          <div className={cx(styles['pop-head'], headerClassName)}>
+            <div>
+              {title && (
+                <h1 ref={titleRef} id={titleIdRef.current} tabIndex={-1}>
+                  {title}
+                </h1>
+              )}
+              {header}
+              {!hideCloseButton && (
+                <Button
+                  not
+                  type="button"
+                  className={styles['pop-close']}
+                  onClick={handleClose}
+                  aria-label="팝업창 닫기"
+                />
+              )}
+            </div>
           </div>
-        </div>
-
+        )}
         <div
-          className={[styles['pop-body'], bodyClassName]
-            .filter(Boolean)
-            .join(' ')}
+          className={cx(
+            styles['pop-body'],
+            !hideHeader ? styles['before-head'] : '',
+            footer ? styles['next-foot'] : '',
+            bodyClassName
+          )}
         >
           {children}
         </div>
 
         {footer && (
-          <div
-            className={[styles['pop-foot'], footerClassName]
-              .filter(Boolean)
-              .join(' ')}
-          >
+          <div className={cx(styles['pop-foot'], footerClassName)}>
             <div>{footer}</div>
           </div>
         )}
