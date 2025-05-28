@@ -47,9 +47,11 @@ class PopupManagerClass {
       onStateChange,
     });
 
-    // 모든 팝업의 상태 업데이트
-    this.notifyAllPopupsStateChange();
-    this.notifyGlobalListeners();
+    // 상태 변화 알림을 비동기로 처리 (React 상태 업데이트 후 실행)
+    setTimeout(() => {
+      this.notifyAllPopupsStateChange();
+      this.notifyGlobalListeners();
+    }, 0);
 
     return additionalZIndex;
   }
@@ -64,9 +66,11 @@ class PopupManagerClass {
       AriaHiddenManager.setLayoutAriaHidden(false);
     }
 
-    // 남은 팝업들의 상태 업데이트
-    this.notifyAllPopupsStateChange();
-    this.notifyGlobalListeners();
+    // 상태 변화 알림을 비동기로 처리
+    setTimeout(() => {
+      this.notifyAllPopupsStateChange();
+      this.notifyGlobalListeners();
+    }, 0);
   }
 
   // 현재 열려있는 팝업 개수
@@ -139,6 +143,10 @@ class PopupManagerClass {
     if (popupInfo) {
       popupInfo.onStateChange = callback;
       this.popups.set(id, popupInfo);
+      
+      // 콜백 등록 즉시 현재 상태 알림
+      const isTop = this.isTopPopup(id);
+      callback(id, isTop);
     }
   }
 
@@ -151,12 +159,20 @@ class PopupManagerClass {
     }
   }
 
+  // 강제로 모든 팝업 상태 업데이트 (외부에서 호출 가능)
+  forceUpdateAllPopupsState(): void {
+    this.notifyAllPopupsStateChange();
+  }
+
   // 모든 팝업에게 상태 변화 알림
   private notifyAllPopupsStateChange(): void {
     this.popups.forEach((info, id) => {
       if (info.onStateChange) {
         const isTop = this.isTopPopup(id);
-        info.onStateChange(id, isTop);
+        // 다음 틱에서 실행하여 React 상태 업데이트와 동기화
+        setTimeout(() => {
+          info.onStateChange?.(id, isTop);
+        }, 0);
       }
     });
   }

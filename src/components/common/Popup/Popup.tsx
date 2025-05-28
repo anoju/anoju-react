@@ -74,8 +74,9 @@ const Popup: React.FC<PopupProps> = ({
   const titleIdRef = useRef<string>(
     id ? `${id}-title` : `popup-title-${Date.now()}`
   );
-  const popupIdRef = useRef<string>(id || Date.now().toString());
+  const popupIdRef = useRef<string>(id || `popup-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const isRegisteredRef = useRef<boolean>(false);
 
   // PopupManager 상태 변화 콜백
   const handlePopupStateChange = useCallback(
@@ -104,7 +105,7 @@ const Popup: React.FC<PopupProps> = ({
 
   // 팝업이 렌더링된 직후 z-index 설정 및 PopupManager 등록
   useEffect(() => {
-    if (isRendered && popupRef.current && popupZIndex === undefined) {
+    if (isRendered && popupRef.current && popupZIndex === undefined && !isRegisteredRef.current) {
       // 실제 DOM 요소에서 computed style로 기본 z-index 가져오기
       const computedStyle = getComputedStyle(popupRef.current);
       const currentZIndex = computedStyle.zIndex;
@@ -118,6 +119,8 @@ const Popup: React.FC<PopupProps> = ({
         popupIdRef.current,
         handlePopupStateChange
       );
+      
+      isRegisteredRef.current = true;
 
       // 최종 z-index 계산 및 설정
       const finalZIndex =
@@ -142,6 +145,27 @@ const Popup: React.FC<PopupProps> = ({
     }
   }, [isRendered, popupZIndex, onOpen, handlePopupStateChange]);
 
+  // PopupManager 상태 변화 감지 및 업데이트
+  useEffect(() => {
+    if (isRegisteredRef.current) {
+      // 등록 완료 후 주기적으로 상태 확인 및 업데이트
+      const intervalId = setInterval(() => {
+        const isTop = PopupManager.isTopPopup(popupIdRef.current);
+        setIsBeforePopup(!isTop);
+      }, 50); // 50ms마다 확인
+
+      // 5초 후 인터벌 정리 (안정성을 위해)
+      const timeoutId = setTimeout(() => {
+        clearInterval(intervalId);
+      }, 5000);
+
+      return () => {
+        clearInterval(intervalId);
+        clearTimeout(timeoutId);
+      };
+    }
+  }, [isRegisteredRef.current]);
+
   // 팝업 닫기 처리
   useEffect(() => {
     if (!visible && isRendered) {
@@ -152,6 +176,7 @@ const Popup: React.FC<PopupProps> = ({
         setIsRendered(false);
         setPopupZIndex(undefined); // z-index 상태 초기화
         setIsBeforePopup(false); // before 상태 초기화
+        isRegisteredRef.current = false; // 등록 상태 초기화
 
         // 팝업 매니저에서 제거
         PopupManager.unregister(popupIdRef.current);
@@ -282,6 +307,10 @@ const Popup: React.FC<PopupProps> = ({
     return () => {
       // 컴포넌트가 언마운트될 때 PopupManager에서 상태 변화 콜백 제거
       PopupManager.removePopupStateChangeCallback(currentPopupId);
+      // 만약 여전히 등록되어 있다면 제거
+      if (isRegisteredRef.current) {
+        PopupManager.unregister(currentPopupId);
+      }
     };
   }, []);
 
