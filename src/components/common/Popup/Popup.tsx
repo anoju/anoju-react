@@ -77,6 +77,16 @@ const Popup: React.FC<PopupProps> = ({
   const popupIdRef = useRef<string>(id || Date.now().toString());
   const containerRef = useRef<HTMLDivElement | null>(null);
 
+  // PopupManager 상태 변화 콜백
+  const handlePopupStateChange = useCallback(
+    (popupId: string, isTopPopup: boolean) => {
+      if (popupId === popupIdRef.current) {
+        setIsBeforePopup(!isTopPopup);
+      }
+    },
+    []
+  );
+
   // 팝업 열기 처리
   useEffect(() => {
     if (visible && !isRendered) {
@@ -92,7 +102,7 @@ const Popup: React.FC<PopupProps> = ({
     }
   }, [visible, isRendered]);
 
-  // 팝업이 렌더링된 직후 z-index 설정 (show 애니메이션 전)
+  // 팝업이 렌더링된 직후 z-index 설정 및 PopupManager 등록
   useEffect(() => {
     if (isRendered && popupRef.current && popupZIndex === undefined) {
       // 실제 DOM 요소에서 computed style로 기본 z-index 가져오기
@@ -104,7 +114,10 @@ const Popup: React.FC<PopupProps> = ({
       setBaseZIndex(actualBaseZIndex);
 
       // 팝업 매니저에 등록하여 추가 z-index 가져오기
-      const additionalZIndex = PopupManager.register(popupIdRef.current);
+      const additionalZIndex = PopupManager.register(
+        popupIdRef.current,
+        handlePopupStateChange
+      );
 
       // 최종 z-index 계산 및 설정
       const finalZIndex =
@@ -112,6 +125,10 @@ const Popup: React.FC<PopupProps> = ({
           ? actualBaseZIndex
           : actualBaseZIndex + additionalZIndex;
       setPopupZIndex(finalZIndex);
+
+      // 초기 before 상태 설정
+      const isTop = PopupManager.isTopPopup(popupIdRef.current);
+      setIsBeforePopup(!isTop);
 
       // z-index 설정 후 애니메이션 시작
       setTimeout(() => {
@@ -123,7 +140,7 @@ const Popup: React.FC<PopupProps> = ({
         }, 300);
       }, 10); // 약간의 지연으로 z-index 적용 후 애니메이션 시작
     }
-  }, [isRendered, popupZIndex, onOpen]);
+  }, [isRendered, popupZIndex, onOpen, handlePopupStateChange]);
 
   // 팝업 닫기 처리
   useEffect(() => {
@@ -134,6 +151,7 @@ const Popup: React.FC<PopupProps> = ({
       setTimeout(() => {
         setIsRendered(false);
         setPopupZIndex(undefined); // z-index 상태 초기화
+        setIsBeforePopup(false); // before 상태 초기화
 
         // 팝업 매니저에서 제거
         PopupManager.unregister(popupIdRef.current);
@@ -202,27 +220,13 @@ const Popup: React.FC<PopupProps> = ({
   // 딤 영역 클릭 핸들러
   const handleDimmClick = useCallback(() => {
     if (maskClosable) {
-      handleClose();
+      // 현재 팝업이 최상위 팝업인지 확인 후 닫기
+      const isTopPopup = PopupManager.isTopPopup(popupIdRef.current);
+      if (isTopPopup) {
+        handleClose();
+      }
     }
   }, [maskClosable, handleClose]);
-
-  // 최상위 팝업 확인 및 before 클래스 관리
-  useEffect(() => {
-    if (isRendered) {
-      const checkTopPopup = () => {
-        const isTop = PopupManager.isTopPopup(popupIdRef.current);
-        setIsBeforePopup(!isTop);
-      };
-
-      // 초기 확인
-      checkTopPopup();
-
-      // PopupManager의 변경사항을 감지하기 위한 인터벌
-      const interval = setInterval(checkTopPopup, 100);
-
-      return () => clearInterval(interval);
-    }
-  }, [isRendered]);
 
   // 키보드 이벤트 리스너
   useEffect(() => {
@@ -236,15 +240,15 @@ const Popup: React.FC<PopupProps> = ({
 
   // 포커스 처리
   useEffect(() => {
-    if (isRendered && animationClass === 'show') {
-      // 애니메이션이 시작된 후 포커스 처리
+    if (isRendered && animationClass === 'show' && !isBeforePopup) {
+      // 최상위 팝업이고 애니메이션이 시작된 후 포커스 처리
       const timer = setTimeout(() => {
         handleFocus();
       }, 50);
 
       return () => clearTimeout(timer);
     }
-  }, [isRendered, animationClass, handleFocus]);
+  }, [isRendered, animationClass, isBeforePopup, handleFocus]);
 
   // 팝업 최대 높이 계산
   const calculateMaxHeight = useCallback(() => {
@@ -271,6 +275,15 @@ const Popup: React.FC<PopupProps> = ({
       };
     }
   }, [isRendered, calculateMaxHeight]);
+
+  // 컴포넌트 언마운트 시 정리
+  useEffect(() => {
+    const currentPopupId = popupIdRef.current;
+    return () => {
+      // 컴포넌트가 언마운트될 때 PopupManager에서 상태 변화 콜백 제거
+      PopupManager.removePopupStateChangeCallback(currentPopupId);
+    };
+  }, []);
 
   // 렌더링하지 않음
   if (!isRendered || !containerRef.current) return null;
@@ -307,7 +320,7 @@ const Popup: React.FC<PopupProps> = ({
       className={popupClass}
       style={popupStyle}
       role="dialog"
-      aria-hidden={!isRendered}
+      aria-hidden={isBeforePopup ? true : undefined}
       aria-labelledby={titleIdRef.current}
       tabIndex={hideHeader || !title ? -1 : undefined}
     >
