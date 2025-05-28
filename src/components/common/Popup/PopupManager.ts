@@ -2,13 +2,30 @@
 
 class PopupManagerClass {
   private popups: Map<string, number> = new Map();
-  private baseZIndex: number = 1000;
-  private currentZIndex: number = this.baseZIndex;
+  private baseZIndex: number;
+  private currentZIndex: number;
   private listeners: Set<() => void> = new Set();
+
+  constructor() {
+    // CSS 변수에서 기본 z-index 값 가져오기
+    this.baseZIndex = this.getBaseZIndexFromCSS();
+    this.currentZIndex = this.baseZIndex;
+  }
+
+  // CSS 변수에서 기본 z-index 값을 읽어오는 메서드
+  private getBaseZIndexFromCSS(): number {
+    //if (typeof window !== 'undefined' && window.getComputedStyle) {
+    const rootStyle = getComputedStyle(document.documentElement);
+    const zIndexValue = rootStyle.getPropertyValue('--pop-z-index').trim();
+    const parsedValue = parseInt(zIndexValue, 10);
+    return isNaN(parsedValue) ? 200 : parsedValue; // 기본값 fallback
+    // }
+    // return 200; // SSR 환경에서의 기본값
+  }
 
   // 팝업 등록 및 z-index 반환
   register(id: string): number {
-    this.currentZIndex += 10;
+    this.currentZIndex += 1; // 1씩 증가로 변경
     this.popups.set(id, this.currentZIndex);
     this.notifyListeners();
     return this.currentZIndex;
@@ -18,7 +35,7 @@ class PopupManagerClass {
   unregister(id: string): void {
     this.popups.delete(id);
     this.notifyListeners();
-    
+
     // 모든 팝업이 닫히면 z-index 초기화
     if (this.popups.size === 0) {
       this.currentZIndex = this.baseZIndex;
@@ -34,14 +51,14 @@ class PopupManagerClass {
   isTopPopup(id: string): boolean {
     const popupZIndex = this.popups.get(id);
     if (!popupZIndex) return false;
-    
+
     let maxZIndex = 0;
     this.popups.forEach((zIndex) => {
       if (zIndex > maxZIndex) {
         maxZIndex = zIndex;
       }
     });
-    
+
     return popupZIndex === maxZIndex;
   }
 
@@ -64,7 +81,7 @@ class PopupManagerClass {
 
   // 리스너들에게 알림
   private notifyListeners(): void {
-    this.listeners.forEach(listener => listener());
+    this.listeners.forEach((listener) => listener());
   }
 }
 

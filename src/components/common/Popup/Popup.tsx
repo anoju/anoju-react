@@ -32,7 +32,6 @@ export interface PopupProps {
   bodyClassName?: string;
   footerClassName?: string;
   style?: CSSProperties;
-  zIndex?: number;
   hideHeader?: boolean;
   hideCloseButton?: boolean;
   keyboard?: boolean;
@@ -57,7 +56,6 @@ const Popup: React.FC<PopupProps> = ({
   bodyClassName = '',
   footerClassName = '',
   style,
-  zIndex,
   hideHeader = false,
   hideCloseButton = false,
   keyboard = true,
@@ -67,7 +65,16 @@ const Popup: React.FC<PopupProps> = ({
   const [isRendered, setIsRendered] = useState(false);
   const [animationClass, setAnimationClass] = useState('');
   const [isBeforePopup, setIsBeforePopup] = useState(false);
-  const [popupZIndex, setPopupZIndex] = useState(zIndex || 1000);
+  const [popupZIndex, setPopupZIndex] = useState(() => {
+    // CSS 변수에서 기본 z-index 값 가져오기
+    if (typeof window !== 'undefined' && window.getComputedStyle) {
+      const rootStyle = getComputedStyle(document.documentElement);
+      const zIndexValue = rootStyle.getPropertyValue('--pop-z-index').trim();
+      const parsedValue = parseInt(zIndexValue, 10);
+      return isNaN(parsedValue) ? 200 : parsedValue;
+    }
+    return 200; // SSR 환경에서의 기본값
+  });
 
   const popupRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -91,7 +98,7 @@ const Popup: React.FC<PopupProps> = ({
 
       // 팝업 매니저에 등록
       const newZIndex = PopupManager.register(popupIdRef.current);
-      setPopupZIndex(zIndex || newZIndex);
+      setPopupZIndex(newZIndex);
       setIsRendered(true);
 
       // 다음 프레임에서 애니메이션 시작
@@ -132,7 +139,7 @@ const Popup: React.FC<PopupProps> = ({
         }
       }, 300); // 애니메이션 시간과 동일
     }
-  }, [visible, isRendered, onClose, onOpen, zIndex, focusTriggerAfterClose]);
+  }, [visible, isRendered, onClose, onOpen, focusTriggerAfterClose]);
 
   // 팝업이 열릴 때 포커스 처리
   const handleFocus = useCallback(() => {
