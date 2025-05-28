@@ -65,15 +65,12 @@ const Popup: React.FC<PopupProps> = ({
   const [isRendered, setIsRendered] = useState(false);
   const [animationClass, setAnimationClass] = useState('');
   const [isBeforePopup, setIsBeforePopup] = useState(false);
-  const [popupZIndex, setPopupZIndex] = useState(() => {
-    // CSS 변수에서 기본 z-index 값 가져오기
-    if (typeof window !== 'undefined' && window.getComputedStyle) {
-      const rootStyle = getComputedStyle(document.documentElement);
-      const zIndexValue = rootStyle.getPropertyValue('--pop-z-index').trim();
-      const parsedValue = parseInt(zIndexValue, 10);
-      return isNaN(parsedValue) ? 200 : parsedValue;
-    }
-    return 200; // SSR 환경에서의 기본값
+  const [popupZIndex, setPopupZIndex] = useState<number>(() => {
+    // CSS에서 기본 z-index 값 가져오기
+    const rootStyle = getComputedStyle(document.documentElement);
+    const zIndexValue = rootStyle.getPropertyValue('--pop-z-index').trim();
+    const parsedValue = parseInt(zIndexValue, 10);
+    return isNaN(parsedValue) ? 200 : parsedValue;
   });
 
   const popupRef = useRef<HTMLDivElement>(null);
@@ -85,20 +82,34 @@ const Popup: React.FC<PopupProps> = ({
   const popupIdRef = useRef<string>(id || Date.now().toString());
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  // 포털 컨테이너 생성 및 관리
+  // CSS에서 기본 zIndex 가져오는 함수
+  const getBaseZIndex = useCallback((): number => {
+    const rootStyle = getComputedStyle(document.documentElement);
+    const zIndexValue = rootStyle.getPropertyValue('--pop-z-index').trim();
+    const parsedValue = parseInt(zIndexValue, 10);
+    return isNaN(parsedValue) ? 200 : parsedValue;
+  }, []);
+
+  // 팝업 열기 처리
   useEffect(() => {
-    if (visible) {
+    if (visible && !isRendered) {
+      // 포털 컨테이너 생성
       if (!containerRef.current) {
-        // 컨테이너 생성
         const container = document.createElement('div');
         container.id = `popup-container-${popupIdRef.current}`;
         document.body.appendChild(container);
         containerRef.current = container;
       }
 
-      // 팝업 매니저에 등록
-      const newZIndex = PopupManager.register(popupIdRef.current);
-      setPopupZIndex(newZIndex);
+      // 팝업 매니저에 등록하여 추가 z-index 가져오기
+      const additionalZIndex = PopupManager.register(popupIdRef.current);
+
+      // CSS 기본 z-index + 추가 z-index로 최종 z-index 계산
+      const baseZIndex = getBaseZIndex();
+      const finalZIndex =
+        additionalZIndex === 0 ? baseZIndex : baseZIndex + additionalZIndex;
+
+      setPopupZIndex(finalZIndex);
       setIsRendered(true);
 
       // 다음 프레임에서 애니메이션 시작
@@ -110,7 +121,12 @@ const Popup: React.FC<PopupProps> = ({
           onOpen?.();
         }, 300);
       });
-    } else if (!visible && isRendered) {
+    }
+  }, [visible, isRendered, getBaseZIndex, onOpen]);
+
+  // 팝업 닫기 처리
+  useEffect(() => {
+    if (!visible && isRendered) {
       // 닫기 애니메이션 시작
       setAnimationClass('');
 
@@ -139,7 +155,7 @@ const Popup: React.FC<PopupProps> = ({
         }
       }, 300); // 애니메이션 시간과 동일
     }
-  }, [visible, isRendered, onClose, onOpen, focusTriggerAfterClose]);
+  }, [visible, isRendered, onClose, focusTriggerAfterClose]);
 
   // 팝업이 열릴 때 포커스 처리
   const handleFocus = useCallback(() => {
@@ -266,11 +282,16 @@ const Popup: React.FC<PopupProps> = ({
     className
   );
 
-  // 팝업 스타일 조합
+  // 팝업 스타일 조합 - 첫 번째 팝업이 아닌 경우에만 zIndex를 직접 설정
   const popupStyle: CSSProperties = {
     ...style,
-    zIndex: popupZIndex,
   };
+
+  // 첫 번째 팝업(additionalZIndex === 0)이 아닌 경우에만 style로 zIndex 설정
+  const baseZIndex = getBaseZIndex();
+  if (popupZIndex !== baseZIndex) {
+    popupStyle.zIndex = popupZIndex;
+  }
 
   // 팝업 내용 스타일
   const contentStyle: CSSProperties = {};
