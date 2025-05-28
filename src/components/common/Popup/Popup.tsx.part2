@@ -1,0 +1,183 @@
+// src/components/common/Popup/Popup.tsx.part2
+  // 팝업 닫기 핸들러
+  const handleClose = useCallback(() => {
+    if (onClose) {
+      onClose();
+    }
+  }, [onClose]);
+
+  // ESC 키 핸들러
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (keyboard && closeOnEsc && e.key === 'Escape' && isRendered) {
+        // 현재 팝업이 최상위 팝업인지 확인
+        const isTopPopup = PopupManager.isTopPopup(popupIdRef.current);
+        if (isTopPopup) {
+          handleClose();
+        }
+      }
+    },
+    [keyboard, closeOnEsc, isRendered, handleClose]
+  );
+
+  // 딤 영역 클릭 핸들러
+  const handleDimmClick = useCallback(() => {
+    if (maskClosable) {
+      handleClose();
+    }
+  }, [maskClosable, handleClose]);
+
+  // 최상위 팝업 확인 및 before 클래스 관리
+  useEffect(() => {
+    if (isRendered) {
+      const checkTopPopup = () => {
+        const isTop = PopupManager.isTopPopup(popupIdRef.current);
+        setIsBeforePopup(!isTop);
+      };
+
+      // 초기 확인
+      checkTopPopup();
+
+      // PopupManager의 변경사항을 감지하기 위한 인터벌
+      const interval = setInterval(checkTopPopup, 100);
+
+      return () => clearInterval(interval);
+    }
+  }, [isRendered]);
+
+  // 키보드 이벤트 리스너
+  useEffect(() => {
+    if (isRendered) {
+      document.addEventListener('keydown', handleKeyDown);
+      return () => {
+        document.removeEventListener('keydown', handleKeyDown);
+      };
+    }
+  }, [isRendered, handleKeyDown]);
+
+  // 포커스 처리
+  useEffect(() => {
+    if (isRendered) {
+      // 약간의 지연을 주어 DOM이 완전히 렌더링된 후 포커스 처리
+      const timer = setTimeout(() => {
+        handleFocus();
+      }, 50);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isRendered, handleFocus]);
+
+  // 팝업 최대 높이 계산
+  const calculateMaxHeight = useCallback(() => {
+    if (popupRef.current) {
+      const popWrap = popupRef.current.querySelector(`.${styles['pop-wrap']}`);
+      if (popWrap && type !== 'full') {
+        const popupHeight = popupRef.current?.offsetHeight;
+        const style = window.getComputedStyle(popupRef.current);
+        const padding =
+          parseInt(style.paddingTop) + parseInt(style.paddingBottom);
+        const maxHeight = popupHeight - padding;
+        (popWrap as HTMLElement).style.maxHeight = `${maxHeight}px`;
+      }
+    }
+  }, [type]);
+
+  // 윈도우 리사이즈 시 최대 높이 재계산
+  useEffect(() => {
+    if (isRendered) {
+      calculateMaxHeight();
+      window.addEventListener('resize', calculateMaxHeight);
+      return () => {
+        window.removeEventListener('resize', calculateMaxHeight);
+      };
+    }
+  }, [isRendered, calculateMaxHeight]);
+
+  // 렌더링하지 않음
+  if (!isRendered || !containerRef.current) return null;
+
+  // 팝업 클래스 조합
+  const popupClass = cx(
+    styles.popup,
+    styles[type],
+    animationClass ? styles[animationClass] : '',
+    isBeforePopup ? styles.before : '',
+    className
+  );
+
+  // 팝업 스타일 조합 - 첫 번째 팝업이 아닌 경우에만 zIndex를 직접 설정
+  const popupStyle: CSSProperties = {
+    ...style,
+  };
+
+  // 첫 번째 팝업(additionalZIndex === 0)이 아닌 경우에만 style로 zIndex 설정
+  const baseZIndex = getBaseZIndex();
+  if (popupZIndex !== baseZIndex) {
+    popupStyle.zIndex = popupZIndex;
+  }
+
+  // 팝업 내용 스타일
+  const contentStyle: CSSProperties = {};
+  if (width) {
+    contentStyle.width = typeof width === 'number' ? `${width}px` : width;
+  }
+
+  const popupContent = (
+    <div
+      ref={popupRef}
+      id={popupIdRef.current}
+      className={popupClass}
+      style={popupStyle}
+      role="dialog"
+      aria-hidden={!isRendered}
+      aria-labelledby={titleIdRef.current}
+      tabIndex={hideHeader || !title ? -1 : undefined}
+    >
+      <div className={styles['pop-mask']} onClick={handleDimmClick} />
+      <article className={cx(styles['pop-wrap'])} style={contentStyle}>
+        {!hideHeader && (
+          <div className={cx(styles['pop-head'], headerClassName)}>
+            <div>
+              {title && (
+                <h1 ref={titleRef} id={titleIdRef.current} tabIndex={-1}>
+                  {title}
+                </h1>
+              )}
+              {header}
+              {!hideCloseButton && (
+                <Button
+                  not
+                  type="button"
+                  className={styles['pop-close']}
+                  onClick={handleClose}
+                  aria-label="팝업창 닫기"
+                />
+              )}
+            </div>
+          </div>
+        )}
+        <div
+          className={cx(
+            styles['pop-body'],
+            !hideHeader ? styles['before-head'] : '',
+            footer ? styles['next-foot'] : '',
+            bodyClassName
+          )}
+        >
+          {children}
+        </div>
+
+        {footer && (
+          <div className={cx(styles['pop-foot'], footerClassName)}>
+            <div>{footer}</div>
+          </div>
+        )}
+      </article>
+    </div>
+  );
+
+  // 포털을 통한 렌더링
+  return createPortal(popupContent, containerRef.current);
+};
+
+export default Popup;
