@@ -118,8 +118,14 @@ const Popup: React.FC<PopupProps> = ({
       popupZIndex === undefined &&
       !isRegisteredRef.current
     ) {
-      // 팝업 매니저에 우선순위와 함께 등록
-      PopupManager.register(
+      // 실제 DOM 요소에서 computed style로 기본 z-index 가져오기
+      const computedStyle = getComputedStyle(popupRef.current);
+      const currentZIndex = computedStyle.zIndex;
+      const parsedBaseZIndex = parseInt(currentZIndex, 10);
+      const actualBaseZIndex = isNaN(parsedBaseZIndex) ? 200 : parsedBaseZIndex;
+
+      // 팝업 매니저에 우선순위와 함께 등록하여 추가 z-index 가져오기
+      const additionalZIndex = PopupManager.register(
         popupIdRef.current,
         priority, // 우선순위 전달
         handlePopupStateChange
@@ -128,10 +134,14 @@ const Popup: React.FC<PopupProps> = ({
       isRegisteredRef.current = true;
 
       // 최종 z-index 계산 및 설정
-      const finalZIndex = PopupManager.calculateActualZIndex(
-        popupIdRef.current
-      );
-      setPopupZIndex(finalZIndex);
+      // additionalZIndex가 0이면 CSS 기본값을 그대로 사용 (style 속성으로 설정하지 않음)
+      if (additionalZIndex === 0) {
+        setPopupZIndex(undefined); // CSS 기본값 사용
+      } else {
+        // CSS 기본값 + 추가 z-index
+        const finalZIndex = actualBaseZIndex + additionalZIndex;
+        setPopupZIndex(finalZIndex);
+      }
 
       // 초기 before 상태 설정
       const isTop = PopupManager.isTopPopup(popupIdRef.current);
@@ -335,7 +345,7 @@ const Popup: React.FC<PopupProps> = ({
     ...style,
   };
 
-  // z-index 설정 (우선순위에 따라 결정됨)
+  // z-index 설정 (추가 z-index가 있는 경우에만 설정)
   if (popupZIndex !== undefined) {
     popupStyle.zIndex = popupZIndex;
   }
