@@ -1,9 +1,10 @@
-// src/components/common/Dialog/Confirm.tsx
+// src/components/common/Popup/Confirm.tsx
 import React from 'react';
 import Popup from './Popup';
 import { Button } from '@/components/common';
 import styles from '@/assets/scss/components/popup.module.scss';
 import cx from '@/utils/cx';
+import { POPUP_PRIORITY } from './PopupManager';
 
 export interface ConfirmOptions {
   title?: string;
@@ -89,6 +90,7 @@ const Confirm: React.FC<ConfirmProps> = ({ id, options, onClose }) => {
       onClose={handlePopupClose}
       keyboard={keyboard}
       maskClosable={maskClosable}
+      priority={POPUP_PRIORITY.HIGH} // 고우선순위 설정
       footer={
         <div
           style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}

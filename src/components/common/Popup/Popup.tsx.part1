@@ -1,4 +1,4 @@
-// src/components/common/Popup/Popup.tsx.part1 (개선된 버전)
+// src/components/common/Popup/Popup.tsx.part1
 import React, {
   useState,
   useEffect,
@@ -7,8 +7,9 @@ import React, {
   ReactNode,
   CSSProperties,
 } from 'react';
+import { isMobile } from '@/utils/device';
 import { createPortal } from 'react-dom';
-import PopupManager from './PopupManager';
+import PopupManager, { PopupPriority } from './PopupManager';
 import styles from '@/assets/scss/components/popup.module.scss';
 import { Button } from '@/components/common';
 import cx from '@/utils/cx';
@@ -37,6 +38,7 @@ export interface PopupProps {
   keyboard?: boolean;
   focusTriggerAfterClose?: boolean;
   maskClosable?: boolean;
+  priority?: PopupPriority; // 팝업 우선순위 추가
 }
 
 const Popup: React.FC<PopupProps> = ({
@@ -61,7 +63,10 @@ const Popup: React.FC<PopupProps> = ({
   keyboard = true,
   focusTriggerAfterClose = true,
   maskClosable = true,
+  priority = PopupPriority.NORMAL, // 기본값은 일반 우선순위
 }) => {
+  const isMobileDevice = isMobile();
+
   const [isRendered, setIsRendered] = useState(false);
   const [animationClass, setAnimationClass] = useState('');
   const [isBeforePopup, setIsBeforePopup] = useState(false);
@@ -74,8 +79,21 @@ const Popup: React.FC<PopupProps> = ({
   const titleIdRef = useRef<string>(
     id ? `${id}-title` : `popup-title-${Date.now()}`
   );
-  const popupIdRef = useRef<string>(id || Date.now().toString());
+  const popupIdRef = useRef<string>(
+    id || `popup-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
+  );
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const isRegisteredRef = useRef<boolean>(false);
+
+  // PopupManager 상태 변화 콜백
+  const handlePopupStateChange = useCallback(
+    (popupId: string, isTopPopup: boolean) => {
+      if (popupId === popupIdRef.current) {
+        setIsBeforePopup(!isTopPopup);
+      }
+    },
+    []
+  );
 
   // 팝업 열기 처리
   useEffect(() => {
@@ -91,86 +109,3 @@ const Popup: React.FC<PopupProps> = ({
       setIsRendered(true);
     }
   }, [visible, isRendered]);
-
-  // 팝업이 렌더링된 직후 z-index 설정 (show 애니메이션 전)
-  useEffect(() => {
-    if (isRendered && popupRef.current && popupZIndex === undefined) {
-      // 실제 DOM 요소에서 computed style로 기본 z-index 가져오기
-      const computedStyle = getComputedStyle(popupRef.current);
-      const currentZIndex = computedStyle.zIndex;
-      const parsedBaseZIndex = parseInt(currentZIndex, 10);
-      const actualBaseZIndex = isNaN(parsedBaseZIndex) ? 200 : parsedBaseZIndex;
-      
-      setBaseZIndex(actualBaseZIndex);
-
-      // 팝업 매니저에 등록하여 추가 z-index 가져오기
-      const additionalZIndex = PopupManager.register(popupIdRef.current);
-
-      // 최종 z-index 계산 및 설정
-      const finalZIndex = additionalZIndex === 0 ? actualBaseZIndex : actualBaseZIndex + additionalZIndex;
-      setPopupZIndex(finalZIndex);
-
-      // z-index 설정 후 애니메이션 시작
-      setTimeout(() => {
-        setAnimationClass('show');
-
-        // 애니메이션 완료 후 처리
-        setTimeout(() => {
-          onOpen?.();
-        }, 300);
-      }, 10); // 약간의 지연으로 z-index 적용 후 애니메이션 시작
-    }
-  }, [isRendered, popupZIndex, onOpen]);
-
-  // 팝업 닫기 처리
-  useEffect(() => {
-    if (!visible && isRendered) {
-      // 닫기 애니메이션 시작
-      setAnimationClass('');
-
-      setTimeout(() => {
-        setIsRendered(false);
-        setPopupZIndex(undefined); // z-index 상태 초기화
-
-        // 팝업 매니저에서 제거
-        PopupManager.unregister(popupIdRef.current);
-
-        // 포커스 복원
-        if (
-          focusTriggerAfterClose &&
-          previousFocusRef.current &&
-          previousFocusRef.current.focus
-        ) {
-          previousFocusRef.current.focus();
-        }
-
-        // 콜백 실행
-        onClose?.();
-
-        // 컨테이너 제거
-        if (containerRef.current) {
-          containerRef.current.remove();
-          containerRef.current = null;
-        }
-      }, 300); // 애니메이션 시간과 동일
-    }
-  }, [visible, isRendered, onClose, focusTriggerAfterClose]);
-
-  // 팝업이 열릴 때 포커스 처리
-  const handleFocus = useCallback(() => {
-    if (isRendered && popupRef.current) {
-      // 현재 포커스된 요소 저장
-      previousFocusRef.current = document.activeElement as HTMLElement;
-
-      // 팝업 내부의 첫 번째 포커스 가능한 요소로 포커스 이동
-      const focusableElements = popupRef.current.querySelectorAll(
-        'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
-      );
-
-      if (focusableElements.length > 0) {
-        (focusableElements[0] as HTMLElement).focus();
-      } else {
-        popupRef.current.focus();
-      }
-    }
-  }, [isRendered]);

@@ -98,6 +98,7 @@
     }
 
     &.alert {
+      z-index: 2000;
       .pop-wrap {
         max-width: 48rem;
       }

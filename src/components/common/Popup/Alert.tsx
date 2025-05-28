@@ -1,9 +1,10 @@
-// src/components/common/Dialog/Alert.tsx
+// src/components/common/Popup/Alert.tsx
 import React from 'react';
 import Popup from './Popup';
 import { Button } from '@/components/common';
 import styles from '@/assets/scss/components/popup.module.scss';
 import cx from '@/utils/cx';
+import { POPUP_PRIORITY } from './PopupManager';
 
 export interface AlertOptions {
   title?: string;
@@ -65,6 +66,7 @@ const Alert: React.FC<AlertProps> = ({ id, options, onClose }) => {
       onClose={handleClose}
       keyboard={keyboard}
       maskClosable={maskClosable}
+      priority={POPUP_PRIORITY.HIGH} // 고우선순위 설정
       footer={
         <Button className="primary" onClick={handleOk} autoFocus>
           {okText}

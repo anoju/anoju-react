@@ -1,4 +1,4 @@
-// src/components/common/Popup/Popup.tsx
+// src/components/common/Popup/Popup.tsx.part1
 import React, {
   useState,
   useEffect,
@@ -9,7 +9,7 @@ import React, {
 } from 'react';
 import { isMobile } from '@/utils/device';
 import { createPortal } from 'react-dom';
-import PopupManager from './PopupManager';
+import PopupManager, { POPUP_PRIORITY, type PopupPriority } from './PopupManager';
 import styles from '@/assets/scss/components/popup.module.scss';
 import { Button } from '@/components/common';
 import cx from '@/utils/cx';
@@ -38,6 +38,7 @@ export interface PopupProps {
   keyboard?: boolean;
   focusTriggerAfterClose?: boolean;
   maskClosable?: boolean;
+  priority?: PopupPriority; // 팝업 우선순위 추가
 }
 
 const Popup: React.FC<PopupProps> = ({
@@ -62,6 +63,7 @@ const Popup: React.FC<PopupProps> = ({
   keyboard = true,
   focusTriggerAfterClose = true,
   maskClosable = true,
+  priority = POPUP_PRIORITY.NORMAL, // 기본값은 일반 우선순위
 }) => {
   const isMobileDevice = isMobile();
 
@@ -69,7 +71,7 @@ const Popup: React.FC<PopupProps> = ({
   const [animationClass, setAnimationClass] = useState('');
   const [isBeforePopup, setIsBeforePopup] = useState(false);
   const [popupZIndex, setPopupZIndex] = useState<number | undefined>(undefined);
-  const [baseZIndex, setBaseZIndex] = useState<number>(200); // 기본값으로 200 설정
+  // baseZIndex 상태 제거 (사용하지 않음)
 
   const popupRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -116,27 +118,19 @@ const Popup: React.FC<PopupProps> = ({
       popupZIndex === undefined &&
       !isRegisteredRef.current
     ) {
-      // 실제 DOM 요소에서 computed style로 기본 z-index 가져오기
-      const computedStyle = getComputedStyle(popupRef.current);
-      const currentZIndex = computedStyle.zIndex;
-      const parsedBaseZIndex = parseInt(currentZIndex, 10);
-      const actualBaseZIndex = isNaN(parsedBaseZIndex) ? 200 : parsedBaseZIndex;
-
-      setBaseZIndex(actualBaseZIndex);
-
-      // 팝업 매니저에 등록하여 추가 z-index 가져오기
-      const additionalZIndex = PopupManager.register(
+      // 팝업 매니저에 우선순위와 함께 등록
+      PopupManager.register(
         popupIdRef.current,
+        priority, // 우선순위 전달
         handlePopupStateChange
       );
 
       isRegisteredRef.current = true;
 
       // 최종 z-index 계산 및 설정
-      const finalZIndex =
-        additionalZIndex === 0
-          ? actualBaseZIndex
-          : actualBaseZIndex + additionalZIndex;
+      const finalZIndex = PopupManager.calculateActualZIndex(
+        popupIdRef.current
+      );
       setPopupZIndex(finalZIndex);
 
       // 초기 before 상태 설정
@@ -153,7 +147,7 @@ const Popup: React.FC<PopupProps> = ({
         }, 300);
       }, 10); // 약간의 지연으로 z-index 적용 후 애니메이션 시작
     }
-  }, [isRendered, popupZIndex, onOpen, handlePopupStateChange]);
+  }, [isRendered, popupZIndex, onOpen, handlePopupStateChange, priority]);
 
   // PopupManager 상태 변화 감지 및 업데이트
   useEffect(() => {
@@ -341,8 +335,8 @@ const Popup: React.FC<PopupProps> = ({
     ...style,
   };
 
-  // 첫 번째 팝업이 아닌 경우에만 style로 zIndex 설정
-  if (popupZIndex !== undefined && popupZIndex !== baseZIndex) {
+  // z-index 설정 (우선순위에 따라 결정됨)
+  if (popupZIndex !== undefined) {
     popupStyle.zIndex = popupZIndex;
   }
 
