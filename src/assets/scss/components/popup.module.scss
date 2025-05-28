@@ -96,6 +96,12 @@
         padding: 1.6rem var(--side-padding);
       }
     }
+
+    &.alert {
+      .pop-wrap {
+        max-width: 48rem;
+      }
+    }
   }
 
   // 바텀시트 타입

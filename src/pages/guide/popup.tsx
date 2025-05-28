@@ -8,6 +8,7 @@ import {
   usePopup,
   usePopups,
 } from '@/components/common';
+import { $alert, $confirm } from '@/utils/dialog';
 import styles from '@/assets/scss/pages/guide.module.scss';
 
 const PopupGuide = () => {
@@ -135,7 +136,277 @@ const PopupGuide = () => {
         <CodeHighlight
           code={`import { Popup } from '@/components/common';
 // 훅도 함께 사용하는 경우
-import { Popup, usePopup, usePopups } from '@/components/common';`}
+import { Popup, usePopup, usePopups } from '@/components/common';
+// Alert, Confirm 함수 사용하는 경우
+import { $alert, $confirm } from '@/utils/dialog';`}
+          language="typescript"
+        />
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles['section-title']}>$alert 함수 사용법</h2>
+        <p className={styles.txt}>
+          $alert 함수를 사용하면 프로그래밍 방식으로 간단한 알림 팝업을 표시할
+          수 있습니다.
+        </p>
+
+        <div className={styles.showcase}>
+          <div className={styles['control-buttons']}>
+            <Button
+              className="primary"
+              onClick={() => $alert('기본 알림 메시지입니다.')}
+            >
+              기본 알럿
+            </Button>
+
+            <Button
+              className="primary"
+              onClick={() =>
+                $alert('커스텀 제목 알림입니다.', {
+                  title: '커스텀 제목',
+                  okText: '확인했습니다',
+                  onOk: () => console.log('알럿 확인됨'),
+                })
+              }
+            >
+              커스텀 알럿
+            </Button>
+
+            <Button
+              className="primary"
+              onClick={() =>
+                $alert(
+                  <div>
+                    <p>JSX 내용을 포함한 알럿입니다.</p>
+                    <p style={{ color: 'red' }}>
+                      중요한 정보를 강조할 수 있습니다.
+                    </p>
+                  </div>,
+                  { title: 'JSX 내용 알럿' }
+                )
+              }
+            >
+              JSX 내용 알럿
+            </Button>
+          </div>
+        </div>
+
+        <h3 className={styles['sub-title']}>참조 소스코드</h3>
+        <CodeHighlight
+          code={`import { $alert } from '@/utils/dialog';
+
+// 기본 알럿
+$alert('기본 알림 메시지입니다.');
+
+// 커스텀 옵션 알럿
+$alert('커스텀 제목 알림입니다.', {
+  title: '커스텀 제목',
+  okText: '확인했습니다',
+  width: 400,
+  onOk: () => console.log('알럿 확인됨')
+});
+
+// JSX 내용 알럿
+$alert(
+  <div>
+    <p>JSX 내용을 포함한 알럿입니다.</p>
+    <p style={{ color: 'red' }}>중요한 정보를 강조할 수 있습니다.</p>
+  </div>,
+  { title: 'JSX 내용 알럿' }
+);
+
+// Promise 방식으로 사용
+$alert('작업이 완료되었습니다.').then(() => {
+  console.log('알럿이 닫혔습니다.');
+});`}
+          language="typescript"
+        />
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles['section-title']}>$confirm 함수 사용법</h2>
+        <p className={styles.txt}>
+          $confirm 함수를 사용하면 프로그래밍 방식으로 확인/취소 팝업을 표시할
+          수 있습니다.
+        </p>
+
+        <div className={styles.showcase}>
+          <div className={styles['control-buttons']}>
+            <Button
+              className="primary"
+              onClick={async () => {
+                const result = await $confirm('정말로 삭제하시겠습니까?');
+                if (result) {
+                  $alert('삭제되었습니다.');
+                } else {
+                  $alert('취소되었습니다.');
+                }
+              }}
+            >
+              기본 컨펌
+            </Button>
+
+            <Button
+              className="primary"
+              onClick={() => {
+                $confirm('이 작업을 계속하시겠습니까?', {
+                  title: '작업 확인',
+                  okText: '계속하기',
+                  cancelText: '중단하기',
+                  onOk: async () => {
+                    // 비동기 작업 시뮬레이션
+                    return new Promise((resolve) => {
+                      setTimeout(() => {
+                        console.log('작업 완료');
+                        resolve();
+                      }, 2000);
+                    });
+                  },
+                  onCancel: () => console.log('작업 중단됨'),
+                }).then((result) => {
+                  console.log('컨펌 결과:', result);
+                });
+              }}
+            >
+              비동기 컨펌
+            </Button>
+
+            <Button
+              className="primary"
+              onClick={() => {
+                $confirm(
+                  <div>
+                    <p>다음 항목들이 삭제됩니다:</p>
+                    <ul style={{ margin: '16px 0', paddingLeft: '20px' }}>
+                      <li>문서 1</li>
+                      <li>문서 2</li>
+                      <li>문서 3</li>
+                    </ul>
+                    <p style={{ color: 'red', fontWeight: 'bold' }}>
+                      이 작업은 되돌릴 수 없습니다.
+                    </p>
+                  </div>,
+                  {
+                    title: '항목 삭제 확인',
+                    okText: '삭제',
+                    cancelText: '취소',
+                    width: 500,
+                  }
+                ).then((result) => {
+                  if (result) {
+                    $alert('선택된 항목들이 삭제되었습니다.');
+                  }
+                });
+              }}
+            >
+              상세 컨펌
+            </Button>
+          </div>
+        </div>
+
+        <h3 className={styles['sub-title']}>참조 소스코드</h3>
+        <CodeHighlight
+          code={`import { $confirm, $alert } from '@/utils/dialog';
+
+// 기본 컨펌
+const handleDelete = async () => {
+  const result = await $confirm('정말로 삭제하시겠습니까?');
+  if (result) {
+    // 삭제 로직 실행
+    $alert('삭제되었습니다.');
+  }
+};
+
+// 커스텀 옵션 컨펌
+$confirm('이 작업을 계속하시겠습니까?', {
+  title: '작업 확인',
+  okText: '계속하기',
+  cancelText: '중단하기',
+  width: 400,
+  onOk: async () => {
+    // 비동기 작업 처리
+    await performAsyncTask();
+  },
+  onCancel: () => {
+    console.log('작업이 취소되었습니다.');
+  }
+}).then(result => {
+  console.log('컨펌 결과:', result); // true 또는 false
+});
+
+// JSX 내용 컨펌
+$confirm(
+  <div>
+    <p>다음 항목들이 삭제됩니다:</p>
+    <ul>
+      <li>문서 1</li>
+      <li>문서 2</li>
+    </ul>
+    <p style={{ color: 'red' }}>이 작업은 되돌릴 수 없습니다.</p>
+  </div>,
+  { title: '삭제 확인', okText: '삭제', cancelText: '취소' }
+);`}
+          language="typescript"
+        />
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles['section-title']}>전역 함수 사용법</h2>
+        <p className={styles.txt}>
+          main.tsx에서 globalDialog를 import하면 어디서든 window.$alert,
+          window.$confirm을 사용할 수 있습니다.
+        </p>
+
+        <div className={styles.showcase}>
+          <div className={styles['control-buttons']}>
+            <Button
+              className="primary"
+              onClick={() => {
+                if (typeof window !== 'undefined' && window.$alert) {
+                  window.$alert('전역 함수로 호출된 알럿입니다!');
+                }
+              }}
+            >
+              window.$alert 사용
+            </Button>
+
+            <Button
+              className="primary"
+              onClick={async () => {
+                if (typeof window !== 'undefined' && window.$confirm) {
+                  const result =
+                    await window.$confirm('전역 함수로 호출된 컨펌입니다.');
+                  if (result && window.$alert) {
+                    window.$alert('확인을 선택하셨습니다.');
+                  }
+                }
+              }}
+            >
+              window.$confirm 사용
+            </Button>
+          </div>
+        </div>
+
+        <h3 className={styles['sub-title']}>참조 소스코드</h3>
+        <CodeHighlight
+          code={`// main.tsx에서 전역 함수 등록
+import '@/utils/globalDialog';
+
+// 어디서든 사용 가능
+window.$alert('전역 알럿입니다!');
+
+// TypeScript 타입 안전성을 위한 체크
+if (typeof window !== 'undefined' && window.$alert) {
+  window.$alert('타입 안전한 전역 알럿');
+}
+
+// 비동기 처리
+const handleGlobalConfirm = async () => {
+  if (window.$confirm) {
+    const result = await window.$confirm('전역 컨펌입니다.');
+    console.log('결과:', result);
+  }
+};`}
           language="typescript"
         />
       </section>
@@ -743,6 +1014,163 @@ const addLog = (message: string) => {
           </table>
         </div>
       </section>
+      <section className={styles.section}>
+        <h2 className={styles['section-title']}>Alert & Confirm API</h2>
+        <div className={styles.showcase}>
+          <h3 className={styles['sub-title']}>$alert(content, options?)</h3>
+          <p className={styles.txt}>알림 팝업을 표시하는 함수입니다.</p>
+
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>매개변수</th>
+                <th>타입</th>
+                <th>기본값</th>
+                <th>설명</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>content</td>
+                <td>React.ReactNode</td>
+                <td>필수</td>
+                <td>알림 내용 (문자열 또는 JSX)</td>
+              </tr>
+              <tr>
+                <td>options.title</td>
+                <td>string</td>
+                <td>'알림'</td>
+                <td>팝업 제목</td>
+              </tr>
+              <tr>
+                <td>options.okText</td>
+                <td>string</td>
+                <td>'확인'</td>
+                <td>확인 버튼 텍스트</td>
+              </tr>
+              <tr>
+                <td>options.width</td>
+                <td>string | number</td>
+                <td>400</td>
+                <td>팝업 너비</td>
+              </tr>
+              <tr>
+                <td>options.className</td>
+                <td>string</td>
+                <td>''</td>
+                <td>추가 CSS 클래스</td>
+              </tr>
+              <tr>
+                <td>options.onOk</td>
+                <td>{'() => void'}</td>
+                <td>-</td>
+                <td>확인 버튼 클릭 시 콜백</td>
+              </tr>
+              <tr>
+                <td>options.keyboard</td>
+                <td>boolean</td>
+                <td>true</td>
+                <td>ESC 키로 닫기 가능 여부</td>
+              </tr>
+              <tr>
+                <td>options.maskClosable</td>
+                <td>boolean</td>
+                <td>false</td>
+                <td>외부 클릭으로 닫기 가능 여부</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3 className={styles['sub-title']}>$confirm(content, options?)</h3>
+          <p className={styles.txt}>확인/취소 팝업을 표시하는 함수입니다.</p>
+
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>매개변수</th>
+                <th>타입</th>
+                <th>기본값</th>
+                <th>설명</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>content</td>
+                <td>React.ReactNode</td>
+                <td>필수</td>
+                <td>확인 내용 (문자열 또는 JSX)</td>
+              </tr>
+              <tr>
+                <td>options.title</td>
+                <td>string</td>
+                <td>'확인'</td>
+                <td>팝업 제목</td>
+              </tr>
+              <tr>
+                <td>options.okText</td>
+                <td>string</td>
+                <td>'확인'</td>
+                <td>확인 버튼 텍스트</td>
+              </tr>
+              <tr>
+                <td>options.cancelText</td>
+                <td>string</td>
+                <td>'취소'</td>
+                <td>취소 버튼 텍스트</td>
+              </tr>
+              <tr>
+                <td>options.width</td>
+                <td>string | number</td>
+                <td>400</td>
+                <td>팝업 너비</td>
+              </tr>
+              <tr>
+                <td>options.className</td>
+                <td>string</td>
+                <td>''</td>
+                <td>추가 CSS 클래스</td>
+              </tr>
+              <tr>
+                <td>options.onOk</td>
+                <td>{'() => void | Promise<void>'}</td>
+                <td>-</td>
+                <td>확인 버튼 클릭 시 콜백 (비동기 지원)</td>
+              </tr>
+              <tr>
+                <td>options.onCancel</td>
+                <td>{'() => void'}</td>
+                <td>-</td>
+                <td>취소 버튼 클릭 시 콜백</td>
+              </tr>
+              <tr>
+                <td>options.keyboard</td>
+                <td>boolean</td>
+                <td>true</td>
+                <td>ESC 키로 닫기 가능 여부</td>
+              </tr>
+              <tr>
+                <td>options.maskClosable</td>
+                <td>boolean</td>
+                <td>false</td>
+                <td>외부 클릭으로 닫기 가능 여부</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3 className={styles['sub-title']}>반환값</h3>
+          <ul>
+            <li>
+              <strong>$alert:</strong> Promise&lt;void&gt; - 팝업이 닫히면
+              resolve
+            </li>
+            <li>
+              <strong>$confirm:</strong> Promise&lt;boolean&gt; - 확인 시 true,
+              취소 시 false
+            </li>
+          </ul>
+        </div>
+      </section>
+
       <section className={styles.section}>
         <h2 className={styles['section-title']}>Hook API</h2>
         <div className={styles.showcase}>
