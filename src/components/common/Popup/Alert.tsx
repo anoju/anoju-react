@@ -1,7 +1,9 @@
-// src/components/common/Dialog/AlertComponent.tsx
+// src/components/common/Dialog/Alert.tsx
 import React from 'react';
-import Popup from '../Popup/Popup';
+import Popup from './Popup';
 import { Button } from '@/components/common';
+import styles from '@/assets/scss/components/popup.module.scss';
+import cx from '@/utils/cx';
 
 export interface AlertOptions {
   title?: string;
@@ -14,17 +16,13 @@ export interface AlertOptions {
   maskClosable?: boolean;
 }
 
-interface AlertComponentProps {
+interface AlertProps {
   id: string;
   options: AlertOptions;
   onClose: () => void;
 }
 
-const AlertComponent: React.FC<AlertComponentProps> = ({ 
-  id, 
-  options, 
-  onClose 
-}) => {
+const Alert: React.FC<AlertProps> = ({ id, options, onClose }) => {
   const {
     title = '알림',
     content,
@@ -48,7 +46,7 @@ const AlertComponent: React.FC<AlertComponentProps> = ({
   const handleClose = () => {
     if (isClosing) return; // 중복 호출 방지
     setIsClosing(true);
-    
+
     // Popup의 visible을 false로 만들어 닫기 애니메이션 시작
     // 애니메이션이 완료된 후 onClose가 호출됨
     setTimeout(() => {
@@ -62,17 +60,13 @@ const AlertComponent: React.FC<AlertComponentProps> = ({
       visible={!isClosing}
       title={title}
       type="modal"
-      className={`alert ${className}`}
+      className={cx(styles.alert, className)}
       width={width}
       onClose={handleClose}
       keyboard={keyboard}
       maskClosable={maskClosable}
       footer={
-        <Button 
-          className="primary" 
-          onClick={handleOk}
-          autoFocus
-        >
+        <Button className="primary" onClick={handleOk} autoFocus>
           {okText}
         </Button>
       }
@@ -82,4 +76,4 @@ const AlertComponent: React.FC<AlertComponentProps> = ({
   );
 };
 
-export default AlertComponent;
+export default Alert;

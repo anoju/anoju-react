@@ -1,7 +1,9 @@
-// src/components/common/Dialog/ConfirmComponent.tsx
+// src/components/common/Dialog/Confirm.tsx
 import React from 'react';
-import Popup from '../Popup/Popup';
+import Popup from './Popup';
 import { Button } from '@/components/common';
+import styles from '@/assets/scss/components/popup.module.scss';
+import cx from '@/utils/cx';
 
 export interface ConfirmOptions {
   title?: string;
@@ -16,17 +18,13 @@ export interface ConfirmOptions {
   maskClosable?: boolean;
 }
 
-interface ConfirmComponentProps {
+interface ConfirmProps {
   id: string;
   options: ConfirmOptions;
   onClose: (result: boolean) => void;
 }
 
-const ConfirmComponent: React.FC<ConfirmComponentProps> = ({ 
-  id, 
-  options, 
-  onClose 
-}) => {
+const Confirm: React.FC<ConfirmProps> = ({ id, options, onClose }) => {
   const {
     title = '확인',
     content,
@@ -68,7 +66,7 @@ const ConfirmComponent: React.FC<ConfirmComponentProps> = ({
   const handleClose = (result: boolean) => {
     if (isClosing) return; // 중복 호출 방지
     setIsClosing(true);
-    
+
     // 애니메이션 완료 후 정리
     setTimeout(() => {
       onClose(result);
@@ -86,21 +84,20 @@ const ConfirmComponent: React.FC<ConfirmComponentProps> = ({
       visible={!isClosing}
       title={title}
       type="modal"
-      className={`alert ${className}`}
+      className={cx(styles.alert, className)}
       width={width}
       onClose={handlePopupClose}
       keyboard={keyboard}
       maskClosable={maskClosable}
       footer={
-        <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-          <Button 
-            onClick={handleCancel}
-            disabled={loading}
-          >
+        <div
+          style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}
+        >
+          <Button onClick={handleCancel} disabled={loading}>
             {cancelText}
           </Button>
-          <Button 
-            className="primary" 
+          <Button
+            className="primary"
             onClick={handleOk}
             disabled={loading}
             autoFocus
@@ -115,4 +112,4 @@ const ConfirmComponent: React.FC<ConfirmComponentProps> = ({
   );
 };
 
-export default ConfirmComponent;
+export default Confirm;
