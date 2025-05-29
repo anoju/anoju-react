@@ -37,8 +37,8 @@ const ExpandPanel = forwardRef<HTMLDivElement, ExpandPanelProps>(
     
     const [isFirstRender, setIsFirstRender] = useState(true);
     const [isAnimating, setIsAnimating] = useState(false);
-    const [currentHeight, setCurrentHeight] = useState<number | 'auto'>(isOpen ? 'auto' : 0);
-    const [shouldRender, setShouldRender] = useState(isOpen);
+    const [isVisible, setIsVisible] = useState(isOpen); // display 제어
+    const [currentHeight, setCurrentHeight] = useState<number | 'auto'>('auto');
     
     const wrapperRef = useRef<HTMLDivElement>(null);
     const contentRef = useRef<HTMLDivElement>(null);
@@ -57,21 +57,23 @@ const ExpandPanel = forwardRef<HTMLDivElement, ExpandPanelProps>(
 
       if (targetOpen) {
         // 열기 애니메이션
-        setShouldRender(true);
-        setCurrentHeight(0);
+        setIsVisible(true); // 먼저 display: block
         setIsAnimating(true);
         
-        // DOM 업데이트 후 실제 높이 측정 및 애니메이션 시작
+        // 첫 번째 requestAnimationFrame: display: block 적용 후 height: 0 설정
         requestAnimationFrame(() => {
-          if (!contentRef.current) return;
+          setCurrentHeight(0);
           
-          // 임시로 height를 auto로 설정하여 실제 높이 측정
-          const originalHeight = contentRef.current.style.height;
-          contentRef.current.style.height = 'auto';
-          const actualHeight = contentRef.current.scrollHeight;
-          contentRef.current.style.height = originalHeight;
-          
+          // 두 번째 requestAnimationFrame: height: 0 적용 후 실제 높이 측정 및 애니메이션 시작
           requestAnimationFrame(() => {
+            if (!contentRef.current) return;
+            
+            // 임시로 height를 auto로 설정하여 실제 높이 측정
+            const originalHeight = contentRef.current.style.height;
+            contentRef.current.style.height = 'auto';
+            const actualHeight = contentRef.current.scrollHeight;
+            contentRef.current.style.height = originalHeight;
+            
             setCurrentHeight(actualHeight);
           });
         });
@@ -107,8 +109,9 @@ const ExpandPanel = forwardRef<HTMLDivElement, ExpandPanelProps>(
         
         animationTimerRef.current = setTimeout(() => {
           setIsAnimating(false);
+          setIsVisible(false); // 마지막에 display: none
           if (destroyOnClose) {
-            setShouldRender(false);
+            // destroyOnClose 로직은 별도로 처리하지 않음 (display: none으로 충분)
           }
           animationTimerRef.current = null;
         }, duration);
@@ -119,7 +122,8 @@ const ExpandPanel = forwardRef<HTMLDivElement, ExpandPanelProps>(
     useEffect(() => {
       if (isFirstRender) {
         setIsFirstRender(false);
-        setShouldRender(isOpen || !destroyOnClose);
+        // 첫 렌더링 시 애니메이션 없이 display 상태만 설정
+        setIsVisible(isOpen);
         setCurrentHeight(isOpen ? 'auto' : 0);
         return;
       }
@@ -134,7 +138,7 @@ const ExpandPanel = forwardRef<HTMLDivElement, ExpandPanelProps>(
           onOpenChange(isOpen);
         }
       }
-    }, [isOpen, isFirstRender, executeAnimation, onOpenChange, destroyOnClose]);
+    }, [isOpen, isFirstRender, executeAnimation, onOpenChange]);
 
     // 컴포넌트 언마운트 시 타이머 정리
     useEffect(() => {
@@ -181,8 +185,8 @@ const ExpandPanel = forwardRef<HTMLDivElement, ExpandPanelProps>(
       className,
     ].filter(Boolean).join(' ');
 
-    // destroyOnClose가 true이고 shouldRender가 false면 렌더링하지 않음
-    if (destroyOnClose && !shouldRender) {
+    // destroyOnClose가 true이고 isVisible이 false면 전체를 렌더링하지 않음
+    if (destroyOnClose && !isVisible) {
       return null;
     }
 
@@ -208,6 +212,7 @@ const ExpandPanel = forwardRef<HTMLDivElement, ExpandPanelProps>(
           className={styles['expand-panel-content']}
           style={{
             height: currentHeight === 'auto' ? 'auto' : `${currentHeight}px`,
+            display: isVisible ? 'block' : 'none',
           }}
         >
           <div className={styles['expand-panel-inner']}>
