@@ -161,7 +161,10 @@ const ExpandItemGuide = () => {
           language="jsx"
         />
         <div className={styles.showcase}>
-          <Expand value={singleValue} onChange={setSingleValue}>
+          <Expand
+            value={singleValue}
+            onChange={(value) => setSingleValue(value as string)}
+          >
             <Expand.Item value="1" title="첫 번째 아이템">
               <div>첫 번째 내용입니다.</div>
             </Expand.Item>
@@ -175,7 +178,10 @@ const ExpandItemGuide = () => {
           <br />
           <br />
           <br />
-          <Expand value={multiValue} onChange={setMultiValue}>
+          <Expand
+            value={multiValue}
+            onChange={(value) => setMultiValue(value as string[])}
+          >
             <Expand.Item value="1" title="다중 선택 1">
               <div>다중 선택 내용 1</div>
             </Expand.Item>
@@ -186,7 +192,11 @@ const ExpandItemGuide = () => {
           <br />
           <br />
           <br />
-          <Expand items={items} value={itemsValue} onChange={setItemsValue} />
+          <Expand
+            items={items}
+            value={itemsValue}
+            onChange={(value) => setItemsValue(value as string)}
+          />
         </div>
 
         <h3 className={styles['sub-title']}>참조 소스코드</h3>
@@ -213,7 +223,7 @@ const items = [
 ];
 
 // 단일형태태
-<Expand value={singleValue} onChange={setSingleValue}>
+<Expand value={singleValue} onChange={(value) => setSingleValue(value as string)}>
   <Expand.Item value="1" title="첫 번째 아이템">
     <div>첫 번째 내용입니다.</div>
   </Expand.Item>
@@ -226,7 +236,7 @@ const items = [
 </Expand>
 
 // 다중 선택 형태
-<Expand value={multiValue} onChange={setMultiValue}>
+<Expand value={multiValue} onChange={(value) => setMultiValue(value as string[])}>
   <Expand.Item value="1" title="다중 선택 1">
     <div>다중 선택 내용 1</div>
   </Expand.Item>
@@ -236,7 +246,7 @@ const items = [
 </Expand>
 
 // items 방식
-<Expand items={items} value={itemsValue} onChange={setItemsValue} />`}
+<Expand items={items} value={itemsValue} onChange={(value) => setItemsValue(value as string)} />`}
           language="jsx"
         />
       </section>

@@ -1,5 +1,5 @@
 // src/components/common/Expand.tsx
-import {
+import React, {
   useState,
   useCallback,
   ReactNode,
@@ -39,7 +39,7 @@ interface ExpandItemProps {
   _onToggle?: (value: number | string) => void;
 }
 
-// 단순화된 타입 정의
+// 확장 값 타입
 type ExpandValue = number | string | (number | string)[];
 
 // Expand 컴포넌트 Props
@@ -71,22 +71,24 @@ function isArrayValue(value: unknown): value is (number | string)[] {
 }
 
 // Expand 컴포넌트
-function Expand({
-  children,
-  items,
-  value,
-  setValue,
-  onChange,
-  defaultValue,
-  className = '',
-  style,
-  duration = 300,
-  easing = 'easeOut',
-  destroyOnClose = false,
-  disabled = false,
-  itemsWrap = true,
-  toggle,
-}: ExpandProps) {
+const Expand = React.forwardRef<HTMLDivElement, ExpandProps>((props, ref) => {
+  const {
+    children,
+    items,
+    value,
+    setValue,
+    onChange,
+    defaultValue,
+    className = '',
+    style,
+    duration = 300,
+    easing = 'easeOut',
+    destroyOnClose = false,
+    disabled = false,
+    itemsWrap = true,
+    toggle,
+  } = props;
+
   // 내부 상태 (value가 제공되지 않은 경우 사용)
   const [internalValue, setInternalValue] = useState<ExpandValue>(
     defaultValue || []
@@ -124,8 +126,7 @@ function Expand({
 
       if (isToggleMode) {
         // 단일 토글 모드
-        const newValue: ExpandValue =
-          currentValue === itemValue ? '' : itemValue;
+        const newValue: ExpandValue = currentValue === itemValue ? '' : itemValue;
         handleValueChange(newValue);
       } else {
         // 다중 선택 모드
@@ -146,28 +147,25 @@ function Expand({
     [currentValue, isToggleMode, disabled, handleValueChange]
   );
 
-  // 아이템이 열린 상태인지 확인
-  const isItemOpen = useCallback(
-    (itemValue: number | string): boolean => {
-      if (isToggleMode) {
-        return currentValue === itemValue;
-      } else {
-        return isArrayValue(currentValue) && currentValue.includes(itemValue);
-      }
-    },
-    [currentValue, isToggleMode]
-  );
+  // 아이템이 열린 상태인지 확인 - 타입 안전성을 위해 분리
+  const checkItemOpen = (itemValue: number | string): boolean => {
+    if (isToggleMode) {
+      return currentValue === itemValue;
+    } else {
+      return isArrayValue(currentValue) && currentValue.includes(itemValue);
+    }
+  };
 
   // items 방식으로 렌더링
   if (items && items.length > 0) {
     return (
-      <div className={`${styles['expand-group']} ${className}`} style={style}>
+      <div ref={ref} className={`${styles['expand-group']} ${className}`} style={style}>
         {items.map((item, index) => (
           <ExpandItem
             key={`${String(item.value)}-${index}`}
             value={item.value}
             title={item.title}
-            open={isItemOpen(item.value)}
+            open={checkItemOpen(item.value)}
             disabled={disabled || item.disabled}
             className={item.className}
             wrap={item.wrap !== undefined ? item.wrap : itemsWrap}
@@ -187,16 +185,16 @@ function Expand({
   // children 방식으로 렌더링
   if (children) {
     return (
-      <div className={`${styles['expand-group']} ${className}`} style={style}>
+      <div ref={ref} className={`${styles['expand-group']} ${className}`} style={style}>
         {Children.map(children, (child, index) => {
           if (isValidElement(child) && child.type === ExpandItem) {
             const childProps = child.props as ExpandItemProps;
-            const itemValue: number | string =
-              childProps.value !== undefined ? childProps.value : index;
+            // 명시적으로 타입 지정
+            const itemValue: number | string = childProps.value ?? index;
 
             return cloneElement(child as ReactElement<ExpandItemProps>, {
               key: `${String(itemValue)}-${index}`,
-              open: isItemOpen(itemValue),
+              open: checkItemOpen(itemValue), // 일반 함수 호출로 변경
               disabled: disabled || childProps.disabled,
               duration: childProps.duration || duration,
               easing: childProps.easing || easing,
@@ -216,7 +214,9 @@ function Expand({
   }
 
   return null;
-}
+});
+
+Expand.displayName = 'Expand';
 
 // Static 속성으로 Item과 Panel 추가
 const ExpandWithStatics = Object.assign(Expand, {
