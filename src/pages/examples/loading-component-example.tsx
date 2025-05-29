@@ -1,13 +1,14 @@
 // examples/loading-component-example.tsx
 // React 컴포넌트에서 $loading 사용 예시
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { $loading } from '@/utils/loading';
 import { Button } from '@/components/common';
 
 const LoadingExampleComponent: React.FC = () => {
   const [data, setData] = useState<string[]>([]);
   const [message, setMessage] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 1. 버튼 클릭으로 로딩 제어
   const handleSimpleLoading = () => {
@@ -42,7 +43,11 @@ const LoadingExampleComponent: React.FC = () => {
   };
 
   // 3. 폼 제출과 함께 사용
-  const handleFormSubmit = async (formData: FormData) => {
+  const handleFormSubmit = async () => {
+    const formData = new FormData();
+    formData.append('testField', 'testValue');
+    formData.append('timestamp', new Date().toISOString());
+
     try {
       await $loading.with(submitForm(formData), {
         text: '양식을 제출하는 중...',
@@ -57,7 +62,13 @@ const LoadingExampleComponent: React.FC = () => {
   };
 
   // 4. 파일 업로드 예시
-  const handleFileUpload = async (file: File) => {
+  const handleFileUpload = async () => {
+    const file = fileInputRef.current?.files?.[0];
+    if (!file) {
+      setMessage('파일을 선택해주세요.');
+      return;
+    }
+
     const uploadProgress = (progress: number) => {
       $loading.show({
         text: `파일 업로드 중... ${progress}%`,
@@ -67,7 +78,7 @@ const LoadingExampleComponent: React.FC = () => {
     try {
       await uploadFile(file, uploadProgress);
       $loading.hide();
-      setMessage('파일 업로드 완료!');
+      setMessage(`파일 업로드 완료! (${file.name})`);
     } catch (error) {
       $loading.hide();
       setMessage(
@@ -135,6 +146,24 @@ const LoadingExampleComponent: React.FC = () => {
       </div>
 
       <div style={{ marginBottom: '1rem' }}>
+        <Button onClick={handleFormSubmit} className="primary">
+          폼 제출 테스트
+        </Button>
+      </div>
+
+      <div style={{ marginBottom: '1rem' }}>
+        <input
+          type="file"
+          ref={fileInputRef}
+          style={{ marginRight: '1rem' }}
+          accept="*/*"
+        />
+        <Button onClick={handleFileUpload} className="primary">
+          파일 업로드
+        </Button>
+      </div>
+
+      <div style={{ marginBottom: '1rem' }}>
         <Button
           onClick={() => handleConditionalOperation(true)}
           className="primary"
@@ -144,6 +173,7 @@ const LoadingExampleComponent: React.FC = () => {
         <Button
           onClick={() => handleConditionalOperation(false)}
           className="line"
+          style={{ marginLeft: '0.5rem' }}
         >
           조건부 로딩 (false)
         </Button>
@@ -206,6 +236,8 @@ const LoadingExampleComponent: React.FC = () => {
 // 헬퍼 함수들 (실제 구현에서는 실제 API 호출로 대체)
 const submitForm = (formData: FormData): Promise<void> => {
   return new Promise((resolve) => {
+    // formData 사용 시뮬레이션
+    console.log('Form data entries:', Array.from(formData.entries()));
     setTimeout(resolve, 2000);
   });
 };
@@ -215,6 +247,7 @@ const uploadFile = (
   onProgress: (progress: number) => void
 ): Promise<void> => {
   return new Promise((resolve) => {
+    console.log(`Uploading file: ${file.name}, size: ${file.size} bytes`);
     let progress = 0;
     const interval = setInterval(() => {
       progress += 10;
