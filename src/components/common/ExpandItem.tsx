@@ -21,7 +21,7 @@ interface ExpandItemProps {
   style?: CSSProperties;
   duration?: number; // 애니메이션 지속시간 (ms), 기본값 300
   easing?: 'linear' | 'easeInOut' | 'easeIn' | 'easeOut'; // 이징 함수
-  onOpenChange?: (open: boolean) => void;
+  onChange?: (open: boolean) => void;
   destroyOnClose?: boolean; // 닫힐 때 children을 DOM에서 제거할지 여부
   disabled?: boolean; // 비활성화 상태
 }
@@ -39,7 +39,7 @@ const ExpandItem = forwardRef<HTMLDivElement, ExpandItemProps>(
       style,
       duration = 300,
       easing = 'easeOut',
-      onOpenChange,
+      onChange,
       destroyOnClose = false,
       disabled = false,
     },
@@ -70,8 +70,8 @@ const ExpandItem = forwardRef<HTMLDivElement, ExpandItemProps>(
       }
 
       // 콜백 호출
-      if (onOpenChange) {
-        onOpenChange(newValue);
+      if (onChange) {
+        onChange(newValue);
       }
     };
 

@@ -113,34 +113,6 @@
   }
 }
 
-// 라이트 모드 스타일
-// @include s.light-mode {
-//   .expand-item {
-//     background-color: #fff;
-//     border-color: var(--bg-dark-10);
-//   }
-
-//   .expand-item-header-wrap {
-//     &:hover:not(:disabled) {
-//       background-color: var(--bg-dark-5);
-//     }
-//   }
-
-//   .expand-item-header-split {
-//     background-color: #fff;
-//   }
-
-//   .expand-item-toggle-btn {
-//     &:hover:not(:disabled) {
-//       background-color: var(--bg-dark-10);
-//     }
-//   }
-
-//   .expand-item-content {
-//     border-top-color: var(--bg-dark-10);
-//   }
-// }
-
 // 다크 모드 스타일
 @include s.dark-mode {
   .expand-item {
@@ -168,37 +140,5 @@
     .expand-item-content {
       border-top-color: var(--bg-light-20);
     }
-  }
-}
-
-// 컴팩트 사이즈 유틸리티 클래스
-:global(.expand-item-compact) {
-  .expand-item-header-wrap,
-  .expand-item-header-split {
-    padding: 1.2rem 1.6rem;
-  }
-
-  .expand-item-title {
-    font-size: 1.4rem;
-  }
-
-  .expand-item-content > div {
-    padding: 1.6rem;
-  }
-}
-
-// 대형 사이즈 유틸리티 클래스
-:global(.expand-item-large) {
-  .expand-item-header-wrap,
-  .expand-item-header-split {
-    padding: 2rem 2.4rem;
-  }
-
-  .expand-item-title {
-    font-size: 1.8rem;
-  }
-
-  .expand-item-content > div {
-    padding: 2.4rem;
   }
 }
