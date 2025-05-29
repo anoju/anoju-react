@@ -44,6 +44,10 @@ const GuideLayout: React.FC<GuideLayoutProps> = ({ children }) => {
             to: '/guide/tooltip',
           },
           {
+            label: 'Expand',
+            to: '/guide/expand',
+          },
+          {
             label: 'Loading',
             to: '/guide/loading',
           },

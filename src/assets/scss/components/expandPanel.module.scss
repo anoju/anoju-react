@@ -1,0 +1,113 @@
+// src/assets/scss/components/expandPanel.module.scss
+@use '@/assets/scss' as s;
+@use 'sass:color';
+@use 'sass:math';
+
+.expand-panel {
+  overflow: hidden;
+  
+  // CSS 변수 기본값
+  --expand-duration: 300ms;
+}
+
+.expand-panel-content {
+  overflow: hidden;
+  transition: height var(--expand-duration) cubic-bezier(0.645, 0.045, 0.355, 1);
+  
+  // 애니메이션 중에는 overflow hidden 유지
+  .expand-panel-animating & {
+    overflow: hidden;
+  }
+  
+  // 애니메이션이 끝나고 열린 상태에서는 overflow visible로 변경
+  .expand-panel-open:not(.expand-panel-animating) & {
+    overflow: visible;
+  }
+}
+
+.expand-panel-inner {
+  // 실제 콘텐츠를 담는 내부 컨테이너
+  // 여기에 실제 높이가 측정됩니다
+}
+
+// 열린 상태
+.expand-panel-open {
+  // 열린 상태의 추가 스타일이 필요한 경우 여기에 작성
+}
+
+// 닫힌 상태  
+.expand-panel-closed {
+  // 닫힌 상태의 추가 스타일이 필요한 경우 여기에 작성
+}
+
+// 애니메이션 중
+.expand-panel-animating {
+  // 애니메이션 중의 추가 스타일이 필요한 경우 여기에 작성
+  
+  .expand-panel-content {
+    // 애니메이션 중에는 더 부드러운 트랜지션 사용
+    transition: height var(--expand-duration) cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+// 다양한 애니메이션 속도를 위한 유틸리티 클래스들
+:global(.expand-panel-fast) {
+  --expand-duration: 150ms;
+}
+
+:global(.expand-panel-slow) {
+  --expand-duration: 500ms;
+}
+
+:global(.expand-panel-very-slow) {
+  --expand-duration: 800ms;
+}
+
+// 사용자 정의 이징 함수들
+:global(.expand-panel-ease-in) {
+  .expand-panel-content {
+    transition: height var(--expand-duration) ease-in;
+  }
+}
+
+:global(.expand-panel-ease-out) {
+  .expand-panel-content {
+    transition: height var(--expand-duration) ease-out;
+  }
+}
+
+:global(.expand-panel-ease-in-out) {
+  .expand-panel-content {
+    transition: height var(--expand-duration) ease-in-out;
+  }
+}
+
+:global(.expand-panel-bounce) {
+  .expand-panel-content {
+    transition: height var(--expand-duration) cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+}
+
+// prefers-reduced-motion 고려
+@media (prefers-reduced-motion: reduce) {
+  .expand-panel-content {
+    transition: none !important;
+  }
+  
+  .expand-panel {
+    --expand-duration: 0ms;
+  }
+}
+
+// 라이트/다크 모드별 스타일 (필요한 경우)
+@include s.light-mode {
+  .expand-panel {
+    // 라이트 모드에서만 적용할 스타일
+  }
+}
+
+@include s.dark-mode {
+  .expand-panel {
+    // 다크 모드에서만 적용할 스타일  
+  }
+}
