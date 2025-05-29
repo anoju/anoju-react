@@ -1,0 +1,210 @@
+// src/assets/scss/components/expandItem.module.scss
+@use '@/assets/scss' as s;
+@use 'sass:color';
+@use 'sass:math';
+
+.expand-item {
+  border: 1px solid var(--bg-dark-10);
+  border-radius: 0.8rem;
+  overflow: hidden;
+  background-color: #fff;
+
+  // 아코디언 그룹에서 사용할 때
+  + .expand-item {
+    margin-top: 0.8rem;
+  }
+}
+
+// 헤더 - wrap 방식 (버튼이 제목을 감쌈)
+.expand-item-header-wrap {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.6rem 2rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.2s ease;
+  
+  &:hover:not(:disabled) {
+    background-color: var(--bg-light-5);
+  }
+  
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
+// 헤더 - split 방식 (제목과 버튼 분리)
+.expand-item-header-split {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.6rem 2rem;
+  background-color: #fff;
+}
+
+// 제목 스타일
+.expand-item-title {
+  flex: 1;
+  font-size: 1.6rem;
+  font-weight: 500;
+  color: var(--strong-txt-color);
+  line-height: 1.4;
+}
+
+// 토글 버튼 (split 방식에서 사용)
+.expand-item-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.2rem;
+  height: 3.2rem;
+  background: none;
+  border: none;
+  border-radius: 0.4rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  
+  &:hover:not(:disabled) {
+    background-color: var(--bg-light-10);
+  }
+  
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
+// 화살표 아이콘
+.expand-item-arrow {
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+  color: var(--bg-dark-50);
+  
+  .expand-item-open & {
+    transform: rotate(180deg);
+  }
+}
+
+// 콘텐츠 영역
+.expand-item-content {
+  border-top: 1px solid var(--bg-dark-10);
+  
+  > div {
+    padding: 2rem;
+  }
+}
+
+// 열린 상태
+.expand-item-open {
+  // 열린 상태의 추가 스타일
+}
+
+// 닫힌 상태
+.expand-item-closed {
+  .expand-item-content {
+    border-top: none;
+  }
+}
+
+// 비활성화 상태
+.expand-item-disabled {
+  opacity: 0.6;
+  
+  .expand-item-header-wrap,
+  .expand-item-toggle-btn {
+    cursor: not-allowed;
+  }
+}
+
+// 라이트 모드 스타일
+@include s.light-mode {
+  .expand-item {
+    background-color: #fff;
+    border-color: var(--bg-dark-10);
+  }
+  
+  .expand-item-header-wrap {
+    &:hover:not(:disabled) {
+      background-color: var(--bg-dark-5);
+    }
+  }
+  
+  .expand-item-header-split {
+    background-color: #fff;
+  }
+  
+  .expand-item-toggle-btn {
+    &:hover:not(:disabled) {
+      background-color: var(--bg-dark-10);
+    }
+  }
+  
+  .expand-item-content {
+    border-top-color: var(--bg-dark-10);
+  }
+}
+
+// 다크 모드 스타일
+@include s.dark-mode {
+  .expand-item {
+    background-color: var(--bg-light-10);
+    border-color: var(--bg-light-20);
+  }
+  
+  .expand-item-header-wrap {
+    &:hover:not(:disabled) {
+      background-color: var(--bg-light-15);
+    }
+  }
+  
+  .expand-item-header-split {
+    background-color: var(--bg-light-10);
+  }
+  
+  .expand-item-toggle-btn {
+    &:hover:not(:disabled) {
+      background-color: var(--bg-light-20);
+    }
+  }
+  
+  .expand-item-content {
+    border-top-color: var(--bg-light-20);
+  }
+}
+
+// 컴팩트 사이즈 유틸리티 클래스
+:global(.expand-item-compact) {
+  .expand-item-header-wrap,
+  .expand-item-header-split {
+    padding: 1.2rem 1.6rem;
+  }
+  
+  .expand-item-title {
+    font-size: 1.4rem;
+  }
+  
+  .expand-item-content > div {
+    padding: 1.6rem;
+  }
+}
+
+// 대형 사이즈 유틸리티 클래스
+:global(.expand-item-large) {
+  .expand-item-header-wrap,
+  .expand-item-header-split {
+    padding: 2rem 2.4rem;
+  }
+  
+  .expand-item-title {
+    font-size: 1.8rem;
+  }
+  
+  .expand-item-content > div {
+    padding: 2.4rem;
+  }
+}
