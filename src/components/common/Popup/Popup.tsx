@@ -74,7 +74,6 @@ const Popup: React.FC<PopupProps> = ({
   const [animationClass, setAnimationClass] = useState('');
   const [isBeforePopup, setIsBeforePopup] = useState(false);
   const [popupZIndex, setPopupZIndex] = useState<number | undefined>(undefined);
-  // baseZIndex 상태 제거 (사용하지 않음)
 
   const popupRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -87,6 +86,7 @@ const Popup: React.FC<PopupProps> = ({
   );
   const containerRef = useRef<HTMLDivElement | null>(null);
   const isRegisteredRef = useRef<boolean>(false);
+  const focusSavedRef = useRef<boolean>(false); // 포커스 저장 여부 추적
 
   // PopupManager 상태 변화 콜백
   const handlePopupStateChange = useCallback(
@@ -97,6 +97,99 @@ const Popup: React.FC<PopupProps> = ({
     },
     []
   );
+
+  // 포커스 저장 함수 - 팝업이 열리기 전에 실행
+  const savePreviousFocus = useCallback(() => {
+    if (!focusSavedRef.current) {
+      const activeElement = document.activeElement as HTMLElement;
+
+      // 유효한 포커스 요소인지 확인
+      if (
+        activeElement &&
+        activeElement !== document.body &&
+        activeElement.tagName !== 'HTML'
+      ) {
+        previousFocusRef.current = activeElement;
+        focusSavedRef.current = true;
+
+        // 디버깅용 로그 (개발 환경에서만)
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Focus saved:', activeElement);
+        }
+      }
+    }
+  }, []);
+
+  // 포커스 복원 함수 - 더 안전한 검증 포함
+  const restorePreviousFocus = useCallback(() => {
+    if (focusTriggerAfterClose && previousFocusRef.current) {
+      const elementToFocus = previousFocusRef.current;
+
+      try {
+        // 요소가 여전히 DOM에 있고 접근 가능한지 확인
+        if (
+          document.contains(elementToFocus) &&
+          typeof elementToFocus.focus === 'function' &&
+          !elementToFocus.hasAttribute('disabled') &&
+          elementToFocus.tabIndex !== -1
+        ) {
+          // 짧은 지연 후 포커스 복원 (브라우저가 정리 작업을 완료할 시간 제공)
+          setTimeout(() => {
+            try {
+              elementToFocus.focus();
+
+              // 포커스가 실제로 이동했는지 확인
+              if (document.activeElement !== elementToFocus) {
+                // 포커스 이동이 실패했다면 다시 시도
+                setTimeout(() => {
+                  try {
+                    elementToFocus.focus();
+                  } catch (error) {
+                    console.warn('Focus restoration failed on retry:', error);
+                  }
+                }, 10);
+              }
+
+              // 디버깅용 로그 (개발 환경에서만)
+              if (process.env.NODE_ENV === 'development') {
+                console.log('Focus restored to:', elementToFocus);
+              }
+            } catch (error) {
+              console.warn('Focus restoration failed:', error);
+            }
+          }, 10);
+        } else {
+          // 원래 요소가 사용할 수 없다면 body로 폴백
+          if (process.env.NODE_ENV === 'development') {
+            console.warn(
+              'Previous focus element is no longer available, falling back to body'
+            );
+          }
+          setTimeout(() => {
+            document.body.focus();
+          }, 10);
+        }
+      } catch (error) {
+        console.warn('Error during focus restoration:', error);
+        // 에러가 발생하면 body로 폴백
+        setTimeout(() => {
+          document.body.focus();
+        }, 10);
+      }
+    }
+
+    // 포커스 관련 상태 초기화
+    previousFocusRef.current = null;
+    focusSavedRef.current = false;
+  }, [focusTriggerAfterClose]);
+
+  // visible 변화 감지 - 포커스 저장을 가장 먼저 실행
+  useEffect(() => {
+    if (visible) {
+      // 팝업이 열리기 시작할 때 즉시 포커스 저장
+      savePreviousFocus();
+    }
+  }, [visible, savePreviousFocus]);
 
   // 팝업 열기 처리
   useEffect(() => {
@@ -199,13 +292,7 @@ const Popup: React.FC<PopupProps> = ({
         PopupManager.unregister(popupIdRef.current);
 
         // 포커스 복원
-        if (
-          focusTriggerAfterClose &&
-          previousFocusRef.current &&
-          previousFocusRef.current.focus
-        ) {
-          previousFocusRef.current.focus();
-        }
+        restorePreviousFocus();
 
         // 콜백 실행
         onClose?.();
@@ -217,14 +304,11 @@ const Popup: React.FC<PopupProps> = ({
         }
       }, 300); // 애니메이션 시간과 동일
     }
-  }, [visible, isRendered, onClose, focusTriggerAfterClose]);
+  }, [visible, isRendered, onClose, restorePreviousFocus]);
 
-  // 팝업이 열릴 때 포커스 처리
+  // 팝업이 열릴 때 포커스 처리 (포커스 저장은 제거, 팝업 내부 포커스만 처리)
   const handleFocus = useCallback(() => {
     if (isRendered && popupRef.current) {
-      // 현재 포커스된 요소 저장
-      previousFocusRef.current = document.activeElement as HTMLElement;
-
       // 팝업 내부의 첫 번째 포커스 가능한 요소로 포커스 이동
       const focusableElements = popupRef.current.querySelectorAll(
         'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
@@ -232,7 +316,11 @@ const Popup: React.FC<PopupProps> = ({
 
       if (focusableElements.length > 0) {
         (focusableElements[0] as HTMLElement).focus();
+      } else if (titleRef.current) {
+        // 포커스 가능한 요소가 없으면 제목에 포커스
+        titleRef.current.focus();
       } else {
+        // 제목도 없으면 팝업 컨테이너에 포커스
         popupRef.current.focus();
       }
     }
