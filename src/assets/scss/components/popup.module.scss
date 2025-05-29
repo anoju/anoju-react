@@ -40,28 +40,9 @@
       transform var(--pop-move-time),
       margin var(--pop-move-time),
       opacity var(--pop-move-time),
-      visibility var(--pop-move-time);
+      visibility 0s var(--pop-move-time);
     visibility: hidden;
     opacity: 0;
-  }
-
-  // 열리는 애니메이션
-  &.opening {
-    animation: ani-pop-fade-in 0.3s ease forwards;
-
-    .pop-wrap {
-      animation: ani-pop-slide-in 0.3s ease forwards;
-    }
-  }
-
-  // 닫히는 애니메이션
-  &.closing {
-    animation: ani-pop-fade-out 0.3s ease forwards;
-
-    .pop-wrap {
-      opacity: 1;
-      animation: ani-pop-slide-out 0.3s ease forwards;
-    }
   }
 
   // 모달 타입 (기본)
@@ -99,6 +80,7 @@
 
     &.alert {
       z-index: 2000;
+
       .pop-wrap {
         max-width: 48rem;
       }
@@ -190,6 +172,7 @@
       transform: translate3d(0, 0, 0);
       visibility: visible;
       opacity: 1;
+      transition-delay: 0s;
     }
 
     &.show-end {
