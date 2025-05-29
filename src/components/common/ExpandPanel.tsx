@@ -1,5 +1,5 @@
 // src/components/common/ExpandPanel.tsx
-import { useEffect, useRef, forwardRef, ReactNode, CSSProperties } from 'react';
+import { useEffect, useRef, forwardRef, ReactNode } from 'react';
 import { slideDown, slideUp } from '@/utils/slideAnimation';
 import cx from '@/utils/cx';
 
@@ -8,7 +8,6 @@ interface ExpandPanelProps {
   open?: boolean; // 기본값 false
   id?: string; // 패널에 적용할 ID
   className?: string;
-  style?: CSSProperties;
   duration?: number; // 애니메이션 지속시간 (ms), 기본값 300
   easing?: 'linear' | 'easeInOut' | 'easeIn' | 'easeOut'; // 이징 함수
   onOpenChange?: (open: boolean) => void;
@@ -22,7 +21,6 @@ const ExpandPanel = forwardRef<HTMLDivElement, ExpandPanelProps>(
       open = false,
       id,
       className = '',
-      style,
       duration = 300,
       easing = 'easeOut',
       onOpenChange,
@@ -100,10 +98,20 @@ const ExpandPanel = forwardRef<HTMLDivElement, ExpandPanelProps>(
     );
 
     return (
-      <div ref={ref} className={wrapperClasses} style={style}>
-        <div ref={contentRef} className="expand-panel-inner" id={id}>
-          {children}
-        </div>
+      <div
+        ref={(node) => {
+          // forwardRef와 contentRef 모두 같은 요소를 참조
+          if (typeof ref === 'function') {
+            ref(node);
+          } else if (ref) {
+            ref.current = node;
+          }
+          contentRef.current = node;
+        }}
+        className={wrapperClasses}
+        id={id}
+      >
+        {children}
       </div>
     );
   }

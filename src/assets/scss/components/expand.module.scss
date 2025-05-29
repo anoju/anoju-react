@@ -43,7 +43,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1.6rem 2rem;
+  padding: 1.1rem 1.2rem 1.1rem 2rem;
   background-color: #fff;
 }
 
@@ -52,7 +52,6 @@
   flex: 1;
   font-size: 1.6rem;
   font-weight: 500;
-  color: var(--strong-txt-color);
   line-height: 1.4;
 }
 
@@ -92,9 +91,7 @@
 
 // 콘텐츠 영역
 .expand-item-content {
-  > div {
-    padding: 2rem;
-  }
+  padding: 2rem;
 }
 
 // 열린 상태
@@ -102,16 +99,7 @@
   // 열린 상태의 추가 스타일
   font-weight: bold;
   .expand-item-content {
-    > div {
-      border-top: 1px solid var(--bg-dark-10);
-    }
-  }
-}
-
-// 닫힌 상태
-.expand-item-closed {
-  .expand-item-content {
-    border-top: none;
+    border-top: 1px solid var(--bg-dark-10);
   }
 }
 
@@ -126,32 +114,32 @@
 }
 
 // 라이트 모드 스타일
-@include s.light-mode {
-  .expand-item {
-    background-color: #fff;
-    border-color: var(--bg-dark-10);
-  }
+// @include s.light-mode {
+//   .expand-item {
+//     background-color: #fff;
+//     border-color: var(--bg-dark-10);
+//   }
 
-  .expand-item-header-wrap {
-    &:hover:not(:disabled) {
-      background-color: var(--bg-dark-5);
-    }
-  }
+//   .expand-item-header-wrap {
+//     &:hover:not(:disabled) {
+//       background-color: var(--bg-dark-5);
+//     }
+//   }
 
-  .expand-item-header-split {
-    background-color: #fff;
-  }
+//   .expand-item-header-split {
+//     background-color: #fff;
+//   }
 
-  .expand-item-toggle-btn {
-    &:hover:not(:disabled) {
-      background-color: var(--bg-dark-10);
-    }
-  }
+//   .expand-item-toggle-btn {
+//     &:hover:not(:disabled) {
+//       background-color: var(--bg-dark-10);
+//     }
+//   }
 
-  .expand-item-content {
-    border-top-color: var(--bg-dark-10);
-  }
-}
+//   .expand-item-content {
+//     border-top-color: var(--bg-dark-10);
+//   }
+// }
 
 // 다크 모드 스타일
 @include s.dark-mode {
@@ -178,9 +166,7 @@
 
   .expand-item-open {
     .expand-item-content {
-      > div {
-        border-top-color: var(--bg-light-20);
-      }
+      border-top-color: var(--bg-light-20);
     }
   }
 }
