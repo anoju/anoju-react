@@ -6,6 +6,7 @@ import cx from '@/utils/cx';
 interface ExpandPanelProps {
   children: ReactNode;
   open?: boolean; // 기본값 false
+  id?: string; // 패널에 적용할 ID
   className?: string;
   style?: CSSProperties;
   duration?: number; // 애니메이션 지속시간 (ms), 기본값 300
@@ -19,6 +20,7 @@ const ExpandPanel = forwardRef<HTMLDivElement, ExpandPanelProps>(
     {
       children,
       open = false,
+      id,
       className = '',
       style,
       duration = 300,
@@ -99,7 +101,7 @@ const ExpandPanel = forwardRef<HTMLDivElement, ExpandPanelProps>(
 
     return (
       <div ref={ref} className={wrapperClasses} style={style}>
-        <div ref={contentRef} className="expand-panel-inner">
+        <div ref={contentRef} className="expand-panel-inner" id={id}>
           {children}
         </div>
       </div>

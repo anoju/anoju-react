@@ -27,11 +27,11 @@
   cursor: pointer;
   text-align: left;
   transition: background-color 0.2s ease;
-  
+
   &:hover:not(:disabled) {
     background-color: var(--bg-light-5);
   }
-  
+
   &:disabled {
     cursor: not-allowed;
     opacity: 0.6;
@@ -68,11 +68,11 @@
   border-radius: 0.4rem;
   cursor: pointer;
   transition: background-color 0.2s ease;
-  
+
   &:hover:not(:disabled) {
     background-color: var(--bg-light-10);
   }
-  
+
   &:disabled {
     cursor: not-allowed;
     opacity: 0.6;
@@ -84,7 +84,7 @@
   flex-shrink: 0;
   transition: transform 0.2s ease;
   color: var(--bg-dark-50);
-  
+
   .expand-item-open & {
     transform: rotate(180deg);
   }
@@ -92,8 +92,6 @@
 
 // 콘텐츠 영역
 .expand-item-content {
-  border-top: 1px solid var(--bg-dark-10);
-  
   > div {
     padding: 2rem;
   }
@@ -102,6 +100,12 @@
 // 열린 상태
 .expand-item-open {
   // 열린 상태의 추가 스타일
+  font-weight: bold;
+  .expand-item-content {
+    > div {
+      border-top: 1px solid var(--bg-dark-10);
+    }
+  }
 }
 
 // 닫힌 상태
@@ -114,7 +118,7 @@
 // 비활성화 상태
 .expand-item-disabled {
   opacity: 0.6;
-  
+
   .expand-item-header-wrap,
   .expand-item-toggle-btn {
     cursor: not-allowed;
@@ -127,23 +131,23 @@
     background-color: #fff;
     border-color: var(--bg-dark-10);
   }
-  
+
   .expand-item-header-wrap {
     &:hover:not(:disabled) {
       background-color: var(--bg-dark-5);
     }
   }
-  
+
   .expand-item-header-split {
     background-color: #fff;
   }
-  
+
   .expand-item-toggle-btn {
     &:hover:not(:disabled) {
       background-color: var(--bg-dark-10);
     }
   }
-  
+
   .expand-item-content {
     border-top-color: var(--bg-dark-10);
   }
@@ -155,25 +159,29 @@
     background-color: var(--bg-light-10);
     border-color: var(--bg-light-20);
   }
-  
+
   .expand-item-header-wrap {
     &:hover:not(:disabled) {
       background-color: var(--bg-light-15);
     }
   }
-  
+
   .expand-item-header-split {
     background-color: var(--bg-light-10);
   }
-  
+
   .expand-item-toggle-btn {
     &:hover:not(:disabled) {
       background-color: var(--bg-light-20);
     }
   }
-  
-  .expand-item-content {
-    border-top-color: var(--bg-light-20);
+
+  .expand-item-open {
+    .expand-item-content {
+      > div {
+        border-top-color: var(--bg-light-20);
+      }
+    }
   }
 }
 
@@ -183,11 +191,11 @@
   .expand-item-header-split {
     padding: 1.2rem 1.6rem;
   }
-  
+
   .expand-item-title {
     font-size: 1.4rem;
   }
-  
+
   .expand-item-content > div {
     padding: 1.6rem;
   }
@@ -199,11 +207,11 @@
   .expand-item-header-split {
     padding: 2rem 2.4rem;
   }
-  
+
   .expand-item-title {
     font-size: 1.8rem;
   }
-  
+
   .expand-item-content > div {
     padding: 2.4rem;
   }

@@ -1,7 +1,14 @@
 // src/components/common/ExpandItem.tsx
-import { useState, forwardRef, ReactNode, CSSProperties } from 'react';
+import { useState, useRef, forwardRef, ReactNode, CSSProperties } from 'react';
 import ExpandPanel from './ExpandPanel';
-import styles from '@/assets/scss/components/expandItem.module.scss';
+import styles from '@/assets/scss/components/expand.module.scss';
+
+// 고유 ID 생성을 위한 유틸리티 함수
+let uniqueIdCounter = 0;
+const generateUniqueId = (): string => {
+  const id = `expand-item_${uniqueIdCounter++}_${Math.random().toString(36).substring(2, 9)}`;
+  return id;
+};
 
 interface ExpandItemProps {
   children: ReactNode;
@@ -38,6 +45,10 @@ const ExpandItem = forwardRef<HTMLDivElement, ExpandItemProps>(
     },
     ref
   ) => {
+    // 고유 ID 생성 (후크로 한 번만 생성됨)
+    const uniqueIdRef = useRef<string>(generateUniqueId());
+    const panelId = uniqueIdRef.current;
+
     // 내부 상태 (value가 제공되지 않은 경우에만 사용)
     const [internalOpen, setInternalOpen] = useState(defaultOpen);
 
@@ -67,7 +78,7 @@ const ExpandItem = forwardRef<HTMLDivElement, ExpandItemProps>(
     // 클래스명 생성
     const wrapperClasses = [
       styles['expand-item'],
-      isOpen ? styles['expand-item-open'] : styles['expand-item-closed'],
+      isOpen ? styles['expand-item-open'] : '',
       disabled ? styles['expand-item-disabled'] : '',
       className,
     ]
@@ -102,7 +113,7 @@ const ExpandItem = forwardRef<HTMLDivElement, ExpandItemProps>(
             onClick={handleToggle}
             disabled={disabled}
             aria-expanded={isOpen}
-            aria-controls="expand-panel-content"
+            aria-controls={panelId}
           >
             <div className={styles['expand-item-title']}>{title}</div>
             <ArrowIcon />
@@ -117,7 +128,7 @@ const ExpandItem = forwardRef<HTMLDivElement, ExpandItemProps>(
               onClick={handleToggle}
               disabled={disabled}
               aria-expanded={isOpen}
-              aria-controls="expand-panel-content"
+              aria-controls={panelId}
               aria-label={isOpen ? '접기' : '펼치기'}
             >
               <ArrowIcon />
@@ -126,13 +137,14 @@ const ExpandItem = forwardRef<HTMLDivElement, ExpandItemProps>(
         )}
 
         <ExpandPanel
+          id={panelId}
           open={isOpen}
           duration={duration}
           easing={easing}
           destroyOnClose={destroyOnClose}
           className={styles['expand-item-content']}
         >
-          <div id="expand-panel-content">{children}</div>
+          {children}
         </ExpandPanel>
       </div>
     );
