@@ -1,155 +1,243 @@
 // src/utils/loading.ts
-import { LoadingConfig } from '@/types/loading';
+export interface LoadingOptions {
+  text?: string;
+  delay?: number;
+  icon?: React.ReactNode | null;
+  bodyLock?: boolean;
+  onShow?: () => void;
+  onHide?: () => void;
+}
 
-// 전역 로딩 함수들을 위한 참조 저장소
-let loadingContext: {
-  showLoading: (config?: LoadingConfig) => void;
-  hideLoading: () => void;
-  setLoading: (loading: boolean, config?: LoadingConfig) => void;
-  getLoading: () => boolean;
-} | null = null;
+interface LoadingState {
+  isVisible: boolean;
+  options: LoadingOptions;
+}
 
-// LoadingProvider에서 호출되는 함수로 전역 함수에서 사용할 컨텍스트 설정
-export const setLoadingContext = (context: {
-  showLoading: (config?: LoadingConfig) => void;
-  hideLoading: () => void;
-  setLoading: (loading: boolean, config?: LoadingConfig) => void;
-  getLoading: () => boolean;
-}) => {
-  loadingContext = context;
-};
-
-// 전역 로딩 표시 함수
-export const showGlobalLoading = (config?: LoadingConfig) => {
-  if (loadingContext) {
-    loadingContext.showLoading(config);
-  } else {
-    console.warn('LoadingProvider가 설정되지 않았습니다.');
-  }
-};
-
-// 전역 로딩 숨기기 함수
-export const hideGlobalLoading = () => {
-  if (loadingContext) {
-    loadingContext.hideLoading();
-  } else {
-    console.warn('LoadingProvider가 설정되지 않았습니다.');
-  }
-};
-
-// 전역 로딩 상태 설정 함수
-export const setGlobalLoading = (loading: boolean, config?: LoadingConfig) => {
-  if (loadingContext) {
-    loadingContext.setLoading(loading, config);
-  } else {
-    console.warn('LoadingProvider가 설정되지 않았습니다.');
-  }
-};
-
-// 전역 로딩 상태 가져오기 함수
-export const getGlobalLoading = (): boolean => {
-  if (loadingContext) {
-    return loadingContext.getLoading();
-  } else {
-    console.warn('LoadingProvider가 설정되지 않았습니다.');
-    return false;
-  }
-};
-
-// Promise와 함께 로딩을 자동으로 관리하는 헬퍼 함수
-export const withLoading = async <T>(
-  promise: Promise<T>,
-  config?: LoadingConfig
-): Promise<T> => {
-  try {
-    showGlobalLoading(config);
-    const result = await promise;
-    return result;
-  } finally {
-    hideGlobalLoading();
-  }
-};
-
-// 비동기 함수를 래핑하여 로딩을 자동으로 관리하는 헬퍼 함수
-export const wrapWithLoading = <T extends unknown[], R>(
-  fn: (...args: T) => Promise<R>,
-  config?: LoadingConfig
-) => {
-  return async (...args: T): Promise<R> => {
-    return withLoading(fn(...args), config);
+// 전역 로딩 상태 관리 클래스
+class LoadingManager {
+  private static instance: LoadingManager;
+  private state: LoadingState = {
+    isVisible: false,
+    options: {}
   };
-};
+  private listeners: Set<(state: LoadingState) => void> = new Set();
+  private delayTimer: NodeJS.Timeout | null = null;
+  private originalBodyOverflow: string = '';
 
-// $loading 객체 - 더 간결한 API 제공
-export const $loading = {
-  /**
-   * 로딩을 표시합니다
-   * @param config 로딩 설정 옵션
-   */
-  show: (config?: LoadingConfig) => {
-    showGlobalLoading(config);
-  },
-
-  /**
-   * 로딩을 숨깁니다
-   */
-  hide: () => {
-    hideGlobalLoading();
-  },
-
-  /**
-   * 로딩 상태를 설정합니다
-   * @param loading 표시 여부
-   * @param config 로딩 설정 옵션
-   */
-  set: (loading: boolean, config?: LoadingConfig) => {
-    setGlobalLoading(loading, config);
-  },
-
-  /**
-   * 현재 로딩 상태를 가져옵니다
-   * @returns 현재 로딩 상태
-   */
-  get: (): boolean => {
-    return getGlobalLoading();
-  },
-
-  /**
-   * 로딩 상태를 토글합니다
-   * @param config 로딩 설정 옵션 (표시할 때만 적용)
-   */
-  toggle: (config?: LoadingConfig) => {
-    const isCurrentlyLoading = getGlobalLoading();
-    if (isCurrentlyLoading) {
-      hideGlobalLoading();
-    } else {
-      showGlobalLoading(config);
+  static getInstance(): LoadingManager {
+    if (!LoadingManager.instance) {
+      LoadingManager.instance = new LoadingManager();
     }
-  },
+    return LoadingManager.instance;
+  }
 
-  /**
-   * Promise와 함께 로딩을 자동 관리합니다
-   * @param promise 실행할 Promise
-   * @param config 로딩 설정 옵션
-   * @returns Promise 결과
-   */
-  with: async <T>(promise: Promise<T>, config?: LoadingConfig): Promise<T> => {
-    return withLoading(promise, config);
-  },
+  subscribe(listener: (state: LoadingState) => void): () => void {
+    this.listeners.add(listener);
+    listener(this.state);
+    return () => {
+      this.listeners.delete(listener);
+    };
+  }
 
-  /**
-   * 비동기 함수를 래핑하여 로딩을 자동 관리합니다
-   * @param fn 래핑할 비동기 함수
-   * @param config 로딩 설정 옵션
-   * @returns 래핑된 함수
-   */
-  wrap: <T extends unknown[], R>(
+  private notify(): void {
+    this.listeners.forEach(listener => listener(this.state));
+  }
+
+  private lockBody(): void {
+    if (typeof document !== 'undefined') {
+      this.originalBodyOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  private unlockBody(): void {
+    if (typeof document !== 'undefined') {
+      document.body.style.overflow = this.originalBodyOverflow || '';
+    }
+  }
+
+  show(options: LoadingOptions = {}): void {
+    if (this.state.isVisible) {
+      this.state.options = { ...this.state.options, ...options };
+      this.notify();
+      return;
+    }
+
+    const delay = options.delay || 0;
+
+    if (this.delayTimer) {
+      clearTimeout(this.delayTimer);
+    }
+
+    if (delay > 0) {
+      this.delayTimer = setTimeout(() => {
+        this.showImmediate(options);
+      }, delay);
+    } else {
+      this.showImmediate(options);
+    }
+  }
+
+  private showImmediate(options: LoadingOptions): void {
+    this.state = {
+      isVisible: true,
+      options: {
+        text: '로딩 중...',
+        bodyLock: false,
+        ...options
+      }
+    };
+
+    if (this.state.options.bodyLock) {
+      this.lockBody();
+    }
+
+    this.notify();
+
+    if (this.state.options.onShow) {
+      setTimeout(() => {
+        this.state.options.onShow?.();
+      }, 0);
+    }
+  }
+
+  hide(): void {
+    if (!this.state.isVisible) {
+      return;
+    }
+
+    if (this.delayTimer) {
+      clearTimeout(this.delayTimer);
+      this.delayTimer = null;
+    }
+
+    const prevOptions = this.state.options;
+
+    this.state = {
+      isVisible: false,
+      options: {}
+    };
+
+    if (prevOptions.bodyLock) {
+      this.unlockBody();
+    }
+
+    this.notify();
+
+    if (prevOptions.onHide) {
+      setTimeout(() => {
+        prevOptions.onHide?.();
+      }, 0);
+    }
+  }
+
+  toggle(options?: LoadingOptions): void {
+    if (this.state.isVisible) {
+      this.hide();
+    } else {
+      this.show(options);
+    }
+  }
+
+  set(visible: boolean, options?: LoadingOptions): void {
+    if (visible) {
+      this.show(options);
+    } else {
+      this.hide();
+    }
+  }
+
+  get(): boolean {
+    return this.state.isVisible;
+  }
+
+  async withPromise<T>(promise: Promise<T>, options?: LoadingOptions): Promise<T> {
+    this.show(options);
+    try {
+      const result = await promise;
+      this.hide();
+      return result;
+    } catch (error) {
+      this.hide();
+      throw error;
+    }
+  }
+
+  wrapFunction<T extends unknown[], R>(
     fn: (...args: T) => Promise<R>,
-    config?: LoadingConfig
-  ) => {
-    return wrapWithLoading(fn, config);
-  },
+    options?: LoadingOptions
+  ): (...args: T) => Promise<R> {
+    return async (...args: T) => {
+      this.show(options);
+      try {
+        const result = await fn(...args);
+        this.hide();
+        return result;
+      } catch (error) {
+        this.hide();
+        throw error;
+      }
+    };
+  }
+}
+
+// 싱글톤 인스턴스 생성
+const loadingManager = LoadingManager.getInstance();
+
+// 편의 함수들 export
+export const showGlobalLoading = (options?: LoadingOptions): void => {
+  loadingManager.show(options);
 };
 
-// 기본 export로도 제공
-export default $loading;
+export const hideGlobalLoading = (): void => {
+  loadingManager.hide();
+};
+
+export const setGlobalLoading = (visible: boolean, options?: LoadingOptions): void => {
+  loadingManager.set(visible, options);
+};
+
+export const getGlobalLoading = (): boolean => {
+  return loadingManager.get();
+};
+
+export function withLoading<T>(promise: Promise<T>, options?: LoadingOptions): Promise<T> {
+  return loadingManager.withPromise(promise, options);
+}
+
+export function wrapWithLoading<T extends unknown[], R>(
+  fn: (...args: T) => Promise<R>,
+  options?: LoadingOptions
+): (...args: T) => Promise<R> {
+  return loadingManager.wrapFunction(fn, options);
+}
+
+// $loading 스타일 API
+export const $loading = {
+  show: (options?: LoadingOptions): void => {
+    loadingManager.show(options);
+  },
+  hide: (): void => {
+    loadingManager.hide();
+  },
+  toggle: (options?: LoadingOptions): void => {
+    loadingManager.toggle(options);
+  },
+  set: (visible: boolean, options?: LoadingOptions): void => {
+    loadingManager.set(visible, options);
+  },
+  get: (): boolean => {
+    return loadingManager.get();
+  },
+  with: function<T>(promise: Promise<T>, options?: LoadingOptions): Promise<T> {
+    return loadingManager.withPromise(promise, options);
+  },
+  wrap: function<T extends unknown[], R>(
+    fn: (...args: T) => Promise<R>,
+    options?: LoadingOptions
+  ): (...args: T) => Promise<R> {
+    return loadingManager.wrapFunction(fn, options);
+  }
+};
+
+export default loadingManager;

@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { usePageLayout } from '@/hooks/usePageLayout';
 import { Button, CodeHighlight } from '@/components/common';
-import { useLoading } from '@/hooks';
+import { useLoading } from '@/hooks/useLoading';
 import {
   showGlobalLoading,
   hideGlobalLoading,
@@ -12,8 +12,6 @@ import {
   wrapWithLoading,
   $loading,
 } from '@/utils/loading';
-// 또는
-// import $loading from '@/utils/loading';
 import styles from '@/assets/scss/pages/guide.module.scss';
 
 const LoadingGuide = () => {
@@ -116,10 +114,32 @@ const LoadingGuide = () => {
       <h1 className={styles.title}>Loading Component</h1>
 
       <section className={styles.section}>
+        <h2 className={styles['section-title']}>변경 사항</h2>
+        <p className={styles.txt}>
+          이제 Loading 컴포넌트를 Provider 없이 사용할 수 있습니다! App.tsx에서
+          &lt;Loading /&gt; 컴포넌트만 추가하면 됩니다.
+        </p>
+        <CodeHighlight
+          code={`// App.tsx
+import Loading from './components/common/Loading';
+
+function App() {
+  return (
+    <div>
+      {/* 다른 컴포넌트들... */}
+      <Loading />
+    </div>
+  );
+}`}
+          language="tsx"
+        />
+      </section>
+
+      <section className={styles.section}>
         <h2 className={styles['section-title']}>import</h2>
         <CodeHighlight
           code={`// Hook 사용
-import { useLoading } from '@/hooks';
+import { useLoading } from '@/hooks/useLoading';
 
 // 전역 함수 사용
 import { 
@@ -129,11 +149,8 @@ import {
   getGlobalLoading,
   withLoading,
   wrapWithLoading,
-  $loading // 새로 추가된 간결한 API!
-} from '@/utils/loading';
-
-// 또는 기본 import로 사용
-import $loading from '@/utils/loading';`}
+  $loading
+} from '@/utils/loading';`}
           language="typescript"
         />
       </section>
@@ -205,6 +222,22 @@ import $loading from '@/utils/loading';`}
             >
               상태 확인
             </Button>
+
+            <Button
+              size="sm"
+              className="primary"
+              onClick={handleAsyncWith$Loading}
+            >
+              $loading.with() (2초)
+            </Button>
+
+            <Button
+              size="sm"
+              className="primary"
+              onClick={handleWrapped$LoadingFunction}
+            >
+              $loading.wrap() (1.5초)
+            </Button>
           </div>
 
           <p className={styles.txt}>
@@ -214,11 +247,10 @@ import $loading from '@/utils/loading';`}
       </section>
 
       <section className={styles.section}>
-        <h2 className={styles['section-title']}>
-          $loading 객체를 사용한 간결한 로딩 제어 (추천)
-        </h2>
+        <h2 className={styles['section-title']}>$loading API (추천)</h2>
         <p className={styles.txt}>
-          $loading 객체를 사용하여 더 간결하고 직관적인 API로 로딩을 제어할 수 있습니다.
+          $loading 객체를 사용하여 더 간결하고 직관적인 API로 로딩을 제어할 수
+          있습니다.
         </p>
 
         <div className={styles.showcase}>
@@ -352,6 +384,14 @@ const wrappedFn = $loading.wrap(fetchData, {
               style={{ zIndex: 10000 }}
             >
               전역 상태 확인
+            </Button>
+
+            <Button
+              size="sm"
+              className="primary"
+              onClick={handleWrapped$LoadingFunction}
+            >
+              $loading.wrap() (1.5초)
             </Button>
           </div>
         </div>
@@ -528,10 +568,9 @@ const wrappedFn = $loading.wrap(fetchData, {
             >
               $loading.wrap() (1.5초)
             </Button>
-
             <Button
               size="sm"
-              className="line"
+              className="primary"
               onClick={handleAsyncWithLoading}
             >
               withLoading() (3초)
@@ -539,7 +578,7 @@ const wrappedFn = $loading.wrap(fetchData, {
 
             <Button
               size="sm"
-              className="line"
+              className="primary"
               onClick={handleWrappedFunction}
             >
               wrapWithLoading() (2.5초)
@@ -642,6 +681,28 @@ const wrappedFetchData = wrapWithLoading(fetchData, {
               </tr>
             </tbody>
           </table>
+          <h2 className={styles['section-title']}>장점</h2>
+          <ul style={{ paddingLeft: '20px' }}>
+            <li>
+              <strong>간단한 사용법:</strong> Provider 설정 불필요
+            </li>
+            <li>
+              <strong>중복 방지:</strong> 내부 매니저가 자동으로 중복 로딩 방지
+            </li>
+            <li>
+              <strong>호환성:</strong> 기존 API와 100% 호환
+            </li>
+            <li>
+              <strong>전역 상태:</strong> 어디서든 접근 가능한 전역 상태
+            </li>
+            <li>
+              <strong>자동 관리:</strong> 단일 인스턴스로 상태 자동 관리
+            </li>
+            <li>
+              <strong>Fast Refresh:</strong> 컴포넌트와 유틸리티 분리로 개발
+              환경 최적화
+            </li>
+          </ul>
         </div>
       </section>
     </div>

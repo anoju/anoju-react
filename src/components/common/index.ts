@@ -19,4 +19,9 @@ export { default as Tooltip } from './Tooltip';
 export { default as Select } from './Select';
 export { default as Loading } from './Loading';
 export { Popup, usePopup, usePopups } from './Popup';
-export type { PopupProps, PopupType, UsePopupReturn, UsePopupsReturn } from './Popup';
+export type {
+  PopupProps,
+  PopupType,
+  UsePopupReturn,
+  UsePopupsReturn,
+} from './Popup';

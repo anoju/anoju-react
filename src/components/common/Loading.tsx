@@ -1,8 +1,14 @@
 // src/components/common/Loading.tsx
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useLoading } from '@/hooks';
+import loadingManager from '@/utils/loading';
+import type { LoadingOptions } from '@/utils/loading';
 import styles from '@/assets/scss/components/loading.module.scss';
+
+interface LoadingState {
+  isVisible: boolean;
+  options: LoadingOptions;
+}
 
 // 기본 스피너 컴포넌트
 const DefaultSpinner: React.FC = () => (
@@ -28,43 +34,48 @@ const DefaultSpinner: React.FC = () => (
   </div>
 );
 
+// Loading 컴포넌트
 const Loading: React.FC = () => {
-  const { isLoading, config } = useLoading();
+  const [state, setState] = useState<LoadingState>({
+    isVisible: false,
+    options: {}
+  });
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+    const unsubscribe = loadingManager.subscribe(setState);
+    return unsubscribe;
   }, []);
 
-  // 로딩이 활성화되어 있지 않거나 아직 마운트되지 않았으면 렌더링하지 않음
-  if (!isLoading || !mounted) {
+  if (!state.isVisible || !mounted) {
     return null;
   }
+
+  const { options } = state;
 
   const loadingContent = (
     <div
       className={styles['loading-overlay']}
       role="status"
       aria-live="polite"
-      aria-label={config.text || '로딩 중'}
+      aria-label={options.text || '로딩 중'}
     >
       <div className={styles['loading-container']}>
         <div className={styles['loading-content']}>
-          {/* 커스텀 아이콘이 있으면 사용, 없으면 기본 스피너 사용 */}
-          {config.icon !== null && (
+          {options.icon !== null && (
             <div className={styles['loading-icon']}>
-              {config.icon || <DefaultSpinner />}
+              {options.icon || <DefaultSpinner />}
             </div>
           )}
-          {config.text && (
-            <div className={styles['loading-text']}>{config.text}</div>
+          {options.text && (
+            <div className={styles['loading-text']}>{options.text}</div>
           )}
         </div>
       </div>
     </div>
   );
 
-  // Portal을 사용하여 body에 직접 렌더링
   return createPortal(loadingContent, document.body);
 };
 

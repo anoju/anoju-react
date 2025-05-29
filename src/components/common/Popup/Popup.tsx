@@ -1,4 +1,4 @@
-// src/components/common/Popup/Popup.tsx.part1
+// src/components/common/Popup/Popup.tsx
 import React, {
   useState,
   useEffect,
@@ -9,7 +9,10 @@ import React, {
 } from 'react';
 import { isMobile } from '@/utils/device';
 import { createPortal } from 'react-dom';
-import PopupManager, { POPUP_PRIORITY, type PopupPriority } from './PopupManager';
+import PopupManager, {
+  POPUP_PRIORITY,
+  type PopupPriority,
+} from './PopupManager';
 import styles from '@/assets/scss/components/popup.module.scss';
 import { Button } from '@/components/common';
 import cx from '@/utils/cx';
