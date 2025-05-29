@@ -13,8 +13,9 @@ const generateUniqueId = (): string => {
 interface ExpandItemProps {
   children: ReactNode;
   title: ReactNode; // 제목 (문자열 또는 React 요소)
-  value?: boolean; // 외부 상태로 제어할 때 사용
-  setValue?: (value: boolean) => void; // 외부 상태 변경 함수
+  value?: number | string; // 아이템의 고유 식별값
+  open?: boolean; // 외부 상태로 제어할 때 사용 (기존 value에서 변경)
+  setOpen?: (open: boolean) => void; // 외부 상태 변경 함수 (기존 setValue에서 변경)
   defaultOpen?: boolean; // 기본 열림 상태 (기본값 false)
   wrap?: boolean; // 버튼이 제목을 감쌀지 여부 (기본값 true)
   className?: string;
@@ -24,6 +25,9 @@ interface ExpandItemProps {
   onChange?: (open: boolean) => void;
   destroyOnClose?: boolean; // 닫힐 때 children을 DOM에서 제거할지 여부
   disabled?: boolean; // 비활성화 상태
+  // Expand 컴포넌트에서 사용할 내부 props
+  _isControlled?: boolean; // 내부용: 부모 컴포넌트에서 제어되는지 여부
+  _onToggle?: (value: number | string) => void; // 내부용: 부모 컴포넌트에서 토글 처리
 }
 
 const ExpandItem = forwardRef<HTMLDivElement, ExpandItemProps>(
@@ -32,7 +36,8 @@ const ExpandItem = forwardRef<HTMLDivElement, ExpandItemProps>(
       children,
       title,
       value,
-      setValue,
+      open,
+      setOpen,
       defaultOpen = false,
       wrap = true,
       className = '',
@@ -42,6 +47,8 @@ const ExpandItem = forwardRef<HTMLDivElement, ExpandItemProps>(
       onChange,
       destroyOnClose = false,
       disabled = false,
+      _isControlled = false,
+      _onToggle,
     },
     ref
   ) => {
@@ -49,21 +56,27 @@ const ExpandItem = forwardRef<HTMLDivElement, ExpandItemProps>(
     const uniqueIdRef = useRef<string>(generateUniqueId());
     const panelId = uniqueIdRef.current;
 
-    // 내부 상태 (value가 제공되지 않은 경우에만 사용)
+    // 내부 상태 (open이 제공되지 않은 경우에만 사용)
     const [internalOpen, setInternalOpen] = useState(defaultOpen);
 
     // 실제 사용할 open 상태 (외부 제어 > 내부 상태)
-    const isOpen = value !== undefined ? value : internalOpen;
+    const isOpen = open !== undefined ? open : internalOpen;
 
     // 상태 변경 함수
     const handleToggle = () => {
       if (disabled) return;
 
+      // Expand 컴포넌트에서 제어되는 경우
+      if (_isControlled && _onToggle && value !== undefined) {
+        _onToggle(value);
+        return;
+      }
+
       const newValue = !isOpen;
 
-      if (setValue) {
+      if (setOpen) {
         // 외부 상태 변경
-        setValue(newValue);
+        setOpen(newValue);
       } else {
         // 내부 상태 변경
         setInternalOpen(newValue);

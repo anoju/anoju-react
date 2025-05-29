@@ -18,6 +18,7 @@ export { default as Textarea, type TextareaHandle } from './Textarea';
 export { default as Tooltip } from './Tooltip';
 export { default as ExpandPanel } from './ExpandPanel';
 export { default as ExpandItem } from './ExpandItem';
+export { default as Expand, ExpandItem as ExpandItemStatic, ExpandPanel as ExpandPanelStatic } from './Expand';
 export { default as Select } from './Select';
 export { default as Loading } from './Loading';
 export { Popup, usePopup, usePopups } from './Popup';

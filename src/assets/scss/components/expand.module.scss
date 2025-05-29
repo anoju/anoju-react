@@ -1,7 +1,19 @@
-// src/assets/scss/components/expandItem.module.scss
+// src/assets/scss/components/expand.module.scss
 @use '@/assets/scss' as s;
 @use 'sass:color';
 @use 'sass:math';
+
+// Expand 그룹 스타일
+.expand-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+
+  // 연속된 아이템들의 마진 제거 (gap으로 대체)
+  .expand-item + .expand-item {
+    margin-top: 0;
+  }
+}
 
 .expand-item {
   border: 1px solid var(--bg-dark-10);
