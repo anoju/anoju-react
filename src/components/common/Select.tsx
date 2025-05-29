@@ -1,4 +1,4 @@
-// src/components/common/Select.tsx - 첫 번째 부분
+// src/components/common/Select.tsx
 import React, {
   useState,
   useRef,
@@ -15,6 +15,9 @@ import React, {
 } from 'react';
 import styles from '@/assets/scss/components/select.module.scss';
 import cx from '@/utils/cx';
+import { Button } from '@/components/common';
+import Popup, { PopupProps } from '@/components/common/Popup/Popup';
+import popupStyles from '@/assets/scss/components/popup.module.scss';
 
 // Option Group 타입 정의
 export interface SelectOptionGroup<T = string | number> {
@@ -32,6 +35,13 @@ export interface SelectOption<T = string | number> {
   groupKey?: string | number; // 그룹 키 (옵션이 그룹의 일부인 경우)
   searchText?: string; // 검색용 텍스트 추가
   [key: string]: unknown; // 인덱스 시그니처 추가로 동적 속성 접근 허용
+}
+
+// 팝업 설정 타입 정의
+export interface SelectPopupConfig
+  extends Omit<PopupProps, 'visible' | 'onClose' | 'type' | 'children'> {
+  // Select 전용 팝업 설정을 위한 추가 속성들
+  searchPlaceholder?: string; // 검색 입력 플레이스홀더
 }
 
 // 셀렉트 컴포넌트 Props 타입 정의
@@ -67,6 +77,9 @@ export interface SelectProps<T = string | number> {
   open?: boolean;
   defaultOpen?: boolean;
   scrollDropdown?: boolean; // 스크롤 시 드롭다운 위치 조정 여부 (true: 위치 조정, false: 드롭다운 닫기)
+
+  // 팝업 관련 (새로 추가)
+  usePopup?: boolean | SelectPopupConfig; // 팝업 사용 여부 또는 팝업 설정
 
   // 다중 선택 관련
   mode?: 'multiple';
@@ -121,7 +134,6 @@ const generateUniqueId = (): string => {
   return `select_${uniqueIdCounter++}_${Math.random().toString(36).substring(2, 9)}`;
 };
 
-// src/components/common/Select.tsx - 두 번째 부분 (optionLabelProp 사용 추가)
 // Select 컴포넌트
 function Select<T = string | number>(
   {
@@ -145,6 +157,7 @@ function Select<T = string | number>(
     open: controlledOpen,
     defaultOpen = false,
     scrollDropdown = false, // 기본값은 false로 설정
+    usePopup = false, // 팝업 사용 여부 (새로 추가)
     mode,
     separator = ', ',
     maxCount,
@@ -154,6 +167,18 @@ function Select<T = string | number>(
   }: SelectProps<T>,
   ref: React.ForwardedRef<SelectHandle>
 ) {
+  // 팝업 설정 처리
+  const popupConfig = useMemo(() => {
+    if (usePopup === true) {
+      return {} as SelectPopupConfig; // 기본 팝업 설정
+    } else if (typeof usePopup === 'object') {
+      return usePopup; // 사용자 정의 팝업 설정
+    }
+    return null; // 팝업 사용하지 않음
+  }, [usePopup]);
+
+  const isUsingPopup = popupConfig !== null;
+
   // 내부 상태 관리
   const [internalValue, setInternalValue] = useState<T | T[] | undefined>(
     value !== undefined ? value : defaultValue
@@ -292,10 +317,9 @@ function Select<T = string | number>(
     }
   }, [controlledOpen]);
 
-  // src/components/common/Select.tsx - 세 번째 부분 (수정된 위치 계산)
-  // 드롭다운 위치 계산
+  // 드롭다운 위치 계산 (팝업 모드가 아닐 때만 사용)
   const updateDropdownPosition = useCallback(() => {
-    if (!selectRef.current || !dropdownRef.current) return;
+    if (isUsingPopup || !selectRef.current || !dropdownRef.current) return;
 
     const selectRect = selectRef.current.getBoundingClientRect();
     const dropdownHeight = dropdownRef.current.offsetHeight;
@@ -342,7 +366,7 @@ function Select<T = string | number>(
       });
       dropdownRef.current.classList.add(styles.dropdownUp);
     }
-  }, []);
+  }, [isUsingPopup]);
 
   // 옵션 스크롤 함수
   const scrollOptionIntoView = useCallback((index: number) => {
@@ -371,21 +395,25 @@ function Select<T = string | number>(
       onDropdownVisibleChange(true);
     }
 
-    // 검색창에 포커스
-    if (showSearch) {
+    // 검색창에 포커스 (팝업 모드가 아닐 때만)
+    if (showSearch && !isUsingPopup) {
       setTimeout(() => {
         searchInputRef.current?.focus();
       }, 0);
     }
 
-    // 지연 실행하여 DOM이 업데이트된 후 위치 계산
-    setTimeout(() => {
-      updateDropdownPosition();
-    }, 0);
+    // 팝업 모드가 아닐 때만 위치 계산
+    if (!isUsingPopup) {
+      // 지연 실행하여 DOM이 업데이트된 후 위치 계산
+      setTimeout(() => {
+        updateDropdownPosition();
+      }, 0);
+    }
   }, [
     disabled,
     loading,
     showSearch,
+    isUsingPopup,
     onDropdownVisibleChange,
     updateDropdownPosition,
   ]);
@@ -476,7 +504,7 @@ function Select<T = string | number>(
       } else {
         // 단일 선택 모드
         updateValue(option.value);
-        closeDropdown();
+        closeDropdown(); // 단일 선택 시 드롭다운/팝업 닫기
       }
     },
     [
@@ -554,11 +582,10 @@ function Select<T = string | number>(
     [onSearch]
   );
 
-  // src/components/common/Select.tsx - 네 번째 부분 (스크롤 이벤트 핸들러 수정)
   // 키보드 조작 함수
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLDivElement>) => {
-      if (disabled || loading) return;
+      if (disabled || loading || isUsingPopup) return; // 팝업 모드에서는 키보드 네비게이션 비활성화
 
       switch (e.key) {
         case 'Enter':
@@ -657,6 +684,7 @@ function Select<T = string | number>(
     [
       disabled,
       loading,
+      isUsingPopup,
       isOpen,
       activeIndex,
       filteredOptions,
@@ -671,8 +699,10 @@ function Select<T = string | number>(
     ]
   );
 
-  // 외부 클릭 감지
+  // 외부 클릭 감지 (팝업 모드가 아닐 때만)
   useEffect(() => {
+    if (isUsingPopup) return; // 팝업 모드에서는 외부 클릭 감지 비활성화
+
     const handleClickOutside = (event: Event) => {
       if (
         selectRef.current &&
@@ -689,11 +719,11 @@ function Select<T = string | number>(
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isOpen, closeDropdown]);
+  }, [isOpen, closeDropdown, isUsingPopup]);
 
-  // 드롭다운 위치 조정 (열릴 때)
+  // 드롭다운 위치 조정 (열릴 때) - 팝업 모드가 아닐 때만
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen || isUsingPopup) return;
 
     // 초기 위치 설정
     updateDropdownPosition();
@@ -728,7 +758,13 @@ function Select<T = string | number>(
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('scroll', handleScroll);
     };
-  }, [isOpen, updateDropdownPosition, scrollDropdown, closeDropdown]);
+  }, [
+    isOpen,
+    updateDropdownPosition,
+    scrollDropdown,
+    closeDropdown,
+    isUsingPopup,
+  ]);
 
   // 외부 메서드 정의
   React.useImperativeHandle(ref, () => {
@@ -770,6 +806,7 @@ function Select<T = string | number>(
       [styles.warning]: status === 'warning',
       [styles.success]: status === 'success',
       [styles.multiple]: isMultiple,
+      [styles.popup]: isUsingPopup, // 팝업 모드 클래스 추가
     },
     className
   );
@@ -849,184 +886,291 @@ function Select<T = string | number>(
   }, [filteredOptions, normalizedOptionsData]);
 
   // 옵션이 현재 선택되어 있는지 확인하는 함수
-  const isOptionSelected = (option: SelectOption<T>) => {
-    if (isMultiple) {
-      // 다중 선택 모드
-      if (Array.isArray(internalValue)) {
-        return internalValue.includes(option.value);
+  const isOptionSelected = useCallback(
+    (option: SelectOption<T>) => {
+      if (isMultiple) {
+        // 다중 선택 모드
+        if (Array.isArray(internalValue)) {
+          return internalValue.includes(option.value);
+        }
+        return false;
+      } else {
+        // 단일 선택 모드
+        return option.value === internalValue;
       }
-      return false;
-    } else {
-      // 단일 선택 모드
-      return option.value === internalValue;
-    }
-  };
+    },
+    [isMultiple, internalValue]
+  );
 
-  // src/components/common/Select.tsx - 다섯번째 부분 (스크롤 처리)
+  // 팝업에서 검색 입력 핸들러 (팝업 내부에서 이벤트 전파 중지)
+  const handlePopupSearchInput = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      e.stopPropagation(); // 팝업 내부 클릭 이벤트 전파 중지
+      handleSearchInput(e);
+    },
+    [handleSearchInput]
+  );
+
+  // 팝업에서 옵션 클릭 핸들러
+  const handlePopupOptionClick = useCallback(
+    (option: SelectOption<T>) => {
+      toggleOption(option);
+
+      // 단일 선택 모드에서는 선택 후 자동으로 팝업 닫기
+      // (toggleOption 내부에서 이미 closeDropdown이 호출되지만, 팝업에서는 명시적으로 처리)
+      if (!isMultiple) {
+        // 약간의 지연을 두어 선택 애니메이션이 보이도록 함
+        setTimeout(() => {
+          closeDropdown();
+        }, 100);
+      }
+    },
+    [toggleOption, isMultiple, closeDropdown]
+  );
+
+  // 옵션 리스트 렌더링 함수 (드롭다운과 팝업에서 공통으로 사용)
+  const renderOptionsList = useCallback(
+    (isInPopup: boolean = false) => {
+      if (filteredOptions.length === 0) {
+        return <div className={styles.empty}>목록이 없습니다</div>;
+      }
+
+      return (
+        <div className={styles['options-wrap']}>
+          {groupedOptions.map((group, groupIndex) => (
+            <React.Fragment key={`group-${groupIndex}`}>
+              {group.group && (
+                <div className={styles['option-group']}>
+                  {group.group.label}
+                </div>
+              )}
+              <ul className={styles['options-list']}>
+                {group.options.map((option, index) => {
+                  const isSelected = isOptionSelected(option);
+                  const globalIndex = filteredOptions.findIndex(
+                    (opt) => opt.value === option.value
+                  );
+
+                  // maxCount에 도달했는지 확인
+                  const isMaxCountReached =
+                    isMultiple &&
+                    maxCount !== undefined &&
+                    Array.isArray(internalValue) &&
+                    internalValue.length >= maxCount &&
+                    !isSelected; // 이미 선택된 항목은 제외
+
+                  const isDisabled = option.disabled || isMaxCountReached;
+
+                  return (
+                    <li
+                      key={`${index}-${String(option.value)}`}
+                      className={cx(styles.option, {
+                        [styles['option-selected']]: isSelected,
+                        [styles['option-active']]:
+                          !isInPopup && globalIndex === activeIndex, // 팝업에서는 active 상태 비활성화
+                        [styles['option-disabled']]: isDisabled,
+                      })}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (!isDisabled) {
+                          if (isInPopup) {
+                            handlePopupOptionClick(option);
+                          } else {
+                            toggleOption(option);
+                          }
+                        }
+                      }}
+                      onMouseEnter={() => {
+                        if (!isDisabled && !isInPopup) {
+                          setActiveIndex(globalIndex);
+                        }
+                      }}
+                      role="option"
+                      aria-selected={isSelected}
+                      aria-disabled={isDisabled}
+                      title={
+                        isMaxCountReached
+                          ? `최대 ${maxCount}개까지 선택 가능합니다`
+                          : undefined
+                      }
+                    >
+                      {isMultiple && (
+                        <span className={styles['option-check']} />
+                      )}
+                      {getOptionLabel(option)}
+                    </li>
+                  );
+                })}
+              </ul>
+            </React.Fragment>
+          ))}
+        </div>
+      );
+    },
+    [
+      filteredOptions,
+      groupedOptions,
+      isOptionSelected,
+      isMultiple,
+      maxCount,
+      internalValue,
+      activeIndex,
+      getOptionLabel,
+      handlePopupOptionClick,
+      toggleOption,
+      setActiveIndex,
+    ]
+  );
+
+  // 검색 입력 렌더링 함수 (드롭다운과 팝업에서 공통으로 사용)
+  const renderSearchInput = useCallback(
+    (isInPopup: boolean = false) => {
+      if (!showSearch) return null;
+
+      return (
+        <div className={styles['search-wrap']}>
+          <input
+            ref={isInPopup ? undefined : searchInputRef}
+            type="text"
+            className={styles['search-input']}
+            value={searchValue}
+            onChange={isInPopup ? handlePopupSearchInput : handleSearchInput}
+            placeholder="검색..."
+            onClick={(e) => e.stopPropagation()}
+            aria-label="옵션 검색"
+          />
+        </div>
+      );
+    },
+    [showSearch, searchValue, handlePopupSearchInput, handleSearchInput]
+  );
+
+  // 팝업 제목 생성
+  const popupTitle = useMemo(() => {
+    if (popupConfig?.title) {
+      return popupConfig.title;
+    }
+    return placeholder || '선택해주세요';
+  }, [popupConfig?.title, placeholder]);
+
   return (
-    <div
-      ref={selectRef}
-      className={selectClassName}
-      style={style}
-      tabIndex={disabled || loading ? -1 : 0}
-      onClick={toggleDropdown}
-      onKeyDown={handleKeyDown}
-      onFocus={handleFocus}
-      onBlur={handleBlur}
-      role="combobox"
-      aria-haspopup="listbox"
-      aria-expanded={isOpen}
-      aria-disabled={disabled || loading}
-      aria-controls={`${selectId.current}-dropdown`}
-      aria-labelledby={`${selectId.current}-label`}
-    >
-      <div className={styles['select-inner']}>
-        {isMultiple && selectedOptions.length > 0 ? (
-          <div
-            className={styles.value}
-            id={`${selectId.current}-label`}
-            title={selectedValueText}
-          >
-            {selectedValueText}
+    <>
+      <div
+        ref={selectRef}
+        className={selectClassName}
+        style={style}
+        tabIndex={disabled || loading ? -1 : 0}
+        onClick={toggleDropdown}
+        onKeyDown={handleKeyDown}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
+        role="combobox"
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+        aria-disabled={disabled || loading}
+        aria-controls={`${selectId.current}-dropdown`}
+        aria-labelledby={`${selectId.current}-label`}
+      >
+        <div className={styles['select-inner']}>
+          {isMultiple && selectedOptions.length > 0 ? (
+            <div
+              className={styles.value}
+              id={`${selectId.current}-label`}
+              title={selectedValueText}
+            >
+              {selectedValueText}
+            </div>
+          ) : selectedOption ? (
+            <div
+              className={styles.value}
+              id={`${selectId.current}-label`}
+              title={getOptionLabel(selectedOption)}
+            >
+              {getOptionLabel(selectedOption)}
+            </div>
+          ) : (
+            <div
+              className={styles.placeholder}
+              id={`${selectId.current}-label`}
+            >
+              {placeholder}
+            </div>
+          )}
+
+          <div className={styles['suffix-wrap']}>
+            {allowClear && hasValue && (
+              <button
+                type="button"
+                className={styles['btn-clear']}
+                onClick={handleClear}
+                aria-label="지우기"
+                tabIndex={-1}
+              >
+                <span className={styles['ico-clear']} aria-hidden="true" />
+              </button>
+            )}
+
+            {loading ? (
+              <span className={styles['ico-loading']} aria-hidden="true" />
+            ) : (
+              <span
+                className={cx(styles.arrow, {
+                  [styles['arrow-active']]: isOpen,
+                })}
+                aria-hidden="true"
+              />
+            )}
           </div>
-        ) : selectedOption ? (
+        </div>
+
+        {/* 일반 드롭다운 렌더링 (팝업 모드가 아닐 때만) */}
+        {!isUsingPopup && isOpen && (
           <div
-            className={styles.value}
-            id={`${selectId.current}-label`}
-            title={getOptionLabel(selectedOption)}
+            ref={dropdownRef}
+            className={cx(styles.dropdown, dropdownClassName)}
+            id={`${selectId.current}-dropdown`}
+            role="listbox"
+            aria-labelledby={`${selectId.current}-label`}
+            style={{
+              ...dropdownStyle,
+              position: 'fixed',
+              ...dropdownPosition,
+            }}
           >
-            {getOptionLabel(selectedOption)}
-          </div>
-        ) : (
-          <div className={styles.placeholder} id={`${selectId.current}-label`}>
-            {placeholder}
+            {renderSearchInput(false)}
+            {renderOptionsList(false)}
           </div>
         )}
-
-        <div className={styles['suffix-wrap']}>
-          {allowClear && hasValue && (
-            <button
-              type="button"
-              className={styles['btn-clear']}
-              onClick={handleClear}
-              aria-label="지우기"
-              tabIndex={-1}
-            >
-              <span className={styles['ico-clear']} aria-hidden="true" />
-            </button>
-          )}
-
-          {loading ? (
-            <span className={styles['ico-loading']} aria-hidden="true" />
-          ) : (
-            <span
-              className={cx(styles.arrow, { [styles['arrow-active']]: isOpen })}
-              aria-hidden="true"
-            />
-          )}
-        </div>
       </div>
 
-      {isOpen && (
-        <div
-          ref={dropdownRef}
-          className={cx(styles.dropdown, dropdownClassName)}
-          id={`${selectId.current}-dropdown`}
-          role="listbox"
-          aria-labelledby={`${selectId.current}-label`}
-          style={{
-            ...dropdownStyle,
-            position: 'fixed',
-            ...dropdownPosition,
-          }}
+      {/* 팝업 렌더링 (팝업 모드일 때만) */}
+      {isUsingPopup && (
+        <Popup
+          {...popupConfig}
+          type="bottom"
+          visible={isOpen}
+          onClose={closeDropdown}
+          title={popupTitle}
+          className={cx(popupStyles['select-popup'], popupConfig?.className)}
+          bodyClassName={cx(
+            styles['select-popup-body'],
+            popupConfig?.bodyClassName
+          )}
+          footer={
+            isMultiple && (
+              <Button size="lg" className="primary" onClick={closeDropdown}>
+                확인
+              </Button>
+            )
+          }
         >
-          {showSearch && (
-            <div className={styles['search-wrap']}>
-              <input
-                ref={searchInputRef}
-                type="text"
-                className={styles['search-input']}
-                value={searchValue}
-                onChange={handleSearchInput}
-                placeholder="검색..."
-                onClick={(e) => e.stopPropagation()}
-                aria-label="옵션 검색"
-              />
-            </div>
-          )}
-
-          {filteredOptions.length > 0 ? (
-            <div className={styles['options-wrap']}>
-              {groupedOptions.map((group, groupIndex) => (
-                <React.Fragment key={`group-${groupIndex}`}>
-                  {group.group && (
-                    <div className={styles['option-group']}>
-                      {group.group.label}
-                    </div>
-                  )}
-                  <ul className={styles['options-list']}>
-                    {group.options.map((option, index) => {
-                      const isSelected = isOptionSelected(option);
-                      const globalIndex = filteredOptions.findIndex(
-                        (opt) => opt.value === option.value
-                      );
-
-                      // maxCount에 도달했는지 확인
-                      const isMaxCountReached =
-                        isMultiple &&
-                        maxCount !== undefined &&
-                        Array.isArray(internalValue) &&
-                        internalValue.length >= maxCount &&
-                        !isSelected; // 이미 선택된 항목은 제외
-
-                      const isDisabled = option.disabled || isMaxCountReached;
-
-                      return (
-                        <li
-                          key={`${index}-${String(option.value)}`}
-                          className={cx(styles.option, {
-                            [styles['option-selected']]: isSelected,
-                            [styles['option-active']]:
-                              globalIndex === activeIndex,
-                            [styles['option-disabled']]: isDisabled,
-                          })}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (!isDisabled) {
-                              toggleOption(option);
-                            }
-                          }}
-                          onMouseEnter={() => {
-                            if (!isDisabled) {
-                              setActiveIndex(globalIndex);
-                            }
-                          }}
-                          role="option"
-                          aria-selected={isSelected}
-                          aria-disabled={isDisabled}
-                          title={
-                            isMaxCountReached
-                              ? `최대 ${maxCount}개까지 선택 가능합니다`
-                              : undefined
-                          }
-                        >
-                          {isMultiple && (
-                            <span className={styles['option-check']} />
-                          )}
-                          {getOptionLabel(option)}
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </React.Fragment>
-              ))}
-            </div>
-          ) : (
-            <div className={styles.empty}>목록이 없습니다</div>
-          )}
-        </div>
+          <div className={styles['select-popup-content']}>
+            {renderSearchInput(true)}
+            {renderOptionsList(true)}
+          </div>
+        </Popup>
       )}
-    </div>
+    </>
   );
 }
 

@@ -1340,6 +1340,124 @@ const [open, setOpen] = useState<boolean>(false);
       </section>
 
       <section className={styles.section}>
+        <h2 className={styles['section-title']}>팝업 모드 (바텀시트)</h2>
+        <p className={styles.txt}>
+          usePopup 속성을 true로 설정하면 드롭다운 대신 바텀시트 팝업으로 옵션을
+          표시합니다.
+        </p>
+
+        <div className={styles.showcase}>
+          <Select
+            usePopup={true}
+            options={['Apple', 'Banana', 'Orange', 'Grape']}
+            placeholder="팝업으로 선택하기"
+          />
+        </div>
+
+        <h3 className={styles['sub-title']}>참조 소스코드</h3>
+        <CodeHighlight
+          code={`<Select
+  usePopup={true}
+  options={['Apple', 'Banana', 'Orange', 'Grape']}
+  placeholder="팝업으로 선택하기"
+/>`}
+          language="jsx"
+        />
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles['section-title']}>팝업 설정 커스터마이징</h2>
+        <p className={styles.txt}>
+          usePopup에 객체를 전달하여 팝업의 제목, 크기 등을 커스터마이징할 수
+          있습니다.
+        </p>
+
+        <div className={styles.showcase}>
+          <Select
+            usePopup={{
+              title: '과일을 선택하세요',
+              searchPlaceholder: '과일 검색...',
+            }}
+            options={[
+              { value: 'apple', label: '🍎 사과' },
+              { value: 'banana', label: '🍌 바나나' },
+              { value: 'orange', label: '🍊 오렌지' },
+              { value: 'grape', label: '🍇 포도' },
+            ]}
+            placeholder="커스텀 팝업으로 선택"
+            showSearch={true}
+          />
+        </div>
+
+        <h3 className={styles['sub-title']}>참조 소스코드</h3>
+        <CodeHighlight
+          code={`<Select
+  usePopup={{
+    title: '과일을 선택하세요',
+    searchPlaceholder: '과일 검색...'
+  }}
+  options={[
+    { value: 'apple', label: '🍎 사과' },
+    { value: 'banana', label: '🍌 바나나' },
+    { value: 'orange', label: '🍊 오렌지' },
+    { value: 'grape', label: '🍇 포도' }
+  ]}
+  placeholder="커스텀 팝업으로 선택"
+  showSearch={true}
+/>`}
+          language="jsx"
+        />
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles['section-title']}>다중 선택 + 팝업 모드</h2>
+        <p className={styles.txt}>
+          다중 선택 모드에서도 팝업을 사용할 수 있습니다. 선택한 항목들이
+          체크마크로 표시됩니다.
+        </p>
+
+        <div className={styles.showcase}>
+          <Select
+            mode="multiple"
+            usePopup={{
+              title: '여러 색상을 선택하세요',
+              hideCloseButton: false,
+            }}
+            options={[
+              { value: 'red', label: '🔴 빨간색' },
+              { value: 'blue', label: '🔵 파란색' },
+              { value: 'green', label: '🟢 초록색' },
+              { value: 'yellow', label: '🟡 노란색' },
+              { value: 'purple', label: '🟣 보라색' },
+            ]}
+            placeholder="여러 색상 선택"
+            maxCount={3}
+          />
+        </div>
+
+        <h3 className={styles['sub-title']}>참조 소스코드</h3>
+        <CodeHighlight
+          code={`<Select
+  mode="multiple"
+  usePopup={{
+    title: '여러 색상을 선택하세요',
+    hideCloseButton: false
+  }}
+  options={[
+    { value: 'red', label: '🔴 빨간색' },
+    { value: 'blue', label: '🔵 파란색' },
+    { value: 'green', label: '🟢 초록색' },
+    { value: 'yellow', label: '🟡 노란색' },
+    { value: 'purple', label: '🟣 보라색' }
+  ]}
+  placeholder="여러 색상 선택"
+  maxCount={3}
+/>`}
+          language="jsx"
+        />
+      </section>
+
+      <section className={styles.section}>
         <h2 className={styles['section-title']}>Props</h2>
         <div className={styles.showcase}>
           <table className={styles.table}>
@@ -1508,6 +1626,12 @@ const [open, setOpen] = useState<boolean>(false);
                 <td>-</td>
                 <td>값 지우기 콜백</td>
               </tr>
+              <tr>
+                <td>usePopup</td>
+                <td>boolean | SelectPopupConfig</td>
+                <td>false</td>
+                <td>팝업 모드 사용 여부 또는 팝업 설정 객체</td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -1618,6 +1742,54 @@ const MyComponent = () => {
 };`}
           language="jsx"
         />
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles['section-title']}>SelectPopupConfig 속성</h2>
+        <div className={styles.showcase}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>속성</th>
+                <th>타입</th>
+                <th>기본값</th>
+                <th>설명</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>title</td>
+                <td>ReactNode</td>
+                <td>placeholder 값</td>
+                <td>팝업 제목</td>
+              </tr>
+              <tr>
+                <td>width</td>
+                <td>string | number</td>
+                <td>undefined</td>
+                <td>팝업 너비</td>
+              </tr>
+              <tr>
+                <td>searchPlaceholder</td>
+                <td>string</td>
+                <td>undefined</td>
+                <td>검색 입력창 플레이스홀더</td>
+              </tr>
+              <tr>
+                <td>hideCloseButton</td>
+                <td>boolean</td>
+                <td>false</td>
+                <td>닫기 버튼 숨김 여부</td>
+              </tr>
+              <tr>
+                <td>className</td>
+                <td>string</td>
+                <td>undefined</td>
+                <td>팝업 커스텀 클래스</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </section>
     </div>
   );
