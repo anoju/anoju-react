@@ -1,12 +1,6 @@
 // src/pages/guide/expand.tsx
 import { usePageLayout } from '@/hooks/usePageLayout';
-import {
-  Button,
-  CodeHighlight,
-  ExpandPanel,
-  ExpandItem,
-  Expand,
-} from '@/components/common';
+import { Button, CodeHighlight, Expand } from '@/components/common';
 import styles from '@/assets/scss/pages/guide.module.scss';
 import { useState } from 'react';
 
@@ -33,7 +27,7 @@ const ExpandItemGuide = () => {
     {
       value: '1',
       title: '타이틀입니다 1',
-      children: <p>내용입니다.1</p>,
+      children: '내용입니다.1',
     },
     {
       value: '2',
@@ -43,7 +37,13 @@ const ExpandItemGuide = () => {
     {
       value: '3',
       title: '타이틀입니다 3',
-      children: <p>내용입니다.3</p>,
+      children: (
+        <>
+          <p>내용입니다.3</p>
+          <p>내용입니다.3</p>
+          <p>내용입니다.3</p>
+        </>
+      ),
     },
   ];
 
@@ -51,18 +51,22 @@ const ExpandItemGuide = () => {
     <div className="page-inner">
       <h1 className={styles.title}>Expand Component</h1>
 
+      <h3 className={styles['sub-title']}>import</h3>
+      <CodeHighlight
+        code={`import { Expand } from '@/components/common';`}
+        language="jsx"
+      />
+
       <section className={styles.section}>
-        <h2 className={styles['section-title']}>ExpandPanel</h2>
-        <h3 className={styles['sub-title']}>import</h3>
-        <CodeHighlight
-          code={`import { ExpandPanel } from '@/components/common';`}
-          language="jsx"
-        />
+        <h2 className={styles['section-title']}>Expand.Panel</h2>
+        <p className={styles.txt}>
+          아코디언 슬라이딩 인터렉션만 필요한 경우 사용
+        </p>
         <div className={styles.showcase}>
           <Button size="sm" className="line" onClick={() => setIsOpen(!isOpen)}>
-            Toggle
+            {isOpen ? '접기' : '펼치기'}
           </Button>
-          <ExpandPanel open={isOpen}>
+          <Expand.Panel open={isOpen}>
             <div>표시할 내용</div>
             <div>표시할 내용</div>
             <div>표시할 내용</div>
@@ -76,29 +80,25 @@ const ExpandItemGuide = () => {
             <div>표시할 내용</div>
             <div>표시할 내용</div>
             <div>표시할 내용</div>
-          </ExpandPanel>
+          </Expand.Panel>
         </div>
 
         <h3 className={styles['sub-title']}>참조 소스코드</h3>
         <CodeHighlight
           code={`const [isOpen, setIsOpen] = useState(false);
 
-<ExpandPanel open={isOpen}>
-  <div>표시할 내용</div>
-</ExpandPanel>`}
+<Expand.Panel open={isOpen}>
+  표시할 내용
+</Expand.Panel>`}
           language="jsx"
         />
       </section>
 
       <section className={styles.section}>
-        <h2 className={styles['section-title']}>ExpandItem</h2>
-        <h3 className={styles['sub-title']}>import</h3>
-        <CodeHighlight
-          code={`import { ExpandItem } from '@/components/common';`}
-          language="jsx"
-        />
+        <h2 className={styles['section-title']}>Expand.Item</h2>
+        <p className={styles.txt}>단일 아코디언 UI</p>
         <div className={styles.showcase}>
-          <ExpandItem title="제목" open={isOpen2} setOpen={setIsOpen2}>
+          <Expand.Item title="제목" open={isOpen2} setOpen={setIsOpen2}>
             <div>표시할 내용</div>
             <div>표시할 내용</div>
             <div>표시할 내용</div>
@@ -112,9 +112,9 @@ const ExpandItemGuide = () => {
             <div>표시할 내용</div>
             <div>표시할 내용</div>
             <div>표시할 내용</div>
-          </ExpandItem>
+          </Expand.Item>
 
-          <ExpandItem
+          <Expand.Item
             title="제목제목제목"
             open={isOpen3}
             setOpen={setIsOpen3}
@@ -133,7 +133,7 @@ const ExpandItemGuide = () => {
             <div>표시할 내용</div>
             <div>표시할 내용</div>
             <div>표시할 내용</div>
-          </ExpandItem>
+          </Expand.Item>
         </div>
 
         <h3 className={styles['sub-title']}>참조 소스코드</h3>
@@ -141,25 +141,20 @@ const ExpandItemGuide = () => {
           code={`const [isOpen, setIsOpen] = useState(false);
 
 //버튼이 감싸는 형태
-<ExpandItem title="제목" value={isOpen} setValue={setIsOpen}>
-  <div>표시할 내용</div>
-</ExpandItem>
+<Expand.Item title="제목" value={isOpen} setValue={setIsOpen}>
+  표시할 내용
+</Expand.Item>
 
 //버튼이 따로 있는 형태(wrap 속성 false)
-<ExpandItem title="제목" value={isOpen} setValue={setIsOpen} wrap={false}>
-  <div>표시할 내용</div>
-</ExpandItem>`}
+<Expand.Item title="제목" value={isOpen} setValue={setIsOpen} wrap={false}>
+  표시할 내용
+</Expand.Item>`}
           language="jsx"
         />
       </section>
 
       <section className={styles.section}>
         <h2 className={styles['section-title']}>Expand</h2>
-        <h3 className={styles['sub-title']}>import</h3>
-        <CodeHighlight
-          code={`import { Expand } from '@/components/common';`}
-          language="jsx"
-        />
         <div className={styles.showcase}>
           <Expand
             value={singleValue}
@@ -167,11 +162,17 @@ const ExpandItemGuide = () => {
           >
             <Expand.Item value="1" title="첫 번째 아이템">
               <div>첫 번째 내용입니다.</div>
+              <div>첫 번째 내용입니다.</div>
+              <div>첫 번째 내용입니다.</div>
             </Expand.Item>
             <Expand.Item value="2" title="두 번째 아이템">
               <div>두 번째 내용입니다.</div>
+              <div>두 번째 내용입니다.</div>
+              <div>두 번째 내용입니다.</div>
             </Expand.Item>
             <Expand.Item value="3" title="세 번째 아이템">
+              <div>세 번째 내용입니다.</div>
+              <div>세 번째 내용입니다.</div>
               <div>세 번째 내용입니다.</div>
             </Expand.Item>
           </Expand>
@@ -184,8 +185,12 @@ const ExpandItemGuide = () => {
           >
             <Expand.Item value="1" title="다중 선택 1">
               <div>다중 선택 내용 1</div>
+              <div>다중 선택 내용 1</div>
+              <div>다중 선택 내용 1</div>
             </Expand.Item>
             <Expand.Item value="2" title="다중 선택 2">
+              <div>다중 선택 내용 2</div>
+              <div>다중 선택 내용 2</div>
               <div>다중 선택 내용 2</div>
             </Expand.Item>
           </Expand>
@@ -208,7 +213,7 @@ const items = [
   {
     value: '1',
     title: '타이틀입니다 1',
-    children: <p>내용입니다.1</p>,
+    children: '내용입니다.1',
   },
   {
     value: '2',
@@ -218,30 +223,36 @@ const items = [
   {
     value: '3',
     title: '타이틀입니다 3',
-    children: <p>내용입니다.3</p>,
+    children: (
+      <>
+        <p>내용입니다.3</p>
+        <p>내용입니다.3</p>
+        <p>내용입니다.3</p>
+      </>
+    ),,
   },
 ];
 
 // 단일형태태
 <Expand value={singleValue} onChange={(value) => setSingleValue(value as string)}>
   <Expand.Item value="1" title="첫 번째 아이템">
-    <div>첫 번째 내용입니다.</div>
+    첫 번째 내용입니다.
   </Expand.Item>
   <Expand.Item value="2" title="두 번째 아이템">
-    <div>두 번째 내용입니다.</div>
+    두 번째 내용입니다.
   </Expand.Item>
   <Expand.Item value="3" title="세 번째 아이템">
-    <div>세 번째 내용입니다.</div>
+    세 번째 내용입니다.
   </Expand.Item>
 </Expand>
 
 // 다중 선택 형태
 <Expand value={multiValue} onChange={(value) => setMultiValue(value as string[])}>
   <Expand.Item value="1" title="다중 선택 1">
-    <div>다중 선택 내용 1</div>
+    다중 선택 내용 1
   </Expand.Item>
   <Expand.Item value="2" title="다중 선택 2">
-    <div>다중 선택 내용 2</div>
+    다중 선택 내용 2
   </Expand.Item>
 </Expand>
 
