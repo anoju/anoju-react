@@ -160,6 +160,7 @@ const ExpandItemGuide = () => {
           code={`import { Expand } from '@/components/common';`}
           language="jsx"
         />
+        <h3 className={styles['sub-title']}>기본</h3>
         <div className={styles.showcase}>
           <Expand
             value={singleValue}
@@ -175,9 +176,9 @@ const ExpandItemGuide = () => {
               <div>세 번째 내용입니다.</div>
             </Expand.Item>
           </Expand>
-          <br />
-          <br />
-          <br />
+        </div>
+        <h3 className={styles['sub-title']}>다중 열림</h3>
+        <div className={styles.showcase}>
           <Expand
             value={multiValue}
             onChange={(value) => setMultiValue(value as string[])}
@@ -189,11 +190,18 @@ const ExpandItemGuide = () => {
               <div>다중 선택 내용 2</div>
             </Expand.Item>
           </Expand>
-          <br />
-          <br />
+        </div>
+        <h3 className={styles['sub-title']}>items 방식</h3>
+        <div className={styles.showcase}>
+          <Expand
+            items={items}
+            value={itemsValue}
+            onChange={(value) => setItemsValue(value as string)}
+          />
           <br />
           <Expand
             items={items}
+            itemsWrap={false}
             value={itemsValue}
             onChange={(value) => setItemsValue(value as string)}
           />
@@ -246,7 +254,17 @@ const items = [
 </Expand>
 
 // items 방식
-<Expand items={items} value={itemsValue} onChange={(value) => setItemsValue(value as string)} />`}
+<Expand
+  items={items}
+  value={itemsValue}
+  onChange={(value) => setItemsValue(value as string)}
+/>
+<Expand
+  items={items}
+  itemsWrap={false}
+  value={itemsValue}
+  onChange={(value) => setItemsValue(value as string)}
+/>`}
           language="jsx"
         />
       </section>

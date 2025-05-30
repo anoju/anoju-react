@@ -109,7 +109,10 @@
 // 열린 상태
 .expand-item-open {
   // 열린 상태의 추가 스타일
-  font-weight: bold;
+  .expand-item-title {
+    font-weight: bold;
+    color: var(--primary-color);
+  }
   .expand-item-content {
     border-top: 1px solid var(--bg-dark-10);
   }
