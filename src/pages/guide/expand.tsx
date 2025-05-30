@@ -23,6 +23,7 @@ const ExpandItemGuide = () => {
   const [singleValue, setSingleValue] = useState<string>('1');
   const [multiValue, setMultiValue] = useState<string[]>(['1']);
   const [itemsValue, setItemsValue] = useState<string>('');
+  const [itemsValue2, setItemsValue2] = useState<string>('');
   const items = [
     {
       value: '1',
@@ -155,11 +156,6 @@ const ExpandItemGuide = () => {
 
       <section className={styles.section}>
         <h2 className={styles['section-title']}>Expand</h2>
-        <h3 className={styles['sub-title']}>import</h3>
-        <CodeHighlight
-          code={`import { Expand } from '@/components/common';`}
-          language="jsx"
-        />
         <h3 className={styles['sub-title']}>기본</h3>
         <div className={styles.showcase}>
           <Expand
@@ -212,8 +208,8 @@ const ExpandItemGuide = () => {
           <Expand
             items={items}
             itemsWrap={false}
-            value={itemsValue}
-            onChange={(value) => setItemsValue(value as string)}
+            value={itemsValue2}
+            onChange={(value) => setItemsValue2(value as string)}
           />
         </div>
 
