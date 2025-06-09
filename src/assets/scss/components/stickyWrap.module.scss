@@ -11,7 +11,11 @@
     z-index: 1000;
 
     .content {
+      position: fixed;
+      left: 0;
+      width: 100%;
       transition: transform 0.3s ease;
+      box-shadow: 0 2px 8px rgb(0 0 0 / 15%);
     }
 
     &.hidden {
@@ -23,19 +27,13 @@
 }
 
 .placeholder {
-  width: 100%;
   transition: height 0.2s ease;
   pointer-events: none;
+  visibility: hidden;
 }
 
 .content {
-  width: 100%;
   transition: none;
-
-  // fixed 상태에서의 스타일
-  .sticky-wrap.fixed & {
-    box-shadow: 0 2px 8px rgb(0 0 0 / 15%);
-  }
 }
 
 // 라이트 모드에서의 그림자 조정
@@ -48,7 +46,7 @@
 }
 
 // 반응형 대응
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .sticky-wrap.fixed .content {
     box-shadow: 0 1px 4px rgb(0 0 0 / 12%);
   }

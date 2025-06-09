@@ -1,36 +1,9 @@
 // src/contexts/StickyWrapContext.tsx
-import React, {
-  createContext,
-  useContext,
-  useRef,
-  useCallback,
-  ReactNode,
-} from 'react';
-
-// StickyWrap 인스턴스 상태 타입
-export interface StickyWrapState {
-  id: string;
-  height: number;
-  width: number;
-  isFixed: boolean;
-  order: number;
-  element: HTMLElement;
-  scrolling: boolean;
-  isHidden: boolean; // scrolling 옵션 시 숨김 상태
-  offsetTop: number;
-  originalTop: number; // 원래 위치
-  originalLeft: number; // 원래 왼쪽 위치
-}
-
-// 컨텍스트 타입 정의
-interface StickyWrapContextType {
-  instances: Map<string, StickyWrapState>;
-  registerInstance: (id: string, state: StickyWrapState) => void;
-  updateInstance: (id: string, updates: Partial<StickyWrapState>) => void;
-  unregisterInstance: (id: string) => void;
-  getTopOffset: (currentId: string) => number;
-  updateStackedPositions: () => void;
-}
+import React, { createContext, useRef, useCallback, ReactNode } from 'react';
+import type {
+  StickyWrapState,
+  StickyWrapContextType,
+} from '@/types/stickyWrap';
 
 // 컨텍스트 생성
 const StickyWrapContext = createContext<StickyWrapContextType | undefined>(
@@ -38,18 +11,15 @@ const StickyWrapContext = createContext<StickyWrapContextType | undefined>(
 );
 
 // Provider 컴포넌트
-export const StickyWrapProvider: React.FC<{ children: ReactNode }> = ({
+const StickyWrapProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const instancesRef = useRef<Map<string, StickyWrapState>>(new Map());
 
   // 인스턴스 등록
-  const registerInstance = useCallback(
-    (id: string, state: StickyWrapState) => {
-      instancesRef.current.set(id, state);
-    },
-    []
-  );
+  const registerInstance = useCallback((id: string, state: StickyWrapState) => {
+    instancesRef.current.set(id, state);
+  }, []);
 
   // 인스턴스 업데이트
   const updateInstance = useCallback(
@@ -74,7 +44,7 @@ export const StickyWrapProvider: React.FC<{ children: ReactNode }> = ({
     if (!current) return 0;
 
     let totalHeight = current.offsetTop;
-    
+
     // 모든 인스턴스를 순회하여 현재 요소보다 앞선 fixed 요소들의 높이를 더함
     Array.from(instancesRef.current.values())
       .filter(
@@ -104,7 +74,7 @@ export const StickyWrapProvider: React.FC<{ children: ReactNode }> = ({
       if (element) {
         // 각 요소의 고유한 offsetTop + 이전 요소들의 누적 높이
         const topPosition = instance.offsetTop + accumulatedHeight;
-        
+
         if (instance.scrolling && instance.isHidden) {
           // scrolling 옵션이 true이고 숨겨진 상태일 때
           element.style.transform = `translateY(-${instance.height}px)`;
@@ -139,13 +109,5 @@ export const StickyWrapProvider: React.FC<{ children: ReactNode }> = ({
   );
 };
 
-// 컨텍스트 사용을 위한 훅
-export const useStickyWrap = () => {
-  const context = useContext(StickyWrapContext);
-  if (context === undefined) {
-    throw new Error('useStickyWrap must be used within a StickyWrapProvider');
-  }
-  return context;
-};
-
-export default StickyWrapContext;
+export { StickyWrapProvider, StickyWrapContext };
+export default StickyWrapProvider;
