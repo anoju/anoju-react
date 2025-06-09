@@ -17,12 +17,13 @@ $header-height: 6rem;
   width: 100%;
   background-color: var(--bg-light-5);
   height: $header-height;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 100;
   overflow: hidden;
+
+  // position: fixed;
+  // top: 0;
+  // left: 0;
+  // right: 0;
+  // z-index: 100;
 }
 
 .header-left,
@@ -78,10 +79,11 @@ $header-height: 6rem;
 
 .container {
   height: 100%;
-  padding-top: $header-height;
   flex-grow: 1;
   display: flex;
   flex-direction: column;
+
+  // padding-top: $header-height;
 
   > div,
   > p,

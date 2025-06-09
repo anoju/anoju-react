@@ -3,7 +3,7 @@ import React, { ReactNode, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLayout } from '@/contexts/LayoutContext';
 import styles from '@/assets/scss/layouts/layouts.module.scss';
-import { Button } from '@/components/common';
+import { Button, StickyWrap } from '@/components/common';
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -85,22 +85,24 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   return (
     <article className={styles.wrapper}>
       {config.showHeader && (
-        <header className={styles.header}>
-          <div ref={leftRef} className={styles['header-left']}>
-            {config.showBackButton && (
-              <Button onClick={handleGoBack} size="sm" aria-label="뒤로 가기">
-                <BackIcon />
-              </Button>
-            )}
-            {config.leftButtons}
-          </div>
-          <div className={styles['header-center']}>
-            <h1 className={styles['header-title']}>{config.title}</h1>
-          </div>
-          <div ref={rightRef} className={styles['header-right']}>
-            {config.rightButtons}
-          </div>
-        </header>
+        <StickyWrap hideScrolling>
+          <header className={styles.header}>
+            <div ref={leftRef} className={styles['header-left']}>
+              {config.showBackButton && (
+                <Button onClick={handleGoBack} size="sm" aria-label="뒤로 가기">
+                  <BackIcon />
+                </Button>
+              )}
+              {config.leftButtons}
+            </div>
+            <div className={styles['header-center']}>
+              <h1 className={styles['header-title']}>{config.title}</h1>
+            </div>
+            <div ref={rightRef} className={styles['header-right']}>
+              {config.rightButtons}
+            </div>
+          </header>
+        </StickyWrap>
       )}
       <main className={styles.container}>{children}</main>
       {config.showFooter && (

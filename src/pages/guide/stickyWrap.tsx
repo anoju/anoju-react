@@ -95,7 +95,7 @@ const StickyWrapGuide = () => {
             <p>이 StickyWrap는 상단에서 50px 떨어진 위치에 고정됩니다.</p>
           </div>
 
-          <StickyWrap offsetTop={50}>
+          <StickyWrap>
             <div
               style={{
                 padding: '20px',
@@ -136,10 +136,13 @@ const StickyWrapGuide = () => {
       <section className={styles.section}>
         <h2 className={styles['section-title']}>여러 개 스택킹</h2>
         <p className={styles.txt}>
-          여러 개의 StickyWrap을 사용하면 첫 번째가 가장 위에 고정되고, 두 번째는 첫 번째 아래에, 세 번째는 두 번째 아래에 차례대로 쌓입니다. (거꾸로 된 탑 모양)
+          여러 개의 StickyWrap을 사용하면 첫 번째가 가장 위에 고정되고, 두
+          번째는 첫 번째 아래에, 세 번째는 두 번째 아래에 차례대로 쌓입니다.
+          (거꾸로 된 탑 모양)
         </p>
         <p className={styles.txt}>
-          각 요소의 높이가 다르기 때문에 스택되는 모습을 명확하게 볼 수 있습니다.
+          각 요소의 높이가 다르기 때문에 스택되는 모습을 명확하게 볼 수
+          있습니다.
         </p>
 
         <div style={{ height: '200vh', padding: '20px 0' }}>
@@ -156,7 +159,6 @@ const StickyWrapGuide = () => {
                 color: 'white',
                 borderRadius: '8px',
                 textAlign: 'center',
-                marginBottom: '20px',
                 fontSize: '16px',
                 fontWeight: 'bold',
               }}
@@ -177,7 +179,6 @@ const StickyWrapGuide = () => {
                 color: 'white',
                 borderRadius: '8px',
                 textAlign: 'center',
-                marginBottom: '20px',
                 fontSize: '16px',
                 fontWeight: 'bold',
               }}
@@ -198,7 +199,6 @@ const StickyWrapGuide = () => {
                 color: 'white',
                 borderRadius: '8px',
                 textAlign: 'center',
-                marginBottom: '20px',
                 fontSize: '16px',
                 fontWeight: 'bold',
               }}
@@ -274,7 +274,7 @@ const handleFixedChange = (isFixed: boolean) => {
             </p>
           </div>
 
-          <StickyWrap scrolling={true}>
+          <StickyWrap hideScrolling>
             <div
               style={{
                 padding: '20px',
@@ -319,9 +319,7 @@ const handleFixedChange = (isFixed: boolean) => {
 
       <section className={styles.section}>
         <h2 className={styles['section-title']}>복합 사용 예시</h2>
-        <p className={styles.txt}>
-          여러 옵션을 조합하여 사용하는 예시입니다.
-        </p>
+        <p className={styles.txt}>여러 옵션을 조합하여 사용하는 예시입니다.</p>
 
         <div style={{ height: '300vh', padding: '20px 0' }}>
           <div style={{ marginBottom: '50px' }}>
@@ -352,7 +350,7 @@ const handleFixedChange = (isFixed: boolean) => {
           </div>
 
           {/* 네비게이션 */}
-          <StickyWrap scrolling={true}>
+          <StickyWrap hideScrolling>
             <div
               style={{
                 padding: '14px 15px', // 58px 높이
@@ -373,7 +371,7 @@ const handleFixedChange = (isFixed: boolean) => {
           </div>
 
           {/* 서브 헤더 */}
-          <StickyWrap offsetTop={10}>
+          <StickyWrap>
             <div
               style={{
                 padding: '18px 15px', // 66px 높이
@@ -566,7 +564,10 @@ const handleFixedChange = (isFixed: boolean) => {
           <ul style={{ paddingLeft: '20px' }}>
             <li>스크롤 시 자동으로 position: fixed로 전환</li>
             <li>고정 시 원래 위치에 placeholder를 두어 레이아웃 유지</li>
-            <li>여러 개 사용 시 첫 번째가 가장 위에, 다음 요소들이 아래로 차례대로 쌓임 (거꾸로 된 탑 모양)</li>
+            <li>
+              여러 개 사용 시 첫 번째가 가장 위에, 다음 요소들이 아래로 차례대로
+              쌓임 (거꾸로 된 탑 모양)
+            </li>
             <li>scrolling 옵션으로 스크롤 방향에 따른 숨김/표시</li>
             <li>ResizeObserver로 크기 변화 자동 감지</li>
             <li>throttle을 이용한 성능 최적화</li>

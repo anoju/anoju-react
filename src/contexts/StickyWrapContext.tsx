@@ -1,9 +1,30 @@
 // src/contexts/StickyWrapContext.tsx
-import React, { createContext, useRef, useCallback, ReactNode } from 'react';
+import React, {
+  createContext,
+  useRef,
+  useCallback,
+  ReactNode,
+  useEffect,
+} from 'react';
 import type {
   StickyWrapState,
   StickyWrapContextType,
 } from '@/types/stickyWrap';
+
+// throttle 유틸리티 함수
+function throttle<T extends unknown[]>(
+  func: (...args: T) => void,
+  limit: number
+): (...args: T) => void {
+  let inThrottle: boolean;
+  return function (this: void, ...args: T) {
+    if (!inThrottle) {
+      func.apply(this, args);
+      inThrottle = true;
+      setTimeout(() => (inThrottle = false), limit);
+    }
+  };
+}
 
 // 컨텍스트 생성
 const StickyWrapContext = createContext<StickyWrapContextType | undefined>(
@@ -15,14 +36,135 @@ const StickyWrapProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const instancesRef = useRef<Map<string, StickyWrapState>>(new Map());
+  const subscribersRef = useRef<Map<string, (state: StickyWrapState) => void>>(
+    new Map()
+  );
+  const lastScrollYRef = useRef<number>(0);
 
-  // 인스턴스 등록
-  const registerInstance = useCallback((id: string, state: StickyWrapState) => {
-    instancesRef.current.set(id, state);
+  // 모든 인스턴스의 상태를 순차적으로 처리
+  const processAllInstances = useCallback(() => {
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const instances = Array.from(instancesRef.current.values()).sort(
+      (a, b) => a.originalTop - b.originalTop
+    ); // DOM 순서대로 정렬
+
+    let accumulatedHeight = 0;
+    const updates: Array<{ id: string; state: StickyWrapState }> = [];
+
+    // 각 인스턴스를 순서대로 처리
+    instances.forEach((instance) => {
+      console.log(instance, scrollTop, instance.originalTop, accumulatedHeight);
+      const shouldBeFixed =
+        scrollTop >= instance.originalTop - accumulatedHeight;
+
+      // 스크롤 방향 감지 (hideScrolling 옵션용)
+      let newIsHidden = instance.isHidden;
+      if (instance.hideScrolling && shouldBeFixed) {
+        const scrollDirection =
+          scrollTop > lastScrollYRef.current ? 'down' : 'up';
+
+        if (scrollDirection === 'down') {
+          newIsHidden = true;
+        } else if (scrollDirection === 'up') {
+          newIsHidden = false;
+        }
+      }
+
+      // 상태가 변경된 경우
+      if (
+        shouldBeFixed !== instance.isFixed ||
+        newIsHidden !== instance.isHidden
+      ) {
+        const updatedState: StickyWrapState = {
+          ...instance,
+          isFixed: shouldBeFixed,
+          isHidden: newIsHidden,
+          fixedTop: accumulatedHeight,
+        };
+
+        instancesRef.current.set(instance.id, updatedState);
+        updates.push({ id: instance.id, state: updatedState });
+
+        // onChange 콜백 호출
+        if (instance.onChange && shouldBeFixed !== instance.isFixed) {
+          instance.onChange(shouldBeFixed);
+        }
+      }
+
+      // 고정되고 숨겨지지 않은 경우 누적 높이에 추가
+      if (shouldBeFixed && !newIsHidden) {
+        accumulatedHeight += instance.height;
+      }
+    });
+
+    lastScrollYRef.current = scrollTop;
+
+    // 스타일 업데이트
+    requestAnimationFrame(() => {
+      updates.forEach(({ id, state }) => {
+        const subscriber = subscribersRef.current.get(id);
+        if (subscriber) {
+          subscriber(state);
+        }
+      });
+    });
   }, []);
 
-  // 인스턴스 업데이트
-  const updateInstance = useCallback(
+  // throttled 스크롤 핸들러
+  const throttledScrollHandler = useRef(
+    throttle(() => {
+      processAllInstances();
+    }, 16)
+  ).current;
+
+  // throttled 리사이즈 핸들러
+  const throttledResizeHandler = useRef(
+    throttle(() => {
+      // 모든 인스턴스의 크기 정보 업데이트
+      instancesRef.current.forEach((instance) => {
+        if (instance.element && instance.element.parentElement) {
+          const rect = instance.element.parentElement.getBoundingClientRect();
+          const updatedInstance = {
+            ...instance,
+            height: rect.height,
+            width: rect.width,
+            originalLeft: rect.left,
+          };
+          instancesRef.current.set(instance.id, updatedInstance);
+        }
+      });
+      processAllInstances();
+    }, 100)
+  ).current;
+
+  // 이벤트 리스너 등록
+  useEffect(() => {
+    window.addEventListener('scroll', throttledScrollHandler, {
+      passive: true,
+    });
+    window.addEventListener('resize', throttledResizeHandler);
+
+    return () => {
+      window.removeEventListener('scroll', throttledScrollHandler);
+      window.removeEventListener('resize', throttledResizeHandler);
+    };
+  }, [throttledScrollHandler, throttledResizeHandler]);
+
+  // 인스턴스 등록
+  const registerInstance = useCallback(
+    (id: string, state: StickyWrapState) => {
+      instancesRef.current.set(id, state);
+
+      // 초기 위치 체크
+      setTimeout(() => {
+        processAllInstances();
+      }, 0);
+    },
+    [processAllInstances]
+  );
+
+  // 인스턴스 데이터 업데이트
+  const updateInstanceData = useCallback(
     (id: string, updates: Partial<StickyWrapState>) => {
       const current = instancesRef.current.get(id);
       if (current) {
@@ -34,72 +176,40 @@ const StickyWrapProvider: React.FC<{ children: ReactNode }> = ({
   );
 
   // 인스턴스 제거
-  const unregisterInstance = useCallback((id: string) => {
-    instancesRef.current.delete(id);
-  }, []);
+  const unregisterInstance = useCallback(
+    (id: string) => {
+      instancesRef.current.delete(id);
+      subscribersRef.current.delete(id);
+      processAllInstances(); // 다른 요소들의 위치 재계산
+    },
+    [processAllInstances]
+  );
 
-  // 현재 요소보다 위에 있는 fixed 요소들의 높이 합계 계산
-  const getTopOffset = useCallback((currentId: string): number => {
-    const current = instancesRef.current.get(currentId);
-    if (!current) return 0;
+  // 상태 업데이트 구독
+  const subscribeToUpdates = useCallback(
+    (id: string, callback: (state: StickyWrapState) => void) => {
+      subscribersRef.current.set(id, callback);
 
-    let totalHeight = current.offsetTop;
-
-    // 모든 인스턴스를 순회하여 현재 요소보다 앞선 fixed 요소들의 높이를 더함
-    Array.from(instancesRef.current.values())
-      .filter(
-        (instance) =>
-          instance.isFixed &&
-          !instance.isHidden &&
-          instance.order < current.order
-      )
-      .sort((a, b) => a.order - b.order) // 순서대로 정렬
-      .forEach((instance) => {
-        totalHeight += instance.height;
-      });
-
-    return totalHeight;
-  }, []);
-
-  // 스택된 요소들의 위치 업데이트
-  const updateStackedPositions = useCallback(() => {
-    const fixedInstances = Array.from(instancesRef.current.values())
-      .filter((instance) => instance.isFixed)
-      .sort((a, b) => a.order - b.order);
-
-    let accumulatedHeight = 0;
-
-    fixedInstances.forEach((instance) => {
-      const element = instance.element;
-      if (element) {
-        // 각 요소의 고유한 offsetTop + 이전 요소들의 누적 높이
-        const topPosition = instance.offsetTop + accumulatedHeight;
-
-        if (instance.scrolling && instance.isHidden) {
-          // scrolling 옵션이 true이고 숨겨진 상태일 때
-          element.style.transform = `translateY(-${instance.height}px)`;
-          element.style.top = `${topPosition}px`;
-        } else {
-          // 일반 상태
-          element.style.transform = 'translateY(0)';
-          element.style.top = `${topPosition}px`;
-        }
-
-        // 숨겨지지 않은 요소만 누적 높이에 추가
-        if (!instance.isHidden) {
-          accumulatedHeight += instance.height;
-        }
+      // 현재 상태 즉시 전달
+      const currentState = instancesRef.current.get(id);
+      if (currentState) {
+        callback(currentState);
       }
-    });
-  }, []);
+
+      // 구독 해제 함수 반환
+      return () => {
+        subscribersRef.current.delete(id);
+      };
+    },
+    []
+  );
 
   const contextValue: StickyWrapContextType = {
     instances: instancesRef.current,
     registerInstance,
-    updateInstance,
+    updateInstanceData,
     unregisterInstance,
-    getTopOffset,
-    updateStackedPositions,
+    subscribeToUpdates,
   };
 
   return (

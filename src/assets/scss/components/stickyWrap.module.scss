@@ -5,17 +5,15 @@
 
 .sticky-wrap {
   position: relative;
-  z-index: 1;
 
   &.fixed {
-    z-index: 1000;
+    z-index: 100;
 
     .content {
       position: fixed;
       left: 0;
-      width: 100%;
+      right: 0;
       transition: transform 0.3s ease;
-      box-shadow: 0 2px 8px rgb(0 0 0 / 15%);
     }
 
     &.hidden {
