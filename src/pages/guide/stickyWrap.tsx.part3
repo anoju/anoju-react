@@ -1,0 +1,239 @@
+      <section className={styles.section}>
+        <h2 className={styles['section-title']}>복합 사용 예시</h2>
+        <p className={styles.txt}>
+          여러 옵션을 조합하여 사용하는 예시입니다.
+        </p>
+
+        <div style={{ height: '300vh', padding: '20px 0' }}>
+          <div style={{ marginBottom: '50px' }}>
+            <p>
+              다양한 옵션을 조합한 StickyWrap들입니다. 스크롤하면서 동작을
+              확인해보세요.
+            </p>
+          </div>
+
+          {/* 기본 헤더 */}
+          <StickyWrap>
+            <div
+              style={{
+                padding: '15px',
+                backgroundColor: '#2c3e50',
+                color: 'white',
+                textAlign: 'center',
+              }}
+            >
+              고정 헤더 (기본)
+            </div>
+          </StickyWrap>
+
+          <div style={{ marginTop: '30px', marginBottom: '50px' }}>
+            <p>첫 번째 섹션 컨텐츠...</p>
+          </div>
+
+          {/* 네비게이션 */}
+          <StickyWrap scrolling={true}>
+            <div
+              style={{
+                padding: '12px',
+                backgroundColor: '#34495e',
+                color: 'white',
+                textAlign: 'center',
+              }}
+            >
+              네비게이션 (scrolling=true)
+            </div>
+          </StickyWrap>
+
+          <div style={{ marginTop: '30px', marginBottom: '100px' }}>
+            <p>두 번째 섹션 컨텐츠...</p>
+            <p>길어진 컨텐츠...</p>
+          </div>
+
+          {/* 서브 헤더 */}
+          <StickyWrap offsetTop={10}>
+            <div
+              style={{
+                padding: '12px',
+                backgroundColor: '#e74c3c',
+                color: 'white',
+                textAlign: 'center',
+              }}
+            >
+              서브 헤더 (offsetTop=10)
+            </div>
+          </StickyWrap>
+
+          <div style={{ marginTop: '100px' }}>
+            <p>마지막 섹션...</p>
+            <div style={{ height: '150vh' }}>
+              <p>매우 긴 컨텐츠 영역입니다.</p>
+            </div>
+          </div>
+        </div>
+
+        <h3 className={styles['sub-title']}>참조 소스코드</h3>
+        <CodeHighlight
+          code={`// 기본 헤더
+<StickyWrap>
+  <div style={{ padding: '15px', backgroundColor: '#2c3e50', color: 'white' }}>
+    고정 헤더 (기본)
+  </div>
+</StickyWrap>
+
+// 스크롤링 네비게이션
+<StickyWrap scrolling={true}>
+  <div style={{ padding: '12px', backgroundColor: '#34495e', color: 'white' }}>
+    네비게이션 (scrolling=true)
+  </div>
+</StickyWrap>
+
+// 오프셋이 있는 서브 헤더
+<StickyWrap offsetTop={10}>
+  <div style={{ padding: '12px', backgroundColor: '#e74c3c', color: 'white' }}>
+    서브 헤더 (offsetTop=10)
+  </div>
+</StickyWrap>`}
+          language="jsx"
+        />
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles['section-title']}>Props</h2>
+        <div className={styles.showcase}>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr>
+                <th
+                  style={{
+                    textAlign: 'left',
+                    padding: '8px',
+                    borderBottom: '1px solid #ddd',
+                  }}
+                >
+                  속성
+                </th>
+                <th
+                  style={{
+                    textAlign: 'left',
+                    padding: '8px',
+                    borderBottom: '1px solid #ddd',
+                  }}
+                >
+                  타입
+                </th>
+                <th
+                  style={{
+                    textAlign: 'left',
+                    padding: '8px',
+                    borderBottom: '1px solid #ddd',
+                  }}
+                >
+                  기본값
+                </th>
+                <th
+                  style={{
+                    textAlign: 'left',
+                    padding: '8px',
+                    borderBottom: '1px solid #ddd',
+                  }}
+                >
+                  설명
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
+                  children
+                </td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
+                  ReactNode
+                </td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
+                  필수
+                </td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
+                  고정할 컨텐츠
+                </td>
+              </tr>
+              <tr>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
+                  offsetTop
+                </td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
+                  number
+                </td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
+                  0
+                </td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
+                  상단에서 몇 px 떨어진 위치에서 고정할지
+                </td>
+              </tr>
+              <tr>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
+                  scrolling
+                </td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
+                  boolean
+                </td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
+                  false
+                </td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
+                  스크롤 방향에 따른 숨김/표시 여부
+                </td>
+              </tr>
+              <tr>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
+                  className
+                </td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
+                  string
+                </td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
+                  ''
+                </td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
+                  추가 CSS 클래스명
+                </td>
+              </tr>
+              <tr>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
+                  onChange
+                </td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
+                  function
+                </td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
+                  undefined
+                </td>
+                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
+                  고정 상태 변경 시 호출될 콜백
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles['section-title']}>주요 특징</h2>
+        <div className={styles.showcase}>
+          <ul style={{ paddingLeft: '20px' }}>
+            <li>스크롤 시 자동으로 position: fixed로 전환</li>
+            <li>고정 시 원래 위치에 placeholder를 두어 레이아웃 유지</li>
+            <li>여러 개 사용 시 순서대로 위에 쌓임</li>
+            <li>scrolling 옵션으로 스크롤 방향에 따른 숨김/표시</li>
+            <li>ResizeObserver로 크기 변화 자동 감지</li>
+            <li>throttle을 이용한 성능 최적화</li>
+            <li>TypeScript 완전 지원</li>
+            <li>반응형 디자인 대응</li>
+          </ul>
+        </div>
+      </section>
+    </div>
+  );
+};
+
+export default StickyWrapGuide;

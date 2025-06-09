@@ -1,0 +1,66 @@
+        if (resizeObserverRef.current) {
+          resizeObserverRef.current.disconnect();
+        }
+        
+        unregisterInstance(id);
+      };
+    }, [
+      id,
+      scrolling,
+      offsetTop,
+      registerInstance,
+      unregisterInstance,
+      throttledScrollHandler,
+      throttledResizeHandler,
+      checkPosition,
+    ]);
+
+    // 클래스명 조합
+    const wrapperClassName = [
+      styles['sticky-wrap'],
+      isFixed ? styles.fixed : '',
+      isFixed && isHidden ? styles.hidden : '',
+      className,
+    ]
+      .filter(Boolean)
+      .join(' ');
+
+    return (
+      <div
+        ref={(node) => {
+          wrapperRef.current = node;
+          if (typeof ref === 'function') {
+            ref(node);
+          } else if (ref) {
+            ref.current = node;
+          }
+        }}
+        className={wrapperClassName}
+        {...props}
+      >
+        {/* 고정 시 자리를 차지할 placeholder */}
+        <div
+          ref={placeholderRef}
+          className={styles.placeholder}
+          style={{
+            height: isFixed ? 'auto' : '0px',
+            width: isFixed ? 'auto' : '0px',
+            visibility: isFixed ? 'hidden' : 'hidden',
+          }}
+        />
+        
+        {/* 실제 컨텐츠 */}
+        <div
+          ref={contentRef}
+          className={styles.content}
+        >
+          {children}
+        </div>
+      </div>
+    );
+  }
+);
+
+StickyWrap.displayName = 'StickyWrap';
+
+export default StickyWrap;

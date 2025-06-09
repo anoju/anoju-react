@@ -1,0 +1,105 @@
+    // 크기 및 위치 정보 업데이트
+    const updateDimensions = useCallback(() => {
+      if (!wrapperRef.current) return;
+
+      const rect = wrapperRef.current.getBoundingClientRect();
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      
+      // 원래 위치 정보 저장
+      if (!originalRectRef.current) {
+        originalRectRef.current = {
+          ...rect,
+          top: rect.top + scrollTop,
+        } as DOMRect;
+      }
+
+      // 인스턴스 정보 업데이트
+      updateInstance(id, {
+        height: rect.height,
+        width: rect.width,
+        originalTop: originalRectRef.current.top,
+        originalLeft: rect.left,
+      });
+    }, [id, updateInstance]);
+
+    // 스크롤 위치 확인 및 fixed 상태 결정
+    const checkPosition = useCallback(() => {
+      if (!wrapperRef.current || !originalRectRef.current) return;
+
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const shouldBeFixed = scrollTop + offsetTop >= originalRectRef.current.top;
+
+      // 스크롤 방향 감지 (scrolling 옵션용)
+      let newIsHidden = isHidden;
+      if (scrolling && isFixed) {
+        const scrollDirection = scrollTop > lastScrollYRef.current ? 'down' : 'up';
+        
+        if (scrollDirection === 'down') {
+          newIsHidden = true;
+        } else if (scrollDirection === 'up') {
+          newIsHidden = false;
+        }
+      }
+
+      lastScrollYRef.current = scrollTop;
+
+      // 상태 변경이 필요한 경우에만 업데이트
+      if (shouldBeFixed !== isFixed || newIsHidden !== isHidden) {
+        setIsFixed(shouldBeFixed);
+        setIsHidden(scrolling ? newIsHidden : false);
+
+        // placeholder 높이 설정
+        if (placeholderRef.current) {
+          if (shouldBeFixed) {
+            const rect = wrapperRef.current.getBoundingClientRect();
+            placeholderRef.current.style.height = `${rect.height}px`;
+            placeholderRef.current.style.width = `${rect.width}px`;
+          } else {
+            placeholderRef.current.style.height = '0px';
+            placeholderRef.current.style.width = '0px';
+          }
+        }
+
+        // 인스턴스 상태 업데이트
+        updateInstance(id, {
+          isFixed: shouldBeFixed,
+          isHidden: scrolling ? newIsHidden : false,
+        });
+
+        // 모든 스택된 요소들의 위치 업데이트
+        setTimeout(() => {
+          updateStackedPositions();
+        }, 0);
+
+        // onChange 콜백 호출
+        if (onChange && shouldBeFixed !== isFixed) {
+          onChange(shouldBeFixed);
+        }
+      }
+    }, [
+      isFixed,
+      isHidden,
+      scrolling,
+      offsetTop,
+      id,
+      updateInstance,
+      updateStackedPositions,
+      onChange,
+    ]);
+
+    // throttled 스크롤 핸들러
+    const throttledScrollHandler = useCallback(
+      throttle(() => {
+        checkPosition();
+      }, 16), // ~60fps
+      [checkPosition]
+    );
+
+    // throttled 리사이즈 핸들러
+    const throttledResizeHandler = useCallback(
+      throttle(() => {
+        updateDimensions();
+        checkPosition();
+      }, 100),
+      [updateDimensions, checkPosition]
+    );
