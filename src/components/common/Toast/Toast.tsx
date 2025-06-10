@@ -130,7 +130,7 @@ const Toast = forwardRef<HTMLDivElement, ToastProps>(
     const toastRef = useRef<HTMLDivElement>(null);
     const prevIndexRef = useRef(index);
 
-    const IconComponent = iconMap[toast.type];
+    const IconComponent = toast.type ? iconMap[toast.type] : null;
 
     // 인덱스 변화 감지 및 애니메이션
     useEffect(() => {
@@ -208,7 +208,7 @@ const Toast = forwardRef<HTMLDivElement, ToastProps>(
     // 토스트 클래스명 생성
     const toastClasses = cx(
       styles.toast,
-      styles[toast.type],
+      toast.type && styles[toast.type],
       styles[toast.position],
       isVisible && styles.visible,
       isLeaving && styles.leaving,
@@ -260,9 +260,11 @@ const Toast = forwardRef<HTMLDivElement, ToastProps>(
         role="alert"
         aria-live="polite"
       >
-        <div className={styles.icon}>
-          <IconComponent />
-        </div>
+        {IconComponent && (
+          <div className={styles.icon}>
+            <IconComponent />
+          </div>
+        )}
         <div className={styles.content}>{toast.content}</div>
         {toast.type !== 'loading' && (
           <button

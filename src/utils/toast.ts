@@ -39,7 +39,7 @@ const createDefaultToastFunction = (): DefaultToastFunction => {
     options: ToastOptions = {}
   ): (() => void) => {
     const context = ensureToastContext();
-    return context.addToast('info', { ...options, content });
+    return context.addToast(null, { ...options, content });
   };
 };
 
