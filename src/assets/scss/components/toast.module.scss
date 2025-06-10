@@ -18,11 +18,12 @@
 
   &.top {
     top: 2.4rem;
+    // 상단은 최신이 위에 (flex-direction: column 기본값)
   }
 
   &.bottom {
     bottom: 2.4rem;
-    flex-direction: column-reverse; // 아래쪽은 역순으로
+    // 하단은 최신이 아래에 (flex-direction: column 기본값)
   }
 }
 
@@ -36,41 +37,101 @@
   padding: 1.6rem;
   background-color: #fff;
   border-radius: 0.8rem;
-  box-shadow:
+  box-shadow: 
     0 0.6rem 1.6rem rgb(0 0 0 / 12%),
     0 0.3rem 0.6rem rgb(0 0 0 / 8%);
   pointer-events: auto;
   cursor: pointer;
   position: relative;
   opacity: 0;
-  transform: translateX(100%);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
-  // 위치별 진입 애니메이션
+  transition: 
+    all 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.3s ease;
+  
+  // 초기 상태 - 위치별 진입 방향
   &.top {
-    transform: translateY(-100%);
+    transform: translateY(-100%) scale(0.9);
   }
 
   &.bottom {
-    transform: translateY(100%);
+    transform: translateY(100%) scale(0.9);
   }
 
   // 보이는 상태
   &.visible {
     opacity: 1;
-    transform: translate(0, 0);
+    transform: translate(0, 0) scale(1);
+    transition-delay: var(--stagger-delay, 0s);
   }
 
-  // 나가는 애니메이션
-  &.leaving {
-    opacity: 0;
-    transform: scale(0.9);
+  // 위치 이동 시 애니메이션 (다른 토스트가 추가/제거될 때)
+  &.shifting {
+    transition: 
+      transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+      opacity 0.3s ease,
+      z-index 0s;
+  }
+
+  // 호버 상태 - 스택에서 위로 떠오름
+  &.hovered {
+    transform: translateY(-0.4rem) scale(1.02) !important;
+    opacity: 1 !important;
+    z-index: 1100 !important;
+    box-shadow: 
+      0 1.2rem 3.6rem rgb(0 0 0 / 20%),
+      0 0.6rem 1.2rem rgb(0 0 0 / 15%);
     transition-duration: 0.2s;
+
+    // 호버 시 다른 토스트들 살짝 어둡게
+    ~ .toast {
+      opacity: 0.7;
+    }
+  }
+
+  // 나가기 시작 애니메이션 (축소)
+  &.leaving {
+    opacity: 0.7;
+    transform: scale(0.95);
+    transition-duration: 0.2s;
+  }
+
+  // 완전히 제거되는 애니메이션 (슬라이드)
+  &.removing {
+    opacity: 0;
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    transform: translateX(100%) scale(0.8);
+    transition: 
+      opacity 0.2s ease,
+      max-height 0.3s ease 0.1s,
+      padding 0.3s ease 0.1s,
+      margin 0.3s ease 0.1s,
+      transform 0.3s ease;
+    overflow: hidden;
+
+    &.top {
+      transform: translateY(-100%) translateX(50%) scale(0.8);
+    }
+
+    &.bottom {
+      transform: translateY(100%) translateX(50%) scale(0.8);
+    }
   }
 
   // 로딩 타입은 클릭 불가
   &.loading {
     cursor: default;
+
+    &.hovered {
+      transform: translate(0, 0) scale(1) !important;
+      box-shadow: 
+        0 0.6rem 1.6rem rgb(0 0 0 / 12%),
+        0 0.3rem 0.6rem rgb(0 0 0 / 8%);
+    }
   }
 
   // 타입별 색상
@@ -113,12 +174,45 @@
       color: #1890ff;
     }
   }
+}
 
-  // 호버 효과
-  &:not(.loading):hover {
-    box-shadow:
-      0 0.8rem 2.4rem rgb(0 0 0 / 16%),
-      0 0.4rem 0.8rem rgb(0 0 0 / 12%);
+// 스택 효과를 위한 추가 스타일
+.toastContainer {
+  .toast {
+    // 스택 인덱스에 따른 시각적 효과
+    &:not(:first-child) {
+      position: relative;
+      
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(
+          to bottom,
+          transparent 0%,
+          rgb(0 0 0 / 2%) 100%
+        );
+        border-radius: inherit;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+      }
+    }
+
+    // 뒤쪽 토스트들에 그림자 효과
+    &:nth-child(n+2) {
+      box-shadow: 
+        0 0.4rem 1.2rem rgb(0 0 0 / 8%),
+        0 0.2rem 0.4rem rgb(0 0 0 / 6%);
+    }
+
+    &:nth-child(n+3) {
+      box-shadow: 
+        0 0.2rem 0.8rem rgb(0 0 0 / 6%),
+        0 0.1rem 0.2rem rgb(0 0 0 / 4%);
+    }
   }
 }
 
@@ -131,6 +225,15 @@
   width: 2rem;
   height: 2rem;
   margin-top: 0.2rem;
+  transition: transform 0.2s ease;
+
+  .toast.hovered:not(.loading) & {
+    transform: scale(1.15) rotate(5deg);
+  }
+
+  .toast.shifting & {
+    transition-duration: 0.4s;
+  }
 }
 
 // 로딩 아이콘 회전 애니메이션
@@ -142,7 +245,6 @@
   0% {
     transform: rotate(0deg);
   }
-
   100% {
     transform: rotate(360deg);
   }
@@ -155,6 +257,15 @@
   line-height: 1.5;
   color: rgb(0 0 0 / 85%);
   word-break: break-word;
+  transition: transform 0.2s ease;
+
+  .toast.hovered & {
+    transform: translateX(0.2rem);
+  }
+
+  .toast.shifting & {
+    transition-duration: 0.4s;
+  }
 }
 
 // 닫기 버튼
@@ -173,18 +284,28 @@
   color: rgb(0 0 0 / 45%);
   cursor: pointer;
   border-radius: 0.4rem;
-  transition:
+  transition: 
     color 0.2s ease,
-    background-color 0.2s ease;
+    background-color 0.2s ease,
+    transform 0.2s ease;
 
   &:hover {
     color: rgb(0 0 0 / 75%);
     background-color: rgb(0 0 0 / 6%);
+    transform: scale(1.15) rotate(90deg);
   }
 
   &:focus {
     outline: 0.2rem solid var(--primary-color);
     outline-offset: 0.2rem;
+  }
+
+  &:active {
+    transform: scale(0.95) rotate(90deg);
+  }
+
+  .toast.shifting & {
+    transition-duration: 0.4s;
   }
 }
 
@@ -192,9 +313,35 @@
 @include s.dark-mode {
   .toast {
     background-color: #1f1f1f;
-    box-shadow:
+    box-shadow: 
       0 0.6rem 1.6rem rgb(0 0 0 / 24%),
       0 0.3rem 0.6rem rgb(0 0 0 / 16%);
+
+    &.hovered {
+      box-shadow: 
+        0 1.2rem 3.6rem rgb(0 0 0 / 40%),
+        0 0.6rem 1.2rem rgb(0 0 0 / 30%);
+    }
+
+    &:nth-child(n+2) {
+      box-shadow: 
+        0 0.4rem 1.2rem rgb(0 0 0 / 16%),
+        0 0.2rem 0.4rem rgb(0 0 0 / 12%);
+    }
+
+    &:nth-child(n+3) {
+      box-shadow: 
+        0 0.2rem 0.8rem rgb(0 0 0 / 12%),
+        0 0.1rem 0.2rem rgb(0 0 0 / 8%);
+    }
+
+    &:not(:first-child)::before {
+      background: linear-gradient(
+        to bottom,
+        transparent 0%,
+        rgb(255 255 255 / 2%) 100%
+      );
+    }
 
     .content {
       color: rgb(255 255 255 / 85%);
@@ -208,17 +355,11 @@
         background-color: rgb(255 255 255 / 8%);
       }
     }
-
-    &:not(.loading):hover {
-      box-shadow:
-        0 0.8rem 2.4rem rgb(0 0 0 / 32%),
-        0 0.4rem 0.8rem rgb(0 0 0 / 24%);
-    }
   }
 }
 
 // 모바일 대응
-@media (width <= 768px) {
+@media (max-width: 768px) {
   .toastContainer {
     padding: 0 1.2rem;
     max-width: calc(100vw - 2.4rem);
@@ -242,6 +383,35 @@
     .content {
       font-size: 1.3rem;
     }
+
+    // 모바일에서는 호버 효과 및 스택 효과 단순화
+    &.hovered {
+      transform: translate(0, 0) scale(1.01) !important;
+      box-shadow: 
+        0 0.8rem 2.4rem rgb(0 0 0 / 16%),
+        0 0.4rem 0.8rem rgb(0 0 0 / 12%);
+
+      .icon {
+        transform: scale(1.05);
+      }
+
+      .content {
+        transform: none;
+      }
+
+      .closeBtn:hover {
+        transform: scale(1.1);
+      }
+    }
+
+    // 모바일에서 스택 오프셋 줄이기
+    &:not(:first-child) {
+      transform: scale(0.98);
+    }
+
+    &:nth-child(n+3) {
+      transform: scale(0.96);
+    }
   }
 }
 
@@ -249,22 +419,43 @@
 @media (prefers-reduced-motion: reduce) {
   .toast {
     transition: opacity 0.2s ease;
-
+    
     &.top,
     &.bottom {
-      transform: none;
+      transform: none !important;
     }
 
     &.visible {
-      transform: none;
+      transform: none !important;
+      transition-delay: 0s;
     }
 
-    &.leaving {
-      transform: none;
+    &.hovered {
+      transform: none !important;
+    }
+
+    &.leaving,
+    &.removing,
+    &.shifting {
+      transform: none !important;
+    }
+
+    .icon,
+    .content,
+    .closeBtn {
+      transition: none;
+      transform: none !important;
     }
   }
 
   .loadingSpin {
     animation: none;
+  }
+}
+
+// 컨테이너 호버 시 전체적인 상호작용
+.toastContainer:hover {
+  .toast:not(.hovered) {
+    transition-duration: 0.3s;
   }
 }

@@ -8,14 +8,20 @@ import styles from '@/assets/scss/components/toast.module.scss';
 const ToastContainer: React.FC = () => {
   const { toasts } = useToast();
 
-  // 위치별로 토스트 분리
+  // 위치별로 토스트 분리 및 정렬
   const { topToasts, bottomToasts } = useMemo(() => {
     const top = toasts.filter((toast) => toast.position === 'top');
     const bottom = toasts.filter((toast) => toast.position === 'bottom');
     
+    // 상단: 최신이 위에 (역순 정렬)
+    const sortedTop = [...top].sort((a, b) => b.createdAt - a.createdAt);
+    
+    // 하단: 최신이 아래에 (정순 정렬)
+    const sortedBottom = [...bottom].sort((a, b) => a.createdAt - b.createdAt);
+    
     return {
-      topToasts: top,
-      bottomToasts: bottom,
+      topToasts: sortedTop,
+      bottomToasts: sortedBottom,
     };
   }, [toasts]);
 
@@ -40,6 +46,7 @@ const ToastContainer: React.FC = () => {
               key={toast.id}
               toast={toast}
               index={index}
+              totalCount={topToasts.length}
             />
           ))}
         </div>
@@ -57,6 +64,7 @@ const ToastContainer: React.FC = () => {
               key={toast.id}
               toast={toast}
               index={index}
+              totalCount={bottomToasts.length}
             />
           ))}
         </div>
