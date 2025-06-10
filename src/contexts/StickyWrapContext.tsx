@@ -157,7 +157,7 @@ const StickyWrapProvider: React.FC<{ children: ReactNode }> = ({
           const rect = instance.element.parentElement.getBoundingClientRect();
           const updatedInstance = {
             ...instance,
-            height: instance.element.offsetHeight || rect.height,
+            height: rect.height,
           };
           instancesRef.current.set(instance.id, updatedInstance);
         }
