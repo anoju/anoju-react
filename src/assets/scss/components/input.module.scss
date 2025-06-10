@@ -31,6 +31,21 @@
     color: var(--form-disabled-color);
   }
 
+  // Success 상태 (유효성 검사 성공)
+  &.success:not(.disabled) {
+    border-color: var(--form-success-color);
+  }
+
+  // Error 상태 (유효성 검사 실패)
+  &.error:not(.disabled) {
+    border-color: var(--form-error-color);
+  }
+
+  // Warning 상태 (경고)
+  &.warning:not(.disabled) {
+    border-color: var(--form-warning-color);
+  }
+
   // before와 after 요소가 있을 때 input 패딩 조정
   &.with-before .native {
     padding-left: calc(var(--form-padding-x) / 2);

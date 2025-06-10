@@ -38,6 +38,9 @@ export interface InputFieldProps {
   align?: 'left' | 'center' | 'right';
 }
 
+// Status 타입 정의 (Ant Design과 유사한 유효성 검사 피드백)
+type InputStatus = 'success' | 'error' | 'warning' | '';
+
 // Input 컴포넌트 Props 타입 정의
 export interface InputProps {
   // 기본 속성
@@ -52,6 +55,7 @@ export interface InputProps {
   readOnly?: boolean;
   // 스타일 관련
   align?: 'left' | 'center' | 'right';
+  status?: InputStatus; // 유효성 검사 상태
   // Input 콘텐츠 관련
   value?: string | number;
   defaultValue?: string | number;
@@ -74,6 +78,7 @@ export interface InputProps {
   // 이벤트 핸들러 (override)
   onFocus?: (e: FocusEvent<HTMLInputElement>, index?: number) => void;
   onBlur?: (e: FocusEvent<HTMLInputElement>, index?: number) => void;
+  onClear?: () => void; // clear 버튼 클릭 시 호출되는 콜백
 }
 
 // InputRefs 인터페이스 정의
@@ -458,6 +463,7 @@ const Input = forwardRef<InputHandle, InputProps>(
 
       // 스타일 관련
       align,
+      status = '', // 기본값은 빈 문자열 (정상 상태)
 
       // Input 콘텐츠 관련
       value,
@@ -486,6 +492,7 @@ const Input = forwardRef<InputHandle, InputProps>(
       onChange,
       onFocus,
       onBlur,
+      onClear,
 
       // 나머지 속성
       ...restProps
@@ -594,6 +601,11 @@ const Input = forwardRef<InputHandle, InputProps>(
     const handleReset = useCallback(() => {
       if (disabled || readOnly) return;
 
+      // onClear 콜백 호출
+      if (onClear) {
+        onClear();
+      }
+
       if (isMultipleInputs) {
         // 모든 input 필드 초기화 (disabled 상태 유지)
         const newValues = inputValues.map((_, index) => {
@@ -671,6 +683,7 @@ const Input = forwardRef<InputHandle, InputProps>(
       setInputValue,
       inputRef,
       inputRefs,
+      onClear,
     ]);
 
     // 비밀번호 표시 토글 함수
@@ -872,6 +885,9 @@ const Input = forwardRef<InputHandle, InputProps>(
       [styles['with-before']]: !!beforeEl,
       [styles['with-after']]: !!afterEl,
       [styles['with-buttons']]: hasButtons,
+      [styles.success]: status === 'success',
+      [styles.error]: status === 'error',
+      [styles.warning]: status === 'warning',
     });
 
     // 입력 필드 클래스 이름

@@ -73,6 +73,46 @@ const InputGuide = () => {
         />
       </section>
       <section className={styles.section}>
+        <h2 className={styles['section-title']}>defaultValue 속성</h2>
+        <p className={styles.txt}>
+          defaultValue 속성을 사용하여 입력 필드의 초기값을 설정할 수 있습니다.
+          이는 uncontrolled 컴포넌트로 동작하며, 내부적으로 상태를 관리합니다.
+        </p>
+
+        <div className={styles.showcase}>
+          <Input
+            placeholder="기본값이 설정된 입력 필드"
+            defaultValue="기본값입니다"
+          />
+          <br />
+          <Input
+            placeholder="숫자 기본값"
+            defaultValue={1234}
+            onlyNumber
+            addComma
+          />
+        </div>
+
+        <h3 className={styles['sub-title']}>참조 소스코드</h3>
+        <CodeHighlight
+          code={`// 문자열 기본값
+<Input
+  placeholder="기본값이 설정된 입력 필드"
+  defaultValue="기본값입니다"
+/>
+
+// 숫자 기본값
+<Input
+  placeholder="숫자 기본값"
+  defaultValue={1234}
+  onlyNumber
+  addComma
+/>`}
+          language="jsx"
+        />
+      </section>
+
+      <section className={styles.section}>
         <h2 className={styles['section-title']}>기본 입력 필드</h2>
         <p className={styles.txt}>
           가장 기본적인 입력 필드입니다. 기본적으로 입력 내용 지우기 버튼을
@@ -263,6 +303,35 @@ const InputGuide = () => {
         <CodeHighlight
           code={`<Input placeholder="비활성화 상태" disabled value="비활성화된 입력 필드" />
 <Input placeholder="읽기 전용 상태" readOnly value="읽기 전용 입력 필드" />`}
+          language="jsx"
+        />
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles['section-title']}>
+          Status 속성 (유효성 검사 피드백)
+        </h2>
+        <p className={styles.txt}>
+          status 속성을 사용하여 입력 필드의 유효성 검사 상태를 시각적으로
+          표시할 수 있습니다. error는 빨간색, warning은 주황색으로 테두리가
+          변경됩니다.
+        </p>
+
+        <div
+          className={styles.showcase}
+          style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}
+        >
+          <Input placeholder="정상 상태 (기본)" />
+          <Input placeholder="성공 상태" status="success" />
+          <Input placeholder="에러 상태" status="error" />
+          <Input placeholder="경고 상태" status="warning" />
+        </div>
+
+        <h3 className={styles['sub-title']}>참조 소스코드</h3>
+        <CodeHighlight
+          code={`<Input placeholder="정상 상태 (기본)" />
+<Input placeholder="에러 상태" status="error" />
+<Input placeholder="경고 상태" status="warning" />`}
           language="jsx"
         />
       </section>
