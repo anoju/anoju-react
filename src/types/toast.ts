@@ -18,6 +18,7 @@ export interface ToastOptions {
   content?: ReactNode; // 토스트 내용
   duration?: number; // 지속 시간 (밀리초), 0이면 자동으로 닫히지 않음
   position?: ToastPosition; // 표시 위치
+  showCloseBtn?: boolean; // 닫기 버튼 노출
   onClose?: () => void; // 닫힐 때 콜백
   key?: string; // 고유 키 (중복 방지용)
   className?: string; // 커스텀 클래스명
@@ -29,6 +30,7 @@ export interface Toast {
   type: ToastType; // 토스트 타입
   content: ReactNode; // 내용
   duration: number; // 지속 시간
+  showCloseBtn: boolean; // 닫기 버튼 노출
   position: ToastPosition; // 위치
   onClose?: () => void; // 닫힐 때 콜백
   createdAt: number; // 생성 시간

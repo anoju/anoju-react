@@ -18,6 +18,7 @@ const ToastGuide = () => {
   });
 
   const [count, setCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
   // 로딩 토스트 참조 저장용
   const [loadingToast, setLoadingToast] = useState<(() => void) | null>(null);
@@ -44,7 +45,7 @@ const ToastGuide = () => {
           <Button
             size="sm"
             className="line"
-            onClick={() => $toast('기본 메시지입니다!', { duration: 50000 })}
+            onClick={() => $toast('기본 메시지입니다!')}
           >
             Default
           </Button>
@@ -136,6 +137,17 @@ $toast.loading('로딩중입니다...');`}
             size="sm"
             className="line"
             onClick={() =>
+              $toast.warning('자동으로 닫히지만, 닫기 버튼을 노출합니다.', {
+                showCloseBtn: true,
+              })
+            }
+          >
+            닫기 버튼 노출
+          </Button>
+          <Button
+            size="sm"
+            className="line"
+            onClick={() =>
               $toast.success('닫힐 때 콜백이 실행됩니다', {
                 onClose: () => {
                   setCount((prev) => prev + 1);
@@ -154,6 +166,7 @@ $toast.loading('로딩중입니다...');`}
 $toast.success('5초 동안 표시됩니다', { duration: 5000 });
 $toast.info('하단에 표시됩니다', { position: 'bottom' });
 $toast.warning('자동으로 닫히지 않습니다', { duration: 0 });
+$toast.warning('자동으로 닫히지만, 닫기 버튼을 노출합니다.', { showCloseBtn: true });
 $toast.success('닫힐 때 콜백이 실행됩니다', {
   onClose: () => {
     console.log('토스트가 닫혔습니다!');
@@ -226,13 +239,18 @@ $toast.config.error({
             size="sm"
             className="line"
             onClick={() => {
-              const close = $toast.loading(
-                '처리중... 버튼을 클릭하면 닫힙니다',
-                {
-                  duration: 0,
-                }
-              );
-              setLoadingToast(() => close);
+              if (isLoading) {
+                $toast.warning('이미 로딩 중입니다.');
+              } else {
+                setIsLoading(true);
+                const close = $toast.loading(
+                  '처리중... 버튼을 클릭하면 닫힙니다',
+                  {
+                    duration: 0,
+                  }
+                );
+                setLoadingToast(() => close);
+              }
             }}
           >
             로딩 시작
@@ -242,6 +260,7 @@ $toast.config.error({
             className="line"
             onClick={() => {
               if (loadingToast) {
+                setIsLoading(false);
                 loadingToast();
                 setLoadingToast(null);
                 $toast.success('작업이 완료되었습니다!');

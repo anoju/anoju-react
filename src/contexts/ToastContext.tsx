@@ -1,10 +1,5 @@
 // src/contexts/ToastContext.tsx
-import React, {
-  useState,
-  useCallback,
-  ReactNode,
-  useRef,
-} from 'react';
+import React, { useState, useCallback, ReactNode, useRef } from 'react';
 import type {
   Toast,
   ToastType,
@@ -32,7 +27,7 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({
   // 토스트 제거 함수
   const removeToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((toast) => toast.id !== id));
-    
+
     // 타이머 정리
     const timer = timersRef.current.get(id);
     if (timer) {
@@ -71,6 +66,7 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({
         content: mergedOptions.content || options.content || '',
         duration: mergedOptions.duration,
         position: mergedOptions.position,
+        showCloseBtn: mergedOptions.showCloseBtn,
         onClose: options.onClose,
         createdAt: Date.now(),
         key: options.key,
@@ -119,7 +115,7 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({
   // 모든 토스트 제거 (위치별로 가능)
   const clearToasts = useCallback((position?: ToastPosition) => {
     setToasts((prev) => {
-      const toastsToRemove = position 
+      const toastsToRemove = position
         ? prev.filter((toast) => toast.position === position)
         : prev;
 
@@ -132,7 +128,7 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({
         }
       });
 
-      return position 
+      return position
         ? prev.filter((toast) => toast.position !== position)
         : [];
     });
@@ -141,7 +137,7 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({
   // 컴포넌트 언마운트 시 모든 타이머 정리
   React.useEffect(() => {
     const timers = timersRef.current; // ref 값을 변수에 복사
-    
+
     return () => {
       timers.forEach((timer) => {
         clearTimeout(timer);
