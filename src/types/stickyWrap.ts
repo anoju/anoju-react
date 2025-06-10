@@ -3,14 +3,12 @@
 export interface StickyWrapState {
   id: string;
   height: number;
-  width: number;
   isFixed: boolean;
   order: number;
   element: HTMLElement;
   hideScrolling: boolean;
   isHidden: boolean; // hideScrolling 옵션 시 숨김 상태
   originalTop: number; // 원래 위치
-  originalLeft: number; // 원래 왼쪽 위치
   fixedTop: number; // 고정 시 top 위치
   onChange?: (isFixed: boolean) => void; // 콜백 함수
 }

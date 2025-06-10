@@ -53,7 +53,7 @@ const StickyWrapProvider: React.FC<{ children: ReactNode }> = ({
 
     // 각 인스턴스를 순서대로 처리
     instances.forEach((instance) => {
-      console.log(instance, scrollTop, instance.originalTop, accumulatedHeight);
+      // console.log(instance, scrollTop, instance.originalTop, accumulatedHeight);
       const shouldBeFixed =
         scrollTop >= instance.originalTop - accumulatedHeight;
 
@@ -99,6 +99,37 @@ const StickyWrapProvider: React.FC<{ children: ReactNode }> = ({
 
     lastScrollYRef.current = scrollTop;
 
+    // 위치 재계산: 모든 고정된 요소들의 위치를 다시 계산
+    // 숨겨진 요소들을 고려하여 fixedTop을 재설정
+    const fixedInstances = Array.from(instancesRef.current.values())
+      .filter((instance) => instance.isFixed)
+      .sort((a, b) => a.originalTop - b.originalTop);
+
+    let currentTop = 0;
+    fixedInstances.forEach((instance) => {
+      const updatedState = {
+        ...instance,
+        fixedTop: instance.isHidden ? currentTop - instance.height : currentTop,
+      };
+      // console.log(instance, updatedState.isHidden, updatedState.fixedTop);
+      instancesRef.current.set(instance.id, updatedState);
+
+      // updates 배열에서 해당 인스턴스 찾아서 업데이트하거나 추가
+      const existingUpdateIndex = updates.findIndex(
+        (update) => update.id === instance.id
+      );
+      if (existingUpdateIndex >= 0) {
+        updates[existingUpdateIndex].state = updatedState;
+      } else {
+        updates.push({ id: instance.id, state: updatedState });
+      }
+
+      // 숨겨지지 않은 요소만 다음 위치에 영향을 줌
+      if (!instance.isHidden) {
+        currentTop += instance.height;
+      }
+    });
+
     // 스타일 업데이트
     requestAnimationFrame(() => {
       updates.forEach(({ id, state }) => {
@@ -127,8 +158,6 @@ const StickyWrapProvider: React.FC<{ children: ReactNode }> = ({
           const updatedInstance = {
             ...instance,
             height: rect.height,
-            width: rect.width,
-            originalLeft: rect.left,
           };
           instancesRef.current.set(instance.id, updatedInstance);
         }

@@ -60,34 +60,19 @@ const StickyWrap = forwardRef<HTMLDivElement, StickyWrapProps>(
 
       const element = contentRef.current;
       const placeholder = placeholderRef.current;
-      // const wrapper = wrapperRef.current;
 
       if (state.isFixed) {
-        // fixed 스타일
-        //const rect = wrapper.getBoundingClientRect();
-        // element.style.position = 'fixed';
-        // element.style.left = `${rect.left}px`;
-        // element.style.width = `${rect.width}px`;
-        element.style.top = `${state.fixedTop}px`;
-        // element.style.zIndex = '1000';
-
-        // transform 처리 (hideScrolling 옵션)
         if (state.hideScrolling && state.isHidden) {
-          element.style.transform = 'translateY(-100%)';
+          element.style.top = `${state.fixedTop - state.height}px`;
         } else {
-          element.style.transform = 'translateY(0)';
+          element.style.top = `${state.fixedTop}px`;
         }
-
+        console.log('state.height', state.height);
         // placeholder 높이 설정
         placeholder.style.height = `${state.height}px`;
       } else {
         // 일반 스타일로 복원
-        element.style.position = '';
-        element.style.left = '';
-        element.style.width = '';
         element.style.top = '';
-        element.style.transform = '';
-        element.style.zIndex = '';
         placeholder.style.height = '';
       }
     }, []);
@@ -115,14 +100,12 @@ const StickyWrap = forwardRef<HTMLDivElement, StickyWrapProps>(
       const newInstance: StickyWrapState = {
         id,
         height: rect.height,
-        width: rect.width,
         isFixed: false,
         order: Date.now(), // 등록 순서
         element: contentRef.current,
         hideScrolling,
         isHidden: false,
         originalTop: rect.top + scrollTop,
-        originalLeft: rect.left,
         fixedTop: 0,
         onChange,
       };
@@ -147,8 +130,6 @@ const StickyWrap = forwardRef<HTMLDivElement, StickyWrapProps>(
             const rect = wrapperRef.current.getBoundingClientRect();
             updateInstanceData(id, {
               height: rect.height,
-              width: rect.width,
-              originalLeft: rect.left,
             });
           }
         });
