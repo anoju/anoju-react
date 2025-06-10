@@ -70,9 +70,9 @@
 
       &:disabled ~ .lbl {
         opacity: 1;
-        color: #c2c2c2;
-        background-color: #f2f4f6;
-        border-color: #f2f4f6;
+        color: var(--form-disabled-color);
+        background-color: var(--form-disabled-bg);
+        border-color: var(--form-disabled-color);
       }
 
       &:checked ~ .lbl {

@@ -525,7 +525,187 @@ const MyCheckboxWithRef = () => {
       </section>
 
       <section className={styles.section}>
-        <h2 className={styles['section-title']}>사용 가능한 메서드</h2>
+        <h2 className={styles['section-title']}>Checkbox Props</h2>
+        <div className={styles.showcase}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>속성</th>
+                <th>타입</th>
+                <th>기본값</th>
+                <th>설명</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>value</td>
+                <td>string | number</td>
+                <td>-</td>
+                <td>체크박스의 값 (Group에서 사용)</td>
+              </tr>
+              <tr>
+                <td>checked</td>
+                <td>boolean</td>
+                <td>-</td>
+                <td>체크 상태 (controlled 컴포넌트용)</td>
+              </tr>
+              <tr>
+                <td>defaultChecked</td>
+                <td>boolean</td>
+                <td>false</td>
+                <td>초기 체크 상태 (uncontrolled 컴포넌트용)</td>
+              </tr>
+              <tr>
+                <td>indeterminate</td>
+                <td>boolean</td>
+                <td>false</td>
+                <td>불확실한 상태 (부분 선택 표시)</td>
+              </tr>
+              <tr>
+                <td>disabled</td>
+                <td>boolean</td>
+                <td>false</td>
+                <td>비활성화 여부</td>
+              </tr>
+              <tr>
+                <td>children</td>
+                <td>ReactNode</td>
+                <td>-</td>
+                <td>라벨 텍스트 또는 컨텐츠</td>
+              </tr>
+              <tr>
+                <td>className</td>
+                <td>string</td>
+                <td>''</td>
+                <td>컴포넌트에 적용할 추가 클래스명</td>
+              </tr>
+              <tr>
+                <td>inputClassName</td>
+                <td>string</td>
+                <td>''</td>
+                <td>input 요소에 적용할 추가 클래스명</td>
+              </tr>
+              <tr>
+                <td>iconClassName</td>
+                <td>string</td>
+                <td>''</td>
+                <td>아이콘 요소에 적용할 추가 클래스명</td>
+              </tr>
+              <tr>
+                <td>labelClassName</td>
+                <td>string</td>
+                <td>''</td>
+                <td>라벨 요소에 적용할 추가 클래스명</td>
+              </tr>
+              <tr>
+                <td>onChange</td>
+                <td>function</td>
+                <td>-</td>
+                <td>체크 상태 변경 시 호출되는 함수</td>
+              </tr>
+              <tr>
+                <td>setValue</td>
+                <td>function</td>
+                <td>-</td>
+                <td>체크 상태를 직접 설정하는 함수</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles['section-title']}>Checkbox.Group Props</h2>
+        <div className={styles.showcase}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>속성</th>
+                <th>타입</th>
+                <th>기본값</th>
+                <th>설명</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>options</td>
+                <td>Array</td>
+                <td>-</td>
+                <td>체크박스 옵션 배열 (문자열 배열 또는 객체 배열)</td>
+              </tr>
+              <tr>
+                <td>value</td>
+                <td>T[]</td>
+                <td>-</td>
+                <td>선택된 값들 (controlled 컴포넌트용)</td>
+              </tr>
+              <tr>
+                <td>defaultValue</td>
+                <td>T[]</td>
+                <td>[]</td>
+                <td>초기 선택된 값들 (uncontrolled 컴포넌트용)</td>
+              </tr>
+              <tr>
+                <td>onChange</td>
+                <td>function</td>
+                <td>-</td>
+                <td>선택된 값들이 변경될 때 호출되는 함수</td>
+              </tr>
+              <tr>
+                <td>setValue</td>
+                <td>function</td>
+                <td>-</td>
+                <td>선택된 값들을 직접 설정하는 함수</td>
+              </tr>
+              <tr>
+                <td>name</td>
+                <td>string</td>
+                <td>-</td>
+                <td>그룹 내 모든 체크박스의 name 속성</td>
+              </tr>
+              <tr>
+                <td>disabled</td>
+                <td>boolean</td>
+                <td>false</td>
+                <td>그룹 내 모든 체크박스 비활성화 여부</td>
+              </tr>
+              <tr>
+                <td>className</td>
+                <td>string</td>
+                <td>''</td>
+                <td>그룹 컨테이너에 적용할 추가 클래스명</td>
+              </tr>
+              <tr>
+                <td>inputClassName</td>
+                <td>string</td>
+                <td>''</td>
+                <td>그룹 내 모든 input 요소에 적용할 추가 클래스명</td>
+              </tr>
+              <tr>
+                <td>iconClassName</td>
+                <td>string</td>
+                <td>''</td>
+                <td>그룹 내 모든 아이콘 요소에 적용할 추가 클래스명</td>
+              </tr>
+              <tr>
+                <td>labelClassName</td>
+                <td>string</td>
+                <td>''</td>
+                <td>그룹 내 모든 라벨 요소에 적용할 추가 클래스명</td>
+              </tr>
+              <tr>
+                <td>children</td>
+                <td>ReactNode</td>
+                <td>-</td>
+                <td>Checkbox 컴포넌트들 (options 대신 사용)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles['section-title']}>Checkbox 메서드</h2>
         <div className={styles.showcase}>
           <table className={styles.table}>
             <thead>
