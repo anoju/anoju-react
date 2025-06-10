@@ -6,6 +6,7 @@ import {
   useCallback,
   ReactNode,
   forwardRef,
+  CSSProperties,
 } from 'react';
 import { useStickyWrap } from '@/hooks/useStickyWrap';
 import type { StickyWrapState } from '@/types/stickyWrap';
@@ -25,6 +26,7 @@ export interface StickyWrapProps {
   hideScrolling?: boolean;
   className?: string;
   innerClassName?: string;
+  style?: CSSProperties; // style prop 추가
   onChange?: (isFixed: boolean) => void;
 }
 
@@ -36,6 +38,7 @@ const StickyWrap = forwardRef<HTMLDivElement, StickyWrapProps>(
       hideScrolling = false,
       className = '',
       innerClassName,
+      style,
       onChange,
       ...props
     },
@@ -191,6 +194,7 @@ const StickyWrap = forwardRef<HTMLDivElement, StickyWrapProps>(
           }
         }}
         className={wrapperClassName}
+        style={style}
         {...props}
       >
         {/* 고정 시 자리를 차지할 placeholder */}

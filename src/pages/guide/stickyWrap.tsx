@@ -30,7 +30,7 @@ const StickyWrapGuide = () => {
     wrap: {
       height: '100vh',
       background:
-        'linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.3))',
+        'linear-gradient(to bottom, rgba(255, 0, 0, 0), rgba(255, 0, 0, 0.3))',
     } as React.CSSProperties,
   };
 
@@ -108,11 +108,11 @@ const StickyWrapGuide = () => {
             </div>
           </StickyWrap>
 
-          <div style={{ marginBottom: '50px' }}>
-            <p>중간 컨텐츠...</p>
-          </div>
-
-          <StickyWrap onChange={handleFixedChange} innerClassName="inner">
+          <StickyWrap
+            onChange={handleFixedChange}
+            innerClassName="inner"
+            style={{ marginTop: '100px' }}
+          >
             <div
               style={{
                 ...guideStyles.box,
@@ -124,11 +124,11 @@ const StickyWrapGuide = () => {
             </div>
           </StickyWrap>
 
-          <div style={{ marginBottom: '50px' }}>
-            <p>더 많은 컨텐츠...</p>
-          </div>
-
-          <StickyWrap onChange={handleFixedChange} innerClassName="inner">
+          <StickyWrap
+            onChange={handleFixedChange}
+            innerClassName="inner"
+            style={{ marginTop: '100px' }}
+          >
             <div
               style={{
                 ...guideStyles.box,
@@ -139,10 +139,6 @@ const StickyWrapGuide = () => {
               세 번째 StickyWrap (높이: 80px)
             </div>
           </StickyWrap>
-
-          <div style={{ marginTop: '100px' }}>
-            <p>마지막 컨텐츠입니다.</p>
-          </div>
         </div>
       </section>
 
