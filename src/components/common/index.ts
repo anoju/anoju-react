@@ -31,3 +31,4 @@ export type {
   UsePopupReturn,
   UsePopupsReturn,
 } from './Popup';
+export { Toast, ToastContainer } from './Toast';
