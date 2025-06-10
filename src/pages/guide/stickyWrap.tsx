@@ -85,55 +85,6 @@ const StickyWrapGuide = () => {
       </section>
 
       <section className={styles.section}>
-        <h2 className={styles['section-title']}>offsetTop 옵션</h2>
-        <p className={styles.txt}>
-          상단에서 얼마나 떨어진 위치에서 고정될지 설정할 수 있습니다.
-        </p>
-
-        <div style={{ height: '150vh', padding: '20px 0' }}>
-          <div style={{ marginBottom: '50px' }}>
-            <p>이 StickyWrap는 상단에서 50px 떨어진 위치에 고정됩니다.</p>
-          </div>
-
-          <StickyWrap>
-            <div
-              style={{
-                padding: '20px',
-                backgroundColor: 'var(--secondary-color)',
-                color: 'white',
-                borderRadius: '8px',
-                textAlign: 'center',
-              }}
-            >
-              offsetTop=50 - 상단에서 50px 떨어진 위치에 고정
-            </div>
-          </StickyWrap>
-
-          <div style={{ marginTop: '50px' }}>
-            <p>추가 컨텐츠...</p>
-          </div>
-        </div>
-
-        <h3 className={styles['sub-title']}>참조 소스코드</h3>
-        <CodeHighlight
-          code={`<StickyWrap offsetTop={50}>
-  <div
-    style={{
-      padding: '20px',
-      backgroundColor: 'var(--secondary-color)',
-      color: 'white',
-      borderRadius: '8px',
-      textAlign: 'center',
-    }}
-  >
-    offsetTop=50 - 상단에서 50px 떨어진 위치에 고정
-  </div>
-</StickyWrap>`}
-          language="jsx"
-        />
-      </section>
-
-      <section className={styles.section}>
         <h2 className={styles['section-title']}>여러 개 스택킹</h2>
         <p className={styles.txt}>
           여러 개의 StickyWrap을 사용하면 첫 번째가 가장 위에 고정되고, 두
@@ -154,7 +105,10 @@ const StickyWrapGuide = () => {
           <StickyWrap onChange={handleFixedChange}>
             <div
               style={{
-                padding: '20px 15px', // 높이를 다르게
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                height: '60px',
                 backgroundColor: '#ff6b6b',
                 color: 'white',
                 borderRadius: '8px',
@@ -164,6 +118,8 @@ const StickyWrapGuide = () => {
               }}
             >
               첫 번째 StickyWrap (높이: 60px)
+              <br />
+              현재 고정된 요소 수: {fixedCount}
             </div>
           </StickyWrap>
 
