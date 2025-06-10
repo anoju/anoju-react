@@ -43,27 +43,37 @@ const ToastGuide = () => {
         <div className={styles.showcase + ' inline'}>
           <Button
             size="sm"
-            className="primary"
+            className="line"
             onClick={() => $toast.success('성공 메시지입니다!')}
           >
             Success
           </Button>
           <Button
             size="sm"
+            className="line"
             onClick={() => $toast.error('에러가 발생했습니다!')}
           >
             Error
           </Button>
           <Button
             size="sm"
+            className="line"
             onClick={() => $toast.warning('주의가 필요합니다!')}
           >
             Warning
           </Button>
-          <Button size="sm" onClick={() => $toast.info('정보를 확인하세요!')}>
+          <Button
+            size="sm"
+            className="line"
+            onClick={() => $toast.info('정보를 확인하세요!')}
+          >
             Info
           </Button>
-          <Button size="sm" onClick={() => $toast.loading('로딩중입니다...')}>
+          <Button
+            size="sm"
+            className="line"
+            onClick={() => $toast.loading('로딩중입니다...')}
+          >
             Loading
           </Button>
         </div>
@@ -89,7 +99,7 @@ $toast.loading('로딩중입니다...');`}
         <div className={styles.showcase + ' inline'}>
           <Button
             size="sm"
-            className="primary"
+            className="line"
             onClick={() =>
               $toast.success('5초 동안 표시됩니다', { duration: 5000 })
             }
@@ -98,6 +108,7 @@ $toast.loading('로딩중입니다...');`}
           </Button>
           <Button
             size="sm"
+            className="line"
             onClick={() =>
               $toast.info('하단에 표시됩니다', { position: 'bottom' })
             }
@@ -106,6 +117,7 @@ $toast.loading('로딩중입니다...');`}
           </Button>
           <Button
             size="sm"
+            className="line"
             onClick={() =>
               $toast.warning('자동으로 닫히지 않습니다', { duration: 0 })
             }
@@ -114,6 +126,7 @@ $toast.loading('로딩중입니다...');`}
           </Button>
           <Button
             size="sm"
+            className="line"
             onClick={() =>
               $toast.success('닫힐 때 콜백이 실행됩니다', {
                 onClose: () => {
@@ -150,7 +163,7 @@ $toast.success('닫힐 때 콜백이 실행됩니다', {
         <div className={styles.showcase + ' inline'}>
           <Button
             size="sm"
-            className="primary"
+            className="line"
             onClick={() =>
               $toast.config.success({
                 content: '객체로 설정된 성공 메시지',
@@ -163,6 +176,7 @@ $toast.success('닫힐 때 콜백이 실행됩니다', {
           </Button>
           <Button
             size="sm"
+            className="line"
             onClick={() =>
               $toast.config.error({
                 content: '하단에 표시되는 에러',
@@ -202,7 +216,7 @@ $toast.config.error({
         <div className={styles.showcase + ' inline'}>
           <Button
             size="sm"
-            className="primary"
+            className="line"
             onClick={() => {
               const close = $toast.loading(
                 '처리중... 버튼을 클릭하면 닫힙니다',
@@ -217,6 +231,7 @@ $toast.config.error({
           </Button>
           <Button
             size="sm"
+            className="line"
             onClick={() => {
               if (loadingToast) {
                 loadingToast();
@@ -261,7 +276,7 @@ const handleComplete = () => {
         <div className={styles.showcase + ' inline'}>
           <Button
             size="sm"
-            className="primary"
+            className="line"
             onClick={() =>
               $toast.info('유니크한 메시지', { key: 'unique-message' })
             }
@@ -270,6 +285,7 @@ const handleComplete = () => {
           </Button>
           <Button
             size="sm"
+            className="line"
             onClick={() =>
               $toast.warning('저장중...', { key: 'saving', duration: 0 })
             }
@@ -278,6 +294,7 @@ const handleComplete = () => {
           </Button>
           <Button
             size="sm"
+            className="line"
             onClick={() => $toast.success('저장 완료!', { key: 'saving' })}
           >
             저장 완료
@@ -305,6 +322,7 @@ $toast.success('저장 완료!', { key: 'saving' }); // 이전 토스트 대체`
         <div className={styles.showcase + ' inline'}>
           <Button
             size="sm"
+            className="line"
             onClick={() => {
               $toast.success('상단 메시지 1', { position: 'top' });
               $toast.info('상단 메시지 2', { position: 'top' });
@@ -314,13 +332,21 @@ $toast.success('저장 완료!', { key: 'saving' }); // 이전 토스트 대체`
           >
             여러 토스트 생성
           </Button>
-          <Button size="sm" onClick={() => $toast.destroy('top')}>
+          <Button
+            size="sm"
+            className="line"
+            onClick={() => $toast.destroy('top')}
+          >
             상단 토스트 제거
           </Button>
-          <Button size="sm" onClick={() => $toast.destroy('bottom')}>
+          <Button
+            size="sm"
+            className="line"
+            onClick={() => $toast.destroy('bottom')}
+          >
             하단 토스트 제거
           </Button>
-          <Button size="sm" onClick={() => $toast.destroy()}>
+          <Button size="sm" className="line" onClick={() => $toast.destroy()}>
             모든 토스트 제거
           </Button>
         </div>
@@ -343,7 +369,7 @@ $toast.destroy('bottom'); // 하단 토스트만 제거`}
         <div className={styles.showcase + ' inline'}>
           <Button
             size="sm"
-            className="primary"
+            className="line"
             onClick={() =>
               $toast.success(
                 <div>
@@ -360,6 +386,7 @@ $toast.destroy('bottom'); // 하단 토스트만 제거`}
           </Button>
           <Button
             size="sm"
+            className="line"
             onClick={() =>
               $toast.info(
                 <div

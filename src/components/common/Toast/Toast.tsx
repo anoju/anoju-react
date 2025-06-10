@@ -106,175 +106,182 @@ const iconMap = {
   loading: LoadingIcon,
 };
 
-const Toast = forwardRef<HTMLDivElement, ToastProps>(({ toast, index, totalCount }, ref) => {
-  const [isVisible, setIsVisible] = useState(false);
-  const [isLeaving, setIsLeaving] = useState(false);
-  const [isRemoving, setIsRemoving] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(index);
-  const { removeToast } = useToast();
-  const toastRef = useRef<HTMLDivElement>(null);
-  const prevIndexRef = useRef(index);
+const Toast = forwardRef<HTMLDivElement, ToastProps>(
+  ({ toast, index, totalCount }, ref) => {
+    const [isVisible, setIsVisible] = useState(false);
+    const [isLeaving, setIsLeaving] = useState(false);
+    const [isRemoving, setIsRemoving] = useState(false);
+    const [currentIndex, setCurrentIndex] = useState(index);
+    const { removeToast } = useToast();
+    const toastRef = useRef<HTMLDivElement>(null);
+    const prevIndexRef = useRef(index);
 
-  const IconComponent = iconMap[toast.type];
+    const IconComponent = iconMap[toast.type];
 
-  // 인덱스 변화 감지 및 애니메이션
-  useEffect(() => {
-    const prevIndex = prevIndexRef.current;
-    const newIndex = index;
+    // 인덱스 변화 감지 및 애니메이션
+    useEffect(() => {
+      const prevIndex = prevIndexRef.current;
+      const newIndex = index;
 
-    if (prevIndex !== newIndex && isVisible) {
-      // 인덱스가 변경되었을 때 (다른 토스트가 추가/제거됨)
-      setCurrentIndex(newIndex);
-      
-      // 토스트가 밀려나는 애니메이션을 위한 클래스 추가
-      if (toastRef.current) {
-        toastRef.current.classList.add(styles.shifting);
-        
-        // 애니메이션 완료 후 클래스 제거
-        setTimeout(() => {
-          if (toastRef.current) {
-            toastRef.current.classList.remove(styles.shifting);
-          }
-        }, 300);
-      }
-    }
+      if (prevIndex !== newIndex && isVisible) {
+        // 인덱스가 변경되었을 때 (다른 토스트가 추가/제거됨)
+        setCurrentIndex(newIndex);
 
-    prevIndexRef.current = newIndex;
-  }, [index, isVisible]);
+        // 토스트가 밀려나는 애니메이션을 위한 클래스 추가
+        if (toastRef.current) {
+          toastRef.current.classList.add(styles.shifting);
 
-  // 마운트 애니메이션
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsVisible(true);
-      setCurrentIndex(index);
-    }, 50 + index * 80); // 각 토스트마다 약간의 지연
-
-    return () => clearTimeout(timer);
-  }, [index]);
-
-  // 토스트 높이 계산 및 CSS 변수 설정
-  useEffect(() => {
-    if (toastRef.current && isVisible) {
-      const height = toastRef.current.offsetHeight;
-      toastRef.current.style.setProperty('--toast-height', `${height}px`);
-    }
-  }, [isVisible]);
-
-  // 토스트 닫기 처리
-  const handleClose = () => {
-    if (isLeaving || isRemoving) return;
-    
-    setIsLeaving(true);
-    
-    // 먼저 leaving 애니메이션
-    setTimeout(() => {
-      setIsRemoving(true);
-      
-      // 그 다음 removing 애니메이션 후 실제 제거
-      setTimeout(() => {
-        removeToast(toast.id);
-      }, 300);
-    }, 200);
-  };
-
-  // 토스트 클릭 시 닫기 (로딩 타입은 제외)
-  const handleClick = () => {
-    if (toast.type !== 'loading') {
-      handleClose();
-    }
-  };
-
-  // 마우스 호버 시 스케일 효과
-  const [isHovered, setIsHovered] = useState(false);
-
-  // 토스트 클래스명 생성
-  const toastClasses = [
-    styles.toast,
-    styles[toast.type],
-    styles[toast.position],
-    isVisible ? styles.visible : '',
-    isLeaving ? styles.leaving : '',
-    isRemoving ? styles.removing : '',
-    isHovered && !isLeaving && !isRemoving ? styles.hovered : '',
-  ]
-    .filter(Boolean)
-    .join(' ');
-
-  // 위치 이동에 따른 변환 계산
-  const getTransformStyle = () => {
-    if (!isVisible || isLeaving || isRemoving) return {};
-    
-    // 스택 효과: 뒤쪽 토스트들을 살짝 축소하고 투명도 조정
-    const stackScale = Math.max(0.95, 1 - (currentIndex * 0.02));
-    const stackOpacity = Math.max(0.8, 1 - (currentIndex * 0.1));
-    const stackOffset = currentIndex * 2; // 2px씩 오프셋
-    
-    return {
-      transform: `scale(${stackScale}) translateY(${toast.position === 'top' ? stackOffset : -stackOffset}px)`,
-      opacity: stackOpacity,
-      zIndex: 1000 - currentIndex, // 최신 토스트가 가장 위에
-    };
-  };
-
-  return (
-    <div
-      ref={(node) => {
-        // ref를 처리하고 toastRef에도 할당
-        if (typeof ref === 'function') {
-          ref(node);
-        } else if (ref) {
-          ref.current = node;
+          // 애니메이션 완료 후 클래스 제거
+          setTimeout(() => {
+            if (toastRef.current) {
+              toastRef.current.classList.remove(styles.shifting);
+            }
+          }, 300);
         }
-        toastRef.current = node;
-      }}
-      className={toastClasses}
-      onClick={handleClick}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      style={{
-        '--toast-index': currentIndex,
-        '--total-count': totalCount,
-        '--stagger-delay': `${index * 0.08}s`,
-        '--stack-index': currentIndex,
-        ...getTransformStyle(),
-      } as React.CSSProperties}
-      role="alert"
-      aria-live="polite"
-    >
-      <div className={styles.icon}>
-        <IconComponent />
-      </div>
-      <div className={styles.content}>{toast.content}</div>
-      {toast.type !== 'loading' && (
-        <button
-          type="button"
-          className={styles.closeBtn}
-          onClick={(e) => {
-            e.stopPropagation();
-            handleClose();
-          }}
-          aria-label="토스트 닫기"
-        >
-          <svg
-            width="12"
-            height="12"
-            viewBox="0 0 12 12"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
+      }
+
+      prevIndexRef.current = newIndex;
+    }, [index, isVisible]);
+
+    // 마운트 애니메이션
+    useEffect(() => {
+      const timer = setTimeout(
+        () => {
+          setIsVisible(true);
+          setCurrentIndex(index);
+        },
+        50 + index * 80
+      ); // 각 토스트마다 약간의 지연
+
+      return () => clearTimeout(timer);
+    }, [index]);
+
+    // 토스트 높이 계산 및 CSS 변수 설정
+    useEffect(() => {
+      if (toastRef.current && isVisible) {
+        const height = toastRef.current.offsetHeight;
+        toastRef.current.style.setProperty('--toast-height', `${height}px`);
+      }
+    }, [isVisible]);
+
+    // 토스트 닫기 처리
+    const handleClose = () => {
+      if (isLeaving || isRemoving) return;
+
+      setIsLeaving(true);
+
+      // 먼저 leaving 애니메이션
+      setTimeout(() => {
+        setIsRemoving(true);
+
+        // 그 다음 removing 애니메이션 후 실제 제거
+        setTimeout(() => {
+          removeToast(toast.id);
+        }, 300);
+      }, 200);
+    };
+
+    // 토스트 클릭 시 닫기 (로딩 타입은 제외)
+    const handleClick = () => {
+      if (toast.type !== 'loading') {
+        handleClose();
+      }
+    };
+
+    // 마우스 호버 시 스케일 효과
+    const [isHovered, setIsHovered] = useState(false);
+
+    // 토스트 클래스명 생성
+    const toastClasses = [
+      styles.toast,
+      styles[toast.type],
+      styles[toast.position],
+      isVisible ? styles.visible : '',
+      isLeaving ? styles.leaving : '',
+      isRemoving ? styles.removing : '',
+      isHovered && !isLeaving && !isRemoving ? styles.hovered : '',
+    ]
+      .filter(Boolean)
+      .join(' ');
+
+    // 위치 이동에 따른 변환 계산
+    const getTransformStyle = () => {
+      if (!isVisible || isLeaving || isRemoving) return {};
+
+      // 스택 효과: 뒤쪽 토스트들을 살짝 축소하고 투명도 조정
+      const stackScale = Math.max(0.95, 1 - currentIndex * 0.02);
+      const stackOpacity = Math.max(0.8, 1 - currentIndex * 0.1);
+      const stackOffset = currentIndex * 2; // 2px씩 오프셋
+
+      return {
+        transform: `scale(${stackScale}) translateY(${toast.position === 'top' ? stackOffset : -stackOffset}px)`,
+        opacity: stackOpacity,
+        zIndex: 1000 - currentIndex, // 최신 토스트가 가장 위에
+      };
+    };
+
+    return (
+      <div
+        ref={(node) => {
+          // ref를 처리하고 toastRef에도 할당
+          if (typeof ref === 'function') {
+            ref(node);
+          } else if (ref) {
+            ref.current = node;
+          }
+          toastRef.current = node;
+        }}
+        className={toastClasses}
+        onClick={handleClick}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        style={
+          {
+            '--toast-index': currentIndex,
+            '--total-count': totalCount,
+            '--stagger-delay': `${index * 0.08}s`,
+            '--stack-index': currentIndex,
+            ...getTransformStyle(),
+          } as React.CSSProperties
+        }
+        role="alert"
+        aria-live="polite"
+      >
+        <div className={styles.icon}>
+          <IconComponent />
+        </div>
+        <div className={styles.content}>{toast.content}</div>
+        {toast.type !== 'loading' && (
+          <button
+            type="button"
+            className={styles['close-btn']}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleClose();
+            }}
+            aria-label="토스트 닫기"
           >
-            <path
-              d="M9 3L3 9M3 3L9 9"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
-      )}
-    </div>
-  );
-});
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 12 12"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M9 3L3 9M3 3L9 9"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+        )}
+      </div>
+    );
+  }
+);
 
 Toast.displayName = 'Toast';
 
