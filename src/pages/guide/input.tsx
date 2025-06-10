@@ -339,16 +339,22 @@ const InputGuide = () => {
         <h2 className={styles['section-title']}>showReset 옵션</h2>
         <p className={styles.txt}>
           showReset 속성을 false로 설정하면 입력 내용 지우기 버튼이 표시되지
-          않습니다.
+          합니다.
         </p>
 
         <div className={styles.showcase}>
           <Input placeholder="지우기 버튼 없음" showReset={false} />
+          <Input
+            placeholder="지울때 onClear 호출"
+            onClear={() => console.log('지우기 버튼 클릭')}
+          />
         </div>
 
         <h3 className={styles['sub-title']}>참조 소스코드</h3>
         <CodeHighlight
-          code={`<Input placeholder="지우기 버튼 없음" showReset={false} />`}
+          code={`<Input placeholder="지우기 버튼 없음" showReset={false} />
+<Input placeholder="지울때 onClear 호출" onClear={() => console.log('지우기 버튼 클릭')} />
+`}
           language="jsx"
         />
       </section>
@@ -757,6 +763,12 @@ const multiInputRef = useRef<InputHandle>(null);
                 <td>function</td>
                 <td>-</td>
                 <td>포커스를 잃을 때 호출되는 함수</td>
+              </tr>
+              <tr>
+                <td>onClear</td>
+                <td>{'() => void'}</td>
+                <td>-</td>
+                <td>값 지우기 콜백</td>
               </tr>
               <tr>
                 <td>values</td>
