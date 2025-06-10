@@ -71,9 +71,19 @@ const StickyWrapProvider: React.FC<{ children: ReactNode }> = ({
         const scrollDirection =
           scrollTop > lastScrollYRef.current ? 'down' : 'up';
 
+        // 아래로 스크롤: 고정된 위치에서 요소 높이만큼 더 스크롤했을 때 숨김
         if (scrollDirection === 'down') {
-          newIsHidden = true;
-        } else if (scrollDirection === 'up') {
+          const hideThreshold =
+            instance.originalTop - accumulatedHeight + instance.height;
+          console.log(scrollTop, hideThreshold);
+          if (scrollTop >= hideThreshold) {
+            newIsHidden = true;
+          } else {
+            newIsHidden = false;
+          }
+        }
+        // 위로 스크롤: 숨김 해제
+        else if (scrollDirection === 'up') {
           newIsHidden = false;
         }
       }
