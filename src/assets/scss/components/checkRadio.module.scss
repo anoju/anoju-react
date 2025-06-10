@@ -238,12 +238,12 @@
 
   &:disabled {
     + .ico {
-      border-color: #ebebeb;
-      background-color: #fafafa;
+      // border-color: var(--form-disabled-color);
+      background-color: var(--form-disabled-color);
     }
 
     ~ .lbl {
-      color: #c2c2c2;
+      color: var(--form-disabled-color);
     }
   }
 }

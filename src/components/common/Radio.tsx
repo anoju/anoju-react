@@ -10,6 +10,7 @@ import React, {
   ReactNode,
   useImperativeHandle,
   useEffect,
+  useState,
 } from 'react';
 import styles from '@/assets/scss/components/checkRadio.module.scss';
 import cx from '@/utils/cx';
@@ -58,6 +59,7 @@ interface RadioProps
   id?: string;
   value: RadioValue; // value는 필수
   checked?: boolean;
+  defaultChecked?: boolean; // 초기 체크 상태
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
   children?: ReactNode;
   className?: string;
@@ -79,6 +81,7 @@ export const Radio = forwardRef<RadioHandle, RadioProps>(
       id,
       value,
       checked,
+      defaultChecked,
       onChange,
       children,
       className = '',
@@ -105,14 +108,25 @@ export const Radio = forwardRef<RadioHandle, RadioProps>(
     const mergedIsSwitch = isSwitch || context?.isSwitch;
     const mergedLeftLabel = leftLabel || context?.leftLabel;
 
+    // 내부 상태 관리 - checked prop이 undefined일 때만 사용
+    const [internalChecked, setInternalChecked] = useState(
+      defaultChecked !== undefined ? defaultChecked : false
+    );
+
     // Generate a unique ID if not provided
     const radioIdRef = useRef<string>(id || generateUniqueId());
     const radioId = radioIdRef.current;
 
-    // 체크 상태 결정 - context가 있으면 context 값 사용, 없으면 props 값
+    // 체크 상태 결정 - context가 있으면 context 값 사용, 없으면 props 값 또는 내부 상태 사용
     const isChecked = useMemo(() => {
-      return context ? context.value === value : checked;
-    }, [context, value, checked]);
+      if (context) {
+        return context.value === value;
+      } else if (checked !== undefined) {
+        return checked;
+      }
+      // 독립형 라디오로 사용되며 checked prop이 없는 경우, 내부 상태 사용
+      return internalChecked;
+    }, [context, value, checked, internalChecked]);
 
     // input 요소에 대한 참조 생성
     const inputRef = useRef<HTMLInputElement>(null);
@@ -130,11 +144,18 @@ export const Radio = forwardRef<RadioHandle, RadioProps>(
 
         if (context) {
           context.onChange(value);
-        } else if (onChange) {
-          onChange(e);
+        } else {
+          // 독립형 라디오인 경우 내부 상태 업데이트
+          if (checked === undefined) {
+            setInternalChecked(true);
+          }
+          
+          if (onChange) {
+            onChange(e);
+          }
         }
       },
-      [context, onChange, value, mergedDisabled]
+      [context, onChange, value, mergedDisabled, checked]
     );
 
     // 외부에서 호출 가능한 메서드 정의
@@ -281,6 +302,7 @@ interface RadioGroupProps<T extends string | number = string | number> {
   children?: ReactNode;
   options?: (T | RadioOption<T>)[];
   value?: T;
+  defaultValue?: T; // 초기 선택된 값
   setValue?: ((value: T) => void) | React.Dispatch<React.SetStateAction<T>>;
   onChange?: (value: T) => void;
   className?: string;
@@ -303,6 +325,7 @@ const RadioGroupComponent = forwardRef(
       children,
       options,
       value,
+      defaultValue,
       setValue,
       onChange,
       className = '',
@@ -320,12 +343,37 @@ const RadioGroupComponent = forwardRef(
     }: RadioGroupProps<T>,
     ref: React.ForwardedRef<RadioGroupHandle>
   ) => {
+    // 내부 상태 관리 - value prop이 undefined일 때만 사용
+    const [internalValue, setInternalValue] = useState<T | undefined>(
+      value !== undefined
+        ? value
+        : defaultValue !== undefined
+          ? defaultValue
+          : undefined
+    );
+
+    // 실제 사용할 값 (제어된 컴포넌트인지 비제어된 컴포넌트인지 판단)
+    const actualValue = value !== undefined ? value : internalValue;
+    const isControlled = value !== undefined;
+
+    // 외부 value prop이 변경되면 내부 상태 업데이트
+    useEffect(() => {
+      if (value !== undefined) {
+        setInternalValue(value);
+      }
+    }, [value]);
+
     // 자식 라디오 컴포넌트에 대한 참조 배열
     const refs = useRef<(RadioHandle | null)[]>([]);
 
     // 라디오 변경 핸들러
     const handleRadioChange = useCallback(
       (radioValue: RadioValue) => {
+        // 비제어된 컴포넌트인 경우 내부 상태 업데이트
+        if (!isControlled) {
+          setInternalValue(radioValue as T);
+        }
+
         // setValue가 있으면 호출
         if (setValue) {
           // setValue가 React.Dispatch<React.SetStateAction<T>> 타입인지 확인
@@ -339,7 +387,7 @@ const RadioGroupComponent = forwardRef(
           onChange(radioValue as T);
         }
       },
-      [onChange, setValue]
+      [onChange, setValue, isControlled]
     );
 
     // Radio 컴포넌트 등록 함수
@@ -353,7 +401,7 @@ const RadioGroupComponent = forwardRef(
     // context 값 메모이제이션
     const contextValue = useMemo<RadioContextType>(
       () => ({
-        value,
+        value: actualValue,
         onChange: handleRadioChange,
         name: name || `radio-group-${generateUniqueId()}`,
         disabled,
@@ -364,7 +412,7 @@ const RadioGroupComponent = forwardRef(
         leftLabel,
       }),
       [
-        value,
+        actualValue,
         handleRadioChange,
         name,
         disabled,
@@ -398,7 +446,7 @@ const RadioGroupComponent = forwardRef(
         },
         // 현재 선택된 값 반환
         getValue: () => {
-          return value;
+          return actualValue;
         },
         // 새 값 설정
         setValue: (newValue: string | number) => {
@@ -416,7 +464,7 @@ const RadioGroupComponent = forwardRef(
           }
         },
       }),
-      [value, onChange, setValue]
+      [actualValue, onChange, setValue]
     );
 
     // 옵션에서 Radio 컴포넌트 생성

@@ -171,6 +171,34 @@ const [selected, setSelected] = useState('option1');
       </section>
 
       <section className={styles.section}>
+        <h2 className={styles['section-title']}>defaultChecked 속성</h2>
+        <p className={styles.txt}>
+          defaultChecked 속성을 사용하여 라디오 버튼의 초기 선택 상태를 설정할
+          수 있습니다. 이는 uncontrolled 컴포넌트로 동작하며, 내부적으로 상태를
+          관리합니다.
+        </p>
+        <div className="check-wrap">
+          <Radio value="option1" defaultChecked>
+            기본적으로 선택된 라디오
+          </Radio>
+          <Radio value="option2" defaultChecked={false}>
+            기본적으로 선택되지 않은 라디오
+          </Radio>
+          <Radio value="option3">
+            defaultChecked가 없는 경우 (기본값: false)
+          </Radio>
+        </div>
+
+        <h3 className={styles['sub-title']}>참조 소스코드</h3>
+        <CodeHighlight
+          code={`<Radio value="option1" defaultChecked>기본적으로 선택된 라디오</Radio>
+<Radio value="option2" defaultChecked={false}>기본적으로 선택되지 않은 라디오</Radio>
+<Radio value="option3">defaultChecked가 없는 경우 (기본값: false)</Radio>`}
+          language="typescript"
+        />
+      </section>
+
+      <section className={styles.section}>
         <h2 className={styles['section-title']}>Radio.Group 사용법</h2>
         <div className={styles.showcase}>
           <Radio.Group value={selectedValue} setValue={setSelectedValue}>
@@ -194,6 +222,73 @@ const [selectedValue, setSelectedValue] = useState<string | number>('option1');
   <Radio value="option2">옵션 2</Radio>
   <Radio value="option3">옵션 3</Radio>
   <Radio value="option4">옵션 4</Radio>
+</Radio.Group>`}
+          language="typescript"
+        />
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles['section-title']}>
+          Radio.Group defaultValue 속성
+        </h2>
+        <p className={styles.txt}>
+          Radio.Group에서 defaultValue 속성을 사용하여 초기 선택된 값을 설정할
+          수 있습니다. 이는 uncontrolled 컴포넌트로 동작하며, 내부적으로 상태를
+          관리합니다.
+        </p>
+
+        <div className={styles.showcase}>
+          <h4 className={styles['sub-title']}>문자열 배열로 기본값 설정</h4>
+          <Radio.Group
+            options={['apple', 'orange', 'banana', 'grape']}
+            defaultValue="banana"
+            className="grid"
+          />
+
+          <h4 className={styles['sub-title']}>객체 배열로 기본값 설정</h4>
+          <Radio.Group
+            options={[
+              { value: 'red', label: '빨간색' },
+              { value: 'blue', label: '파란색' },
+              { value: 'green', label: '초록색' },
+              { value: 'yellow', label: '노란색' },
+            ]}
+            defaultValue="green"
+            className="grid"
+          />
+
+          <h4 className={styles['sub-title']}>children으로 기본값 설정</h4>
+          <Radio.Group defaultValue="option2">
+            <Radio value="option1">라디오 1</Radio>
+            <Radio value="option2">라디오 2 (기본 선택)</Radio>
+            <Radio value="option3">라디오 3</Radio>
+          </Radio.Group>
+        </div>
+
+        <h3 className={styles['sub-title']}>참조 소스코드</h3>
+        <CodeHighlight
+          code={`// 문자열 배열로 기본값 설정
+<Radio.Group
+  options={['apple', 'orange', 'banana', 'grape']}
+  defaultValue="banana"
+/>
+
+// 객체 배열로 기본값 설정
+<Radio.Group
+  options={[
+    { value: 'red', label: '빨간색' },
+    { value: 'blue', label: '파란색' },
+    { value: 'green', label: '초록색' },
+    { value: 'yellow', label: '노란색' },
+  ]}
+  defaultValue="green"
+/>
+
+// children으로 기본값 설정
+<Radio.Group defaultValue="option2">
+  <Radio value="option1">라디오 1</Radio>
+  <Radio value="option2">라디오 2 (기본 선택)</Radio>
+  <Radio value="option3">라디오 3</Radio>
 </Radio.Group>`}
           language="typescript"
         />
@@ -681,7 +776,175 @@ const MyRadioWithRef = () => {
       </section>
 
       <section className={styles.section}>
-        <h2 className={styles['section-title']}>사용 가능한 메서드</h2>
+        <h2 className={styles['section-title']}>Radio Props</h2>
+        <div className={styles.showcase}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>속성</th>
+                <th>타입</th>
+                <th>기본값</th>
+                <th>설명</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>value</td>
+                <td>string | number</td>
+                <td>필수</td>
+                <td>라디오 버튼의 값 (필수 속성)</td>
+              </tr>
+              <tr>
+                <td>checked</td>
+                <td>boolean</td>
+                <td>-</td>
+                <td>선택 상태 (controlled 컴포넌트용)</td>
+              </tr>
+              <tr>
+                <td>defaultChecked</td>
+                <td>boolean</td>
+                <td>false</td>
+                <td>초기 선택 상태 (uncontrolled 컴포넌트용)</td>
+              </tr>
+              <tr>
+                <td>disabled</td>
+                <td>boolean</td>
+                <td>false</td>
+                <td>비활성화 여부</td>
+              </tr>
+              <tr>
+                <td>children</td>
+                <td>ReactNode</td>
+                <td>-</td>
+                <td>라벨 텍스트 또는 컨텐츠</td>
+              </tr>
+              <tr>
+                <td>className</td>
+                <td>string</td>
+                <td>''</td>
+                <td>컴포넌트에 적용할 추가 클래스명</td>
+              </tr>
+              <tr>
+                <td>inputClassName</td>
+                <td>string</td>
+                <td>''</td>
+                <td>input 요소에 적용할 추가 클래스명</td>
+              </tr>
+              <tr>
+                <td>iconClassName</td>
+                <td>string</td>
+                <td>''</td>
+                <td>아이콘 요소에 적용할 추가 클래스명</td>
+              </tr>
+              <tr>
+                <td>labelClassName</td>
+                <td>string</td>
+                <td>''</td>
+                <td>라벨 요소에 적용할 추가 클래스명</td>
+              </tr>
+              <tr>
+                <td>onChange</td>
+                <td>function</td>
+                <td>-</td>
+                <td>선택 상태 변경 시 호출되는 함수</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles['section-title']}>Radio.Group Props</h2>
+        <div className={styles.showcase}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>속성</th>
+                <th>타입</th>
+                <th>기본값</th>
+                <th>설명</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>options</td>
+                <td>Array</td>
+                <td>-</td>
+                <td>라디오 버튼 옵션 배열 (문자열 배열 또는 객체 배열)</td>
+              </tr>
+              <tr>
+                <td>value</td>
+                <td>string | number</td>
+                <td>-</td>
+                <td>선택된 값 (controlled 컴포넌트용)</td>
+              </tr>
+              <tr>
+                <td>defaultValue</td>
+                <td>string | number</td>
+                <td>-</td>
+                <td>초기 선택된 값 (uncontrolled 컴포넌트용)</td>
+              </tr>
+              <tr>
+                <td>onChange</td>
+                <td>function</td>
+                <td>-</td>
+                <td>선택된 값이 변경될 때 호출되는 함수</td>
+              </tr>
+              <tr>
+                <td>setValue</td>
+                <td>function</td>
+                <td>-</td>
+                <td>선택된 값을 직접 설정하는 함수</td>
+              </tr>
+              <tr>
+                <td>name</td>
+                <td>string</td>
+                <td>자동 생성</td>
+                <td>그룹 내 모든 라디오 버튼의 name 속성</td>
+              </tr>
+              <tr>
+                <td>disabled</td>
+                <td>boolean</td>
+                <td>false</td>
+                <td>그룹 내 모든 라디오 버튼 비활성화 여부</td>
+              </tr>
+              <tr>
+                <td>className</td>
+                <td>string</td>
+                <td>''</td>
+                <td>그룹 컨테이너에 적용할 추가 클래스명</td>
+              </tr>
+              <tr>
+                <td>inputClassName</td>
+                <td>string</td>
+                <td>''</td>
+                <td>그룹 내 모든 input 요소에 적용할 추가 클래스명</td>
+              </tr>
+              <tr>
+                <td>iconClassName</td>
+                <td>string</td>
+                <td>''</td>
+                <td>그룹 내 모든 아이콘 요소에 적용할 추가 클래스명</td>
+              </tr>
+              <tr>
+                <td>labelClassName</td>
+                <td>string</td>
+                <td>''</td>
+                <td>그룹 내 모든 라벨 요소에 적용할 추가 클래스명</td>
+              </tr>
+              <tr>
+                <td>children</td>
+                <td>ReactNode</td>
+                <td>-</td>
+                <td>Radio 컴포넌트들 (options 대신 사용)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles['section-title']}>Radio 메서드</h2>
         <div className={styles.showcase}>
           <table className={styles.table}>
             <thead>
