@@ -41,10 +41,6 @@ const GuideLayout: React.FC<GuideLayoutProps> = ({ children }) => {
               to: '/guide/textarea',
             },
             {
-            label: 'Toast',
-            to: '/guide/toast',
-            },
-            {
               label: 'StickyWrap',
               to: '/guide/stickyWrap',
             },
@@ -59,6 +55,10 @@ const GuideLayout: React.FC<GuideLayoutProps> = ({ children }) => {
             {
               label: 'Popup',
               to: '/guide/popup',
+            },
+            {
+              label: 'Toast',
+              to: '/guide/toast',
             },
             {
               label: 'Device',

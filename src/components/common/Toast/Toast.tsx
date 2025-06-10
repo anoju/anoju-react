@@ -1,7 +1,7 @@
 // src/components/common/Toast/Toast.tsx
 import React, { useState, useEffect, forwardRef } from 'react';
 import { Toast as ToastType } from '@/types/toast';
-import { useToast } from '@/contexts/ToastContext';
+import { useToast } from '@/hooks/useToast';
 import styles from '@/assets/scss/components/toast.module.scss';
 
 interface ToastProps {

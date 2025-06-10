@@ -1,7 +1,7 @@
 // src/components/common/Toast/ToastContainer.tsx
 import React, { useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { useToast } from '@/contexts/ToastContext';
+import { useToast } from '@/hooks/useToast';
 import Toast from './Toast';
 import styles from '@/assets/scss/components/toast.module.scss';
 

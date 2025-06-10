@@ -1,7 +1,5 @@
 // src/contexts/ToastContext.tsx
 import React, {
-  createContext,
-  useContext,
   useState,
   useCallback,
   ReactNode,
@@ -9,36 +7,13 @@ import React, {
 } from 'react';
 import type {
   Toast,
-  ToastContextType,
   ToastType,
   ToastOptions,
   ToastPosition,
 } from '@/types/toast';
 import { registerToastContext, unregisterToastContext } from '@/utils/toast';
-
-// 고유 ID 생성을 위한 카운터
-let toastIdCounter = 0;
-const generateToastId = (): string => {
-  return `toast_${++toastIdCounter}_${Date.now()}`;
-};
-
-// 기본값
-const defaultToastOptions: Required<Omit<ToastOptions, 'content' | 'onClose' | 'key'>> = {
-  duration: 3000, // 3초
-  position: 'top',
-};
-
-// 토스트 컨텍스트 생성
-const ToastContext = createContext<ToastContextType | undefined>(undefined);
-
-// 컨텍스트 훅
-export const useToast = (): ToastContextType => {
-  const context = useContext(ToastContext);
-  if (!context) {
-    throw new Error('useToast는 ToastProvider 내에서 사용해야 합니다.');
-  }
-  return context;
-};
+import { generateToastId, defaultToastOptions } from '@/utils/toastHelpers';
+import { ToastContext } from '@/hooks/useToast';
 
 // 토스트 프로바이더 Props
 interface ToastProviderProps {
@@ -164,15 +139,17 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({
 
   // 컴포넌트 언마운트 시 모든 타이머 정리
   React.useEffect(() => {
+    const timers = timersRef.current; // ref 값을 변수에 복사
+    
     return () => {
-      timersRef.current.forEach((timer) => {
+      timers.forEach((timer) => {
         clearTimeout(timer);
       });
-      timersRef.current.clear();
+      timers.clear();
     };
   }, []);
 
-  const contextValue: ToastContextType = {
+  const contextValue = {
     toasts,
     addToast,
     removeToast,
