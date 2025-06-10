@@ -135,6 +135,30 @@ import { Checkbox, CheckboxGroup } from '@/components/common';`}
       </section>
 
       <section className={styles.section}>
+        <h2 className={styles['section-title']}>defaultChecked 속성</h2>
+        <p className={styles.txt}>
+          defaultChecked 속성을 사용하여 체크박스의 초기 체크 상태를 설정할 수
+          있습니다. 이는 uncontrolled 컴포넌트로 동작하며, 내부적으로 상태를
+          관리합니다.
+        </p>
+        <div className="check-wrap">
+          <Checkbox defaultChecked>기본적으로 체크된 상태</Checkbox>
+          <Checkbox defaultChecked={false}>
+            기본적으로 체크되지 않은 상태
+          </Checkbox>
+          <Checkbox>defaultChecked가 없는 경우 (기본값: false)</Checkbox>
+        </div>
+
+        <h3 className={styles['sub-title']}>참조 소스코드</h3>
+        <CodeHighlight
+          code={`<Checkbox defaultChecked>기본적으로 체크된 상태</Checkbox>
+<Checkbox defaultChecked={false}>기본적으로 체크되지 않은 상태</Checkbox>
+<Checkbox>defaultChecked가 없는 경우 (기본값: false)</Checkbox>`}
+          language="typescript"
+        />
+      </section>
+
+      <section className={styles.section}>
         <h2 className={styles['section-title']}>Checkbox.Group 사용법</h2>
         <div className={styles.showcase}>
           <Checkbox.Group value={selectedValues} setValue={setSelectedValues}>
@@ -161,6 +185,73 @@ const [selectedValues, setSelectedValues] = useState<(string | number | boolean)
   <Checkbox value="option2">옵션 2</Checkbox>
   <Checkbox value="option3">옵션 3</Checkbox>
   <Checkbox value="option4">옵션 4</Checkbox>
+</Checkbox.Group>`}
+          language="typescript"
+        />
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles['section-title']}>
+          Checkbox.Group defaultValue 속성
+        </h2>
+        <p className={styles.txt}>
+          Checkbox.Group에서 defaultValue 속성을 사용하여 초기 선택된 값들을
+          설정할 수 있습니다. 이는 uncontrolled 컴포넌트로 동작하며, 내부적으로
+          상태를 관리합니다.
+        </p>
+
+        <div className={styles.showcase}>
+          <h4 className={styles['sub-title']}>문자열 배열로 기본값 설정</h4>
+          <Checkbox.Group
+            options={['apple', 'orange', 'banana', 'grape']}
+            defaultValue={['apple', 'banana']}
+            className="grid"
+          />
+
+          <h4 className={styles['sub-title']}>객체 배열로 기본값 설정</h4>
+          <Checkbox.Group
+            options={[
+              { value: 'red', label: '빨간색' },
+              { value: 'blue', label: '파란색' },
+              { value: 'green', label: '초록색' },
+              { value: 'yellow', label: '노란색' },
+            ]}
+            defaultValue={['red', 'green']}
+            className="grid"
+          />
+
+          <h4 className={styles['sub-title']}>Boolean 배열로 기본값 설정</h4>
+          <Checkbox.Group defaultValue={[false, true, true]}>
+            <Checkbox>체크박스 1</Checkbox>
+            <Checkbox>체크박스 2 (기본 선택)</Checkbox>
+            <Checkbox>체크박스 3 (기본 선택)</Checkbox>
+          </Checkbox.Group>
+        </div>
+
+        <h3 className={styles['sub-title']}>참조 소스코드</h3>
+        <CodeHighlight
+          code={`// 문자열 배열로 기본값 설정
+<Checkbox.Group
+  options={['apple', 'orange', 'banana', 'grape']}
+  defaultValue={['apple', 'banana']}
+/>
+
+// 객체 배열로 기본값 설정
+<Checkbox.Group
+  options={[
+    { value: 'red', label: '빨간색' },
+    { value: 'blue', label: '파란색' },
+    { value: 'green', label: '초록색' },
+    { value: 'yellow', label: '노란색' },
+  ]}
+  defaultValue={['red', 'green']}
+/>
+
+// Boolean 배열로 기본값 설정
+<Checkbox.Group defaultValue={[false, true, true]}>
+  <Checkbox>체크박스 1</Checkbox>
+  <Checkbox>체크박스 2 (기본 선택)</Checkbox>
+  <Checkbox>체크박스 3 (기본 선택)</Checkbox>
 </Checkbox.Group>`}
           language="typescript"
         />

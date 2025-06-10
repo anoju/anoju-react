@@ -56,11 +56,11 @@
       font-weight: normal;
       vertical-align: middle;
       margin: 0;
-      border: 0.1rem solid var(--input-border-color);
-      color: var(--input-text-color);
+      border: 0.1rem solid var(--form-border-color);
+      color: var(--form-text-color);
       transition: 0.3s;
       font-size: 1.4rem;
-      background-color: var(--input-bg-color);
+      background-color: var(--form-bg-color);
       appearance: none;
     }
 
@@ -139,7 +139,7 @@
       // background: none;
 
       border-radius: calc(var(--switch-height) / 2);
-      background-color: var(--input-bg-color);
+      background-color: var(--form-bg-color);
       transition: background 0.3s ease;
 
       // &::before {

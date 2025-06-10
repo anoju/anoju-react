@@ -71,6 +71,7 @@ export interface CheckboxProps
   id?: string;
   value?: string | number;
   checked?: boolean;
+  defaultChecked?: boolean; // 초기 체크 상태
   indeterminate?: boolean;
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
   setValue?: SetValueFunction<boolean>;
@@ -93,6 +94,7 @@ export const Checkbox = forwardRef<CheckboxHandle, CheckboxProps>(
       id,
       value,
       checked,
+      defaultChecked,
       indeterminate = false,
       onChange,
       setValue: setValueProp,
@@ -120,7 +122,9 @@ export const Checkbox = forwardRef<CheckboxHandle, CheckboxProps>(
     const mergedLeftLabel = leftLabel || context?.leftLabel;
 
     // 내부 상태 관리 - checked prop이 undefined일 때만 사용
-    const [internalChecked, setInternalChecked] = useState(false);
+    const [internalChecked, setInternalChecked] = useState(
+      defaultChecked !== undefined ? defaultChecked : false
+    );
 
     // Generate a unique ID if not provided
     const checkboxIdRef = useRef<string>(id || generateUniqueId());
@@ -402,6 +406,7 @@ export interface CheckboxGroupProps<
   children?: ReactNode;
   options?: (T | CheckboxOption<T extends string | number ? T : never>)[];
   value?: T[];
+  defaultValue?: T[]; // 초기 선택된 값들
   onChange?: (values: T[]) => void;
   setValue?: SetValueFunction<T[]>;
   name?: string;
@@ -422,7 +427,8 @@ const CheckboxGroupComponent = forwardRef(
     {
       children,
       options,
-      value = [],
+      value,
+      defaultValue,
       onChange,
       setValue,
       name,
@@ -439,6 +445,26 @@ const CheckboxGroupComponent = forwardRef(
     }: CheckboxGroupProps<T>,
     ref: React.ForwardedRef<CheckboxGroupHandle>
   ) => {
+    // 내부 상태 관리 - value prop이 undefined일 때만 사용
+    const [internalValue, setInternalValue] = useState<T[]>(
+      value !== undefined
+        ? value
+        : defaultValue !== undefined
+          ? defaultValue
+          : []
+    );
+
+    // 실제 사용할 값 (제어된 컴포넌트인지 비제어된 컴포넌트인지 판단)
+    const actualValue = value !== undefined ? value : internalValue;
+    const isControlled = value !== undefined;
+
+    // 외부 value prop이 변경되면 내부 상태 업데이트
+    useEffect(() => {
+      if (value !== undefined) {
+        setInternalValue(value);
+      }
+    }, [value]);
+
     // 자식 체크박스 컴포넌트에 대한 참조 배열
     const refs = useRef<(CheckboxHandle | null)[]>([]);
 
@@ -483,6 +509,11 @@ const CheckboxGroupComponent = forwardRef(
           );
         });
 
+        // 비제어된 컴포넌트인 경우 내부 상태 업데이트
+        if (!isControlled) {
+          setInternalValue(typedValues);
+        }
+
         // 외부 상태 업데이트
         if (setValue) {
           setValue(typedValues);
@@ -493,13 +524,13 @@ const CheckboxGroupComponent = forwardRef(
           onChange(typedValues);
         }
       },
-      [setValue, onChange]
+      [setValue, onChange, isControlled]
     );
 
     // context 값 메모이제이션
     const contextValue = useMemo<CheckboxContextType>(
       () => ({
-        value: value as CheckboxValue[],
+        value: actualValue as CheckboxValue[],
         booleanMode,
         onChange: (newValues: CheckboxValue[]) => {
           handleGroupValueChange(newValues);
@@ -515,7 +546,7 @@ const CheckboxGroupComponent = forwardRef(
         leftLabel,
       }),
       [
-        value,
+        actualValue,
         booleanMode,
         handleGroupValueChange,
         name,
@@ -567,7 +598,7 @@ const CheckboxGroupComponent = forwardRef(
           }
         },
         getValue: () => {
-          return value as CheckboxValue[];
+          return actualValue as CheckboxValue[];
         },
         setValue: (newValues: CheckboxValue[]) => {
           handleGroupValueChange(newValues);
@@ -599,7 +630,7 @@ const CheckboxGroupComponent = forwardRef(
           }
         },
       }),
-      [options, children, booleanMode, value, handleGroupValueChange]
+      [options, children, booleanMode, actualValue, handleGroupValueChange]
     );
 
     // 옵션에서 Checkbox 컴포넌트 생성
