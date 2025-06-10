@@ -3,6 +3,7 @@ import type {
   ToastType,
   ToastOptions,
   ToastUtility,
+  DefaultToastFunction,
 } from '@/types/toast';
 
 // 토스트 컨텍스트를 전역에서 사용하기 위한 참조
@@ -31,6 +32,17 @@ const ensureToastContext = (): NonNullable<typeof toastContextRef> => {
   return toastContextRef;
 };
 
+// 기본 토스트 함수 생성 (타입 없음, info로 처리)
+const createDefaultToastFunction = (): DefaultToastFunction => {
+  return (
+    content: React.ReactNode,
+    options: ToastOptions = {}
+  ): (() => void) => {
+    const context = ensureToastContext();
+    return context.addToast('info', { ...options, content });
+  };
+};
+
 // 기본 토스트 함수 생성 헬퍼
 const createToastFunction = (type: ToastType) => {
   return (
@@ -51,29 +63,34 @@ const createToastConfigFunction = (type: ToastType) => {
 };
 
 // $toast 유틸리티 객체
-export const $toast: ToastUtility = {
-  // 기본 사용법: $toast.success('메시지', { duration: 5000 })
-  success: createToastFunction('success'),
-  error: createToastFunction('error'),
-  warning: createToastFunction('warning'),
-  info: createToastFunction('info'),
-  loading: createToastFunction('loading'),
+const toastUtility: ToastUtility = Object.assign(
+  createDefaultToastFunction(), // 기본 함수를 할당
+  {
+    // 기본 사용법: $toast.success('메시지', { duration: 5000 })
+    success: createToastFunction('success'),
+    error: createToastFunction('error'),
+    warning: createToastFunction('warning'),
+    info: createToastFunction('info'),
+    loading: createToastFunction('loading'),
 
-  // 옵션 객체 사용법: $toast.config.success({ content: '메시지', duration: 5000 })
-  config: {
-    success: createToastConfigFunction('success'),
-    error: createToastConfigFunction('error'),
-    warning: createToastConfigFunction('warning'),
-    info: createToastConfigFunction('info'),
-    loading: createToastConfigFunction('loading'),
-  },
+    // 옵션 객체 사용법: $toast.config.success({ content: '메시지', duration: 5000 })
+    config: {
+      success: createToastConfigFunction('success'),
+      error: createToastConfigFunction('error'),
+      warning: createToastConfigFunction('warning'),
+      info: createToastConfigFunction('info'),
+      loading: createToastConfigFunction('loading'),
+    },
 
-  // 모든 토스트 제거
-  destroy: (position?: 'top' | 'bottom'): void => {
-    const context = ensureToastContext();
-    context.clearToasts(position);
-  },
-};
+    // 모든 토스트 제거
+    destroy: (position?: 'top' | 'bottom'): void => {
+      const context = ensureToastContext();
+      context.clearToasts(position);
+    },
+  }
+);
+
+export const $toast = toastUtility;
 
 // 개별 토스트 함수들도 별도로 export (선택사항)
 export const toastSuccess = $toast.success;

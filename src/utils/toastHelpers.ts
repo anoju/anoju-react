@@ -12,4 +12,5 @@ export const generateToastId = (): string => {
 export const defaultToastOptions: Required<Omit<ToastOptions, 'content' | 'onClose' | 'key'>> = {
   duration: 3000, // 3초
   position: 'top',
+  className: '',
 };

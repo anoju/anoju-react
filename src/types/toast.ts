@@ -14,6 +14,7 @@ export interface ToastOptions {
   position?: ToastPosition; // 표시 위치
   onClose?: () => void; // 닫힐 때 콜백
   key?: string; // 고유 키 (중복 방지용)
+  className?: string; // 커스텀 클래스명
 }
 
 // 개별 토스트 인터페이스
@@ -26,6 +27,7 @@ export interface Toast {
   onClose?: () => void; // 닫힐 때 콜백
   createdAt: number; // 생성 시간
   key?: string; // 고유 키
+  className?: string; // 커스텀 클래스명
 }
 
 // 토스트 컨텍스트 인터페이스
@@ -39,9 +41,14 @@ export interface ToastContextType {
 // $toast 함수 타입들
 export type ToastFunction = (content: ReactNode, options?: Omit<ToastOptions, 'content'>) => () => void;
 export type ToastWithOptionsFunction = (options: ToastOptions) => () => void;
+export type DefaultToastFunction = (content: ReactNode, options?: ToastOptions) => () => void; // 기본 토스트용
 
 // $toast 유틸리티 인터페이스
 export interface ToastUtility {
+  // 기본 토스트 (타입 없음)
+  (content: ReactNode, options?: ToastOptions): () => void;
+  
+  // 타입별 토스트
   success: ToastFunction;
   error: ToastFunction;
   warning: ToastFunction;

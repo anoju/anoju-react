@@ -74,6 +74,7 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({
         onClose: options.onClose,
         createdAt: Date.now(),
         key: options.key,
+        className: options.className,
       };
 
       setToasts((prev) => {

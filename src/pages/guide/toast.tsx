@@ -44,6 +44,13 @@ const ToastGuide = () => {
           <Button
             size="sm"
             className="line"
+            onClick={() => $toast('기본 메시지입니다!', { duration: 50000 })}
+          >
+            Default
+          </Button>
+          <Button
+            size="sm"
+            className="line"
             onClick={() => $toast.success('성공 메시지입니다!')}
           >
             Success
@@ -81,6 +88,7 @@ const ToastGuide = () => {
         <h3 className={styles['sub-title']}>참조 소스코드</h3>
         <CodeHighlight
           code={`// 기본 사용법
+$toast('기본 메시지입니다!');
 $toast.success('성공 메시지입니다!');
 $toast.error('에러가 발생했습니다!');
 $toast.warning('주의가 필요합니다!');

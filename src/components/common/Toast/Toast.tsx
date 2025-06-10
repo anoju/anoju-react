@@ -3,6 +3,7 @@ import React, { useState, useEffect, forwardRef, useRef } from 'react';
 import { Toast as ToastType } from '@/types/toast';
 import { useToast } from '@/hooks/useToast';
 import styles from '@/assets/scss/components/toast.module.scss';
+import cx from '@/utils/cx';
 
 type CustomCSSProperties = React.CSSProperties & {
   '--toast-index'?: number;
@@ -205,17 +206,16 @@ const Toast = forwardRef<HTMLDivElement, ToastProps>(
     const [isHovered, setIsHovered] = useState(false);
 
     // 토스트 클래스명 생성
-    const toastClasses = [
+    const toastClasses = cx(
       styles.toast,
       styles[toast.type],
       styles[toast.position],
-      isVisible ? styles.visible : '',
-      isLeaving ? styles.leaving : '',
-      isRemoving ? styles.removing : '',
-      isHovered && !isLeaving && !isRemoving ? styles.hovered : '',
-    ]
-      .filter(Boolean)
-      .join(' ');
+      isVisible && styles.visible,
+      isLeaving && styles.leaving,
+      isRemoving && styles.removing,
+      isHovered && !isLeaving && !isRemoving && styles.hovered,
+      toast.className // 커스텀 클래스명 추가
+    );
 
     // 위치 이동에 따른 변환 계산
     const getTransformStyle = () => {
