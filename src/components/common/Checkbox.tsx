@@ -32,6 +32,9 @@ function includesValue<T>(array: T[], value: unknown): boolean {
   return array.some((item) => item === value);
 }
 
+// Status 타입 정의 (Input 컴포넌트와 동일한 유효성 검사 피드백)
+type CheckboxStatus = 'success' | 'error' | 'warning' | '';
+
 // CheckboxContext 타입 정의
 interface CheckboxContextType<T = CheckboxValue> {
   value: T[];
@@ -40,6 +43,7 @@ interface CheckboxContextType<T = CheckboxValue> {
   setValue?: SetValueFunction<T[]>;
   name?: string;
   disabled?: boolean;
+  status?: CheckboxStatus;
   registerCheckbox?: (index: number, handle: CheckboxHandle | null) => void;
   isBtn?: boolean;
   isSwitch?: boolean;
@@ -81,6 +85,7 @@ export interface CheckboxProps
   iconClassName?: string;
   labelClassName?: string;
   disabled?: boolean;
+  status?: CheckboxStatus; // 유효성 검사 상태
   isBtn?: boolean;
   isSwitch?: boolean;
   leftLabel?: boolean;
@@ -104,6 +109,7 @@ export const Checkbox = forwardRef<CheckboxHandle, CheckboxProps>(
       iconClassName = '',
       labelClassName = '',
       disabled = false,
+      status = '', // 기본값은 빈 문자열 (정상 상태)
       isBtn = false,
       isSwitch = false,
       leftLabel = false,
@@ -117,6 +123,7 @@ export const Checkbox = forwardRef<CheckboxHandle, CheckboxProps>(
 
     // 그룹에서 상속받은 속성 적용
     const mergedDisabled = disabled || context?.disabled;
+    const mergedStatus = status || context?.status || '';
     const mergedIsBtn = isBtn || context?.isBtn;
     const mergedIsSwitch = isSwitch || context?.isSwitch;
     const mergedLeftLabel = leftLabel || context?.leftLabel;
@@ -330,6 +337,9 @@ export const Checkbox = forwardRef<CheckboxHandle, CheckboxProps>(
     const checkboxClasses = cx(styles.checkbox, className, {
       [styles.btn]: mergedIsBtn,
       [styles.switch]: mergedIsSwitch,
+      [styles.success]: mergedStatus === 'success',
+      [styles.error]: mergedStatus === 'error',
+      [styles.warning]: mergedStatus === 'warning',
     });
 
     return (
@@ -411,6 +421,7 @@ export interface CheckboxGroupProps<
   setValue?: SetValueFunction<T[]>;
   name?: string;
   disabled?: boolean;
+  status?: CheckboxStatus; // 유효성 검사 상태
   className?: string;
   inputClassName?: string;
   iconClassName?: string;
@@ -433,6 +444,7 @@ const CheckboxGroupComponent = forwardRef(
       setValue,
       name,
       disabled = false,
+      status = '', // 기본값은 빈 문자열 (정상 상태)
       className = '',
       inputClassName = '',
       iconClassName = '',
@@ -540,6 +552,7 @@ const CheckboxGroupComponent = forwardRef(
         },
         name,
         disabled,
+        status,
         registerCheckbox,
         isBtn,
         isSwitch,
@@ -551,6 +564,7 @@ const CheckboxGroupComponent = forwardRef(
         handleGroupValueChange,
         name,
         disabled,
+        status,
         registerCheckbox,
         isBtn,
         isSwitch,

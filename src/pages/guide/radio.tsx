@@ -431,6 +431,51 @@ const [selectedColor, setSelectedColor] = useState<string | number>('blue');
       </section>
 
       <section className={styles.section}>
+        <h2 className={styles['section-title']}>
+          Status 속성 (유효성 검사 피드백)
+        </h2>
+        <p className={styles.txt}>
+          status 속성을 사용하여 입력 필드의 유효성 검사 상태를 시각적으로
+          표시할 수 있습니다. error는 빨간색, warning은 주황색으로 테두리가
+          변경됩니다.
+        </p>
+
+        <div className={styles.showcase + ' inline'}>
+          <Radio value="1">정상 상태 (기본)</Radio>
+          <Radio value="2" status="success">
+            성공 상태
+          </Radio>
+          <Radio value="3" status="error">
+            에러 상태
+          </Radio>
+          <Radio value="4" status="warning">
+            경고 상태
+          </Radio>
+          <Radio value="5" isBtn>
+            정상 상태 (기본)
+          </Radio>
+          <Radio value="6" isBtn status="success">
+            성공 상태
+          </Radio>
+          <Radio value="7" isBtn status="error">
+            에러 상태
+          </Radio>
+          <Radio value="8" isBtn status="warning">
+            경고 상태
+          </Radio>
+        </div>
+
+        <h3 className={styles['sub-title']}>참조 소스코드</h3>
+        <CodeHighlight
+          code={`<Checkbox>정상 상태 (기본)</Checkbox>
+<Checkbox status="success">성공 상태</Checkbox>
+<Checkbox status="error">에러 상태</Checkbox>
+<Checkbox status="warning">경고 상태</Checkbox>`}
+          language="jsx"
+        />
+      </section>
+
+      <section className={styles.section}>
         <h2 className={styles['section-title']}>스타일 적용</h2>
         <h3 className={styles['sub-title']}>체크박스 우측배치</h3>
         <p className={styles.txt}>leftLabel 옵션 true</p>

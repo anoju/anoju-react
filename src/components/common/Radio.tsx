@@ -21,6 +21,9 @@ const generateUniqueId = (): string => {
   return `radio_${uniqueIdCounter++}_${Math.random().toString(36).slice(2, 9)}`;
 };
 
+// Status 타입 정의 (Input 컴포넌트와 동일한 유효성 검사 피드백)
+type RadioStatus = 'success' | 'error' | 'warning' | '';
+
 // 라디오 버튼 값 타입 정의
 type RadioValue = string | number;
 
@@ -30,6 +33,7 @@ interface RadioContextType {
   onChange: (value: RadioValue) => void;
   name?: string;
   disabled?: boolean;
+  status?: RadioStatus;
   registerRadio?: (index: number, handle: RadioHandle | null) => void;
   isCheckbox?: boolean;
   isBtn?: boolean;
@@ -67,6 +71,7 @@ interface RadioProps
   iconClassName?: string;
   labelClassName?: string;
   disabled?: boolean;
+  status?: RadioStatus; // 유효성 검사 상태
   isCheckbox?: boolean;
   isBtn?: boolean;
   isSwitch?: boolean;
@@ -89,6 +94,7 @@ export const Radio = forwardRef<RadioHandle, RadioProps>(
       iconClassName = '',
       labelClassName = '',
       disabled = false,
+      status = '', // 기본값은 빈 문자열 (정상 상태)
       isCheckbox = false,
       isBtn = false,
       isSwitch = false,
@@ -103,6 +109,7 @@ export const Radio = forwardRef<RadioHandle, RadioProps>(
 
     // 그룹에서 상속받은 속성 적용
     const mergedDisabled = disabled || context?.disabled;
+    const mergedStatus = status || context?.status || '';
     const mergedIsCheckbox = isCheckbox || context?.isCheckbox;
     const mergedIsBtn = isBtn || context?.isBtn;
     const mergedIsSwitch = isSwitch || context?.isSwitch;
@@ -234,6 +241,9 @@ export const Radio = forwardRef<RadioHandle, RadioProps>(
       {
         [styles.btn]: mergedIsBtn,
         [styles.switch]: mergedIsSwitch,
+        [styles.success]: mergedStatus === 'success',
+        [styles.error]: mergedStatus === 'error',
+        [styles.warning]: mergedStatus === 'warning',
       }
     );
 
@@ -311,6 +321,7 @@ interface RadioGroupProps<T extends string | number = string | number> {
   labelClassName?: string;
   name?: string;
   disabled?: boolean;
+  status?: RadioStatus; // 유효성 검사 상태
   style?: React.CSSProperties;
   isCheckbox?: boolean;
   isBtn?: boolean;
@@ -334,6 +345,7 @@ const RadioGroupComponent = forwardRef(
       labelClassName = '',
       name,
       disabled = false,
+      status = '', // 기본값은 빈 문자열 (정상 상태)
       style,
       isCheckbox = false,
       isBtn = false,
@@ -405,6 +417,7 @@ const RadioGroupComponent = forwardRef(
         onChange: handleRadioChange,
         name: name || `radio-group-${generateUniqueId()}`,
         disabled,
+        status,
         registerRadio,
         isCheckbox,
         isBtn,
@@ -416,6 +429,7 @@ const RadioGroupComponent = forwardRef(
         handleRadioChange,
         name,
         disabled,
+        status,
         registerRadio,
         isCheckbox,
         isBtn,
