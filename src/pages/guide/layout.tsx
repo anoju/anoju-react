@@ -67,7 +67,7 @@ const GuideLayout: React.FC<GuideLayoutProps> = ({ children }) => {
           ]}
         />
       </StickyWrap>
-      {children}
+      <div style={{ marginTop: '3rem' }}>{children}</div>
     </>
   );
 };

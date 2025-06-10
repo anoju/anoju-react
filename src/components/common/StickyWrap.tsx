@@ -51,6 +51,7 @@ const StickyWrap = forwardRef<HTMLDivElement, StickyWrapProps>(
     const placeholderRef = useRef<HTMLDivElement>(null);
     const contentRef = useRef<HTMLDivElement>(null);
     const idRef = useRef<string>(generateId());
+    const onChangeRef = useRef(onChange); // onChange를 ref로 저장하여 안정화
 
     // context 사용
     const {
@@ -62,6 +63,11 @@ const StickyWrap = forwardRef<HTMLDivElement, StickyWrapProps>(
 
     const id = idRef.current;
 
+    // onChange ref 업데이트
+    useEffect(() => {
+      onChangeRef.current = onChange;
+    }, [onChange]);
+
     // 스타일 적용
     const applyStyles = useCallback((state: StickyWrapState) => {
       if (!contentRef.current || !placeholderRef.current || !wrapperRef.current)
@@ -71,11 +77,8 @@ const StickyWrap = forwardRef<HTMLDivElement, StickyWrapProps>(
       const placeholder = placeholderRef.current;
 
       if (state.isFixed) {
-        if (state.hideScrolling && state.isHidden) {
-          element.style.top = `${state.fixedTop - state.height}px`;
-        } else {
-          element.style.top = `${state.fixedTop}px`;
-        }
+        // top 위치 설정
+        element.style.top = `${state.fixedTop}px`;
         // placeholder 높이 설정
         placeholder.style.height = `${state.height}px`;
       } else {
@@ -104,7 +107,7 @@ const StickyWrap = forwardRef<HTMLDivElement, StickyWrapProps>(
       const scrollTop =
         window.pageYOffset || document.documentElement.scrollTop;
 
-      // 인스턴스 등록
+      // 인스턴스 등록 - onChange를 ref로 전달
       const newInstance: StickyWrapState = {
         id,
         height: rect.height,
@@ -115,7 +118,7 @@ const StickyWrap = forwardRef<HTMLDivElement, StickyWrapProps>(
         isHidden: false,
         originalTop: rect.top + scrollTop,
         fixedTop: 0,
-        onChange,
+        onChange: onChangeRef.current, // ref를 통해 안정화된 함수 전달
       };
 
       registerInstance(id, newInstance);
@@ -124,22 +127,34 @@ const StickyWrap = forwardRef<HTMLDivElement, StickyWrapProps>(
       return () => {
         unregisterInstance(id);
       };
-    }, [id, hideScrolling, onChange, registerInstance, unregisterInstance]);
+    }, [id, hideScrolling, registerInstance, unregisterInstance]); // onChange는 의존성에서 제거
 
-    // 크기 변경 감지 (ResizeObserver)
+    // onChange 함수가 변경될 때 인스턴스 업데이트
+    useEffect(() => {
+      updateInstanceData(id, {
+        onChange: onChangeRef.current,
+      });
+    }, [id, onChange, updateInstanceData]);
+
+    // 크기 변경 감지 (ResizeObserver) - debounce 추가
     useEffect(() => {
       if (!wrapperRef.current) return;
 
       let resizeObserver: ResizeObserver | null = null;
+      let resizeTimeout: NodeJS.Timeout;
 
       if (window.ResizeObserver) {
         resizeObserver = new ResizeObserver(() => {
-          if (wrapperRef.current && contentRef.current) {
-            const rect = wrapperRef.current.getBoundingClientRect();
-            updateInstanceData(id, {
-              height: rect.height,
-            });
-          }
+          // debounce로 연속적인 크기 변경 이벤트 방지
+          clearTimeout(resizeTimeout);
+          resizeTimeout = setTimeout(() => {
+            if (wrapperRef.current && contentRef.current) {
+              const rect = wrapperRef.current.getBoundingClientRect();
+              updateInstanceData(id, {
+                height: rect.height,
+              });
+            }
+          }, 50); // 50ms debounce
         });
 
         resizeObserver.observe(wrapperRef.current);
@@ -149,6 +164,7 @@ const StickyWrap = forwardRef<HTMLDivElement, StickyWrapProps>(
         if (resizeObserver) {
           resizeObserver.disconnect();
         }
+        clearTimeout(resizeTimeout);
       };
     }, [id, updateInstanceData]);
 

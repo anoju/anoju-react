@@ -16,6 +16,19 @@ const StickyWrapGuide = () => {
     ),
   });
 
+  const guideStyles = {
+    box: {
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      color: 'white',
+      borderRadius: '8px',
+      textAlign: 'center',
+      fontSize: '16px',
+      fontWeight: 'bold',
+    } as React.CSSProperties,
+  };
+
   const [fixedCount, setFixedCount] = useState(0);
 
   const handleFixedChange = (isFixed: boolean) => {
@@ -48,11 +61,9 @@ const StickyWrapGuide = () => {
           <StickyWrap>
             <div
               style={{
-                padding: '20px',
+                ...guideStyles.box,
+                height: '60px',
                 backgroundColor: 'var(--primary-color)',
-                color: 'white',
-                borderRadius: '8px',
-                textAlign: 'center',
               }}
             >
               기본 StickyWrap - 상단에 고정됩니다
@@ -68,17 +79,7 @@ const StickyWrapGuide = () => {
         <h3 className={styles['sub-title']}>참조 소스코드</h3>
         <CodeHighlight
           code={`<StickyWrap>
-  <div
-    style={{
-      padding: '20px',
-      backgroundColor: 'var(--primary-color)',
-      color: 'white',
-      borderRadius: '8px',
-      textAlign: 'center',
-    }}
-  >
-    기본 StickyWrap - 상단에 고정됩니다
-  </div>
+  고정시킬 컨텐츠
 </StickyWrap>`}
           language="jsx"
         />
@@ -105,16 +106,9 @@ const StickyWrapGuide = () => {
           <StickyWrap onChange={handleFixedChange}>
             <div
               style={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
+                ...guideStyles.box,
                 height: '60px',
                 backgroundColor: '#ff6b6b',
-                color: 'white',
-                borderRadius: '8px',
-                textAlign: 'center',
-                fontSize: '16px',
-                fontWeight: 'bold',
               }}
             >
               첫 번째 StickyWrap (높이: 60px)
@@ -130,13 +124,9 @@ const StickyWrapGuide = () => {
           <StickyWrap onChange={handleFixedChange}>
             <div
               style={{
-                padding: '25px 15px', // 더 높게
+                ...guideStyles.box,
+                height: '70px',
                 backgroundColor: '#4ecdc4',
-                color: 'white',
-                borderRadius: '8px',
-                textAlign: 'center',
-                fontSize: '16px',
-                fontWeight: 'bold',
               }}
             >
               두 번째 StickyWrap (높이: 70px)
@@ -150,13 +140,9 @@ const StickyWrapGuide = () => {
           <StickyWrap onChange={handleFixedChange}>
             <div
               style={{
-                padding: '30px 15px', // 가장 높게
+                ...guideStyles.box,
+                height: '80px',
                 backgroundColor: '#45b7d1',
-                color: 'white',
-                borderRadius: '8px',
-                textAlign: 'center',
-                fontSize: '16px',
-                fontWeight: 'bold',
               }}
             >
               세 번째 StickyWrap (높이: 80px)
@@ -167,58 +153,12 @@ const StickyWrapGuide = () => {
             <p>마지막 컨텐츠입니다.</p>
           </div>
         </div>
-
-        <h3 className={styles['sub-title']}>참조 소스코드</h3>
-        <CodeHighlight
-          code={`const [fixedCount, setFixedCount] = useState(0);
-
-const handleFixedChange = (isFixed: boolean) => {
-  setFixedCount(prev => isFixed ? prev + 1 : Math.max(0, prev - 1));
-};
-
-// 첫 번째 (높이: 60px)
-<StickyWrap onChange={handleFixedChange}>
-  <div style={{ 
-    padding: '20px 15px', 
-    backgroundColor: '#ff6b6b', 
-    color: 'white',
-    fontWeight: 'bold'
-  }}>
-    첫 번째 StickyWrap (높이: 60px)
-  </div>
-</StickyWrap>
-
-// 두 번째 (높이: 70px)
-<StickyWrap onChange={handleFixedChange}>
-  <div style={{ 
-    padding: '25px 15px', 
-    backgroundColor: '#4ecdc4', 
-    color: 'white',
-    fontWeight: 'bold'
-  }}>
-    두 번째 StickyWrap (높이: 70px)
-  </div>
-</StickyWrap>
-
-// 세 번째 (높이: 80px)
-<StickyWrap onChange={handleFixedChange}>
-  <div style={{ 
-    padding: '30px 15px', 
-    backgroundColor: '#45b7d1', 
-    color: 'white',
-    fontWeight: 'bold'
-  }}>
-    세 번째 StickyWrap (높이: 80px)
-  </div>
-</StickyWrap>`}
-          language="jsx"
-        />
       </section>
 
       <section className={styles.section}>
-        <h2 className={styles['section-title']}>scrolling 옵션</h2>
+        <h2 className={styles['section-title']}>hideScrolling 옵션</h2>
         <p className={styles.txt}>
-          scrolling=true 옵션을 사용하면 아래로 스크롤할 때 숨겨지고, 위로
+          hideScrolling=true 옵션을 사용하면 아래로 스크롤할 때 숨겨지고, 위로
           스크롤할 때 다시 나타납니다.
         </p>
 
@@ -233,14 +173,12 @@ const handleFixedChange = (isFixed: boolean) => {
           <StickyWrap hideScrolling>
             <div
               style={{
-                padding: '20px',
+                ...guideStyles.box,
+                height: '60px',
                 backgroundColor: '#9b59b6',
-                color: 'white',
-                borderRadius: '8px',
-                textAlign: 'center',
               }}
             >
-              Scrolling StickyWrap - 스크롤 방향에 따라 숨겨집니다
+              Scrolling StickyWrap <br /> 스크롤 방향에 따라 숨겨집니다
             </div>
           </StickyWrap>
 

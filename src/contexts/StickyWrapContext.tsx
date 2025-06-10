@@ -40,20 +40,24 @@ const StickyWrapProvider: React.FC<{ children: ReactNode }> = ({
     new Map()
   );
   const lastScrollYRef = useRef<number>(0);
+  const processingRef = useRef<boolean>(false); // 처리 중 플래그 추가
 
   // 모든 인스턴스의 상태를 순차적으로 처리
   const processAllInstances = useCallback(() => {
+    // 이미 처리 중이면 중복 실행 방지
+    if (processingRef.current) return;
+    processingRef.current = true;
+
     const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
     const instances = Array.from(instancesRef.current.values()).sort(
       (a, b) => a.originalTop - b.originalTop
     ); // DOM 순서대로 정렬
 
     let accumulatedHeight = 0;
-    const updates: Array<{ id: string; state: StickyWrapState }> = [];
+    const updates: Array<{ id: string; state: StickyWrapState; wasFixed: boolean }> = [];
 
     // 각 인스턴스를 순서대로 처리
     instances.forEach((instance) => {
-      // console.log(instance, scrollTop, instance.originalTop, accumulatedHeight);
       const shouldBeFixed =
         scrollTop >= instance.originalTop - accumulatedHeight;
 
@@ -83,12 +87,11 @@ const StickyWrapProvider: React.FC<{ children: ReactNode }> = ({
         };
 
         instancesRef.current.set(instance.id, updatedState);
-        updates.push({ id: instance.id, state: updatedState });
-
-        // onChange 콜백 호출
-        if (instance.onChange && shouldBeFixed !== instance.isFixed) {
-          instance.onChange(shouldBeFixed);
-        }
+        updates.push({ 
+          id: instance.id, 
+          state: updatedState, 
+          wasFixed: instance.isFixed 
+        });
       }
 
       // 고정되고 숨겨지지 않은 경우 누적 높이에 추가
@@ -111,7 +114,7 @@ const StickyWrapProvider: React.FC<{ children: ReactNode }> = ({
         ...instance,
         fixedTop: instance.isHidden ? currentTop - instance.height : currentTop,
       };
-      // console.log(instance, updatedState.isHidden, updatedState.fixedTop);
+
       instancesRef.current.set(instance.id, updatedState);
 
       // updates 배열에서 해당 인스턴스 찾아서 업데이트하거나 추가
@@ -121,7 +124,11 @@ const StickyWrapProvider: React.FC<{ children: ReactNode }> = ({
       if (existingUpdateIndex >= 0) {
         updates[existingUpdateIndex].state = updatedState;
       } else {
-        updates.push({ id: instance.id, state: updatedState });
+        updates.push({ 
+          id: instance.id, 
+          state: updatedState, 
+          wasFixed: instance.isFixed 
+        });
       }
 
       // 숨겨지지 않은 요소만 다음 위치에 영향을 줌
@@ -130,14 +137,27 @@ const StickyWrapProvider: React.FC<{ children: ReactNode }> = ({
       }
     });
 
-    // 스타일 업데이트
+    // 스타일 업데이트 및 onChange 콜백 호출
     requestAnimationFrame(() => {
-      updates.forEach(({ id, state }) => {
+      updates.forEach(({ id, state, wasFixed }) => {
         const subscriber = subscribersRef.current.get(id);
         if (subscriber) {
           subscriber(state);
         }
+
+        // onChange 콜백 호출 - fixed 상태가 실제로 변경된 경우에만
+        if (state.onChange && state.isFixed !== wasFixed) {
+          // setTimeout으로 지연 실행하여 상태 업데이트 후 콜백 실행
+          setTimeout(() => {
+            if (state.onChange) {
+              state.onChange(state.isFixed);
+            }
+          }, 0);
+        }
       });
+
+      // 처리 완료 플래그 해제
+      processingRef.current = false;
     });
   }, []);
 
@@ -199,9 +219,14 @@ const StickyWrapProvider: React.FC<{ children: ReactNode }> = ({
       if (current) {
         const updated = { ...current, ...updates };
         instancesRef.current.set(id, updated);
+        
+        // onChange 함수 업데이트인 경우에는 processAllInstances 호출하지 않음
+        if (!('onChange' in updates)) {
+          processAllInstances();
+        }
       }
     },
-    []
+    [processAllInstances]
   );
 
   // 인스턴스 제거
