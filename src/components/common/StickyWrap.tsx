@@ -107,7 +107,7 @@ const StickyWrap = forwardRef<HTMLDivElement, StickyWrapProps>(
       // 인스턴스 등록
       const newInstance: StickyWrapState = {
         id,
-        height: wrapperRef.current?.offsetHeight || rect.height,
+        height: contentRef.current?.offsetHeight || rect.height,
         isFixed: false,
         order: Date.now(), // 등록 순서
         element: contentRef.current,
@@ -134,10 +134,10 @@ const StickyWrap = forwardRef<HTMLDivElement, StickyWrapProps>(
 
       if (window.ResizeObserver) {
         resizeObserver = new ResizeObserver(() => {
-          if (wrapperRef.current) {
+          if (wrapperRef.current && contentRef.current) {
             const rect = wrapperRef.current.getBoundingClientRect();
             updateInstanceData(id, {
-              height: wrapperRef.current?.offsetHeight || rect.height,
+              height: contentRef.current?.offsetHeight || rect.height,
             });
           }
         });

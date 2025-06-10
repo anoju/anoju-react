@@ -9,38 +9,21 @@
   &.fixed {
     z-index: 100;
 
+    .placeholder {
+      width: 100%;
+      display: block;
+    }
+
     .content {
       position: fixed;
       left: 0;
       right: 0;
-      transition: top 0.3s ease; // transform 대신 top 애니메이션
-      box-shadow: 0 2px 8px rgb(0 0 0 / 15%);
+      top: 0;
+      transition: top 0.3s ease;
     }
-
-    // hidden 클래스 관련 transform은 제거 (top으로 처리)
   }
 }
 
 .placeholder {
-  transition: height 0.2s ease;
-  pointer-events: none;
-  visibility: hidden;
-}
-
-.content {
-  transition: none;
-}
-
-// 라이트 모드에서의 그림자 조정
-@include s.light-mode {
-  .sticky-wrap.fixed .content {
-    box-shadow: 0 2px 8px rgb(0 0 0 / 10%);
-  }
-}
-
-// 반응형 대응
-@media (width <= 768px) {
-  .sticky-wrap.fixed .content {
-    box-shadow: 0 1px 4px rgb(0 0 0 / 12%);
-  }
+  display: none;
 }
