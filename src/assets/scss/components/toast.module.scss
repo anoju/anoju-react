@@ -18,14 +18,10 @@
 
   &.top {
     top: 2.4rem;
-
-    // 상단은 최신이 위에 (flex-direction: column 기본값)
   }
 
   &.bottom {
     bottom: 2.4rem;
-
-    // 하단은 최신이 아래에 (flex-direction: column 기본값)
   }
 
   // 스택 효과를 위한 추가 스타일
@@ -166,7 +162,7 @@
     }
   }
 
-  // 로딩 타입은 클릭 불가
+  // 로딩 타입은 클릭 불가 및 호버 효과 제한
   &.loading {
     cursor: default;
     border-left: 0.4rem solid #1890ff;
@@ -175,11 +171,12 @@
       color: #1890ff;
     }
 
+    // 로딩 토스트는 호버 시 위치 변화만 약간 적용, 아이콘 회전은 방해하지 않음
     &.hovered {
-      transform: translate(0, 0) scale(1) !important;
+      transform: translateY(-0.2rem) scale(1.01) !important;
       box-shadow:
-        0 0.6rem 1.6rem rgb(0 0 0 / 12%),
-        0 0.3rem 0.6rem rgb(0 0 0 / 8%);
+        0 0.8rem 2rem rgb(0 0 0 / 14%),
+        0 0.4rem 0.8rem rgb(0 0 0 / 10%);
     }
   }
 
@@ -228,8 +225,14 @@
   margin-top: 0.2rem;
   transition: transform 0.2s ease;
 
+  // 일반 토스트의 호버 효과 (로딩 제외)
   .toast.hovered:not(.loading) & {
     transform: scale(1.15) rotate(5deg);
+  }
+
+  // 로딩 토스트의 호버 효과 (아이콘만 살짝 확대, 회전은 없음)
+  .toast.loading.hovered & {
+    transform: scale(1.05);
   }
 
   .toast.shifting & {
@@ -237,12 +240,12 @@
   }
 }
 
-// 로딩 아이콘 회전 애니메이션
+// 로딩 아이콘 애니메이션 개선
 .loading-spin {
   animation: loading-spin 2s linear infinite;
 }
 
-.loading-dash {
+.loading-circle {
   animation: loading-dash 2s linear infinite;
 }
 
@@ -258,18 +261,18 @@
 
 @keyframes loading-dash {
   0% {
-    stroke-dasharray: 0, 150;
+    stroke-dasharray: 0, 37.7;
     stroke-dashoffset: 0;
   }
 
   50% {
-    stroke-dasharray: 100, 150;
-    stroke-dashoffset: -16;
+    stroke-dasharray: 18.85, 37.7;
+    stroke-dashoffset: -9.425;
   }
 
   100% {
-    stroke-dasharray: 0, 150;
-    stroke-dashoffset: -116;
+    stroke-dasharray: 0, 37.7;
+    stroke-dashoffset: -37.7;
   }
 }
 
@@ -282,7 +285,7 @@
   word-break: break-word;
   transition: transform 0.2s ease;
 
-  .toast.hovered & {
+  .toast.hovered:not(.loading) & {
     transform: translateX(0.2rem);
   }
 
@@ -471,7 +474,7 @@
     }
   }
 
-  .loading-spin {
+  .loading-circle {
     animation: none;
   }
 }

@@ -12,13 +12,13 @@ const ToastContainer: React.FC = () => {
   const { topToasts, bottomToasts } = useMemo(() => {
     const top = toasts.filter((toast) => toast.position === 'top');
     const bottom = toasts.filter((toast) => toast.position === 'bottom');
-
+    
     // 상단: 최신이 위에 (역순 정렬)
     const sortedTop = [...top].sort((a, b) => b.createdAt - a.createdAt);
-
+    
     // 하단: 최신이 아래에 (정순 정렬)
     const sortedBottom = [...bottom].sort((a, b) => a.createdAt - b.createdAt);
-
+    
     return {
       topToasts: sortedTop,
       bottomToasts: sortedBottom,
@@ -36,7 +36,7 @@ const ToastContainer: React.FC = () => {
     <>
       {/* 상단 토스트 컨테이너 */}
       {topToasts.length > 0 && (
-        <div
+        <div 
           className={`${styles['toast-container']} ${styles.top}`}
           aria-live="polite"
           aria-label="상단 알림"
@@ -54,7 +54,7 @@ const ToastContainer: React.FC = () => {
 
       {/* 하단 토스트 컨테이너 */}
       {bottomToasts.length > 0 && (
-        <div
+        <div 
           className={`${styles['toast-container']} ${styles.bottom}`}
           aria-live="polite"
           aria-label="하단 알림"

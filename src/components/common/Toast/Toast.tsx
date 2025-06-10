@@ -95,11 +95,17 @@ const LoadingIcon = () => (
     xmlns="http://www.w3.org/2000/svg"
     className={styles['loading-spin']}
   >
-    <path
-      d="M8 1.5C4.41015 1.5 1.5 4.41015 1.5 8C1.5 11.5899 4.41015 14.5 8 14.5C11.5899 14.5 14.5 11.5899 14.5 8C14.5 6.92184 14.2002 5.92184 13.6713 5.06629"
+    <circle
+      cx="8"
+      cy="8"
+      r="6"
       stroke="currentColor"
-      strokeWidth="1.5"
+      strokeWidth="2"
+      fill="none"
+      strokeDasharray="37.7"
+      strokeDashoffset="0"
       strokeLinecap="round"
+      className={styles['loading-circle']}
     />
   </svg>
 );
