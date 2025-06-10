@@ -22,7 +22,7 @@ export const unregisterToastContext = (): void => {
 };
 
 // 에러 처리용 헬퍼 함수
-const ensureToastContext = (): typeof toastContextRef => {
+const ensureToastContext = (): NonNullable<typeof toastContextRef> => {
   if (!toastContextRef) {
     throw new Error(
       '$toast를 사용하려면 앱이 ToastProvider로 감싸져 있어야 합니다.'
