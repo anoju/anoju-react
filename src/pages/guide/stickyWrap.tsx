@@ -27,6 +27,11 @@ const StickyWrapGuide = () => {
       fontSize: '16px',
       fontWeight: 'bold',
     } as React.CSSProperties,
+    wrap: {
+      height: '100vh',
+      background:
+        'linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.3))',
+    } as React.CSSProperties,
   };
 
   const [fixedCount, setFixedCount] = useState(0);
@@ -53,11 +58,7 @@ const StickyWrapGuide = () => {
           스크롤 시 브라우저 상단에 닿으면 고정되는 기본적인 StickyWrap입니다.
         </p>
 
-        <div style={{ height: '100vh', padding: '20px 0' }}>
-          <div style={{ marginBottom: '50px' }}>
-            <p>위로 스크롤해보세요. 아래 박스가 상단에 고정됩니다.</p>
-          </div>
-
+        <div style={guideStyles.wrap}>
           <StickyWrap innerClassName="inner">
             <div
               style={{
@@ -69,11 +70,6 @@ const StickyWrapGuide = () => {
               기본 StickyWrap - 상단에 고정됩니다
             </div>
           </StickyWrap>
-
-          <div style={{ marginTop: '50px' }}>
-            <p>컨텐츠가 계속됩니다...</p>
-            <p>스크롤을 더 내려보세요.</p>
-          </div>
         </div>
 
         <h3 className={styles['sub-title']}>참조 소스코드</h3>
@@ -97,12 +93,7 @@ const StickyWrapGuide = () => {
           있습니다.
         </p>
 
-        <div style={{ height: '100vh', padding: '20px 0' }}>
-          <div style={{ marginBottom: '30px' }}>
-            <p>아래 3개의 박스가 순서대로 쌓입니다.</p>
-            <p>현재 고정된 요소 수: {fixedCount}</p>
-          </div>
-
+        <div style={guideStyles.wrap}>
           <StickyWrap onChange={handleFixedChange} innerClassName="inner">
             <div
               style={{
@@ -162,14 +153,7 @@ const StickyWrapGuide = () => {
           스크롤할 때 다시 나타납니다.
         </p>
 
-        <div style={{ height: '100vh', padding: '20px 0' }}>
-          <div style={{ marginBottom: '50px' }}>
-            <p>
-              아래로 스크롤하면 숨겨지고, 위로 스크롤하면 다시 나타나는
-              StickyWrap입니다.
-            </p>
-          </div>
-
+        <div style={guideStyles.wrap}>
           <StickyWrap hideScrolling innerClassName="inner">
             <div
               style={{
@@ -181,15 +165,6 @@ const StickyWrapGuide = () => {
               Scrolling StickyWrap <br /> 스크롤 방향에 따라 숨겨집니다
             </div>
           </StickyWrap>
-
-          <div style={{ marginTop: '50px' }}>
-            <p>계속 아래로 스크롤해보세요...</p>
-            <p>그리고 다시 위로 스크롤해보세요.</p>
-            <div style={{ height: '100vh' }}>
-              <p>긴 컨텐츠 영역...</p>
-            </div>
-            <p>마지막 부분입니다.</p>
-          </div>
         </div>
 
         <h3 className={styles['sub-title']}>참조 소스코드</h3>
