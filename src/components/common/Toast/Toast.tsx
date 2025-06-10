@@ -4,6 +4,13 @@ import { Toast as ToastType } from '@/types/toast';
 import { useToast } from '@/hooks/useToast';
 import styles from '@/assets/scss/components/toast.module.scss';
 
+type CustomCSSProperties = React.CSSProperties & {
+  '--toast-index'?: number;
+  '--total-count'?: number;
+  '--stagger-delay'?: string;
+  '--stack-index'?: number;
+};
+
 interface ToastProps {
   toast: ToastType;
   index: number; // 토스트의 순서 (애니메이션용)
@@ -242,7 +249,7 @@ const Toast = forwardRef<HTMLDivElement, ToastProps>(
             '--stagger-delay': `${index * 0.08}s`,
             '--stack-index': currentIndex,
             ...getTransformStyle(),
-          } as React.CSSProperties
+          } as CustomCSSProperties
         }
         role="alert"
         aria-live="polite"
