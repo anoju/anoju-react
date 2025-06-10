@@ -10,6 +10,7 @@ import {
 import { useStickyWrap } from '@/hooks/useStickyWrap';
 import type { StickyWrapState } from '@/types/stickyWrap';
 import styles from '@/assets/scss/components/stickyWrap.module.scss';
+import cx from '@/utils/cx';
 
 // 고유 ID 생성 함수
 let idCounter = 0;
@@ -23,13 +24,21 @@ export interface StickyWrapProps {
   children: ReactNode;
   hideScrolling?: boolean;
   className?: string;
+  innerClassName?: string;
   onChange?: (isFixed: boolean) => void;
 }
 
 // StickyWrap 컴포넌트
 const StickyWrap = forwardRef<HTMLDivElement, StickyWrapProps>(
   (
-    { children, hideScrolling = false, className = '', onChange, ...props },
+    {
+      children,
+      hideScrolling = false,
+      className = '',
+      innerClassName,
+      onChange,
+      ...props
+    },
     ref
   ) => {
     // 상태 관리
@@ -67,7 +76,6 @@ const StickyWrap = forwardRef<HTMLDivElement, StickyWrapProps>(
         } else {
           element.style.top = `${state.fixedTop}px`;
         }
-        console.log('state.height', state.height);
         // placeholder 높이 설정
         placeholder.style.height = `${state.height}px`;
       } else {
@@ -99,7 +107,7 @@ const StickyWrap = forwardRef<HTMLDivElement, StickyWrapProps>(
       // 인스턴스 등록
       const newInstance: StickyWrapState = {
         id,
-        height: rect.height,
+        height: wrapperRef.current?.offsetHeight || rect.height,
         isFixed: false,
         order: Date.now(), // 등록 순서
         element: contentRef.current,
@@ -129,7 +137,7 @@ const StickyWrap = forwardRef<HTMLDivElement, StickyWrapProps>(
           if (wrapperRef.current) {
             const rect = wrapperRef.current.getBoundingClientRect();
             updateInstanceData(id, {
-              height: rect.height,
+              height: wrapperRef.current?.offsetHeight || rect.height,
             });
           }
         });
@@ -145,14 +153,12 @@ const StickyWrap = forwardRef<HTMLDivElement, StickyWrapProps>(
     }, [id, updateInstanceData]);
 
     // 클래스명 조합
-    const wrapperClassName = [
+    const wrapperClassName = cx(
       styles['sticky-wrap'],
       currentState?.isFixed ? styles.fixed : '',
       currentState?.isFixed && currentState?.isHidden ? styles.hidden : '',
-      className,
-    ]
-      .filter(Boolean)
-      .join(' ');
+      className
+    );
 
     return (
       <div
@@ -171,7 +177,7 @@ const StickyWrap = forwardRef<HTMLDivElement, StickyWrapProps>(
         <div ref={placeholderRef} className={styles.placeholder} />
 
         {/* 실제 컨텐츠 */}
-        <div ref={contentRef} className={styles.content}>
+        <div ref={contentRef} className={cx(styles.content, innerClassName)}>
           {children}
         </div>
       </div>

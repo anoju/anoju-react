@@ -14,10 +14,11 @@
   display: flex;
   flex-direction: column;
   width: 100%;
+  background-color: #242424;
 
-  &.only-tab {
-    margin-bottom: 30px;
-  }
+  // &.only-tab {
+  //   margin-bottom: 30px;
+  // }
 
   // 다양한 스타일 변형
   &.outline {
@@ -153,6 +154,10 @@
 
 // 라이트 모드 스타일
 @include s.light-mode {
+  .tabs {
+    background-color: #fff;
+  }
+
   .tab {
     color: var(--bg-dark-60);
 
