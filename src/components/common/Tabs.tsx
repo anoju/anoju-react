@@ -267,6 +267,53 @@ export const Tabs = React.forwardRef(
 
     const { tabs, panels, tabIds, tabValues } = tabsAndPanelsRef.current;
 
+    // 활성 탭을 스크롤 중앙으로 이동시키는 함수
+    const scrollToActiveTab = useCallback(() => {
+      if (!tabsHeaderRef.current) return;
+
+      const tabsHeader = tabsHeaderRef.current;
+      const activeTab = tabsHeader.querySelector(
+        `.${styles.active}`
+      ) as HTMLElement;
+
+      if (!activeTab) return;
+
+      // 스크롤 가능한 컨테이너인지 확인
+      const containerWidth = tabsHeader.clientWidth;
+      const scrollWidth = tabsHeader.scrollWidth;
+
+      // 스크롤이 필요없는 경우 (모든 탭이 보이는 경우)
+      if (scrollWidth <= containerWidth) return;
+
+      // 활성 탭의 위치 정보
+      const tabLeft = activeTab.offsetLeft;
+      const tabWidth = activeTab.offsetWidth;
+      const tabCenter = tabLeft + tabWidth / 2;
+
+      // 컨테이너의 중앙 위치
+      const containerCenter = containerWidth / 2;
+
+      // 목표 스크롤 위치 (활성 탭이 중앙에 오도록)
+      let targetScrollLeft = tabCenter - containerCenter;
+
+      // 스크롤 범위 제한
+      const maxScrollLeft = scrollWidth - containerWidth;
+      targetScrollLeft = Math.max(0, Math.min(targetScrollLeft, maxScrollLeft));
+
+      // 현재 스크롤 위치와 차이가 있을 때만 스크롤
+      const currentScrollLeft = tabsHeader.scrollLeft;
+      const scrollDiff = Math.abs(targetScrollLeft - currentScrollLeft);
+
+      // 5px 이하의 차이는 무시 (불필요한 스크롤 방지)
+      if (scrollDiff > 5) {
+        // 부드러운 스크롤 애니메이션
+        tabsHeader.scrollTo({
+          left: targetScrollLeft,
+          behavior: 'smooth',
+        });
+      }
+    }, []);
+
     // 활성 탭의 위치를 업데이트하는 함수
     const updateActiveIndicator = useCallback(() => {
       if (!tabsHeaderRef.current) return;
@@ -290,8 +337,11 @@ export const Tabs = React.forwardRef(
           tabsContainer.style.setProperty('--active-tab-left', `${left}px`);
           tabsContainer.style.setProperty('--active-tab-width', `${width}px`);
         }
+
+        // 활성 탭을 중앙으로 스크롤 (이 줄이 새로 추가되는 부분입니다)
+        scrollToActiveTab();
       }
-    }, []);
+    }, [scrollToActiveTab]); // dependency에 scrollToActiveTab 추가
 
     // value 또는 defaultValue 기반으로 초기화
     useEffect(() => {
