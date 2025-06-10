@@ -53,12 +53,12 @@ const StickyWrapGuide = () => {
           스크롤 시 브라우저 상단에 닿으면 고정되는 기본적인 StickyWrap입니다.
         </p>
 
-        <div style={{ height: '200vh', padding: '20px 0' }}>
+        <div style={{ height: '100vh', padding: '20px 0' }}>
           <div style={{ marginBottom: '50px' }}>
             <p>위로 스크롤해보세요. 아래 박스가 상단에 고정됩니다.</p>
           </div>
 
-          <StickyWrap>
+          <StickyWrap innerClassName="inner">
             <div
               style={{
                 ...guideStyles.box,
@@ -97,13 +97,13 @@ const StickyWrapGuide = () => {
           있습니다.
         </p>
 
-        <div style={{ height: '200vh', padding: '20px 0' }}>
+        <div style={{ height: '100vh', padding: '20px 0' }}>
           <div style={{ marginBottom: '30px' }}>
             <p>아래 3개의 박스가 순서대로 쌓입니다.</p>
             <p>현재 고정된 요소 수: {fixedCount}</p>
           </div>
 
-          <StickyWrap onChange={handleFixedChange}>
+          <StickyWrap onChange={handleFixedChange} innerClassName="inner">
             <div
               style={{
                 ...guideStyles.box,
@@ -121,7 +121,7 @@ const StickyWrapGuide = () => {
             <p>중간 컨텐츠...</p>
           </div>
 
-          <StickyWrap onChange={handleFixedChange}>
+          <StickyWrap onChange={handleFixedChange} innerClassName="inner">
             <div
               style={{
                 ...guideStyles.box,
@@ -137,7 +137,7 @@ const StickyWrapGuide = () => {
             <p>더 많은 컨텐츠...</p>
           </div>
 
-          <StickyWrap onChange={handleFixedChange}>
+          <StickyWrap onChange={handleFixedChange} innerClassName="inner">
             <div
               style={{
                 ...guideStyles.box,
@@ -162,7 +162,7 @@ const StickyWrapGuide = () => {
           스크롤할 때 다시 나타납니다.
         </p>
 
-        <div style={{ height: '250vh', padding: '20px 0' }}>
+        <div style={{ height: '100vh', padding: '20px 0' }}>
           <div style={{ marginBottom: '50px' }}>
             <p>
               아래로 스크롤하면 숨겨지고, 위로 스크롤하면 다시 나타나는
@@ -170,7 +170,7 @@ const StickyWrapGuide = () => {
             </p>
           </div>
 
-          <StickyWrap hideScrolling>
+          <StickyWrap hideScrolling innerClassName="inner">
             <div
               style={{
                 ...guideStyles.box,
@@ -212,317 +212,50 @@ const StickyWrapGuide = () => {
       </section>
 
       <section className={styles.section}>
-        <h2 className={styles['section-title']}>복합 사용 예시</h2>
-        <p className={styles.txt}>여러 옵션을 조합하여 사용하는 예시입니다.</p>
-
-        <div style={{ height: '300vh', padding: '20px 0' }}>
-          <div style={{ marginBottom: '50px' }}>
-            <p>
-              다양한 옵션을 조합한 StickyWrap들입니다. 스크롤하면서 동작을
-              확인해보세요.
-            </p>
-          </div>
-
-          {/* 기본 헤더 */}
-          <StickyWrap>
-            <div
-              style={{
-                padding: '16px 15px', // 64px 높이
-                backgroundColor: '#2c3e50',
-                color: 'white',
-                textAlign: 'center',
-                fontWeight: 'bold',
-                fontSize: '18px',
-              }}
-            >
-              고정 헤더 (기본) - 64px
-            </div>
-          </StickyWrap>
-
-          <div style={{ marginTop: '30px', marginBottom: '50px' }}>
-            <p>첫 번째 섹션 컨텐츠...</p>
-          </div>
-
-          {/* 네비게이션 */}
-          <StickyWrap hideScrolling>
-            <div
-              style={{
-                padding: '14px 15px', // 58px 높이
-                backgroundColor: '#34495e',
-                color: 'white',
-                textAlign: 'center',
-                fontWeight: 'bold',
-                fontSize: '16px',
-              }}
-            >
-              네비게이션 (scrolling=true) - 58px
-            </div>
-          </StickyWrap>
-
-          <div style={{ marginTop: '30px', marginBottom: '100px' }}>
-            <p>두 번째 섹션 컨텐츠...</p>
-            <p>길어진 컨텐츠...</p>
-          </div>
-
-          {/* 서브 헤더 */}
-          <StickyWrap>
-            <div
-              style={{
-                padding: '18px 15px', // 66px 높이
-                backgroundColor: '#e74c3c',
-                color: 'white',
-                textAlign: 'center',
-                fontWeight: 'bold',
-                fontSize: '16px',
-              }}
-            >
-              서브 헤더 (offsetTop=10) - 66px
-            </div>
-          </StickyWrap>
-
-          <div style={{ marginTop: '100px' }}>
-            <p>마지막 섹션...</p>
-            <div style={{ height: '150vh' }}>
-              <p>매우 긴 컨텐츠 영역입니다.</p>
-            </div>
-          </div>
-        </div>
-
-        <h3 className={styles['sub-title']}>참조 소스코드</h3>
-        <CodeHighlight
-          code={`// 기본 헤더 (높이: 64px)
-<StickyWrap>
-  <div style={{ 
-    padding: '16px 15px', 
-    backgroundColor: '#2c3e50', 
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: '18px'
-  }}>
-    고정 헤더 (기본) - 64px
-  </div>
-</StickyWrap>
-
-// 스크롤링 네비게이션 (높이: 58px)
-<StickyWrap scrolling={true}>
-  <div style={{ 
-    padding: '14px 15px', 
-    backgroundColor: '#34495e', 
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: '16px'
-  }}>
-    네비게이션 (scrolling=true) - 58px
-  </div>
-</StickyWrap>
-
-// 오프셋이 있는 서브 헤더 (높이: 66px)
-<StickyWrap offsetTop={10}>
-  <div style={{ 
-    padding: '18px 15px', 
-    backgroundColor: '#e74c3c', 
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: '16px'
-  }}>
-    서브 헤더 (offsetTop=10) - 66px
-  </div>
-</StickyWrap>`}
-          language="jsx"
-        />
-      </section>
-
-      <section className={styles.section}>
         <h2 className={styles['section-title']}>Props</h2>
         <div className={styles.showcase}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <table className={styles.table}>
             <thead>
               <tr>
-                <th
-                  style={{
-                    textAlign: 'left',
-                    padding: '8px',
-                    borderBottom: '1px solid #ddd',
-                  }}
-                >
-                  속성
-                </th>
-                <th
-                  style={{
-                    textAlign: 'left',
-                    padding: '8px',
-                    borderBottom: '1px solid #ddd',
-                  }}
-                >
-                  타입
-                </th>
-                <th
-                  style={{
-                    textAlign: 'left',
-                    padding: '8px',
-                    borderBottom: '1px solid #ddd',
-                  }}
-                >
-                  기본값
-                </th>
-                <th
-                  style={{
-                    textAlign: 'left',
-                    padding: '8px',
-                    borderBottom: '1px solid #ddd',
-                  }}
-                >
-                  설명
-                </th>
+                <th>속성</th>
+                <th>타입</th>
+                <th>기본값</th>
+                <th>설명</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  children
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  ReactNode
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  필수
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  고정할 컨텐츠
-                </td>
+                <td>children</td>
+                <td>ReactNode</td>
+                <td>필수</td>
+                <td>고정할 컨텐츠</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  offsetTop
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  number
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  0
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  상단에서 몇 px 떨어진 위치에서 고정할지
-                </td>
+                <td>hideScrolling</td>
+                <td>boolean</td>
+                <td>false</td>
+                <td>스크롤 방향에 따른 숨김/표시 여부</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  scrolling
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  boolean
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  false
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  스크롤 방향에 따른 숨김/표시 여부
-                </td>
+                <td>className</td>
+                <td>string</td>
+                <td>''</td>
+                <td>추가 CSS 클래스명</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  className
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  string
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  ''
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  추가 CSS 클래스명
-                </td>
+                <td>innerClassName</td>
+                <td>string</td>
+                <td>''</td>
+                <td>추가 CSS 클래스명</td>
               </tr>
               <tr>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  onChange
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  function
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  undefined
-                </td>
-                <td style={{ padding: '8px', borderBottom: '1px solid #ddd' }}>
-                  고정 상태 변경 시 호출될 콜백
-                </td>
+                <td>onChange</td>
+                <td>function</td>
+                <td>undefined</td>
+                <td>고정 상태 변경 시 호출될 콜백</td>
               </tr>
             </tbody>
           </table>
-        </div>
-      </section>
-
-      <section className={styles.section}>
-        <h2 className={styles['section-title']}>주요 특징</h2>
-        <div className={styles.showcase}>
-          <ul style={{ paddingLeft: '20px' }}>
-            <li>스크롤 시 자동으로 position: fixed로 전환</li>
-            <li>고정 시 원래 위치에 placeholder를 두어 레이아웃 유지</li>
-            <li>
-              여러 개 사용 시 첫 번째가 가장 위에, 다음 요소들이 아래로 차례대로
-              쌓임 (거꾸로 된 탑 모양)
-            </li>
-            <li>scrolling 옵션으로 스크롤 방향에 따른 숨김/표시</li>
-            <li>ResizeObserver로 크기 변화 자동 감지</li>
-            <li>throttle을 이용한 성능 최적화</li>
-            <li>TypeScript 완전 지원</li>
-            <li>반응형 디자인 대응</li>
-            <li>offsetTop 옵션으로 각 요소마다 다른 고정 위치 설정 가능</li>
-          </ul>
-        </div>
-      </section>
-
-      <section className={styles.section}>
-        <h2 className={styles['section-title']}>사용 예시</h2>
-        <div className={styles.showcase}>
-          <h4 className={styles['sub-title']}>기본 사용</h4>
-          <CodeHighlight
-            code={`import { StickyWrap } from '@/components/common';
-
-function Header() {
-  return (
-    <StickyWrap>
-      <header style={{ background: '#fff', padding: '20px' }}>
-        <h1>사이트 헤더</h1>
-      </header>
-    </StickyWrap>
-  );
-}`}
-            language="jsx"
-          />
-
-          <h4 className={styles['sub-title']}>상태 변경 감지</h4>
-          <CodeHighlight
-            code={`function NavigationBar() {
-  const [isSticky, setIsSticky] = useState(false);
-  
-  return (
-    <StickyWrap onChange={setIsSticky}>
-      <nav style={{ 
-        background: isSticky ? '#f8f9fa' : 'transparent',
-        transition: 'background-color 0.3s'
-      }}>
-        네비게이션 메뉴
-      </nav>
-    </StickyWrap>
-  );
-}`}
-            language="jsx"
-          />
-
-          <h4 className={styles['sub-title']}>스크롤링 네비게이션</h4>
-          <CodeHighlight
-            code={`function SmartNavigation() {
-  return (
-    <StickyWrap scrolling={true} offsetTop={60}>
-      <nav style={{ background: '#007bff', color: 'white', padding: '10px' }}>
-        <div>스마트 네비게이션 - 아래 스크롤 시 숨김</div>
-      </nav>
-    </StickyWrap>
-  );
-}`}
-            language="jsx"
-          />
         </div>
       </section>
     </div>

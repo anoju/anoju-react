@@ -79,11 +79,14 @@ const StickyWrap = forwardRef<HTMLDivElement, StickyWrapProps>(
       if (state.isFixed) {
         // top 위치 설정
         element.style.top = `${state.fixedTop}px`;
+        // z-index 설정
+        element.style.zIndex = state.zIndex.toString();
         // placeholder 높이 설정
         placeholder.style.height = `${state.height}px`;
       } else {
         // 일반 스타일로 복원
         element.style.top = '';
+        element.style.zIndex = '';
         placeholder.style.height = '';
       }
     }, []);
@@ -118,6 +121,7 @@ const StickyWrap = forwardRef<HTMLDivElement, StickyWrapProps>(
         isHidden: false,
         originalTop: rect.top + scrollTop,
         fixedTop: 0,
+        zIndex: 200, // 기본 z-index (나중에 Context에서 조정됨)
         onChange: onChangeRef.current, // ref를 통해 안정화된 함수 전달
       };
 

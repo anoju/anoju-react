@@ -10,6 +10,7 @@ export interface StickyWrapState {
   isHidden: boolean; // hideScrolling 옵션 시 숨김 상태
   originalTop: number; // 원래 위치
   fixedTop: number; // 고정 시 top 위치
+  zIndex: number; // z-index 값
   onChange?: (isFixed: boolean) => void; // 콜백 함수
 }
 

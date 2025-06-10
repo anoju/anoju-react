@@ -54,7 +54,11 @@ const StickyWrapProvider: React.FC<{ children: ReactNode }> = ({
     ); // DOM 순서대로 정렬
 
     let accumulatedHeight = 0;
-    const updates: Array<{ id: string; state: StickyWrapState; wasFixed: boolean }> = [];
+    const updates: Array<{
+      id: string;
+      state: StickyWrapState;
+      wasFixed: boolean;
+    }> = [];
 
     // 각 인스턴스를 순서대로 처리
     instances.forEach((instance) => {
@@ -87,10 +91,10 @@ const StickyWrapProvider: React.FC<{ children: ReactNode }> = ({
         };
 
         instancesRef.current.set(instance.id, updatedState);
-        updates.push({ 
-          id: instance.id, 
-          state: updatedState, 
-          wasFixed: instance.isFixed 
+        updates.push({
+          id: instance.id,
+          state: updatedState,
+          wasFixed: instance.isFixed,
         });
       }
 
@@ -102,17 +106,19 @@ const StickyWrapProvider: React.FC<{ children: ReactNode }> = ({
 
     lastScrollYRef.current = scrollTop;
 
-    // 위치 재계산: 모든 고정된 요소들의 위치를 다시 계산
-    // 숨겨진 요소들을 고려하여 fixedTop을 재설정
+    // 위치 및 z-index 재계산: 모든 고정된 요소들의 위치와 z-index를 다시 계산
     const fixedInstances = Array.from(instancesRef.current.values())
       .filter((instance) => instance.isFixed)
       .sort((a, b) => a.originalTop - b.originalTop);
 
     let currentTop = 0;
-    fixedInstances.forEach((instance) => {
+    const baseZIndex = 200; // 기본 z-index 시작값
+
+    fixedInstances.forEach((instance, index) => {
       const updatedState = {
         ...instance,
         fixedTop: instance.isHidden ? currentTop - instance.height : currentTop,
+        zIndex: baseZIndex - index, // 첫 번째: 200, 두 번째: 199, 세 번째: 198...
       };
 
       instancesRef.current.set(instance.id, updatedState);
@@ -124,10 +130,10 @@ const StickyWrapProvider: React.FC<{ children: ReactNode }> = ({
       if (existingUpdateIndex >= 0) {
         updates[existingUpdateIndex].state = updatedState;
       } else {
-        updates.push({ 
-          id: instance.id, 
-          state: updatedState, 
-          wasFixed: instance.isFixed 
+        updates.push({
+          id: instance.id,
+          state: updatedState,
+          wasFixed: instance.isFixed,
         });
       }
 
@@ -219,7 +225,7 @@ const StickyWrapProvider: React.FC<{ children: ReactNode }> = ({
       if (current) {
         const updated = { ...current, ...updates };
         instancesRef.current.set(id, updated);
-        
+
         // onChange 함수 업데이트인 경우에는 processAllInstances 호출하지 않음
         if (!('onChange' in updates)) {
           processAllInstances();

@@ -4,11 +4,7 @@
 @use 'sass:math';
 
 .sticky-wrap {
-  position: relative;
-
   &.fixed {
-    z-index: 100;
-
     .placeholder {
       width: 100%;
       display: block;
@@ -20,6 +16,11 @@
       right: 0;
       top: 0;
       transition: top 0.3s ease;
+
+      &:global(.inner) {
+        padding-left: var(--side-padding);
+        padding-right: var(--side-padding);
+      }
     }
   }
 }
