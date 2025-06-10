@@ -75,7 +75,6 @@ const StickyWrapProvider: React.FC<{ children: ReactNode }> = ({
         if (scrollDirection === 'down') {
           const hideThreshold =
             instance.originalTop - accumulatedHeight + instance.height;
-          console.log(scrollTop, hideThreshold);
           if (scrollTop >= hideThreshold) {
             newIsHidden = true;
           } else {
