@@ -194,18 +194,8 @@ const StickyWrapGuide = () => {
 
         <h3 className={styles['sub-title']}>참조 소스코드</h3>
         <CodeHighlight
-          code={`<StickyWrap scrolling={true}>
-  <div
-    style={{
-      padding: '20px',
-      backgroundColor: '#9b59b6',
-      color: 'white',
-      borderRadius: '8px',
-      textAlign: 'center',
-    }}
-  >
-    Scrolling StickyWrap - 스크롤 방향에 따라 숨겨집니다
-  </div>
+          code={`<StickyWrap hideScrolling>
+  고정 시킬 컨텐츠
 </StickyWrap>`}
           language="jsx"
         />
