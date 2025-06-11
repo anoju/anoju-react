@@ -33,7 +33,10 @@ const layouts = import.meta.glob<LayoutModule>('../pages/**/layout.tsx', {
 function getPageMetadata(pageModule: PageModule): PageMetadata {
   // PageModule.default가 존재하고 metadata가 있는 경우에만 접근
   if (pageModule?.default && typeof pageModule.default === 'function') {
-    return (pageModule.default as any).metadata || {};
+    const componentWithMetadata = pageModule.default as React.ComponentType & {
+      metadata?: PageMetadata;
+    };
+    return componentWithMetadata.metadata || {};
   }
   return {};
 }
@@ -559,7 +562,46 @@ const routes = buildRouteTree();
 //   )
 // );
 
-// 라우터 생성
+// 라우터 생성 (스크롤 복원 설정 포함)
 const router = createBrowserRouter(routes);
+
+// 페이지 이동 시 스크롤을 상단으로 이동
+if (typeof window !== 'undefined') {
+  let currentLocation = window.location.pathname;
+  
+  // 라우터 navigation 이벤트 감지
+  const originalPushState = window.history.pushState;
+  const originalReplaceState = window.history.replaceState;
+  
+  window.history.pushState = function(...args) {
+    originalPushState.apply(window.history, args);
+    setTimeout(() => {
+      if (window.location.pathname !== currentLocation) {
+        window.scrollTo(0, 0);
+        currentLocation = window.location.pathname;
+      }
+    }, 0);
+  };
+  
+  window.history.replaceState = function(...args) {
+    originalReplaceState.apply(window.history, args);
+    setTimeout(() => {
+      if (window.location.pathname !== currentLocation) {
+        window.scrollTo(0, 0);
+        currentLocation = window.location.pathname;
+      }
+    }, 0);
+  };
+  
+  // popstate 이벤트 (뒤로가기/앞으로가기)
+  window.addEventListener('popstate', () => {
+    setTimeout(() => {
+      if (window.location.pathname !== currentLocation) {
+        window.scrollTo(0, 0);
+        currentLocation = window.location.pathname;
+      }
+    }, 0);
+  });
+}
 
 export default router;
