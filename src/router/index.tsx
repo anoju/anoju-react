@@ -568,12 +568,12 @@ const router = createBrowserRouter(routes);
 // 페이지 이동 시 스크롤을 상단으로 이동
 if (typeof window !== 'undefined') {
   let currentLocation = window.location.pathname;
-  
+
   // 라우터 navigation 이벤트 감지
   const originalPushState = window.history.pushState;
   const originalReplaceState = window.history.replaceState;
-  
-  window.history.pushState = function(...args) {
+
+  window.history.pushState = function (...args) {
     originalPushState.apply(window.history, args);
     setTimeout(() => {
       if (window.location.pathname !== currentLocation) {
@@ -582,8 +582,8 @@ if (typeof window !== 'undefined') {
       }
     }, 0);
   };
-  
-  window.history.replaceState = function(...args) {
+
+  window.history.replaceState = function (...args) {
     originalReplaceState.apply(window.history, args);
     setTimeout(() => {
       if (window.location.pathname !== currentLocation) {
@@ -592,16 +592,16 @@ if (typeof window !== 'undefined') {
       }
     }, 0);
   };
-  
+
   // popstate 이벤트 (뒤로가기/앞으로가기)
-  window.addEventListener('popstate', () => {
-    setTimeout(() => {
-      if (window.location.pathname !== currentLocation) {
-        window.scrollTo(0, 0);
-        currentLocation = window.location.pathname;
-      }
-    }, 0);
-  });
+  // window.addEventListener('popstate', () => {
+  //   setTimeout(() => {
+  //     if (window.location.pathname !== currentLocation) {
+  //       window.scrollTo(0, 0);
+  //       currentLocation = window.location.pathname;
+  //     }
+  //   }, 0);
+  // });
 }
 
 export default router;
