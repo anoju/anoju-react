@@ -15,6 +15,7 @@ import React, {
 } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styles from '@/assets/scss/components/tabs.module.scss';
+import cx from '@/utils/cx';
 
 // 고유 ID 생성을 위한 유틸리티 함수
 let uniqueIdCounter = 0;
@@ -85,7 +86,7 @@ type TabsProps<T extends string | number = string | number> = {
 };
 
 // Tab 컴포넌트
-export const Tab = React.forwardRef<HTMLDivElement, TabProps>(
+export const Tab = React.forwardRef<HTMLAnchorElement, TabProps>(
   (
     {
       id,
@@ -93,7 +94,7 @@ export const Tab = React.forwardRef<HTMLDivElement, TabProps>(
       index,
       label,
       active = false,
-      disabled = false,
+      disabled = undefined,
       onClick,
       to,
       controls,
@@ -106,7 +107,8 @@ export const Tab = React.forwardRef<HTMLDivElement, TabProps>(
     const tabIdRef = useRef<string>(id || generateUniqueId());
     const tabId = tabIdRef.current;
 
-    const handleClick = () => {
+    const handleClick = (e: React.MouseEvent) => {
+      e.preventDefault();
       if (disabled) return;
 
       if (to) {
@@ -120,24 +122,27 @@ export const Tab = React.forwardRef<HTMLDivElement, TabProps>(
     const panelId = controls || `panel-${tabId}`;
 
     return (
-      <div
-        ref={ref}
-        className={[
-          styles.tab,
-          active ? styles.active : '',
-          disabled ? styles.disabled : '',
-        ].join(' ')}
-        onClick={handleClick}
-        role="tab"
-        id={`tab-${tabId}`}
-        aria-selected={active}
-        aria-disabled={disabled}
-        aria-controls={panelId}
-        tabIndex={disabled ? -1 : 0}
-        data-value={value !== undefined ? value : index}
-      >
-        {label}
-      </div>
+      <li role="presentation">
+        <a
+          ref={ref}
+          role="tab"
+          id={`tab-${tabId}`}
+          className={cx(
+            styles.tab,
+            active ? styles.active : '',
+            disabled ? styles.disabled : ''
+          )}
+          href={'#' + panelId}
+          aria-controls={panelId}
+          aria-selected={active}
+          aria-disabled={disabled}
+          // tabIndex={disabled ? -1 : 0}
+          data-value={value !== undefined ? value : index}
+          onClick={handleClick}
+        >
+          {label}
+        </a>
+      </li>
     );
   }
 );
@@ -152,7 +157,7 @@ export const TabPanel = React.forwardRef<HTMLDivElement, TabPanelProps>(
     return (
       <div
         ref={ref}
-        className={[styles['tab-panel'], active ? styles.active : ''].join(' ')}
+        className={cx(styles['tab-panel'], active ? styles.active : '')}
         role="tabpanel"
         id={`panel-${panelId}`}
         aria-labelledby={tabId}
@@ -201,7 +206,7 @@ export const Tabs = React.forwardRef(
           : undefined
     );
 
-    const tabsHeaderRef = useRef<HTMLDivElement>(null);
+    const tabsHeaderRef = useRef<HTMLUListElement>(null);
     const initializedRef = useRef<boolean>(false);
 
     // 이전 value 값 저장
@@ -669,18 +674,13 @@ export const Tabs = React.forwardRef(
 
       return (
         <div
-          className={[styles.tabs, variantClass, onlyClass, className].join(
-            ' '
-          )}
+          className={cx(styles.tabs, variantClass, onlyClass, className)}
           ref={ref}
         >
-          <div
+          <ul
+            role="tablist"
             ref={tabsHeaderRef}
-            className={[
-              styles['tabs-header'],
-              alignmentClass,
-              tabsClassName,
-            ].join(' ')}
+            className={cx(styles['tabs-header'], alignmentClass, tabsClassName)}
           >
             {processedItems.map((item, index) => {
               const itemId = item.id as string;
@@ -702,11 +702,9 @@ export const Tabs = React.forwardRef(
                 />
               );
             })}
-          </div>
+          </ul>
           {hasAnyContent && (
-            <div
-              className={[styles['tabs-content'], contentClassName].join(' ')}
-            >
+            <div className={cx(styles['tabs-content'], contentClassName)}>
               {processedItems.map((item, index) => {
                 const itemId = item.id as string;
                 const itemValue = item.value as string | number;
@@ -766,21 +764,15 @@ export const Tabs = React.forwardRef(
     });
 
     return (
-      <div
-        className={[styles.tabs, variantClass, className].join(' ')}
-        ref={ref}
-      >
-        <div
+      <div className={cx(styles.tabs, variantClass, className)} ref={ref}>
+        <ul
+          role="tablist"
           ref={tabsHeaderRef}
-          className={[
-            styles['tabs-header'],
-            alignmentClass,
-            tabsClassName,
-          ].join(' ')}
+          className={cx(styles['tabs-header'], alignmentClass, tabsClassName)}
         >
           {renderedTabs}
-        </div>
-        <div className={[styles['tabs-content'], contentClassName].join(' ')}>
+        </ul>
+        <div className={cx(styles['tabs-content'], contentClassName)}>
           {renderedPanels}
         </div>
       </div>
