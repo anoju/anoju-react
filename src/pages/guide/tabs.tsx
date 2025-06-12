@@ -310,63 +310,59 @@ const [itemsTab, setItemsTab] = useState(1);
       <section className={styles.section}>
         <h2 className={styles['section-title']}>스타일 변형</h2>
         <p className={styles.txt}>
-          variant와 alignment 속성으로 다양한 스타일 변형을 적용할 수 있습니다.
+          type와 align 속성으로 다양한 스타일 변형을 적용할 수 있습니다.
         </p>
 
-        <h3 className={styles['sub-title']}>Outline 스타일</h3>
+        <h3 className={styles['sub-title']}>round 스타일</h3>
         <div className={styles.showcase}>
           <Tabs
-            variant="outline"
+            type="round"
             items={[
               {
                 value: 'tab1',
                 label: '탭 1',
                 content: (
-                  <p className={styles.txt}>
-                    Outline 스타일의 탭 1 내용입니다.
-                  </p>
+                  <p className={styles.txt}>round 스타일의 탭 1 내용입니다.</p>
                 ),
               },
               {
                 value: 'tab2',
                 label: '탭 2',
                 content: (
-                  <p className={styles.txt}>
-                    Outline 스타일의 탭 2 내용입니다.
-                  </p>
+                  <p className={styles.txt}>round 스타일의 탭 2 내용입니다.</p>
                 ),
               },
             ]}
           />
         </div>
 
-        <h3 className={styles['sub-title']}>Pills 스타일</h3>
+        <h3 className={styles['sub-title']}>txt 스타일</h3>
         <div className={styles.showcase}>
           <Tabs
-            variant="pills"
+            type="txt"
             items={[
               {
                 value: 'tab1',
                 label: '탭 1',
                 content: (
-                  <p className={styles.txt}>Pills 스타일의 탭 1 내용입니다.</p>
+                  <p className={styles.txt}>txt 스타일의 탭 1 내용입니다.</p>
                 ),
               },
               {
                 value: 'tab2',
                 label: '탭 2',
                 content: (
-                  <p className={styles.txt}>Pills 스타일의 탭 2 내용입니다.</p>
+                  <p className={styles.txt}>txt 스타일의 탭 2 내용입니다.</p>
                 ),
               },
             ]}
           />
         </div>
 
-        <h3 className={styles['sub-title']}>정렬 방식 - 중앙 정렬</h3>
+        <h3 className={styles['sub-title']}>정렬 - center</h3>
         <div className={styles.showcase}>
           <Tabs
-            alignment="center"
+            align="center"
             items={[
               {
                 value: 'tab1',
@@ -393,10 +389,40 @@ const [itemsTab, setItemsTab] = useState(1);
           />
         </div>
 
-        <h3 className={styles['sub-title']}>정렬 방식 - 전체 너비</h3>
+        <h3 className={styles['sub-title']}>정렬 - left</h3>
         <div className={styles.showcase}>
           <Tabs
-            alignment="full"
+            align="left"
+            items={[
+              {
+                value: 'tab1',
+                label: '탭 1',
+                content: (
+                  <p className={styles.txt}>전체 너비 탭 1 내용입니다.</p>
+                ),
+              },
+              {
+                value: 'tab2',
+                label: '탭 2',
+                content: (
+                  <p className={styles.txt}>전체 너비 탭 2 내용입니다.</p>
+                ),
+              },
+              {
+                value: 'tab3',
+                label: '탭 3',
+                content: (
+                  <p className={styles.txt}>전체 너비 탭 3 내용입니다.</p>
+                ),
+              },
+            ]}
+          />
+        </div>
+
+        <h3 className={styles['sub-title']}>정렬 - right</h3>
+        <div className={styles.showcase}>
+          <Tabs
+            align="right"
             items={[
               {
                 value: 'tab1',
@@ -425,27 +451,27 @@ const [itemsTab, setItemsTab] = useState(1);
 
         <h3 className={styles['sub-title']}>참조 소스코드</h3>
         <CodeHighlight
-          code={`// Outline 스타일
+          code={`// round 스타일
 <Tabs 
-  variant="outline"
+  type="round"
   items={[
-    { value: 'tab1', label: '탭 1', content: <p className={styles.txt}>Outline 스타일의 탭 1 내용입니다.</p> },
-    { value: 'tab2', label: '탭 2', content: <p className={styles.txt}>Outline 스타일의 탭 2 내용입니다.</p> },
+    { value: 'tab1', label: '탭 1', content: <p className={styles.txt}>round 스타일의 탭 1 내용입니다.</p> },
+    { value: 'tab2', label: '탭 2', content: <p className={styles.txt}>round 스타일의 탭 2 내용입니다.</p> },
   ]}
 />
 
-// Pills 스타일
+// txt 스타일
 <Tabs 
-  variant="pills"
+  type="txt"
   items={[
-    { value: 'tab1', label: '탭 1', content: <p className={styles.txt}>Pills 스타일의 탭 1 내용입니다.</p> },
-    { value: 'tab2', label: '탭 2', content: <p className={styles.txt}>Pills 스타일의 탭 2 내용입니다.</p> },
+    { value: 'tab1', label: '탭 1', content: <p className={styles.txt}>txt 스타일의 탭 1 내용입니다.</p> },
+    { value: 'tab2', label: '탭 2', content: <p className={styles.txt}>txt 스타일의 탭 2 내용입니다.</p> },
   ]}
 />
 
-// 중앙 정렬
+// 정렬 - center
 <Tabs 
-  alignment="center"
+  align="center"
   items={[
     { value: 'tab1', label: '탭 1', content: <p className={styles.txt}>중앙 정렬된 탭 1 내용입니다.</p> },
     { value: 'tab2', label: '탭 2', content: <p className={styles.txt}>중앙 정렬된 탭 2 내용입니다.</p> },
@@ -453,9 +479,19 @@ const [itemsTab, setItemsTab] = useState(1);
   ]}
 />
 
-// 전체 너비
+// 정렬 - left
 <Tabs 
-  alignment="full"
+  align="left"
+  items={[
+    { value: 'tab1', label: '탭 1', content: <p className={styles.txt}>전체 너비 탭 1 내용입니다.</p> },
+    { value: 'tab2', label: '탭 2', content: <p className={styles.txt}>전체 너비 탭 2 내용입니다.</p> },
+    { value: 'tab3', label: '탭 3', content: <p className={styles.txt}>전체 너비 탭 3 내용입니다.</p> },
+  ]}
+/>
+
+// 정렬 - right
+<Tabs 
+  align="right"
   items={[
     { value: 'tab1', label: '탭 1', content: <p className={styles.txt}>전체 너비 탭 1 내용입니다.</p> },
     { value: 'tab2', label: '탭 2', content: <p className={styles.txt}>전체 너비 탭 2 내용입니다.</p> },

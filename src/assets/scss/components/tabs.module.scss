@@ -10,75 +10,126 @@
 }
 
 .tabs {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  background-color: #242424;
-
   // &.only-tab {
   //   margin-bottom: 30px;
   // }
 
-  // 다양한 스타일 변형
-  &.outline {
+  // tabs 종류
+  &.tabs-line {
+    background-color: #242424;
+
     .tabs-header {
-      border: 1px solid var(--bg-dark-10);
-      border-bottom: none;
-      border-top-left-radius: 0.8rem;
-      border-top-right-radius: 0.8rem;
+      border-bottom: 1px solid var(--bg-dark-60);
+
+      &::after {
+        height: 3px;
+        background-color: var(--primary-color);
+      }
+
+      &.center,
+      &.left,
+      &.right {
+        .tab-li {
+          width: auto;
+        }
+      }
     }
 
-    .tabs-content {
-      border: 1px solid var(--bg-dark-10);
-      border-top: none;
-      border-bottom-left-radius: 0.8rem;
-      border-bottom-right-radius: 0.8rem;
-      padding: 2rem;
+    .tab-li {
+      width: 100%;
+    }
+
+    .tab {
+      padding: 1rem 1.5rem;
+      transition: color 0.2s ease;
+      font-size: 1.6rem;
+      font-weight: 500;
+      color: var(--bg-dark-50);
+
+      &:hover {
+        color: var(--primary-color);
+      }
+
+      &.active {
+        color: var(--primary-color);
+      }
     }
   }
 
-  &.pills {
-    &::after {
-      display: none; // 인디케이터 라인 숨김
-    }
-
+  &.tabs-round {
     .tabs-header {
-      border-bottom: none;
-      gap: 0.5rem;
+      gap: 0.8rem;
 
       &::after {
-        border-radius: 5rem;
-        height: 100%;
-        opacity: 0.6;
-        z-index: -1;
+        display: none;
       }
     }
 
     .tab {
-      border-radius: 5rem;
-      transition: all 0.2s ease;
+      height: 4rem;
+      padding: 0 1.5rem;
+      transition:
+        color 0.2s ease,
+        border-color 0.2s ease;
+      font-size: 1.6rem;
+      font-weight: 500;
+      color: var(--bg-dark-50);
+      border: 1px solid var(--bg-dark-60);
+      border-radius: 2rem;
+
+      &:hover {
+        color: var(--primary-color);
+      }
 
       &.active {
-        background-color: var(--primary-color);
-        color: white;
+        border-color: var(--primary-color);
+        color: var(--primary-color);
       }
     }
   }
 
-  // 반응형 - 모바일에서는 스크롤
-  // @media (width <= 768px) {
-  //   .tabs-header.full {
-  //     .tab {
-  //       flex: 0 0 auto;
-  //     }
-  //   }
-  // }
+  &.tabs-txt {
+    .tabs-header {
+      &::after {
+        display: none;
+      }
+    }
+
+    .tab-li {
+      display: flex;
+      align-items: center;
+
+      + .tab-li {
+        &::before {
+          content: '';
+          display: block;
+          width: 0.1rem;
+          height: 1.2rem;
+          margin: 0 1.2rem;
+          background-color: var(--bg-dark-60);
+          flex-shrink: 0;
+        }
+      }
+    }
+
+    .tab {
+      font-size: 1.6rem;
+      font-weight: 500;
+      color: var(--bg-dark-50);
+      transition:
+        color 0.2s ease,
+        font-weight 0.2s ease;
+
+      &.active {
+        font-weight: bold;
+        color: var(--primary-color);
+      }
+    }
+  }
 }
 
 .tabs-header {
   display: flex;
-  border-bottom: 1px solid var(--bg-dark-60);
   overflow-x: auto;
   position: relative;
 
@@ -95,8 +146,6 @@
     bottom: 0;
     left: var(--active-tab-left, 0);
     width: var(--active-tab-width, 10px);
-    height: 3px;
-    background-color: var(--primary-color);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 1;
     pointer-events: none;
@@ -106,10 +155,12 @@
     justify-content: center;
   }
 
-  &.full {
-    .tab {
-      flex: 1 1 0%;
-    }
+  &.left {
+    justify-content: flex-start;
+  }
+
+  &.right {
+    justify-content: flex-end;
   }
 }
 
@@ -117,22 +168,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem 1.5rem;
-  cursor: pointer;
-  transition: color 0.2s ease;
-  font-size: 1.6rem;
-  font-weight: 500;
-  white-space: nowrap;
-  color: var(--bg-dark-50);
   position: relative;
-
-  &:hover {
-    color: var(--primary-color);
-  }
-
-  &.active {
-    color: var(--primary-color);
-  }
 
   &.disabled {
     opacity: 0.5;

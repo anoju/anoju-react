@@ -73,8 +73,8 @@ type TabsProps<T extends string | number = string | number> = {
   setValue?: SetValueFunction<T>;
   defaultValue?: T;
   onChange?: (value: string | number) => void;
-  variant?: 'default' | 'outline' | 'underline' | 'pills';
-  alignment?: 'start' | 'center' | 'full';
+  type?: 'line' | 'round' | 'txt';
+  align?: 'left' | 'center' | 'right' | '';
   className?: string;
   tabsClassName?: string;
   contentClassName?: string;
@@ -122,7 +122,7 @@ export const Tab = React.forwardRef<HTMLAnchorElement, TabProps>(
     const panelId = controls || `panel-${tabId}`;
 
     return (
-      <li role="presentation">
+      <li role="presentation" className={styles['tab-li']}>
         <a
           ref={ref}
           role="tab"
@@ -183,8 +183,8 @@ export const Tabs = React.forwardRef(
       setValue,
       defaultValue,
       onChange,
-      variant = 'default',
-      alignment = 'start',
+      type = 'line',
+      align = '',
       className = '',
       tabsClassName = '',
       contentClassName = '',
@@ -664,8 +664,8 @@ export const Tabs = React.forwardRef(
     );
 
     // 변형 클래스 생성
-    const variantClass = variant !== 'default' ? styles[variant] : '';
-    const alignmentClass = alignment !== 'start' ? styles[alignment] : '';
+    const typeClass = styles['tabs-' + type];
+    const alignClass = align !== '' ? styles[align] : '';
 
     // items 속성을 사용하는 경우
     if (processedItems && processedItems.length > 0) {
@@ -674,13 +674,13 @@ export const Tabs = React.forwardRef(
 
       return (
         <div
-          className={cx(styles.tabs, variantClass, onlyClass, className)}
+          className={cx(styles.tabs, typeClass, onlyClass, className)}
           ref={ref}
         >
           <ul
             role="tablist"
             ref={tabsHeaderRef}
-            className={cx(styles['tabs-header'], alignmentClass, tabsClassName)}
+            className={cx(styles['tabs-header'], alignClass, tabsClassName)}
           >
             {processedItems.map((item, index) => {
               const itemId = item.id as string;
@@ -763,12 +763,14 @@ export const Tabs = React.forwardRef(
       } as Partial<TabPanelProps>);
     });
 
+    console.log(type, typeClass);
+
     return (
-      <div className={cx(styles.tabs, variantClass, className)} ref={ref}>
+      <div className={cx(styles.tabs, typeClass, className)} ref={ref}>
         <ul
           role="tablist"
           ref={tabsHeaderRef}
-          className={cx(styles['tabs-header'], alignmentClass, tabsClassName)}
+          className={cx(styles['tabs-header'], alignClass, tabsClassName)}
         >
           {renderedTabs}
         </ul>
