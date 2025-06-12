@@ -41,3 +41,17 @@
     background-size: $size;
   }
 }
+
+@mixin ellipsis($line: 0) {
+  overflow: hidden;
+  word-break: break-all;
+
+  @if $line == 0 {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  } @else {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: $line;
+  }
+}

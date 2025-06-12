@@ -1,0 +1,493 @@
+@use '@/assets/scss' as s;
+@use 'sass:color';
+@use 'sass:math';
+
+// color(텍스트 컬러)
+.fc-primary {
+  color: var(--primary-color) !important;
+}
+
+// font-size, line-height(20 이하,20 이상은 짝수만 출력)
+@for $i from 0 through 40 {
+  @if $i <= 20 or ($i > 20 and $i % 2 == 0) {
+    .fz-#{$i} {
+      font-size: $i * 0.1rem !important;
+    }
+    .lh-#{$i} {
+      line-height: $i * 0.1rem !important;
+    }
+  }
+}
+
+// font-weight
+@for $i from 1 through 9 {
+  .fw-#{$i}00 {
+    font-weight: $i * 100 !important;
+  }
+}
+
+.fw-normal {
+  font-weight: normal !important;
+}
+
+.fw-bold {
+  font-weight: bold !important;
+}
+
+// text-align
+.ta-right {
+  text-align: right !important;
+}
+
+.ta-left {
+  text-align: left !important;
+}
+
+.ta-center {
+  text-align: center !important;
+}
+
+// vertical-align
+.va-top {
+  vertical-align: top !important;
+}
+
+.va-middle {
+  vertical-align: middle !important;
+}
+
+.va-bottom {
+  vertical-align: bottom !important;
+}
+
+// float
+.f-left {
+  float: left;
+}
+
+.f-right {
+  float: right;
+}
+
+.clear {
+  clear: both;
+}
+
+// display
+.d-none {
+  display: none !important;
+}
+
+.d-block {
+  display: block !important;
+}
+
+.d-inline {
+  display: inline !important;
+}
+
+.d-inline-block {
+  display: inline-block !important;
+}
+
+.d-flex {
+  display: flex !important;
+}
+
+.d-inline-flex {
+  display: inline-flex !important;
+}
+
+.d-grid {
+  display: grid !important;
+}
+
+// align-items
+.align-start {
+  align-items: flex-start !important;
+}
+
+.align-center {
+  align-items: center !important;
+}
+
+.align-end {
+  align-items: flex-end !important;
+}
+
+// justify-content
+.justify-start {
+  justify-content: flex-start !important;
+}
+
+.justify-center {
+  justify-content: center !important;
+}
+
+.justify-end {
+  justify-content: flex-end !important;
+}
+
+.space-between {
+  justify-content: space-between !important;
+}
+
+.space-around {
+  justify-content: space-around !important;
+}
+
+.space-evenly {
+  justify-content: space-evenly !important;
+}
+
+// align-self
+.align-self-start {
+  align-self: flex-start !important;
+}
+
+.align-self-center {
+  align-self: center !important;
+}
+
+.align-self-end {
+  align-self: flex-end !important;
+}
+
+// justify-self
+.justify-self-start {
+  justify-self: flex-start !important;
+}
+
+.justify-self-center {
+  justify-self: center !important;
+}
+
+.justify-self-end {
+  justify-self: flex-end !important;
+}
+
+.justify-stretch {
+  justify-items: stretch !important;
+}
+
+// flex-wrap
+.flex-wrap {
+  flex-wrap: wrap !important;
+}
+
+.flex-nowrap {
+  flex-wrap: nowrap !important;
+}
+
+.flex-wrap-reverse {
+  flex-wrap: wrap-reverse !important;
+}
+
+// flex-direction
+.flex-column {
+  flex-direction: column !important;
+}
+
+.flex-row {
+  flex-direction: row !important;
+}
+
+// grid
+
+// overflow
+.ovf-hidden {
+  overflow: hidden !important;
+}
+
+.ovf-visible {
+  overflow: visible !important;
+}
+
+.ovf-auto {
+  overflow: auto !important;
+}
+
+.ovf-x-hidden {
+  overflow-x: hidden !important;
+}
+
+.ovf-x-auto {
+  overflow-x: auto !important;
+}
+
+.ovf-y-hidden {
+  overflow-y: hidden !important;
+}
+
+.ovf-y-auto {
+  overflow-y: auto !important;
+}
+
+// width
+.w-auto {
+  width: auto !important;
+}
+
+@for $i from 0 through 300 {
+  .w-#{$i} {
+    width: $i * 0.1rem !important;
+  }
+  .w-#{$i}f {
+    flex: 0 0 $i * 0.1rem !important;
+  }
+}
+
+@for $i from 0 through 100 {
+  @if $i != 33 and $i != 66 {
+    .w-#{$i}p {
+      width: $i * 1% !important;
+    }
+    .w-#{$i}vw {
+      width: $i * 1vw !important;
+    }
+    .w-#{$i}fp {
+      flex: 0 0 $i * 1% !important;
+    }
+  }
+}
+
+.w-33p {
+  width: 33.3333% !important;
+}
+
+.w-66p {
+  width: 66.6666% !important;
+}
+
+.w-33vw {
+  width: 33.3333vw !important;
+}
+
+.w-66vw {
+  width: 66.6666vw !important;
+}
+
+.w-33fp {
+  flex: 0 0 33.3333% !important;
+}
+
+.w-66fp {
+  flex: 0 0 66.6666% !important;
+}
+
+// height
+.h-auto {
+  height: auto !important;
+}
+
+@for $i from 0 through 100 {
+  .h-#{$i} {
+    height: $i * 0.1rem !important;
+  }
+}
+
+@for $i from 1 through 40 {
+  .h-#{$i * 5 + 100} {
+    height: $i * 0.5rem + 10rem !important;
+  }
+}
+
+@for $i from 0 through 100 {
+  @if $i != 33 and $i != 66 {
+    .h-#{$i}p {
+      height: $i * 1% !important;
+    }
+    .h-#{$i}vh {
+      height: -vh(#{$i}) !important;
+    }
+  }
+}
+
+.h-33p {
+  height: 33.3333% !important;
+}
+
+.h-66p {
+  height: 66.6666% !important;
+}
+
+.h-33vh {
+  height: -vh(33.3333) !important;
+}
+
+.h-66vh {
+  height: -vh(66.6666) !important;
+}
+
+// margin auto
+.mg-auto-x {
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+.ml-auto {
+  margin-left: auto !important;
+}
+
+.mr-auto {
+  margin-right: auto !important;
+}
+
+.mt-auto {
+  margin-top: auto !important;
+}
+
+.mb-auto {
+  margin-bottom: auto !important;
+}
+
+// margin
+// 20 이하 모든수
+// 20 이상 100 이하는 4배수 5배수 만
+// 100 이상 200 이하는 5배수 만
+// 200 이상 300 이하는 10배수 만
+@for $i from 0 through 300 {
+  @if ($i <= 20) or
+    ($i > 20 and $i <= 100 and ($i % 4 == 0 or $i % 5 == 0)) or
+    ($i > 100 and $i <= 200 and ($i % 5 == 0)) or
+    ($i > 200 and ($i % 10 == 0))
+  {
+    .mg-#{$i} {
+      margin: $i * 0.1rem !important;
+    }
+    .mg-#{$i}-x {
+      margin-left: $i * 0.1rem !important;
+      margin-right: $i * 0.1rem !important;
+    }
+    .mg-#{$i}-y {
+      margin-top: $i * 0.1rem !important;
+      margin-bottom: $i * 0.1rem !important;
+    }
+    .mt-#{$i} {
+      margin-top: $i * 0.1rem !important;
+    }
+    .mb-#{$i} {
+      margin-bottom: $i * 0.1rem !important;
+    }
+    .ml-#{$i} {
+      margin-left: $i * 0.1rem !important;
+    }
+    .mr-#{$i} {
+      margin-right: $i * 0.1rem !important;
+    }
+  }
+}
+
+// padding
+// 20 이하 모든수
+// 20 이상 100 이하는 4배수 5배수 만
+@for $i from 0 through 100 {
+  @if $i <= 20 or ($i > 20 and ($i % 4 == 0 or $i % 5 == 0)) {
+    .pd-#{$i} {
+      padding: $i * 0.1rem !important;
+    }
+    .pd-#{$i}-x {
+      padding-left: $i * 0.1rem !important;
+      padding-right: $i * 0.1rem !important;
+    }
+    .pd-#{$i}-y {
+      padding-top: $i * 0.1rem !important;
+      padding-bottom: $i * 0.1rem !important;
+    }
+    .pt-#{$i} {
+      padding-top: $i * 0.1rem !important;
+    }
+    .pb-#{$i} {
+      padding-bottom: $i * 0.1rem !important;
+    }
+    .pl-#{$i} {
+      padding-left: $i * 0.1rem !important;
+    }
+    .pr-#{$i} {
+      padding-right: $i * 0.1rem !important;
+    }
+  }
+}
+
+// ellipsis(글자 말줄임)
+.ellipsis {
+  @include s.ellipsis(0);
+}
+
+@for $i from 1 through 5 {
+  .ellipsis-#{$i} {
+    @include s.ellipsis($i);
+  }
+}
+
+// border
+.bd-none {
+  border: none !important;
+}
+
+.bd-l-none {
+  border-left: none !important;
+}
+
+.bd-r-none {
+  border-right: none !important;
+}
+
+.bd-t-none {
+  border-top: none !important;
+}
+
+.bd-b-none {
+  border-bottom: none !important;
+}
+
+@for $i from 0 through 10 {
+  .bd-#{$i} {
+    border-width: $i * 0.1rem !important;
+  }
+  .bd-l-#{$i} {
+    border-left-width: $i * 0.1rem !important;
+  }
+  .bd-r-#{$i} {
+    border-right-width: $i * 0.1rem !important;
+  }
+  .bd-t-#{$i} {
+    border-top-width: $i * 0.1rem !important;
+  }
+  .bd-b-#{$i} {
+    border-bottom-width: $i * 0.1rem !important;
+  }
+}
+
+@for $i from 0 through 50 {
+  .bd-radius-#{$i} {
+    border-radius: $i * 0.1rem !important;
+  }
+}
+
+$bd-types: (solid, dashed, dotted);
+
+@each $bd-type in $bd-types {
+  .bd-#{$bd-type} {
+    border-style: #{$bd-type};
+  }
+  .bd-top-#{$bd-type} {
+    border-top-style: #{$bd-type};
+  }
+  .bd-bottom-#{$bd-type} {
+    border-bottom-style: #{$bd-type};
+  }
+  .bd-left-#{$bd-type} {
+    border-left-style: #{$bd-type};
+  }
+  .bd-right-#{$bd-type} {
+    border-right-style: #{$bd-type};
+  }
+}
+
+// opacity
+@for $i from 1 through 20 {
+  .op-#{$i * 5} {
+    opacity: $i * 0.05 !important;
+  }
+}
