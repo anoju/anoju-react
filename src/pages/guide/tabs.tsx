@@ -563,27 +563,24 @@ export default MyComponent;`}
       </section>
 
       <section className={styles.section}>
-        <h2 className={styles['section-title']}>하위 호환성 지원</h2>
-        <p className={styles.txt}>
-          기존의 activeTab과 defaultTab 속성도 여전히 지원됩니다.
-        </p>
+        <h2 className={styles['section-title']}>defaultTab</h2>
 
         <div className={styles.showcase}>
           <Tabs
             defaultTab="tab2"
             items={[
               {
-                id: 'tab1',
+                value: 'tab1',
                 label: '탭 1',
                 content: <p className={styles.txt}>탭 1 내용입니다.</p>,
               },
               {
-                id: 'tab2',
+                value: 'tab2',
                 label: '탭 2',
                 content: <p className={styles.txt}>탭 2 내용입니다.</p>,
               },
               {
-                id: 'tab3',
+                value: 'tab3',
                 label: '탭 3',
                 content: <p className={styles.txt}>탭 3 내용입니다.</p>,
               },

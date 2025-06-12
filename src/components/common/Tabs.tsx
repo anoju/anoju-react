@@ -79,9 +79,6 @@ type TabsProps<T extends string | number = string | number> = {
   tabsClassName?: string;
   contentClassName?: string;
   forceUsePathname?: boolean;
-
-  // 이전 속성들 (하위호환성 유지)
-  activeTab?: string;
   defaultTab?: string | number;
 };
 
@@ -189,8 +186,6 @@ export const Tabs = React.forwardRef(
       tabsClassName = '',
       contentClassName = '',
       forceUsePathname = false,
-      // 이전 속성들 (하위호환성)
-      activeTab,
       defaultTab,
     } = props;
 
@@ -369,41 +364,40 @@ export const Tabs = React.forwardRef(
         return;
       }
 
-      // 이전 방식 지원 (하위호환성)
-      if (activeTab !== undefined) {
-        setActiveValue(activeTab);
-        initializedRef.current = true;
-        return;
-      }
-
+      // defaultTab 처리
       if (defaultTab !== undefined) {
+        let resolvedDefaultValue: string | number | undefined;
+
         if (typeof defaultTab === 'number') {
           // 인덱스 기반 처리
-          if (
-            processedItems &&
-            defaultTab >= 0 &&
-            defaultTab < processedItems.length
-          ) {
-            setActiveValue(
-              processedItems[defaultTab].value !== undefined
-                ? processedItems[defaultTab].value!
-                : defaultTab
-            );
-          } else if (
-            tabValues.length > 0 &&
-            defaultTab >= 0 &&
-            defaultTab < tabValues.length
-          ) {
-            setActiveValue(tabValues[defaultTab]);
-          } else {
-            setActiveValue(0); // 기본값
+          if (processedItems && processedItems.length > 0) {
+            // processedItems를 사용하는 경우
+            if (defaultTab >= 0 && defaultTab < processedItems.length) {
+              const targetItem = processedItems[defaultTab];
+              resolvedDefaultValue =
+                targetItem.value !== undefined ? targetItem.value : defaultTab;
+            }
+          } else if (tabValues.length > 0) {
+            // 자식 컴포넌트를 사용하는 경우
+            if (defaultTab >= 0 && defaultTab < tabValues.length) {
+              resolvedDefaultValue = tabValues[defaultTab];
+            }
+          }
+
+          // 인덱스가 범위를 벗어나면 0을 기본값으로 사용
+          if (resolvedDefaultValue === undefined) {
+            resolvedDefaultValue = 0;
           }
         } else {
           // 문자열 기반 처리
-          setActiveValue(defaultTab);
+          resolvedDefaultValue = defaultTab;
         }
-        initializedRef.current = true;
-        return;
+
+        if (resolvedDefaultValue !== undefined) {
+          setActiveValue(resolvedDefaultValue);
+          initializedRef.current = true;
+          return;
+        }
       }
 
       // 경로 기반 활성화
@@ -458,7 +452,6 @@ export const Tabs = React.forwardRef(
     }, [
       value,
       defaultValue,
-      activeTab,
       defaultTab,
       processedItems,
       tabs,
