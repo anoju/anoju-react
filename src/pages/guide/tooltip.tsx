@@ -272,7 +272,7 @@ const targetButtonRef = useRef<HTMLButtonElement>(null);
               <tr>
                 <td>children</td>
                 <td>ReactNode</td>
-                <td>필수</td>
+                <td>-</td>
                 <td>툴팁에 표시할 내용</td>
               </tr>
               <tr>
@@ -286,6 +286,30 @@ const targetButtonRef = useRef<HTMLButtonElement>(null);
               </tr>
               <tr>
                 <td>className</td>
+                <td>string</td>
+                <td>''</td>
+                <td>툴팁 래퍼에 적용할 CSS 클래스</td>
+              </tr>
+              <tr>
+                <td>maxWidth</td>
+                <td>number</td>
+                <td>undefined</td>
+                <td>툴팁의 최대 너비 (px 단위, 미설정 시 화면 너비에 맞춤)</td>
+              </tr>
+              <tr>
+                <td>triggerClassName</td>
+                <td>string</td>
+                <td>''</td>
+                <td>트리거 요소에 적용할 CSS 클래스</td>
+              </tr>
+              <tr>
+                <td>contentClassName</td>
+                <td>string</td>
+                <td>''</td>
+                <td>툴팁 내용에 적용할 CSS 클래스</td>
+              </tr>
+              <tr>
+                <td>btnLabel</td>
                 <td>string</td>
                 <td>'자세한 내용 확인'</td>
                 <td>기본 버튼 사용 시 접근성을 위한 aria-label</td>
@@ -304,7 +328,7 @@ const targetButtonRef = useRef<HTMLButtonElement>(null);
               </tr>
               <tr>
                 <td>setBodyShow</td>
-                <td>function</td>
+                <td>(isShow: boolean) =&gt; void</td>
                 <td>undefined</td>
                 <td>툴팁이 닫힐 때 외부 상태를 업데이트하는 콜백 함수</td>
               </tr>

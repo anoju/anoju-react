@@ -17,7 +17,7 @@ import cx from '@/utils/cx';
 let idCounter = 0;
 const generateId = (): string => {
   idCounter += 1;
-  return `sticky-wrap-${idCounter}-${Date.now()}`;
+  return `sticky-${idCounter}-${Date.now()}`;
 };
 
 // Sticky Props 인터페이스
