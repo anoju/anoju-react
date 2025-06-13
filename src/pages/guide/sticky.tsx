@@ -1,12 +1,12 @@
-// src/pages/guide/stickyWrap.tsx
+// src/pages/guide/sticky.tsx
 import { useState } from 'react';
 import { usePageLayout } from '@/hooks/usePageLayout';
-import { Button, CodeHighlight, StickyWrap } from '@/components/common';
+import { Button, CodeHighlight, Sticky } from '@/components/common';
 import styles from '@/assets/scss/pages/guide.module.scss';
 
-const StickyWrapGuide = () => {
+const StickyGuide = () => {
   usePageLayout({
-    title: 'StickyWrap / 컴포넌트 가이드',
+    title: 'sticky / 컴포넌트 가이드',
     rightButtons: (
       <>
         <Button to="/" size="sm">
@@ -42,12 +42,12 @@ const StickyWrapGuide = () => {
 
   return (
     <div className="page-inner">
-      <h1 className={styles.title}>StickyWrap Component</h1>
+      <h1 className={styles.title}>sticky Component</h1>
 
       <section className={styles.section}>
         <h2 className={styles['section-title']}>import</h2>
         <CodeHighlight
-          code={`import { StickyWrap } from '@/components/common';`}
+          code={`import { sticky } from '@/components/common';`}
           language="jsx"
         />
       </section>
@@ -55,11 +55,11 @@ const StickyWrapGuide = () => {
       <section className={styles.section}>
         <h2 className={styles['section-title']}>기본 사용법</h2>
         <p className={styles.txt}>
-          스크롤 시 브라우저 상단에 닿으면 고정되는 기본적인 StickyWrap입니다.
+          스크롤 시 브라우저 상단에 닿으면 고정되는 기본적인 sticky입니다.
         </p>
 
         <div style={guideStyles.wrap}>
-          <StickyWrap innerClassName="inner">
+          <Sticky innerClassName="inner">
             <div
               style={{
                 ...guideStyles.box,
@@ -67,16 +67,16 @@ const StickyWrapGuide = () => {
                 backgroundColor: 'var(--primary-color)',
               }}
             >
-              기본 StickyWrap - 상단에 고정됩니다
+              기본 sticky - 상단에 고정됩니다
             </div>
-          </StickyWrap>
+          </Sticky>
         </div>
 
         <h3 className={styles['sub-title']}>참조 소스코드</h3>
         <CodeHighlight
-          code={`<StickyWrap>
+          code={`<Sticky>
   고정시킬 컨텐츠
-</StickyWrap>`}
+</Sticky>`}
           language="jsx"
         />
       </section>
@@ -84,9 +84,9 @@ const StickyWrapGuide = () => {
       <section className={styles.section}>
         <h2 className={styles['section-title']}>여러 개 스택킹</h2>
         <p className={styles.txt}>
-          여러 개의 StickyWrap을 사용하면 첫 번째가 가장 위에 고정되고, 두
-          번째는 첫 번째 아래에, 세 번째는 두 번째 아래에 차례대로 쌓입니다.
-          (거꾸로 된 탑 모양)
+          여러 개의 sticky을 사용하면 첫 번째가 가장 위에 고정되고, 두 번째는 첫
+          번째 아래에, 세 번째는 두 번째 아래에 차례대로 쌓입니다. (거꾸로 된 탑
+          모양)
         </p>
         <p className={styles.txt}>
           각 요소의 높이가 다르기 때문에 스택되는 모습을 명확하게 볼 수
@@ -94,7 +94,7 @@ const StickyWrapGuide = () => {
         </p>
 
         <div style={guideStyles.wrap}>
-          <StickyWrap onChange={handleFixedChange} innerClassName="inner">
+          <Sticky onChange={handleFixedChange} innerClassName="inner">
             <div
               style={{
                 ...guideStyles.box,
@@ -102,13 +102,13 @@ const StickyWrapGuide = () => {
                 backgroundColor: '#ff6b6b',
               }}
             >
-              첫 번째 StickyWrap (높이: 60px)
+              첫 번째 sticky (높이: 60px)
               <br />
               현재 고정된 요소 수: {fixedCount}
             </div>
-          </StickyWrap>
+          </Sticky>
 
-          <StickyWrap
+          <Sticky
             onChange={handleFixedChange}
             innerClassName="inner"
             style={{ marginTop: '100px' }}
@@ -120,11 +120,11 @@ const StickyWrapGuide = () => {
                 backgroundColor: '#4ecdc4',
               }}
             >
-              두 번째 StickyWrap (높이: 70px)
+              두 번째 sticky (높이: 70px)
             </div>
-          </StickyWrap>
+          </Sticky>
 
-          <StickyWrap
+          <Sticky
             onChange={handleFixedChange}
             innerClassName="inner"
             style={{ marginTop: '100px' }}
@@ -136,9 +136,9 @@ const StickyWrapGuide = () => {
                 backgroundColor: '#45b7d1',
               }}
             >
-              세 번째 StickyWrap (높이: 80px)
+              세 번째 sticky (높이: 80px)
             </div>
-          </StickyWrap>
+          </Sticky>
         </div>
       </section>
 
@@ -150,7 +150,7 @@ const StickyWrapGuide = () => {
         </p>
 
         <div style={guideStyles.wrap}>
-          <StickyWrap hideScrolling innerClassName="inner">
+          <Sticky hideScrolling innerClassName="inner">
             <div
               style={{
                 ...guideStyles.box,
@@ -158,16 +158,16 @@ const StickyWrapGuide = () => {
                 backgroundColor: '#9b59b6',
               }}
             >
-              Scrolling StickyWrap <br /> 스크롤 방향에 따라 숨겨집니다
+              Scrolling sticky <br /> 스크롤 방향에 따라 숨겨집니다
             </div>
-          </StickyWrap>
+          </Sticky>
         </div>
 
         <h3 className={styles['sub-title']}>참조 소스코드</h3>
         <CodeHighlight
-          code={`<StickyWrap hideScrolling>
+          code={`<Sticky hideScrolling>
   고정 시킬 컨텐츠
-</StickyWrap>`}
+</Sticky>`}
           language="jsx"
         />
       </section>
@@ -223,4 +223,4 @@ const StickyWrapGuide = () => {
   );
 };
 
-export default StickyWrapGuide;
+export default StickyGuide;

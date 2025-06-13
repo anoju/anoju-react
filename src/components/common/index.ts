@@ -16,7 +16,7 @@ export {
 export { default as Input, type InputHandle } from './Input';
 export { default as Textarea, type TextareaHandle } from './Textarea';
 export { default as Tooltip } from './Tooltip';
-export { default as StickyWrap } from './StickyWrap';
+export { default as Sticky } from './Sticky';
 export {
   default as Expand,
   ExpandItem as ExpandItemStatic,

@@ -1,4 +1,4 @@
-// src/components/common/StickyWrap.tsx
+// src/components/common/Sticky.tsx
 import {
   useState,
   useRef,
@@ -8,9 +8,9 @@ import {
   forwardRef,
   CSSProperties,
 } from 'react';
-import { useStickyWrap } from '@/hooks/useStickyWrap';
-import type { StickyWrapState } from '@/types/stickyWrap';
-import styles from '@/assets/scss/components/stickyWrap.module.scss';
+import { useSticky } from '@/hooks/useSticky';
+import type { StickyState } from '@/types/sticky';
+import styles from '@/assets/scss/components/sticky.module.scss';
 import cx from '@/utils/cx';
 
 // 고유 ID 생성 함수
@@ -20,8 +20,8 @@ const generateId = (): string => {
   return `sticky-wrap-${idCounter}-${Date.now()}`;
 };
 
-// StickyWrap Props 인터페이스
-export interface StickyWrapProps {
+// Sticky Props 인터페이스
+export interface StickyProps {
   children: ReactNode;
   hideScrolling?: boolean;
   className?: string;
@@ -30,8 +30,8 @@ export interface StickyWrapProps {
   onChange?: (isFixed: boolean) => void;
 }
 
-// StickyWrap 컴포넌트
-const StickyWrap = forwardRef<HTMLDivElement, StickyWrapProps>(
+// Sticky 컴포넌트
+const Sticky = forwardRef<HTMLDivElement, StickyProps>(
   (
     {
       children,
@@ -45,9 +45,7 @@ const StickyWrap = forwardRef<HTMLDivElement, StickyWrapProps>(
     ref
   ) => {
     // 상태 관리
-    const [currentState, setCurrentState] = useState<StickyWrapState | null>(
-      null
-    );
+    const [currentState, setCurrentState] = useState<StickyState | null>(null);
 
     // ref들
     const wrapperRef = useRef<HTMLDivElement>(null);
@@ -62,7 +60,7 @@ const StickyWrap = forwardRef<HTMLDivElement, StickyWrapProps>(
       updateInstanceData,
       unregisterInstance,
       subscribeToUpdates,
-    } = useStickyWrap();
+    } = useSticky();
 
     const id = idRef.current;
 
@@ -72,7 +70,7 @@ const StickyWrap = forwardRef<HTMLDivElement, StickyWrapProps>(
     }, [onChange]);
 
     // 스타일 적용
-    const applyStyles = useCallback((state: StickyWrapState) => {
+    const applyStyles = useCallback((state: StickyState) => {
       if (!contentRef.current || !placeholderRef.current || !wrapperRef.current)
         return;
 
@@ -114,7 +112,7 @@ const StickyWrap = forwardRef<HTMLDivElement, StickyWrapProps>(
         window.pageYOffset || document.documentElement.scrollTop;
 
       // 인스턴스 등록 - onChange를 ref로 전달
-      const newInstance: StickyWrapState = {
+      const newInstance: StickyState = {
         id,
         height: rect.height,
         isFixed: false,
@@ -209,6 +207,6 @@ const StickyWrap = forwardRef<HTMLDivElement, StickyWrapProps>(
   }
 );
 
-StickyWrap.displayName = 'StickyWrap';
+Sticky.displayName = 'Sticky';
 
-export default StickyWrap;
+export default Sticky;

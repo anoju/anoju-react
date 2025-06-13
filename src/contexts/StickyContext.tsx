@@ -1,4 +1,4 @@
-// src/contexts/StickyWrapContext.tsx
+// src/contexts/StickyContext.tsx
 import React, {
   createContext,
   useRef,
@@ -6,10 +6,7 @@ import React, {
   ReactNode,
   useEffect,
 } from 'react';
-import type {
-  StickyWrapState,
-  StickyWrapContextType,
-} from '@/types/stickyWrap';
+import type { StickyState, StickyContextType } from '@/types/sticky';
 
 // throttle 유틸리티 함수
 function throttle<T extends unknown[]>(
@@ -27,16 +24,12 @@ function throttle<T extends unknown[]>(
 }
 
 // 컨텍스트 생성
-const StickyWrapContext = createContext<StickyWrapContextType | undefined>(
-  undefined
-);
+const StickyContext = createContext<StickyContextType | undefined>(undefined);
 
 // Provider 컴포넌트
-const StickyWrapProvider: React.FC<{ children: ReactNode }> = ({
-  children,
-}) => {
-  const instancesRef = useRef<Map<string, StickyWrapState>>(new Map());
-  const subscribersRef = useRef<Map<string, (state: StickyWrapState) => void>>(
+const StickyProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const instancesRef = useRef<Map<string, StickyState>>(new Map());
+  const subscribersRef = useRef<Map<string, (state: StickyState) => void>>(
     new Map()
   );
   const lastScrollYRef = useRef<number>(0);
@@ -56,7 +49,7 @@ const StickyWrapProvider: React.FC<{ children: ReactNode }> = ({
     let accumulatedHeight = 0;
     const updates: Array<{
       id: string;
-      state: StickyWrapState;
+      state: StickyState;
       wasFixed: boolean;
     }> = [];
 
@@ -92,7 +85,7 @@ const StickyWrapProvider: React.FC<{ children: ReactNode }> = ({
         shouldBeFixed !== instance.isFixed ||
         newIsHidden !== instance.isHidden
       ) {
-        const updatedState: StickyWrapState = {
+        const updatedState: StickyState = {
           ...instance,
           isFixed: shouldBeFixed,
           isHidden: newIsHidden,
@@ -216,7 +209,7 @@ const StickyWrapProvider: React.FC<{ children: ReactNode }> = ({
 
   // 인스턴스 등록
   const registerInstance = useCallback(
-    (id: string, state: StickyWrapState) => {
+    (id: string, state: StickyState) => {
       instancesRef.current.set(id, state);
 
       // 초기 위치 체크
@@ -229,7 +222,7 @@ const StickyWrapProvider: React.FC<{ children: ReactNode }> = ({
 
   // 인스턴스 데이터 업데이트
   const updateInstanceData = useCallback(
-    (id: string, updates: Partial<StickyWrapState>) => {
+    (id: string, updates: Partial<StickyState>) => {
       const current = instancesRef.current.get(id);
       if (current) {
         const updated = { ...current, ...updates };
@@ -256,7 +249,7 @@ const StickyWrapProvider: React.FC<{ children: ReactNode }> = ({
 
   // 상태 업데이트 구독
   const subscribeToUpdates = useCallback(
-    (id: string, callback: (state: StickyWrapState) => void) => {
+    (id: string, callback: (state: StickyState) => void) => {
       subscribersRef.current.set(id, callback);
 
       // 현재 상태 즉시 전달
@@ -273,7 +266,7 @@ const StickyWrapProvider: React.FC<{ children: ReactNode }> = ({
     []
   );
 
-  const contextValue: StickyWrapContextType = {
+  const contextValue: StickyContextType = {
     instances: instancesRef.current,
     registerInstance,
     updateInstanceData,
@@ -282,11 +275,11 @@ const StickyWrapProvider: React.FC<{ children: ReactNode }> = ({
   };
 
   return (
-    <StickyWrapContext.Provider value={contextValue}>
+    <StickyContext.Provider value={contextValue}>
       {children}
-    </StickyWrapContext.Provider>
+    </StickyContext.Provider>
   );
 };
 
-export { StickyWrapProvider, StickyWrapContext };
-export default StickyWrapProvider;
+export { StickyProvider, StickyContext };
+export default StickyProvider;

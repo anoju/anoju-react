@@ -1,6 +1,6 @@
-// src/types/stickyWrap.ts
-// StickyWrap 인스턴스 상태 타입
-export interface StickyWrapState {
+// src/types/sticky.ts
+// Sticky 인스턴스 상태 타입
+export interface StickyState {
   id: string;
   height: number;
   isFixed: boolean;
@@ -15,13 +15,13 @@ export interface StickyWrapState {
 }
 
 // 컨텍스트 타입 정의
-export interface StickyWrapContextType {
-  instances: Map<string, StickyWrapState>;
-  registerInstance: (id: string, state: StickyWrapState) => void;
-  updateInstanceData: (id: string, updates: Partial<StickyWrapState>) => void;
+export interface StickyContextType {
+  instances: Map<string, StickyState>;
+  registerInstance: (id: string, state: StickyState) => void;
+  updateInstanceData: (id: string, updates: Partial<StickyState>) => void;
   unregisterInstance: (id: string) => void;
   subscribeToUpdates: (
     id: string,
-    callback: (state: StickyWrapState) => void
+    callback: (state: StickyState) => void
   ) => () => void;
 }

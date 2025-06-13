@@ -1,6 +1,6 @@
 // src/pages/guide/layout.tsx
 import React, { ReactNode } from 'react';
-import { Tabs, StickyWrap } from '@/components/common';
+import { Tabs, Sticky } from '@/components/common';
 
 interface GuideLayoutProps {
   children: ReactNode;
@@ -9,7 +9,7 @@ interface GuideLayoutProps {
 const GuideLayout: React.FC<GuideLayoutProps> = ({ children }) => {
   return (
     <>
-      <StickyWrap>
+      <Sticky>
         <Tabs
           items={[
             {
@@ -41,8 +41,12 @@ const GuideLayout: React.FC<GuideLayoutProps> = ({ children }) => {
               to: '/guide/textarea',
             },
             {
-              label: 'StickyWrap',
-              to: '/guide/stickyWrap',
+              label: 'Tooltip',
+              to: '/guide/tooltip',
+            },
+            {
+              label: 'sticky',
+              to: '/guide/sticky',
             },
             {
               label: 'Expand',
@@ -66,7 +70,7 @@ const GuideLayout: React.FC<GuideLayoutProps> = ({ children }) => {
             },
           ]}
         />
-      </StickyWrap>
+      </Sticky>
       <div style={{ marginTop: '3rem' }}>{children}</div>
     </>
   );

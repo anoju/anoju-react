@@ -3,7 +3,7 @@ import React, { ReactNode, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLayout } from '@/contexts/LayoutContext';
 import styles from '@/assets/scss/layouts/layouts.module.scss';
-import { Button, StickyWrap } from '@/components/common';
+import { Button, Sticky } from '@/components/common';
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -85,7 +85,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   return (
     <article className={styles.wrapper}>
       {config.showHeader && (
-        <StickyWrap hideScrolling>
+        <Sticky hideScrolling>
           <header className={styles.header}>
             <div ref={leftRef} className={styles['header-left']}>
               {config.showBackButton && (
@@ -102,7 +102,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               {config.rightButtons}
             </div>
           </header>
-        </StickyWrap>
+        </Sticky>
       )}
       <main className={styles.container}>{children}</main>
       {config.showFooter && (
