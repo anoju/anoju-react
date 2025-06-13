@@ -93,6 +93,62 @@ import { Tabs ,Tab, TabPanel } from '@/components/common';`}
       </section>
 
       <section className={styles.section}>
+        <h2 className={styles['section-title']}>defaultValue</h2>
+        <p className={styles.txt}>
+          useState로 value를 설정 안하고 defaultValue를 사용하여 기본 탭을
+          지정할 수 있습니다.
+        </p>
+        <div className={styles.showcase}>
+          <Tabs
+            defaultValue="tab2"
+            items={[
+              {
+                value: 'tab1',
+                label: '탭 1',
+                content: <p className={styles.txt}>탭 1 내용입니다.</p>,
+              },
+              {
+                value: 'tab2',
+                label: '탭 2',
+                content: <p className={styles.txt}>탭 2 내용입니다.</p>,
+              },
+              {
+                value: 'tab3',
+                label: '탭 3',
+                content: <p className={styles.txt}>탭 3 내용입니다.</p>,
+              },
+            ]}
+          />
+        </div>
+
+        <h3 className={styles['sub-title']}>참조 소스코드</h3>
+        <CodeHighlight
+          code={`// 기존 방식 사용 예시
+<Tabs
+  defaultValue="tab2"
+  items={[
+    {
+      id: 'tab1',
+      label: '탭 1',
+      content: <p className={styles.txt}>탭 1 내용입니다.</p>,
+    },
+    {
+      id: 'tab2',
+      label: '탭 2',
+      content: <p className={styles.txt}>탭 2 내용입니다.</p>,
+    },
+    {
+      id: 'tab3',
+      label: '탭 3',
+      content: <p className={styles.txt}>탭 3 내용입니다.</p>,
+    },
+  ]}
+/>`}
+          language="jsx"
+        />
+      </section>
+
+      <section className={styles.section}>
         <h2 className={styles['section-title']}>외부 상태 관리</h2>
         <p className={styles.txt}>
           value와 setValue를 사용하여 탭 상태를 외부에서 제어하는 방법입니다.
@@ -558,59 +614,6 @@ const MyComponent = () => {
 };
 
 export default MyComponent;`}
-          language="jsx"
-        />
-      </section>
-
-      <section className={styles.section}>
-        <h2 className={styles['section-title']}>defaultTab</h2>
-
-        <div className={styles.showcase}>
-          <Tabs
-            defaultTab="tab2"
-            items={[
-              {
-                value: 'tab1',
-                label: '탭 1',
-                content: <p className={styles.txt}>탭 1 내용입니다.</p>,
-              },
-              {
-                value: 'tab2',
-                label: '탭 2',
-                content: <p className={styles.txt}>탭 2 내용입니다.</p>,
-              },
-              {
-                value: 'tab3',
-                label: '탭 3',
-                content: <p className={styles.txt}>탭 3 내용입니다.</p>,
-              },
-            ]}
-          />
-        </div>
-
-        <h3 className={styles['sub-title']}>참조 소스코드</h3>
-        <CodeHighlight
-          code={`// 기존 방식 사용 예시
-<Tabs
-  defaultTab="tab2"
-  items={[
-    {
-      id: 'tab1',
-      label: '탭 1',
-      content: <p className={styles.txt}>탭 1 내용입니다.</p>,
-    },
-    {
-      id: 'tab2',
-      label: '탭 2',
-      content: <p className={styles.txt}>탭 2 내용입니다.</p>,
-    },
-    {
-      id: 'tab3',
-      label: '탭 3',
-      content: <p className={styles.txt}>탭 3 내용입니다.</p>,
-    },
-  ]}
-/>`}
           language="jsx"
         />
       </section>

@@ -79,7 +79,6 @@ type TabsProps<T extends string | number = string | number> = {
   tabsClassName?: string;
   contentClassName?: string;
   forceUsePathname?: boolean;
-  defaultTab?: string | number;
 };
 
 // Tab 컴포넌트
@@ -186,7 +185,6 @@ export const Tabs = React.forwardRef(
       tabsClassName = '',
       contentClassName = '',
       forceUsePathname = false,
-      defaultTab,
     } = props;
 
     const navigate = useNavigate();
@@ -364,42 +362,6 @@ export const Tabs = React.forwardRef(
         return;
       }
 
-      // defaultTab 처리
-      if (defaultTab !== undefined) {
-        let resolvedDefaultValue: string | number | undefined;
-
-        if (typeof defaultTab === 'number') {
-          // 인덱스 기반 처리
-          if (processedItems && processedItems.length > 0) {
-            // processedItems를 사용하는 경우
-            if (defaultTab >= 0 && defaultTab < processedItems.length) {
-              const targetItem = processedItems[defaultTab];
-              resolvedDefaultValue =
-                targetItem.value !== undefined ? targetItem.value : defaultTab;
-            }
-          } else if (tabValues.length > 0) {
-            // 자식 컴포넌트를 사용하는 경우
-            if (defaultTab >= 0 && defaultTab < tabValues.length) {
-              resolvedDefaultValue = tabValues[defaultTab];
-            }
-          }
-
-          // 인덱스가 범위를 벗어나면 0을 기본값으로 사용
-          if (resolvedDefaultValue === undefined) {
-            resolvedDefaultValue = 0;
-          }
-        } else {
-          // 문자열 기반 처리
-          resolvedDefaultValue = defaultTab;
-        }
-
-        if (resolvedDefaultValue !== undefined) {
-          setActiveValue(resolvedDefaultValue);
-          initializedRef.current = true;
-          return;
-        }
-      }
-
       // 경로 기반 활성화
       if (processedItems && processedItems.length > 0) {
         const pathTab = processedItems.find(
@@ -452,7 +414,6 @@ export const Tabs = React.forwardRef(
     }, [
       value,
       defaultValue,
-      defaultTab,
       processedItems,
       tabs,
       tabValues,
