@@ -1,7 +1,7 @@
 // src/pages/guide/button.tsx - 버튼 가이드 페이지
 import { useState } from 'react';
 import { usePageLayout } from '@/hooks/usePageLayout';
-import { Button, CodeHighlight } from '@/components/common';
+import { Button, CodeHighlight, Sticky } from '@/components/common';
 import styles from '@/assets/scss/pages/guide.module.scss';
 
 const ButtonGuide = () => {
@@ -17,6 +17,24 @@ const ButtonGuide = () => {
       </>
     ),
   });
+
+  const guideStyles = {
+    spyBox1: {
+      height: '50vh',
+      background:
+        'linear-gradient(to bottom, rgba(255, 0, 0, 0), rgba(255, 0, 0, 0.3))',
+    } as React.CSSProperties,
+    spyBox2: {
+      height: '50vh',
+      background:
+        'linear-gradient(to bottom, rgba(255, 0, 0, 0), rgba(0, 255, 0, 0.3))',
+    } as React.CSSProperties,
+    spyBox3: {
+      height: '50vh',
+      background:
+        'linear-gradient(to bottom, rgba(255, 0, 0, 0), rgba(0, 0, 255, 0.3))',
+    } as React.CSSProperties,
+  };
 
   const handleClick = () => {
     setClickCount((prev) => prev + 1);
@@ -251,6 +269,32 @@ const ButtonGuide = () => {
 </Button>`}
           language="jsx"
         />
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles['section-title']}>ScrollSpy</h2>
+        <Sticky innerClassName="inner">
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <Button toScroll="#section1" size="sm" className="line">
+              섹션 1로 이동
+            </Button>
+            <Button toScroll="#section2" size="sm" className="line">
+              섹션 2로 이동
+            </Button>
+            <Button toScroll="#section3" size="sm" className="line">
+              섹션 3로 이동
+            </Button>
+          </div>
+        </Sticky>
+        <div id="section1" style={guideStyles.spyBox1}>
+          섹션 1 내용
+        </div>
+        <div id="section2" style={guideStyles.spyBox2}>
+          섹션 2 내용
+        </div>
+        <div id="section3" style={guideStyles.spyBox3}>
+          섹션 3 내용
+        </div>
       </section>
 
       <section className={styles.section}>

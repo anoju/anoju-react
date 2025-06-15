@@ -25,17 +25,17 @@ const TabsGuide = () => {
 
   const guideStyles = {
     spyBox1: {
-      height: '100vh',
+      height: '50vh',
       background:
         'linear-gradient(to bottom, rgba(255, 0, 0, 0), rgba(255, 0, 0, 0.3))',
     } as React.CSSProperties,
     spyBox2: {
-      height: '100vh',
+      height: '50vh',
       background:
         'linear-gradient(to bottom, rgba(255, 0, 0, 0), rgba(0, 255, 0, 0.3))',
     } as React.CSSProperties,
     spyBox3: {
-      height: '100vh',
+      height: '50vh',
       background:
         'linear-gradient(to bottom, rgba(255, 0, 0, 0), rgba(0, 0, 255, 0.3))',
     } as React.CSSProperties,

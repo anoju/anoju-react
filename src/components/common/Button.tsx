@@ -1,7 +1,8 @@
 // src/components/common/Button.tsx
 // 프로젝트 내에서 이동시 to 속성 사용
 // 외부링크 이동시 anchor + href 속성 사용
-import React, { useRef, useState, useEffect } from 'react';
+// 스크롤 이동시 toScroll 속성 사용
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import styles from '@/assets/scss/components/button.module.scss';
 
@@ -37,11 +38,23 @@ interface RippleEffect {
   id: number;
 }
 
+// 스크롤 관련 타입 정의
+interface ScrollToOptions {
+  target: string;
+  offset?: number;
+  duration?: number;
+}
+
 // 공통 속성 타입 정의
 type CommonButtonProps = {
   size?: ButtonSize;
   not?: boolean; // 'not' prop 추가
   effect?: ButtonEffect; // 버튼 효과 옵션
+  toScroll?: string; // 스크롤할 대상 요소의 ID나 선택자
+  scrollOffset?: number; // 스크롤 오프셋 (기본값: 0)
+  scrollDuration?: number; // 스크롤 애니메이션 지속시간 (기본값: 500ms)
+  activeClassName?: string; // 활성화 시 추가할 클래스명
+  onScrollToTarget?: (target: string) => void; // 스크롤 시 콜백
 };
 
 type ButtonProps =
@@ -53,11 +66,185 @@ type ButtonProps =
       React.AnchorHTMLAttributes<HTMLAnchorElement>,
       'href'
     > &
-      CommonButtonProps);
+      CommonButtonProps)
+  | ({ toScroll: string } & React.AnchorHTMLAttributes<HTMLAnchorElement> & CommonButtonProps);
+
+// 스크롤 유틸리티 함수들
+const scrollUtils = {
+  // ID나 선택자로 요소 찾기
+  getElementByScrollTarget: (target: string): HTMLElement | null => {
+    // # 으로 시작하면 ID로 처리
+    if (target.startsWith('#')) {
+      return document.getElementById(target.slice(1));
+    }
+    // 그 외에는 querySelector로 처리
+    return document.querySelector(target);
+  },
+
+  // 요소가 뷰포트에 있는지 확인 (활성화 상태 판단용)
+  isElementInViewport: (
+    element: HTMLElement,
+    offset: number = 0
+  ): boolean => {
+    const rect = element.getBoundingClientRect();
+    const windowHeight = window.innerHeight || document.documentElement.clientHeight;
+    
+    // 더 관대한 조건으로 변경: 요소의 일부라도 뷰포트에 보이면 활성화
+    // 요소의 하단이 뷰포트 상단 + offset보다 아래에 있고
+    // 요소의 상단이 뷰포트 하단 - offset보다 위에 있으면 뷰포트에 있는 것으로 판단
+    return (
+      rect.bottom >= offset && 
+      rect.top <= windowHeight - offset
+    );
+  },
+
+  // 부드러운 스크롤 함수
+  scrollToElement: (options: ScrollToOptions): Promise<void> => {
+    return new Promise((resolve) => {
+      const { target, offset = 0, duration = 500 } = options;
+      const targetElement = scrollUtils.getElementByScrollTarget(target);
+      
+      if (!targetElement) {
+        console.warn(`스크롤 대상을 찾을 수 없습니다: ${target}`);
+        resolve();
+        return;
+      }
+
+      const startPosition = window.pageYOffset;
+      const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset - offset;
+      const distance = targetPosition - startPosition;
+      const startTime = performance.now();
+
+      // easeInOutQuad 이징 함수
+      const easeInOutQuad = (t: number): number => {
+        return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+      };
+
+      const scrollAnimation = (currentTime: number) => {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        
+        const easedProgress = easeInOutQuad(progress);
+        const currentPosition = startPosition + distance * easedProgress;
+        
+        window.scrollTo(0, currentPosition);
+        
+        if (progress < 1) {
+          requestAnimationFrame(scrollAnimation);
+        } else {
+          resolve();
+        }
+      };
+
+      requestAnimationFrame(scrollAnimation);
+    });
+  },
+
+  // 현재 활성화된 스크롤 대상 찾기
+  getCurrentActiveTarget: (
+    targets: string[],
+    offset: number = 0
+  ): string | null => {
+    // 역순으로 확인해서 가장 아래 있는 요소를 우선적으로 활성화
+    for (let i = targets.length - 1; i >= 0; i--) {
+      const target = targets[i];
+      const element = scrollUtils.getElementByScrollTarget(target);
+      
+      if (element && scrollUtils.isElementInViewport(element, offset)) {
+        return target;
+      }
+    }
+    return null;
+  }
+};
 
 const Button = React.forwardRef<HTMLElement, ButtonProps>((props, ref) => {
   const [ripples, setRipples] = useState<RippleEffect[]>([]);
+  const [isScrollActive, setIsScrollActive] = useState(false);
   const nextRippleId = useRef(0);
+  const scrollCheckInterval = useRef<NodeJS.Timeout | null>(null);
+
+  // 스크롤 활성화 상태 확인
+  const checkScrollActiveState = useCallback(() => {
+    if (!props.toScroll) return;
+
+    const element = scrollUtils.getElementByScrollTarget(props.toScroll);
+    if (element) {
+      const isActive = scrollUtils.isElementInViewport(
+        element,
+        props.scrollOffset || 0
+      );
+      
+      // 디버깅용 로그 (개발 중에만 사용)
+      if (process.env.NODE_ENV === 'development') {
+        const rect = element.getBoundingClientRect();
+        console.log('Scroll check:', {
+          target: props.toScroll,
+          isActive,
+          currentActive: isScrollActive,
+          elementTop: rect.top,
+          elementBottom: rect.bottom,
+          windowHeight: window.innerHeight,
+          offset: props.scrollOffset || 0
+        });
+      }
+      
+      if (isActive !== isScrollActive) {
+        setIsScrollActive(isActive);
+      }
+    }
+  }, [props.toScroll, props.scrollOffset, isScrollActive]);
+
+  // 스크롤 이벤트 리스너 등록
+  useEffect(() => {
+    if (!props.toScroll) {
+      setIsScrollActive(false);
+      return;
+    }
+
+    let rafId: number;
+    
+    // requestAnimationFrame을 사용한 스크롤 이벤트 핸들러
+    const handleScroll = () => {
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+      }
+      rafId = requestAnimationFrame(() => {
+        checkScrollActiveState();
+      });
+    };
+
+    // 리사이즈 이벤트 핸들러
+    const handleResize = () => {
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+      }
+      rafId = requestAnimationFrame(() => {
+        checkScrollActiveState();
+      });
+    };
+
+    // 초기 상태 확인
+    checkScrollActiveState();
+
+    // 이벤트 리스너 등록
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleResize, { passive: true });
+
+    // 주기적으로 상태 확인 (동적 콘텐츠 변경 대응)
+    scrollCheckInterval.current = setInterval(checkScrollActiveState, 500); // 500ms로 더 빠르게
+
+    return () => {
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+      }
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleResize);
+      if (scrollCheckInterval.current) {
+        clearInterval(scrollCheckInterval.current);
+      }
+    };
+  }, [props.toScroll, props.scrollOffset, checkScrollActiveState]);
 
   // 사라지는 리플 제거
   useEffect(() => {
@@ -78,7 +265,9 @@ const Button = React.forwardRef<HTMLElement, ButtonProps>((props, ref) => {
     className?: string,
     size?: ButtonSize,
     not?: boolean,
-    effect?: ButtonEffect
+    effect?: ButtonEffect,
+    isScrollActive?: boolean,
+    activeClassName?: string
   ) => {
     // not 속성이 true이면 className만 반환
     if (not) {
@@ -93,6 +282,8 @@ const Button = React.forwardRef<HTMLElement, ButtonProps>((props, ref) => {
       effect === 'rotate' && styles['button-rotate'],
       effect === 'shake' && styles['button-shake'],
       effect === 'jello' && styles['button-jello'],
+      isScrollActive && activeClassName, // 스크롤 활성화 시 추가 클래스
+      isScrollActive && styles['scroll-active'], // 기본 스크롤 활성화 클래스
       className,
     ].filter(Boolean);
 
@@ -168,9 +359,27 @@ const Button = React.forwardRef<HTMLElement, ButtonProps>((props, ref) => {
     }
   };
 
+  // 스크롤 함수
+  const handleScrollTo = async (target: string) => {
+    try {
+      await scrollUtils.scrollToElement({
+        target,
+        offset: props.scrollOffset || 0,
+        duration: props.scrollDuration || 500,
+      });
+
+      // 스크롤 완료 후 콜백 실행
+      if (props.onScrollToTarget) {
+        props.onScrollToTarget(target);
+      }
+    } catch (error) {
+      console.error('스크롤 중 오류 발생:', error);
+    }
+  };
+
   // to 속성이 있으면 Link
   if ('to' in props && props.to) {
-    const { to, children, className, size, not, effect, onClick, ...rest } =
+    const { to, children, className, size, not, effect, onClick, toScroll, activeClassName, ...rest } =
       props;
 
     // Link 시 target 속성 제외
@@ -178,7 +387,13 @@ const Button = React.forwardRef<HTMLElement, ButtonProps>((props, ref) => {
     delete newRest.target; // target 속성 제거
 
     // 클릭 이벤트 핸들러 결합
-    const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    const handleLinkClick = async (e: React.MouseEvent<HTMLAnchorElement>) => {
+      // toScroll이 있으면 스크롤 우선 실행
+      if (toScroll) {
+        e.preventDefault();
+        await handleScrollTo(toScroll);
+      }
+
       createRipple(e);
 
       // scale 효과 적용
@@ -194,7 +409,7 @@ const Button = React.forwardRef<HTMLElement, ButtonProps>((props, ref) => {
     return (
       <Link
         to={to}
-        className={getButtonClasses(className, size, not, effect)}
+        className={getButtonClasses(className, size, not, effect, isScrollActive, activeClassName)}
         onClick={handleLinkClick}
         {...newRest}
         ref={ref as React.Ref<HTMLAnchorElement>}
@@ -218,10 +433,15 @@ const Button = React.forwardRef<HTMLElement, ButtonProps>((props, ref) => {
     );
   }
 
-  // anchor 속성이 있으면 a 태그
-  if ('anchor' in props || 'href' in props) {
+  // toScroll이 있으면 anchor 모드로 처리 (a 태그)
+  if (props.toScroll || ('anchor' in props || 'href' in props)) {
+    // anchor 모드로 처리하는 props
+    const anchorProps = props as React.AnchorHTMLAttributes<HTMLAnchorElement> & CommonButtonProps & {
+      anchor?: boolean;
+    };
+    
     const {
-      href = '#',
+      href,
       target,
       onClick,
       children,
@@ -229,17 +449,22 @@ const Button = React.forwardRef<HTMLElement, ButtonProps>((props, ref) => {
       size,
       not,
       effect,
+      toScroll,
+      activeClassName,
       ...rest
-    } = props;
+    } = anchorProps;
 
-    // anchor 속성 제거
-    const anchorProps = { ...rest };
-    delete anchorProps.anchor;
+    // toScroll이 있으면 href 설정, 없으면 기본값 '#'
+    const finalHref = toScroll || href || '#';
 
-    const handleClick = (
+    const handleClick = async (
       e: React.MouseEvent<HTMLAnchorElement, MouseEvent>
     ) => {
-      if (href === '#') {
+      // toScroll이 있으면 스크롤 우선 실행
+      if (toScroll) {
+        e.preventDefault();
+        await handleScrollTo(toScroll);
+      } else if (finalHref === '#') {
         e.preventDefault();
       }
 
@@ -251,18 +476,20 @@ const Button = React.forwardRef<HTMLElement, ButtonProps>((props, ref) => {
         handleScaleEffect(e.currentTarget);
       }
 
-      if (onClick) onClick(e);
+      if (onClick) {
+        onClick(e);
+      }
     };
 
     return (
       <a
-        href={href}
+        href={finalHref}
         role="button"
-        className={getButtonClasses(className, size, not, effect)}
+        className={getButtonClasses(className, size, not, effect, isScrollActive, activeClassName)}
         target={target}
         rel={target === '_blank' ? 'noopener noreferrer' : undefined}
         onClick={handleClick}
-        {...anchorProps}
+        {...rest}
         ref={ref as React.Ref<HTMLAnchorElement>}
       >
         {children}
@@ -284,12 +511,12 @@ const Button = React.forwardRef<HTMLElement, ButtonProps>((props, ref) => {
     );
   }
 
-  // 기본은 button
+  // 기본은 button (기본 버튼 모드)
   const { children, className, size, not, effect, onClick, ...rest } =
     props as React.ButtonHTMLAttributes<HTMLButtonElement> & CommonButtonProps;
 
   // 클릭 이벤트 핸들러 결합
-  const handleButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleButtonClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     createRipple(e);
 
     // scale 효과 적용

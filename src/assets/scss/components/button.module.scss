@@ -78,6 +78,29 @@
     font-size: 1.8rem;
     border-radius: 0.8rem;
   }
+
+  // 스크롤 활성화 상태 스타일
+  &.scroll-active {
+    position: relative;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      border-radius: inherit;
+      background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+      z-index: -1;
+      animation: scroll-active-glow 2s ease-in-out infinite alternate;
+    }
+
+    &:global(.primary) {
+      box-shadow: 0 0 20px rgba(var(--primary-color-rgb, 52, 152, 219), 0.4);
+    }
+
+    &:global(.secondary) {
+      box-shadow: 0 0 20px rgba(var(--secondary-color-rgb, 46, 204, 113), 0.4);
+    }
+  }
 }
 
 // 리플 효과 관련 스타일
@@ -252,5 +275,16 @@
 
   88.8% {
     transform: skewX(-0.1953125deg) skewY(-0.1953125deg);
+  }
+}
+
+// 스크롤 활성화 글로우 애니메이션
+@keyframes scroll-active-glow {
+  0% {
+    opacity: 0.6;
+  }
+
+  100% {
+    opacity: 1;
   }
 }
