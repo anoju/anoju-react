@@ -7,6 +7,7 @@ import {
   Tabs,
   Tab,
   TabPanel,
+  Sticky,
 } from '@/components/common';
 import styles from '@/assets/scss/pages/guide.module.scss';
 
@@ -21,6 +22,24 @@ const TabsGuide = () => {
       </>
     ),
   });
+
+  const guideStyles = {
+    spyBox1: {
+      height: '100vh',
+      background:
+        'linear-gradient(to bottom, rgba(255, 0, 0, 0), rgba(255, 0, 0, 0.3))',
+    } as React.CSSProperties,
+    spyBox2: {
+      height: '100vh',
+      background:
+        'linear-gradient(to bottom, rgba(255, 0, 0, 0), rgba(0, 255, 0, 0.3))',
+    } as React.CSSProperties,
+    spyBox3: {
+      height: '100vh',
+      background:
+        'linear-gradient(to bottom, rgba(255, 0, 0, 0), rgba(0, 0, 255, 0.3))',
+    } as React.CSSProperties,
+  };
 
   // 탭 값 상태 관리 예시
   const [activeTab, setActiveTab] = useState('tab2');
@@ -556,6 +575,30 @@ const [itemsTab, setItemsTab] = useState(1);
 />`}
           language="jsx"
         />
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles['section-title']}>ScrollSpy</h2>
+        <Sticky>
+          <Tabs
+            spyScroll={true}
+            spyOffset={86}
+            items={[
+              { value: 'section1', label: '섹션 1' },
+              { value: 'section2', label: '섹션 2' },
+              { value: 'section3', label: '섹션 3' },
+            ]}
+          />
+        </Sticky>
+        <div id="section1" style={guideStyles.spyBox1}>
+          섹션 1 내용
+        </div>
+        <div id="section2" style={guideStyles.spyBox2}>
+          섹션 2 내용
+        </div>
+        <div id="section3" style={guideStyles.spyBox3}>
+          섹션 3 내용
+        </div>
       </section>
 
       <section className={styles.section}>

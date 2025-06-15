@@ -33,7 +33,6 @@ export interface TabItem {
   content?: ReactNode;
   disabled?: boolean;
   to?: string; // 내부 라우팅 경로
-  anchor?: string; // 스파이 스크롤용 앵커 ID (# 없이)
 }
 
 // Tab 컴포넌트 props
@@ -46,7 +45,7 @@ interface TabProps {
   disabled?: boolean;
   onClick?: (value: string | number) => void;
   to?: string;
-  anchor?: string; // 스파이 스크롤용 앵커 ID
+  spyScroll?: boolean; // 스파이 스크롤 모드인지 여부
   controls?: string; // aria-controls 속성을 위한 prop
 }
 
@@ -99,7 +98,7 @@ export const Tab = React.forwardRef<HTMLAnchorElement, TabProps>(
       disabled = undefined,
       onClick,
       to,
-      anchor,
+      spyScroll = false,
       controls,
     },
     ref
@@ -116,9 +115,9 @@ export const Tab = React.forwardRef<HTMLAnchorElement, TabProps>(
 
       if (to) {
         navigate(to);
-      } else if (anchor) {
-        // 스파이 스크롤 앵커 클릭 처리
-        const targetElement = document.getElementById(anchor);
+      } else if (spyScroll && value !== undefined) {
+        // 스파이 스크롤 모드에서 value를 앵커로 사용
+        const targetElement = document.getElementById(String(value));
         if (targetElement) {
           targetElement.scrollIntoView({
             behavior: 'smooth',
@@ -134,8 +133,8 @@ export const Tab = React.forwardRef<HTMLAnchorElement, TabProps>(
     };
 
     const panelId = controls || `panel-${tabId}`;
-    // anchor가 있으면 href를 anchor로 설정, 없으면 기본 panelId 사용
-    const href = anchor ? `#${anchor}` : `#${panelId}`;
+    // spyScroll 모드에서는 value를 href로 사용, 아니면 기본 panelId 사용
+    const href = spyScroll && value !== undefined ? `#${value}` : `#${panelId}`;
 
     return (
       <li role="presentation" className={styles['tab-li']}>
@@ -154,7 +153,6 @@ export const Tab = React.forwardRef<HTMLAnchorElement, TabProps>(
           aria-disabled={disabled}
           // tabIndex={disabled ? -1 : 0}
           data-value={value !== undefined ? value : index}
-          data-anchor={anchor} // 스파이 스크롤용 데이터 속성
           onClick={handleClick}
         >
           {label}
@@ -386,22 +384,20 @@ export const Tabs = React.forwardRef(
       const findActiveSection = (): string | number | undefined => {
         if (!processedItems && tabs.length === 0) return;
 
-        // 앵커를 가진 아이템들 수집
+        // value를 가진 아이템들 수집 (스파이 스크롤에서는 value가 앵커 ID역할)
         const anchors: Array<{ value: string | number; anchor: string }> = [];
 
         if (processedItems) {
           processedItems.forEach((item) => {
-            if (item.anchor && item.value !== undefined) {
-              anchors.push({ value: item.value, anchor: item.anchor });
+            if (item.value !== undefined) {
+              anchors.push({ value: item.value, anchor: String(item.value) });
             }
           });
         } else if (tabs.length > 0) {
           tabs.forEach((tabComponent, index) => {
             const tabProps = tabComponent.props as TabProps;
-            if (tabProps.anchor) {
-              const value = tabProps.value !== undefined ? tabProps.value : index;
-              anchors.push({ value, anchor: tabProps.anchor });
-            }
+            const value = tabProps.value !== undefined ? tabProps.value : index;
+            anchors.push({ value, anchor: String(value) });
           });
         }
 
@@ -809,7 +805,7 @@ export const Tabs = React.forwardRef(
                   disabled={item.disabled}
                   onClick={handleTabClick}
                   to={item.to}
-                  anchor={item.anchor}
+                  spyScroll={spyScroll}
                   controls={panelId}
                 />
               );
@@ -855,8 +851,7 @@ export const Tabs = React.forwardRef(
         active: isActive,
         onClick: handleTabClick,
         controls: `panel-${tabId}`,
-        // 기존 anchor 속성 유지
-        anchor: (tabComponent.props as TabProps).anchor,
+        spyScroll: spyScroll, // 스파이 스크롤 전달
       } as Partial<TabProps>);
     });
 
