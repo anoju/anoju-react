@@ -33,6 +33,7 @@ export interface TabItem {
   content?: ReactNode;
   disabled?: boolean;
   to?: string; // 내부 라우팅 경로
+  anchor?: string; // 스파이 스크롤용 앵커 ID (# 없이)
 }
 
 // Tab 컴포넌트 props
@@ -45,6 +46,7 @@ interface TabProps {
   disabled?: boolean;
   onClick?: (value: string | number) => void;
   to?: string;
+  anchor?: string; // 스파이 스크롤용 앵커 ID
   controls?: string; // aria-controls 속성을 위한 prop
 }
 
@@ -79,6 +81,10 @@ type TabsProps<T extends string | number = string | number> = {
   tabsClassName?: string;
   contentClassName?: string;
   forceUsePathname?: boolean;
+  // 스파이 스크롤 옵션
+  spyScroll?: boolean; // 스파이 스크롤 활성화 여부
+  spyOffset?: number; // 스파이 스크롤 오프셋 (px)
+  scrollContainer?: string | HTMLElement; // 스크롤 컴테이너 지정
 };
 
 // Tab 컴포넌트
@@ -93,6 +99,7 @@ export const Tab = React.forwardRef<HTMLAnchorElement, TabProps>(
       disabled = undefined,
       onClick,
       to,
+      anchor,
       controls,
     },
     ref
@@ -109,13 +116,26 @@ export const Tab = React.forwardRef<HTMLAnchorElement, TabProps>(
 
       if (to) {
         navigate(to);
-      } else if (onClick) {
+      } else if (anchor) {
+        // 스파이 스크롤 앵커 클릭 처리
+        const targetElement = document.getElementById(anchor);
+        if (targetElement) {
+          targetElement.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start',
+          });
+        }
+      }
+      
+      if (onClick) {
         // value가 없으면 인덱스 사용
         onClick(value !== undefined ? value : index !== undefined ? index : 0);
       }
     };
 
     const panelId = controls || `panel-${tabId}`;
+    // anchor가 있으면 href를 anchor로 설정, 없으면 기본 panelId 사용
+    const href = anchor ? `#${anchor}` : `#${panelId}`;
 
     return (
       <li role="presentation" className={styles['tab-li']}>
@@ -128,12 +148,13 @@ export const Tab = React.forwardRef<HTMLAnchorElement, TabProps>(
             active ? styles.active : '',
             disabled ? styles.disabled : ''
           )}
-          href={'#' + panelId}
+          href={href}
           aria-controls={panelId}
           aria-selected={active}
           aria-disabled={disabled}
           // tabIndex={disabled ? -1 : 0}
           data-value={value !== undefined ? value : index}
+          data-anchor={anchor} // 스파이 스크롤용 데이터 속성
           onClick={handleClick}
         >
           {label}
@@ -185,6 +206,10 @@ export const Tabs = React.forwardRef(
       tabsClassName = '',
       contentClassName = '',
       forceUsePathname = false,
+      // 스파이 스크롤 옵션
+      spyScroll = false,
+      spyOffset = 0,
+      scrollContainer,
     } = props;
 
     const navigate = useNavigate();
@@ -340,6 +365,138 @@ export const Tabs = React.forwardRef(
         scrollToActiveTab();
       }
     }, [scrollToActiveTab]); // dependency에 scrollToActiveTab 추가
+
+    // 스파이 스크롤 기능
+    useEffect(() => {
+      if (!spyScroll) return;
+
+      // 스크롤 컴테이너 결정
+      const getScrollContainer = (): Element | Window => {
+        if (scrollContainer) {
+          if (typeof scrollContainer === 'string') {
+            const element = document.querySelector(scrollContainer);
+            return element || window;
+          }
+          return scrollContainer;
+        }
+        return window;
+      };
+
+      // 현재 보이는 섹션 찾기
+      const findActiveSection = (): string | number | undefined => {
+        if (!processedItems && tabs.length === 0) return;
+
+        // 앵커를 가진 아이템들 수집
+        const anchors: Array<{ value: string | number; anchor: string }> = [];
+
+        if (processedItems) {
+          processedItems.forEach((item) => {
+            if (item.anchor && item.value !== undefined) {
+              anchors.push({ value: item.value, anchor: item.anchor });
+            }
+          });
+        } else if (tabs.length > 0) {
+          tabs.forEach((tabComponent, index) => {
+            const tabProps = tabComponent.props as TabProps;
+            if (tabProps.anchor) {
+              const value = tabProps.value !== undefined ? tabProps.value : index;
+              anchors.push({ value, anchor: tabProps.anchor });
+            }
+          });
+        }
+
+        if (anchors.length === 0) return;
+
+        // 각 앵커 요소의 위치 확인
+        const scrollTop = scrollContainer
+          ? scrollContainer instanceof HTMLElement
+            ? scrollContainer.scrollTop
+            : window.pageYOffset
+          : window.pageYOffset;
+
+        const viewportHeight = window.innerHeight;
+        const triggerPoint = scrollTop + viewportHeight / 2 + spyOffset; // 화면 중간 지점 기준
+
+        let activeAnchor: string | number | undefined;
+        let minDistance = Infinity;
+
+        anchors.forEach(({ value, anchor }) => {
+          const element = document.getElementById(anchor);
+          if (element) {
+            const rect = element.getBoundingClientRect();
+            const elementTop = scrollTop + rect.top;
+            const distance = Math.abs(elementTop - triggerPoint);
+
+            // 요소가 화면에 보이고, 거리가 가장 가까운 것을 선택
+            if (distance < minDistance && elementTop <= triggerPoint) {
+              minDistance = distance;
+              activeAnchor = value;
+            }
+          }
+        });
+
+        return activeAnchor;
+      };
+
+      // 스크롤 이벤트 핸들러
+      const handleScroll = () => {
+        const activeSection = findActiveSection();
+        if (activeSection !== undefined && activeSection !== activeValue) {
+          setActiveValue(activeSection);
+
+          // 외부 상태도 업데이트
+          if (setValue) {
+            if (typeof activeSection === 'string') {
+              const stringSetValue = setValue as
+                | Dispatch<SetStateAction<string>>
+                | ((value: string) => void);
+              stringSetValue(activeSection);
+            } else if (typeof activeSection === 'number') {
+              const numberSetValue = setValue as
+                | Dispatch<SetStateAction<number>>
+                | ((value: number) => void);
+              numberSetValue(activeSection);
+            }
+          }
+
+          // onChange 콜백 호출
+          if (onChange) {
+            onChange(activeSection);
+          }
+        }
+      };
+
+      // 스크롤 이벤트 등록
+      const container = getScrollContainer();
+      const eventOptions = { passive: true };
+
+      // 쓰로틀링을 위한 타이머
+      let scrollTimer: NodeJS.Timeout;
+      const throttledScroll = () => {
+        clearTimeout(scrollTimer);
+        scrollTimer = setTimeout(handleScroll, 16); // 60fps
+      };
+
+      container.addEventListener('scroll', throttledScroll, eventOptions);
+
+      // 초기 상태 확인
+      handleScroll();
+
+      // 클린업
+      return () => {
+        container.removeEventListener('scroll', throttledScroll);
+        clearTimeout(scrollTimer);
+      };
+    }, [
+      spyScroll,
+      spyOffset,
+      scrollContainer,
+      processedItems,
+      tabs,
+      activeValue,
+      setValue,
+      onChange,
+    ]);
 
     // value 또는 defaultValue 기반으로 초기화
     useEffect(() => {
@@ -652,6 +809,7 @@ export const Tabs = React.forwardRef(
                   disabled={item.disabled}
                   onClick={handleTabClick}
                   to={item.to}
+                  anchor={item.anchor}
                   controls={panelId}
                 />
               );
@@ -697,6 +855,8 @@ export const Tabs = React.forwardRef(
         active: isActive,
         onClick: handleTabClick,
         controls: `panel-${tabId}`,
+        // 기존 anchor 속성 유지
+        anchor: (tabComponent.props as TabProps).anchor,
       } as Partial<TabProps>);
     });
 
@@ -716,8 +876,6 @@ export const Tabs = React.forwardRef(
         labelledby: `tab-${tabId}`,
       } as Partial<TabPanelProps>);
     });
-
-    console.log(type, typeClass);
 
     return (
       <div className={cx(styles.tabs, typeClass, className)} ref={ref}>
