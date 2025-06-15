@@ -125,7 +125,7 @@ export const Tab = React.forwardRef<HTMLAnchorElement, TabProps>(
           });
         }
       }
-      
+
       if (onClick) {
         // value가 없으면 인덱스 사용
         onClick(value !== undefined ? value : index !== undefined ? index : 0);
@@ -382,26 +382,31 @@ export const Tabs = React.forwardRef(
 
       // 현재 보이는 섹션 찾기
       const findActiveSection = (): string | number | undefined => {
-        if (!processedItems && tabs.length === 0) return;
+        if (!processedItems && tabs.length === 0) return undefined;
 
         // value를 가진 아이템들 수집 (스파이 스크롤에서는 value가 앵커 ID역할)
-        const anchors: Array<{ value: string | number; anchor: string }> = [];
+        const validAnchors: Array<{ value: string | number; anchor: string }> =
+          [];
 
         if (processedItems) {
           processedItems.forEach((item) => {
             if (item.value !== undefined) {
-              anchors.push({ value: item.value, anchor: String(item.value) });
+              validAnchors.push({
+                value: item.value,
+                anchor: String(item.value),
+              });
             }
           });
         } else if (tabs.length > 0) {
           tabs.forEach((tabComponent, index) => {
             const tabProps = tabComponent.props as TabProps;
-            const value = tabProps.value !== undefined ? tabProps.value : index;
-            anchors.push({ value, anchor: String(value) });
+            const tabValue =
+              tabProps.value !== undefined ? tabProps.value : index;
+            validAnchors.push({ value: tabValue, anchor: String(tabValue) });
           });
         }
 
-        if (anchors.length === 0) return;
+        if (validAnchors.length === 0) return undefined;
 
         // 각 앵커 요소의 위치 확인
         const scrollTop = scrollContainer
@@ -410,28 +415,41 @@ export const Tabs = React.forwardRef(
             : window.pageYOffset
           : window.pageYOffset;
 
-        const viewportHeight = window.innerHeight;
-        const triggerPoint = scrollTop + viewportHeight / 2 + spyOffset; // 화면 중간 지점 기준
+        // 현재 보이는 영역에서 가장 적합한 섹션 찾기
+        let currentActiveValue: string | number | undefined;
+        let closestMatch:
+          | { value: string | number; distance: number }
+          | undefined;
 
-        let activeAnchor: string | number | undefined;
-        let minDistance = Infinity;
-
-        anchors.forEach(({ value, anchor }) => {
-          const element = document.getElementById(anchor);
+        // 모든 앵커들의 위치를 확인하고 가장 적합한 것을 찾기
+        // for (const { value: itemValue, anchor: anchorId } of validAnchors) {
+        validAnchors.forEach(({ value: itemValue, anchor: anchorId }) => {
+          const element = document.getElementById(anchorId);
           if (element) {
             const rect = element.getBoundingClientRect();
             const elementTop = scrollTop + rect.top;
-            const distance = Math.abs(elementTop - triggerPoint);
 
-            // 요소가 화면에 보이고, 거리가 가장 가까운 것을 선택
-            if (distance < minDistance && elementTop <= triggerPoint) {
-              minDistance = distance;
-              activeAnchor = value;
+            // 요소가 화면 상단에 도달했거나 지나갔을 때
+            const triggerPoint = scrollTop + spyOffset + 50; // 50px 여유 공간
+
+            if (elementTop <= triggerPoint) {
+              const distance = triggerPoint - elementTop;
+              if (!closestMatch || distance < closestMatch.distance) {
+                closestMatch = { value: itemValue, distance };
+              }
             }
           }
         });
 
-        return activeAnchor;
+        // 가장 적합한 매치가 있으면 사용, 없으면 첫 번째 앵커 사용
+        if (closestMatch) {
+          currentActiveValue = closestMatch.value;
+        } else if (validAnchors.length > 0) {
+          // 아무것도 트리거되지 않았으면 첫 번째 앵커 사용 (페이지 맨 위에 있을 때)
+          currentActiveValue = validAnchors[0].value;
+        }
+
+        return currentActiveValue;
       };
 
       // 스크롤 이벤트 핸들러
