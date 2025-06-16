@@ -465,6 +465,10 @@ const Button = React.forwardRef<HTMLElement, ButtonProps>((props, ref) => {
       effect,
       toScroll,
       activeClassName,
+      anchor: _anchor, // eslint-disable-line @typescript-eslint/no-unused-vars
+      scrollOffset: _scrollOffset, // eslint-disable-line @typescript-eslint/no-unused-vars
+      scrollDuration: _scrollDuration, // eslint-disable-line @typescript-eslint/no-unused-vars
+      onScrollToTarget: _onScrollToTarget, // eslint-disable-line @typescript-eslint/no-unused-vars
       ...rest
     } = anchorProps;
 
