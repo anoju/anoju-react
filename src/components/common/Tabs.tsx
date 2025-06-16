@@ -13,7 +13,7 @@ import React, {
   SetStateAction,
   ForwardedRef,
 } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import styles from '@/assets/scss/components/tabs.module.scss';
 import cx from '@/utils/cx';
 
@@ -103,22 +103,17 @@ export const Tab = React.forwardRef<HTMLAnchorElement, TabProps>(
     },
     ref
   ) => {
-    const navigate = useNavigate();
-
     // 고유 ID 생성, 한 번만 생성되도록 참조로 저장
     const tabIdRef = useRef<string>(id || generateUniqueId());
     const tabId = tabIdRef.current;
 
     const handleClick = (e: React.MouseEvent) => {
-      e.preventDefault();
-      
-      if (disabled) return;
-
-      // to 속성이 있으면 항상 navigate 실행 (중복 클릭이어도)
-      if (to) {
-        navigate(to);
-        return; // navigate 후 다른 로직은 실행하지 않음
+      // Link에서는 preventDefault를 하지 않음 (to 속성이 없는 경우에만)
+      if (!to) {
+        e.preventDefault();
       }
+
+      if (disabled) return;
 
       // spyScroll 모드 처리
       if (spyScroll && value !== undefined) {
@@ -132,7 +127,7 @@ export const Tab = React.forwardRef<HTMLAnchorElement, TabProps>(
         }
       }
 
-      // to가 없는 경우에만 onClick 실행
+      // onClick 실행 (상태 업데이트를 위해)
       if (onClick) {
         // value가 없으면 인덱스 사용
         onClick(value !== undefined ? value : index !== undefined ? index : 0);
@@ -145,25 +140,44 @@ export const Tab = React.forwardRef<HTMLAnchorElement, TabProps>(
 
     return (
       <li role="presentation" className={styles['tab-li']}>
-        <a
-          ref={ref}
-          role="tab"
-          id={`tab-${tabId}`}
-          className={cx(
-            styles.tab,
-            active ? styles.active : '',
-            disabled ? styles.disabled : ''
-          )}
-          href={href}
-          aria-controls={panelId}
-          aria-selected={active}
-          aria-disabled={disabled}
-          // tabIndex={disabled ? -1 : 0}
-          data-value={value !== undefined ? value : index}
-          onClick={handleClick}
-        >
-          {label}
-        </a>
+        {to ? (
+          <Link
+            ref={ref}
+            role="tab"
+            id={`tab-${tabId}`}
+            className={cx(
+              styles.tab,
+              active ? styles.active : '',
+              disabled ? styles.disabled : ''
+            )}
+            to={to}
+            aria-selected={active}
+            aria-disabled={disabled}
+            data-value={value !== undefined ? value : index}
+            onClick={handleClick}
+          >
+            {label}
+          </Link>
+        ) : (
+          <a
+            ref={ref}
+            role="tab"
+            id={`tab-${tabId}`}
+            className={cx(
+              styles.tab,
+              active ? styles.active : '',
+              disabled ? styles.disabled : ''
+            )}
+            href={href}
+            aria-controls={panelId}
+            aria-selected={active}
+            aria-disabled={disabled}
+            data-value={value !== undefined ? value : index}
+            onClick={handleClick}
+          >
+            {label}
+          </a>
+        )}
       </li>
     );
   }
@@ -388,10 +402,11 @@ export const Tabs = React.forwardRef(
         if (!isScrollable) return;
 
         isMouseDown = true;
-        setIsDragging(true);
+        // setIsDragging(true); // 즉시 설정하지 않음
         startX = e.pageX - tablist.offsetLeft;
         scrollLeft = tablist.scrollLeft;
-        e.preventDefault();
+        hasMoved = false; // 초기화
+        // e.preventDefault(); // 즉시 호출하지 않음
       };
 
       const handleMouseLeave = () => {
@@ -868,7 +883,7 @@ export const Tabs = React.forwardRef(
       (clickedValue: string | number) => {
         // 먼저 to 속성이 있는지 확인하고 navigate 실행
         let hasToAttribute = false;
-        
+
         // items 배열을 사용하는 경우
         if (processedItems) {
           const clickedTab = processedItems.find(
