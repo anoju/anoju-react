@@ -47,6 +47,7 @@ interface TabProps {
   to?: string;
   spyScroll?: boolean; // 스파이 스크롤 모드인지 여부
   controls?: string; // aria-controls 속성을 위한 prop
+  isDragging?: boolean; // 드래그 상태 전달용
 }
 
 // TabPanel 컴포넌트 props
@@ -100,6 +101,7 @@ export const Tab = React.forwardRef<HTMLAnchorElement, TabProps>(
       to,
       spyScroll = false,
       controls,
+      isDragging = false,
     },
     ref
   ) => {
@@ -111,6 +113,12 @@ export const Tab = React.forwardRef<HTMLAnchorElement, TabProps>(
 
     const handleClick = (e: React.MouseEvent) => {
       e.preventDefault();
+      // 드래그 중이면 클릭 방지
+      if (isDragging) {
+        e.stopPropagation();
+        return;
+      }
+
       if (disabled) return;
 
       if (to) {
@@ -374,22 +382,24 @@ export const Tabs = React.forwardRef(
       let isMouseDown = false;
       let startX = 0;
       let scrollLeft = 0;
+      let hasMoved = false; // 마우스가 이동했는지 추적
 
       const handleMouseDown = (e: MouseEvent) => {
         // 스크롤이 가능한 상태에서만 드래그 활성화
         if (!isScrollable) return;
 
         isMouseDown = true;
-        setIsDragging(true);
+        hasMoved = false;
         startX = e.pageX - tablist.offsetLeft;
         scrollLeft = tablist.scrollLeft;
-        e.preventDefault();
+        // preventDefault를 여기서 호출하지 않음 (클릭 이벤트 보존)
       };
 
       const handleMouseLeave = () => {
         if (isMouseDown) {
           isMouseDown = false;
           setIsDragging(false);
+          hasMoved = false;
         }
       };
 
@@ -397,15 +407,27 @@ export const Tabs = React.forwardRef(
         if (isMouseDown) {
           isMouseDown = false;
           setIsDragging(false);
+          hasMoved = false;
         }
       };
 
       const handleMouseMove = (e: MouseEvent) => {
         if (!isMouseDown) return;
-        e.preventDefault();
+
         const x = e.pageX - tablist.offsetLeft;
-        const walk = (x - startX) * 1.5; // 스크롤 속도 조절
-        tablist.scrollLeft = scrollLeft - walk;
+        const distance = Math.abs(x - startX);
+
+        // 5px 이상 이동한 경우에만 드래그로 처리
+        if (distance > 5 && !hasMoved) {
+          hasMoved = true;
+          setIsDragging(true);
+        }
+
+        if (hasMoved) {
+          e.preventDefault();
+          const walk = (x - startX) * 1; // 스크롤 속도 조절
+          tablist.scrollLeft = scrollLeft - walk;
+        }
       };
 
       // 스크롤 이벤트 핸들러 (스크롤 방향 상태 업데이트용)
@@ -951,6 +973,7 @@ export const Tabs = React.forwardRef(
                     to={item.to}
                     spyScroll={spyScroll}
                     controls={panelId}
+                    isDragging={isDragging}
                   />
                 );
               })}
@@ -997,6 +1020,7 @@ export const Tabs = React.forwardRef(
         onClick: handleTabClick,
         controls: `panel-${tabId}`,
         spyScroll: spyScroll, // 스파이 스크롤 전달
+        isDragging: isDragging, // 드래그 상태 전달
       } as Partial<TabProps>);
     });
 

@@ -171,8 +171,10 @@
     }
 
     // 드래그 중일 때 탭 hover 효과 제거
-    &.dragging .tab {
-      pointer-events: none;
+    &.dragging {
+      .tab {
+        pointer-events: none;
+      }
     }
   }
 
