@@ -335,6 +335,100 @@ export const Tabs = React.forwardRef(
       }
     }, []);
 
+    // 스크롤 가능 여부 확인 및 클래스 추가/제거
+    const updateScrollableClass = useCallback(() => {
+      if (!tabsHeaderRef.current) return;
+
+      const tabsHeader = tabsHeaderRef.current;
+      const containerWidth = tabsHeader.clientWidth;
+      const scrollWidth = tabsHeader.scrollWidth;
+      const isScrollable = scrollWidth > containerWidth;
+
+      // 스크롤 가능 여부에 따른 클래스 추가/제거
+      if (isScrollable) {
+        tabsHeader.classList.add(styles['scrollable']);
+      } else {
+        tabsHeader.classList.remove(styles['scrollable']);
+      }
+    }, []);
+
+    // 마우스 드래그 스크롤 기능
+    useEffect(() => {
+      if (!tabsHeaderRef.current) return;
+
+      const tabsHeader = tabsHeaderRef.current;
+      let isMouseDown = false;
+      let startX = 0;
+      let scrollLeft = 0;
+
+      const handleMouseDown = (e: MouseEvent) => {
+        isMouseDown = true;
+        startX = e.pageX - tabsHeader.offsetLeft;
+        scrollLeft = tabsHeader.scrollLeft;
+        e.preventDefault();
+      };
+
+      const handleMouseLeave = () => {
+        if (isMouseDown) {
+          isMouseDown = false;
+        }
+      };
+
+      const handleMouseUp = () => {
+        if (isMouseDown) {
+          isMouseDown = false;
+        }
+      };
+
+      const handleMouseMove = (e: MouseEvent) => {
+        if (!isMouseDown) return;
+        e.preventDefault();
+        const x = e.pageX - tabsHeader.offsetLeft;
+        const walk = (x - startX) * 1.5; // 스크롤 속도 조절
+        tabsHeader.scrollLeft = scrollLeft - walk;
+      };
+
+      // 스크롤 가능 여부 확인 후 이벤트 리스너 추가
+      const containerWidth = tabsHeader.clientWidth;
+      const scrollWidth = tabsHeader.scrollWidth;
+      const isScrollable = scrollWidth > containerWidth;
+
+      if (isScrollable) {
+        tabsHeader.addEventListener('mousedown', handleMouseDown);
+        tabsHeader.addEventListener('mouseleave', handleMouseLeave);
+        tabsHeader.addEventListener('mouseup', handleMouseUp);
+        tabsHeader.addEventListener('mousemove', handleMouseMove);
+      }
+
+      // 클린업
+      return () => {
+        tabsHeader.removeEventListener('mousedown', handleMouseDown);
+        tabsHeader.removeEventListener('mouseleave', handleMouseLeave);
+        tabsHeader.removeEventListener('mouseup', handleMouseUp);
+        tabsHeader.removeEventListener('mousemove', handleMouseMove);
+      };
+    }, []);
+
+    // ResizeObserver를 사용하여 탭 컨테이너 크기 변화 감지
+    useEffect(() => {
+      if (!tabsHeaderRef.current) return;
+
+      const tabsHeader = tabsHeaderRef.current;
+
+      const resizeObserver = new ResizeObserver(() => {
+        updateScrollableClass();
+      });
+
+      resizeObserver.observe(tabsHeader);
+
+      // 초기 실행
+      updateScrollableClass();
+
+      return () => {
+        resizeObserver.disconnect();
+      };
+    }, [updateScrollableClass]);
+
     // 활성 탭의 위치를 업데이트하는 함수
     const updateActiveIndicator = useCallback(() => {
       if (!tabsHeaderRef.current) return;
