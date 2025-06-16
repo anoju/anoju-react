@@ -57,14 +57,10 @@
 .loading-text {
   font-size: 1.6rem;
   font-weight: 500;
-  color: var(--primary-color);
   text-align: center;
   max-width: 20rem;
   line-height: 1.5;
-
-  @include s.light-mode {
-    color: #333;
-  }
+  color: #333;
 
   @include s.dark-mode {
     color: #fff;

@@ -15,7 +15,7 @@ $header-height: 6rem;
 .header {
   display: flex;
   width: 100%;
-  background-color: var(--bg-light-5);
+  background-color: var(--bg-dark-5);
   height: $header-height;
   overflow: hidden;
 
@@ -70,7 +70,7 @@ $header-height: 6rem;
 .footer {
   display: flex;
   width: 100%;
-  background-color: var(--bg-light-5);
+  background-color: var(--bg-dark-5);
   height: 4rem;
   align-items: center;
   justify-content: center;
@@ -93,9 +93,9 @@ $header-height: 6rem;
   }
 }
 
-@include s.light-mode {
+@include s.dark-mode {
   .header,
   .footer {
-    background-color: var(--bg-dark-5);
+    background-color: var(--bg-light-5);
   }
 }

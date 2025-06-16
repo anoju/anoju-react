@@ -261,18 +261,3 @@
     display: block;
   }
 }
-
-// 라이트 모드 스타일
-@include s.light-mode {
-  .tabs {
-    background-color: #fff;
-  }
-
-  .tab {
-    color: var(--bg-dark-60);
-
-    &.active {
-      color: var(--primary-color);
-    }
-  }
-}

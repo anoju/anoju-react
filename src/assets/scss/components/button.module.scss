@@ -28,11 +28,6 @@
     width 0s;
   appearance: none;
 
-  @include s.light-mode {
-    // 라이트 모드에서 primary 버튼에만 적용할 스타일
-    // box-shadow: 0 2px 4px rgb(0 0 0 / 20%);
-  }
-
   &:global(.primary) {
     background-color: var(--primary-color);
     color: #fff;
@@ -82,13 +77,17 @@
   // 스크롤 활성화 상태 스타일
   &.scroll-active {
     position: relative;
-    
+
     &::before {
       content: '';
       position: absolute;
       inset: -2px;
       border-radius: inherit;
-      background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+      background: linear-gradient(
+        45deg,
+        var(--primary-color),
+        var(--secondary-color)
+      );
       z-index: -1;
       animation: scroll-active-glow 2s ease-in-out infinite alternate;
     }
@@ -107,14 +106,14 @@
 .ripple {
   position: absolute;
   border-radius: 50%;
-  background-color: rgb(255 255 255 / 35%);
+  background-color: rgb(0 0 0 / 15%);
   transform: scale(0);
   animation: ripple-animation 0.6s linear;
   pointer-events: none;
   touch-action: none; // 모바일 터치 개선
 
-  @include s.light-mode {
-    background-color: rgb(0 0 0 / 15%);
+  @include s.dark-mode {
+    background-color: rgb(255 255 255 / 35%);
   }
 }
 

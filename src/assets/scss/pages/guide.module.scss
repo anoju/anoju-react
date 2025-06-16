@@ -62,31 +62,31 @@
   td {
     padding: 12px 8px;
     text-align: left;
-    border-bottom: 1px solid var(--bg-dark-20);
+    border-bottom: 1px solid var(--bg-dark-10);
   }
 
   th {
-    background-color: var(--bg-light-5);
+    background-color: var(--bg-dark-5);
     font-weight: 600;
     font-size: 13px;
   }
 
   tr:hover {
-    background-color: var(--bg-light-2);
+    background-color: var(--bg-dark-2);
   }
 
-  @include s.light-mode {
+  @include s.dark-mode {
     th {
-      background-color: var(--bg-dark-5);
+      background-color: var(--bg-light-5);
     }
 
     tr:hover {
-      background-color: var(--bg-dark-2);
+      background-color: var(--bg-light-2);
     }
 
     th,
     td {
-      border-bottom-color: var(--bg-dark-10);
+      border-bottom-color: var(--bg-dark-20);
     }
   }
 }

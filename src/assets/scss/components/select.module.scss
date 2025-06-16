@@ -203,10 +203,10 @@
 }
 
 .dropdown {
-  background-color: #fff;
+  background-color: var(--form-bg-color);
   border-radius: var(--form-radius);
   box-shadow: var(--form-dropdown-shadow);
-  border: 1px solid #f0f0f0;
+  border: 1px solid var(--form-border-color);
   z-index: 1050;
   overflow: hidden;
 
@@ -217,15 +217,17 @@
 
 .search-wrap {
   padding: 0.8rem;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--form-border-color);
 }
 
 .search-input {
   width: 100%;
   height: 3.2rem;
   padding: 0 0.8rem;
-  border: 1px solid #d9d9d9;
+  border: 1px solid var(--form-border-color);
+  background-color: var(--form-bg-color);
   border-radius: var(--form-radius);
+  color: var(--form-text-color);
   outline: none;
   font-size: 1.4rem;
   transition: all 0.3s;
@@ -331,44 +333,11 @@
 .empty {
   padding: 1.2rem;
   text-align: center;
-  color: #bfbfbf;
-}
-
-// 라이트 모드 스타일 (원래 스타일과 동일)
-@include s.light-mode {
-  .select {
-    background-color: #fff;
-  }
+  color: var(--form-placeholder-color);
 }
 
 // 다크 모드 스타일 (필요시 추가)
 @include s.dark-mode {
-  :root {
-    --form-border-color: #434343;
-    --form-disabled-bg: #262626;
-    --form-disabled-color: rgb(255 255 255 / 30%);
-  }
-
-  .select {
-    background-color: #1f1f1f;
-    border-color: var(--form-border-color);
-  }
-
-  .dropdown {
-    background-color: #1f1f1f;
-    border-color: #434343;
-  }
-
-  .search-wrap {
-    border-bottom-color: #303030;
-  }
-
-  .search-input {
-    background-color: #141414;
-    border-color: #434343;
-    color: #fff;
-  }
-
   .option {
     &:hover:not(.option-disabled) {
       background-color: #303030;
@@ -389,10 +358,5 @@
 
   .option-group {
     background-color: #262626;
-  }
-
-  .placeholder,
-  .empty {
-    color: #666;
   }
 }
