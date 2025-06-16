@@ -21,7 +21,7 @@
     .tabs-header {
       border-bottom: 1px solid var(--bg-dark-60);
 
-      &::after {
+      .tablist::after {
         height: 3px;
         background-color: var(--primary-color);
       }
@@ -129,6 +129,73 @@
 }
 
 .tabs-header {
+  position: relative;
+
+  // 스크롤 가능한 상태
+  &.scrollable {
+    user-select: none;
+
+    &::before,
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      width: 1rem;
+      height: 100%;
+      background-color: var(--bg-dark-60);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    &::before {
+      left: 0;
+    }
+
+    &::after {
+      right: 0;
+    }
+
+    // 왼쪽으로 스크롤 가능한 상태
+    &.scrollable-left {
+      &::before {
+        opacity: 1;
+      }
+    }
+
+    // 오른쪽으로 스크롤 가능한 상태
+    &.scrollable-right {
+      &::after {
+        opacity: 1;
+      }
+    }
+
+    // 드래그 중일 때 탭 hover 효과 제거
+    &.dragging .tab {
+      pointer-events: none;
+    }
+  }
+
+  &.center {
+    .tablist {
+      justify-content: center;
+    }
+  }
+
+  &.left {
+    .tablist {
+      justify-content: flex-start;
+    }
+  }
+
+  &.right {
+    .tablist {
+      justify-content: flex-end;
+    }
+  }
+}
+
+.tablist {
   display: flex;
   overflow-x: auto;
   position: relative;
@@ -140,16 +207,6 @@
     display: none; // Chrome, Safari, Opera
   }
 
-  // 스크롤 가능한 상태
-  &.scrollable {
-    user-select: none;
-
-    // 드래그 중일 때 탭 hover 효과 제거
-    &.dragging .tab {
-      pointer-events: none;
-    }
-  }
-
   &::after {
     content: '';
     position: absolute;
@@ -159,18 +216,6 @@
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 1;
     pointer-events: none;
-  }
-
-  &.center {
-    justify-content: center;
-  }
-
-  &.left {
-    justify-content: flex-start;
-  }
-
-  &.right {
-    justify-content: flex-end;
   }
 }
 
@@ -209,13 +254,6 @@
 
     &.active {
       color: var(--primary-color);
-    }
-  }
-
-  .tabs.outline {
-    .tabs-header,
-    .tabs-content {
-      border-color: var(--bg-dark-10);
     }
   }
 }

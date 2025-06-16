@@ -225,8 +225,10 @@ export const Tabs = React.forwardRef(
     // 스크롤 관련 상태 추가
     const [isScrollable, setIsScrollable] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
+    const [canScrollLeft, setCanScrollLeft] = useState(false);
+    const [canScrollRight, setCanScrollRight] = useState(false);
 
-    const tabsHeaderRef = useRef<HTMLUListElement>(null);
+    const tablistRef = useRef<HTMLUListElement>(null);
     const initializedRef = useRef<boolean>(false);
 
     // 이전 value 값 저장
@@ -294,27 +296,43 @@ export const Tabs = React.forwardRef(
 
     // 스크롤 가능 여부를 체크하는 함수
     const checkScrollable = useCallback(() => {
-      if (!tabsHeaderRef.current) return;
+      if (!tablistRef.current) return;
 
-      const element = tabsHeaderRef.current;
+      const element = tablistRef.current;
       const scrollable = element.scrollWidth > element.clientWidth;
       setIsScrollable(scrollable);
+
+      if (scrollable) {
+        // 스크롤 방향 체크
+        const scrollLeft = element.scrollLeft;
+        const maxScrollLeft = element.scrollWidth - element.clientWidth;
+
+        // 왼쪽으로 스크롤 가능 여부 (스크롤이 오른쪽으로 되어있을 때)
+        setCanScrollLeft(scrollLeft > 0);
+
+        // 오른쪽으로 스크롤 가능 여부 (스크롤이 왼쪽에 여유공간이 있을 때)
+        setCanScrollRight(scrollLeft < maxScrollLeft);
+      } else {
+        // 스크롤이 불가능하면 모두 false
+        setCanScrollLeft(false);
+        setCanScrollRight(false);
+      }
     }, []);
 
     // 활성 탭을 스크롤 중앙으로 이동시키는 함수
     const scrollToActiveTab = useCallback(() => {
-      if (!tabsHeaderRef.current) return;
+      if (!tablistRef.current) return;
 
-      const tabsHeader = tabsHeaderRef.current;
-      const activeTab = tabsHeader.querySelector(
+      const tablist = tablistRef.current;
+      const activeTab = tablist.querySelector(
         `.${styles.active}`
       ) as HTMLElement;
 
       if (!activeTab) return;
 
       // 스크롤 가능한 컨테이너인지 확인
-      const containerWidth = tabsHeader.clientWidth;
-      const scrollWidth = tabsHeader.scrollWidth;
+      const containerWidth = tablist.clientWidth;
+      const scrollWidth = tablist.scrollWidth;
 
       // 스크롤이 필요없는 경우 (모든 탭이 보이는 경우)
       if (scrollWidth <= containerWidth) return;
@@ -335,13 +353,13 @@ export const Tabs = React.forwardRef(
       targetScrollLeft = Math.max(0, Math.min(targetScrollLeft, maxScrollLeft));
 
       // 현재 스크롤 위치와 차이가 있을 때만 스크롤
-      const currentScrollLeft = tabsHeader.scrollLeft;
+      const currentScrollLeft = tablist.scrollLeft;
       const scrollDiff = Math.abs(targetScrollLeft - currentScrollLeft);
 
       // 5px 이하의 차이는 무시 (불필요한 스크롤 방지)
       if (scrollDiff > 5) {
         // 부드러운 스크롤 애니메이션
-        tabsHeader.scrollTo({
+        tablist.scrollTo({
           left: targetScrollLeft,
           behavior: 'smooth',
         });
@@ -350,9 +368,9 @@ export const Tabs = React.forwardRef(
 
     // 마우스 드래그 스크롤 기능
     useEffect(() => {
-      if (!tabsHeaderRef.current) return;
+      if (!tablistRef.current) return;
 
-      const tabsHeader = tabsHeaderRef.current;
+      const tablist = tablistRef.current;
       let isMouseDown = false;
       let startX = 0;
       let scrollLeft = 0;
@@ -363,8 +381,8 @@ export const Tabs = React.forwardRef(
 
         isMouseDown = true;
         setIsDragging(true);
-        startX = e.pageX - tabsHeader.offsetLeft;
-        scrollLeft = tabsHeader.scrollLeft;
+        startX = e.pageX - tablist.offsetLeft;
+        scrollLeft = tablist.scrollLeft;
         e.preventDefault();
       };
 
@@ -385,37 +403,50 @@ export const Tabs = React.forwardRef(
       const handleMouseMove = (e: MouseEvent) => {
         if (!isMouseDown) return;
         e.preventDefault();
-        const x = e.pageX - tabsHeader.offsetLeft;
+        const x = e.pageX - tablist.offsetLeft;
         const walk = (x - startX) * 1.5; // 스크롤 속도 조절
-        tabsHeader.scrollLeft = scrollLeft - walk;
+        tablist.scrollLeft = scrollLeft - walk;
+      };
+
+      // 스크롤 이벤트 핸들러 (스크롤 방향 상태 업데이트용)
+      const handleScroll = () => {
+        if (!isScrollable) return;
+
+        const scrollLeft = tablist.scrollLeft;
+        const maxScrollLeft = tablist.scrollWidth - tablist.clientWidth;
+
+        setCanScrollLeft(scrollLeft > 0);
+        setCanScrollRight(scrollLeft < maxScrollLeft);
       };
 
       // 이벤트 리스너 추가
-      tabsHeader.addEventListener('mousedown', handleMouseDown);
-      tabsHeader.addEventListener('mouseleave', handleMouseLeave);
-      tabsHeader.addEventListener('mouseup', handleMouseUp);
-      tabsHeader.addEventListener('mousemove', handleMouseMove);
+      tablist.addEventListener('mousedown', handleMouseDown);
+      tablist.addEventListener('mouseleave', handleMouseLeave);
+      tablist.addEventListener('mouseup', handleMouseUp);
+      tablist.addEventListener('mousemove', handleMouseMove);
+      tablist.addEventListener('scroll', handleScroll, { passive: true });
 
       // 클린업
       return () => {
-        tabsHeader.removeEventListener('mousedown', handleMouseDown);
-        tabsHeader.removeEventListener('mouseleave', handleMouseLeave);
-        tabsHeader.removeEventListener('mouseup', handleMouseUp);
-        tabsHeader.removeEventListener('mousemove', handleMouseMove);
+        tablist.removeEventListener('mousedown', handleMouseDown);
+        tablist.removeEventListener('mouseleave', handleMouseLeave);
+        tablist.removeEventListener('mouseup', handleMouseUp);
+        tablist.removeEventListener('mousemove', handleMouseMove);
+        tablist.removeEventListener('scroll', handleScroll);
       };
     }, [isScrollable]);
 
     // ResizeObserver를 사용하여 탭 컨테이너 크기 변화 감지
     useEffect(() => {
-      if (!tabsHeaderRef.current) return;
+      if (!tablistRef.current) return;
 
-      const tabsHeader = tabsHeaderRef.current;
+      const tablist = tablistRef.current;
 
       const resizeObserver = new ResizeObserver(() => {
         checkScrollable();
       });
 
-      resizeObserver.observe(tabsHeader);
+      resizeObserver.observe(tablist);
 
       // 초기 실행
       checkScrollable();
@@ -427,10 +458,10 @@ export const Tabs = React.forwardRef(
 
     // 활성 탭의 위치를 업데이트하는 함수
     const updateActiveIndicator = useCallback(() => {
-      if (!tabsHeaderRef.current) return;
+      if (!tablistRef.current) return;
 
-      const tabsHeader = tabsHeaderRef.current;
-      const activeTab = tabsHeader.querySelector(
+      const tablist = tablistRef.current;
+      const activeTab = tablist.querySelector(
         `.${styles.active}`
       ) as HTMLElement;
 
@@ -440,9 +471,7 @@ export const Tabs = React.forwardRef(
         const width = activeTab.offsetWidth;
 
         // 탭 컨테이너 찾기
-        const tabsContainer = tabsHeader.closest(
-          `.${styles.tabs}`
-        ) as HTMLElement;
+        const tabsContainer = tablist.closest(`.${styles.tabs}`) as HTMLElement;
         if (tabsContainer) {
           // CSS 변수 적용
           tabsContainer.style.setProperty('--active-tab-left', `${left}px`);
@@ -892,61 +921,63 @@ export const Tabs = React.forwardRef(
           className={cx(styles.tabs, typeClass, onlyClass, className)}
           ref={ref}
         >
-          <ul
-            role="tablist"
-            ref={tabsHeaderRef}
+          <div
             className={cx(
               styles['tabs-header'],
               alignClass,
               tabsClassName,
               isScrollable ? styles.scrollable : '',
-              isDragging ? styles.dragging : ''
+              isDragging ? styles.dragging : '',
+              canScrollLeft ? styles['scrollable-left'] : '',
+              canScrollRight ? styles['scrollable-right'] : ''
             )}
           >
-            {processedItems.map((item, index) => {
-              const itemId = item.id as string;
-              const itemValue = item.value as string | number;
-              const panelId = `panel-${itemId}`;
-
-              return (
-                <Tab
-                  key={`tab-${itemId}`}
-                  id={itemId}
-                  value={itemValue}
-                  index={index}
-                  label={item.label}
-                  active={activeValue === itemValue}
-                  disabled={item.disabled}
-                  onClick={handleTabClick}
-                  to={item.to}
-                  spyScroll={spyScroll}
-                  controls={panelId}
-                />
-              );
-            })}
-          </ul>
-          {hasAnyContent && (
-            <div className={cx(styles['tabs-content'], contentClassName)}>
+            <ul role="tablist" className={styles.tablist} ref={tablistRef}>
               {processedItems.map((item, index) => {
                 const itemId = item.id as string;
                 const itemValue = item.value as string | number;
-                const tabId = `tab-${itemId}`;
+                const panelId = `panel-${itemId}`;
 
-                return item.content ? (
-                  <TabPanel
-                    key={`panel-${itemId}`}
+                return (
+                  <Tab
+                    key={`tab-${itemId}`}
                     id={itemId}
                     value={itemValue}
                     index={index}
+                    label={item.label}
                     active={activeValue === itemValue}
-                    labelledby={tabId}
-                  >
-                    {item.content}
-                  </TabPanel>
-                ) : null;
+                    disabled={item.disabled}
+                    onClick={handleTabClick}
+                    to={item.to}
+                    spyScroll={spyScroll}
+                    controls={panelId}
+                  />
+                );
               })}
-            </div>
-          )}
+            </ul>
+            {hasAnyContent && (
+              <div className={cx(styles['tabs-content'], contentClassName)}>
+                {processedItems.map((item, index) => {
+                  const itemId = item.id as string;
+                  const itemValue = item.value as string | number;
+                  const tabId = `tab-${itemId}`;
+
+                  return item.content ? (
+                    <TabPanel
+                      key={`panel-${itemId}`}
+                      id={itemId}
+                      value={itemValue}
+                      index={index}
+                      active={activeValue === itemValue}
+                      labelledby={tabId}
+                    >
+                      {item.content}
+                    </TabPanel>
+                  ) : null;
+                })}
+              </div>
+            )}
+          </div>
         </div>
       );
     }
@@ -988,19 +1019,21 @@ export const Tabs = React.forwardRef(
 
     return (
       <div className={cx(styles.tabs, typeClass, className)} ref={ref}>
-        <ul
-          role="tablist"
-          ref={tabsHeaderRef}
+        <div
           className={cx(
             styles['tabs-header'],
             alignClass,
             tabsClassName,
             isScrollable ? styles.scrollable : '',
-            isDragging ? styles.dragging : ''
+            isDragging ? styles.dragging : '',
+            canScrollLeft ? styles['scrollable-left'] : '',
+            canScrollRight ? styles['scrollable-right'] : ''
           )}
         >
-          {renderedTabs}
-        </ul>
+          <ul role="tablist" className={styles.tablist} ref={tablistRef}>
+            {renderedTabs}
+          </ul>
+        </div>
         <div className={cx(styles['tabs-content'], contentClassName)}>
           {renderedPanels}
         </div>
