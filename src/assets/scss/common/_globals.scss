@@ -8,7 +8,7 @@ html {
 
 body {
   color: rgb(255 255 255 / 87%);
-  background-color: #242424;
+  background-color: var(--body-bg-color);
   font:
     normal 1.6rem/1.44 Roboto,
     'Noto Sans KR',

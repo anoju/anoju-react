@@ -47,7 +47,6 @@ interface TabProps {
   to?: string;
   spyScroll?: boolean; // 스파이 스크롤 모드인지 여부
   controls?: string; // aria-controls 속성을 위한 prop
-  isDragging?: boolean; // 드래그 상태 전달용
 }
 
 // TabPanel 컴포넌트 props
@@ -101,7 +100,6 @@ export const Tab = React.forwardRef<HTMLAnchorElement, TabProps>(
       to,
       spyScroll = false,
       controls,
-      isDragging = false,
     },
     ref
   ) => {
@@ -113,12 +111,7 @@ export const Tab = React.forwardRef<HTMLAnchorElement, TabProps>(
 
     const handleClick = (e: React.MouseEvent) => {
       e.preventDefault();
-      // 드래그 중이면 클릭 방지
-      if (isDragging) {
-        e.stopPropagation();
-        return;
-      }
-
+      
       if (disabled) return;
 
       if (to) {
@@ -389,10 +382,10 @@ export const Tabs = React.forwardRef(
         if (!isScrollable) return;
 
         isMouseDown = true;
-        hasMoved = false;
+        setIsDragging(true);
         startX = e.pageX - tablist.offsetLeft;
         scrollLeft = tablist.scrollLeft;
-        // preventDefault를 여기서 호출하지 않음 (클릭 이벤트 보존)
+        e.preventDefault();
       };
 
       const handleMouseLeave = () => {
@@ -973,7 +966,6 @@ export const Tabs = React.forwardRef(
                     to={item.to}
                     spyScroll={spyScroll}
                     controls={panelId}
-                    isDragging={isDragging}
                   />
                 );
               })}
@@ -1020,7 +1012,6 @@ export const Tabs = React.forwardRef(
         onClick: handleTabClick,
         controls: `panel-${tabId}`,
         spyScroll: spyScroll, // 스파이 스크롤 전달
-        isDragging: isDragging, // 드래그 상태 전달
       } as Partial<TabProps>);
     });
 

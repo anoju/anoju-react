@@ -16,10 +16,9 @@
 
   // tabs 종류
   &.tabs-line {
-    background-color: #242424;
-
     .tabs-header {
       border-bottom: 1px solid var(--bg-dark-60);
+      background-color: var(--body-bg-color);
 
       .tablist::after {
         height: 3px;
@@ -140,9 +139,8 @@
       content: '';
       position: absolute;
       top: 0;
-      width: 1rem;
+      width: var(--side-padding);
       height: 100%;
-      background-color: var(--bg-dark-60);
       opacity: 0;
       pointer-events: none;
       z-index: 1;
@@ -150,10 +148,20 @@
 
     &::before {
       left: 0;
+      background: linear-gradient(
+        to right,
+        var(--body-bg-color) 10%,
+        transparent 100%
+      );
     }
 
     &::after {
       right: 0;
+      background: linear-gradient(
+        to left,
+        var(--body-bg-color) 10%,
+        transparent 100%
+      );
     }
 
     // 왼쪽으로 스크롤 가능한 상태
@@ -215,7 +223,7 @@
     bottom: 0;
     left: var(--active-tab-left, 0);
     width: var(--active-tab-width, 10px);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s var(--ease-set1);
     z-index: 1;
     pointer-events: none;
   }
@@ -226,6 +234,15 @@
   align-items: center;
   justify-content: center;
   position: relative;
+  -webkit-user-drag: none; /* WebKit 브라우저에서 드래그 방지 */
+  -khtml-user-drag: none; /* KHTML 브라우저에서 드래그 방지 */
+  -moz-user-drag: none; /* Firefox에서 드래그 방지 */
+  -o-user-drag: none; /* Opera에서 드래그 방지 */
+  // user-drag: none; /* 표준 속성 */
+  // -webkit-user-select: none; /* 텍스트 선택 방지 (WebKit) */
+  // -moz-user-select: none;    /* 텍스트 선택 방지 (Firefox) */
+  // -ms-user-select: none;     /* 텍스트 선택 방지 (IE/Edge) */
+  user-select: none; /* 텍스트 선택 방지 (표준) */
 
   &.disabled {
     opacity: 0.5;

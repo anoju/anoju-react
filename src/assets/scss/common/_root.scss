@@ -9,6 +9,9 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
+  --body-bg-color: #242424;
+  --ease-set1: cubic-bezier(0.85, 0, 0, 1);
+
   // color
   --primary-color: #{s.$primary-color};
   --primary-color-rgb: 52, 152, 219; // primary-color의 RGB 값
