@@ -222,6 +222,10 @@ export const Tabs = React.forwardRef(
           : undefined
     );
 
+    // 스크롤 관련 상태 추가
+    const [isScrollable, setIsScrollable] = useState(false);
+    const [isDragging, setIsDragging] = useState(false);
+
     const tabsHeaderRef = useRef<HTMLUListElement>(null);
     const initializedRef = useRef<boolean>(false);
 
@@ -288,6 +292,15 @@ export const Tabs = React.forwardRef(
 
     const { tabs, panels, tabIds, tabValues } = tabsAndPanelsRef.current;
 
+    // 스크롤 가능 여부를 체크하는 함수
+    const checkScrollable = useCallback(() => {
+      if (!tabsHeaderRef.current) return;
+
+      const element = tabsHeaderRef.current;
+      const scrollable = element.scrollWidth > element.clientWidth;
+      setIsScrollable(scrollable);
+    }, []);
+
     // 활성 탭을 스크롤 중앙으로 이동시키는 함수
     const scrollToActiveTab = useCallback(() => {
       if (!tabsHeaderRef.current) return;
@@ -335,23 +348,6 @@ export const Tabs = React.forwardRef(
       }
     }, []);
 
-    // 스크롤 가능 여부 확인 및 클래스 추가/제거
-    const updateScrollableClass = useCallback(() => {
-      if (!tabsHeaderRef.current) return;
-
-      const tabsHeader = tabsHeaderRef.current;
-      const containerWidth = tabsHeader.clientWidth;
-      const scrollWidth = tabsHeader.scrollWidth;
-      const isScrollable = scrollWidth > containerWidth;
-
-      // 스크롤 가능 여부에 따른 클래스 추가/제거
-      if (isScrollable) {
-        tabsHeader.classList.add(styles['scrollable']);
-      } else {
-        tabsHeader.classList.remove(styles['scrollable']);
-      }
-    }, []);
-
     // 마우스 드래그 스크롤 기능
     useEffect(() => {
       if (!tabsHeaderRef.current) return;
@@ -362,7 +358,11 @@ export const Tabs = React.forwardRef(
       let scrollLeft = 0;
 
       const handleMouseDown = (e: MouseEvent) => {
+        // 스크롤이 가능한 상태에서만 드래그 활성화
+        if (!isScrollable) return;
+
         isMouseDown = true;
+        setIsDragging(true);
         startX = e.pageX - tabsHeader.offsetLeft;
         scrollLeft = tabsHeader.scrollLeft;
         e.preventDefault();
@@ -371,12 +371,14 @@ export const Tabs = React.forwardRef(
       const handleMouseLeave = () => {
         if (isMouseDown) {
           isMouseDown = false;
+          setIsDragging(false);
         }
       };
 
       const handleMouseUp = () => {
         if (isMouseDown) {
           isMouseDown = false;
+          setIsDragging(false);
         }
       };
 
@@ -388,17 +390,11 @@ export const Tabs = React.forwardRef(
         tabsHeader.scrollLeft = scrollLeft - walk;
       };
 
-      // 스크롤 가능 여부 확인 후 이벤트 리스너 추가
-      const containerWidth = tabsHeader.clientWidth;
-      const scrollWidth = tabsHeader.scrollWidth;
-      const isScrollable = scrollWidth > containerWidth;
-
-      if (isScrollable) {
-        tabsHeader.addEventListener('mousedown', handleMouseDown);
-        tabsHeader.addEventListener('mouseleave', handleMouseLeave);
-        tabsHeader.addEventListener('mouseup', handleMouseUp);
-        tabsHeader.addEventListener('mousemove', handleMouseMove);
-      }
+      // 이벤트 리스너 추가
+      tabsHeader.addEventListener('mousedown', handleMouseDown);
+      tabsHeader.addEventListener('mouseleave', handleMouseLeave);
+      tabsHeader.addEventListener('mouseup', handleMouseUp);
+      tabsHeader.addEventListener('mousemove', handleMouseMove);
 
       // 클린업
       return () => {
@@ -407,7 +403,7 @@ export const Tabs = React.forwardRef(
         tabsHeader.removeEventListener('mouseup', handleMouseUp);
         tabsHeader.removeEventListener('mousemove', handleMouseMove);
       };
-    }, []);
+    }, [isScrollable]);
 
     // ResizeObserver를 사용하여 탭 컨테이너 크기 변화 감지
     useEffect(() => {
@@ -416,18 +412,18 @@ export const Tabs = React.forwardRef(
       const tabsHeader = tabsHeaderRef.current;
 
       const resizeObserver = new ResizeObserver(() => {
-        updateScrollableClass();
+        checkScrollable();
       });
 
       resizeObserver.observe(tabsHeader);
 
       // 초기 실행
-      updateScrollableClass();
+      checkScrollable();
 
       return () => {
         resizeObserver.disconnect();
       };
-    }, [updateScrollableClass]);
+    }, [checkScrollable]);
 
     // 활성 탭의 위치를 업데이트하는 함수
     const updateActiveIndicator = useCallback(() => {
@@ -899,7 +895,13 @@ export const Tabs = React.forwardRef(
           <ul
             role="tablist"
             ref={tabsHeaderRef}
-            className={cx(styles['tabs-header'], alignClass, tabsClassName)}
+            className={cx(
+              styles['tabs-header'],
+              alignClass,
+              tabsClassName,
+              isScrollable ? styles.scrollable : '',
+              isDragging ? styles.dragging : ''
+            )}
           >
             {processedItems.map((item, index) => {
               const itemId = item.id as string;
@@ -989,7 +991,13 @@ export const Tabs = React.forwardRef(
         <ul
           role="tablist"
           ref={tabsHeaderRef}
-          className={cx(styles['tabs-header'], alignClass, tabsClassName)}
+          className={cx(
+            styles['tabs-header'],
+            alignClass,
+            tabsClassName,
+            isScrollable ? styles.scrollable : '',
+            isDragging ? styles.dragging : ''
+          )}
         >
           {renderedTabs}
         </ul>

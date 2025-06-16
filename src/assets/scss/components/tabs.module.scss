@@ -142,12 +142,7 @@
 
   // 스크롤 가능한 상태
   &.scrollable {
-    cursor: grab;
     user-select: none;
-
-    &.dragging {
-      cursor: grabbing;
-    }
 
     // 드래그 중일 때 탭 hover 효과 제거
     &.dragging .tab {
