@@ -13,7 +13,7 @@ import React, {
   SetStateAction,
   ForwardedRef,
 } from 'react';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import styles from '@/assets/scss/components/tabs.module.scss';
 import cx from '@/utils/cx';
 
@@ -103,9 +103,14 @@ export const Tab = React.forwardRef<HTMLAnchorElement, TabProps>(
     },
     ref
   ) => {
+    const location = useLocation();
+
     // 고유 ID 생성, 한 번만 생성되도록 참조로 저장
     const tabIdRef = useRef<string>(id || generateUniqueId());
     const tabId = tabIdRef.current;
+
+    // 현재 페이지 여부 확인 (to 속성이 있고 현재 경로와 일치하는 경우)
+    const isCurrentPage = to && location.pathname.startsWith(to);
 
     const handleClick = (e: React.MouseEvent) => {
       // Link에서는 preventDefault를 하지 않음 (to 속성이 없는 경우에만)
@@ -144,7 +149,6 @@ export const Tab = React.forwardRef<HTMLAnchorElement, TabProps>(
           <Link
             ref={ref}
             role="tab"
-            id={`tab-${tabId}`}
             className={cx(
               styles.tab,
               active ? styles.active : '',
@@ -153,7 +157,7 @@ export const Tab = React.forwardRef<HTMLAnchorElement, TabProps>(
             to={to}
             aria-selected={active}
             aria-disabled={disabled}
-            data-value={value !== undefined ? value : index}
+            aria-current={isCurrentPage ? 'page' : undefined}
             onClick={handleClick}
           >
             {label}
@@ -231,7 +235,6 @@ export const Tabs = React.forwardRef(
       scrollContainer,
     } = props;
 
-    const navigate = useNavigate();
     const location = useLocation();
 
     // 활성 탭 값 상태 (value 또는 index)
@@ -878,10 +881,10 @@ export const Tabs = React.forwardRef(
       };
     }, [updateActiveIndicator]);
 
-    // 탭 클릭 핸들러 - to 속성 처리 개선
+    // 탭 클릭 핸들러 - 상태 업데이트만 처리 (페이지 이동은 Link가 담당)
     const handleTabClick = useCallback(
       (clickedValue: string | number) => {
-        // 먼저 to 속성이 있는지 확인하고 navigate 실행
+        // to 속성이 있는지 확인 (페이지 이동은 Link가 처리하므로 navigate 호출하지 않음)
         let hasToAttribute = false;
 
         // items 배열을 사용하는 경우
@@ -890,7 +893,6 @@ export const Tabs = React.forwardRef(
             (item) => item.value === clickedValue
           );
           if (clickedTab?.to) {
-            navigate(clickedTab.to);
             hasToAttribute = true;
           }
         } else if (tabs.length > 0) {
@@ -899,7 +901,6 @@ export const Tabs = React.forwardRef(
             if (tabValues[i] === clickedValue) {
               const tabProps = tabs[i].props as TabProps;
               if (tabProps.to) {
-                navigate(tabProps.to);
                 hasToAttribute = true;
               }
               break;
@@ -907,7 +908,8 @@ export const Tabs = React.forwardRef(
           }
         }
 
-        // to 속성이 없고 이미 활성화된 탭 클릭시 중복 실행 방지
+        // to 속성이 없고 이미 활성화된 탭 클릭시에만 중복 실행 방지
+        // to 속성이 있는 경우에도 상태 업데이트는 필요함
         if (!hasToAttribute && clickedValue === activeValue) {
           return;
         }
@@ -938,15 +940,7 @@ export const Tabs = React.forwardRef(
           onChange(clickedValue);
         }
       },
-      [
-        activeValue,
-        setValue,
-        onChange,
-        processedItems,
-        tabs,
-        tabValues,
-        navigate,
-      ]
+      [activeValue, setValue, onChange, processedItems, tabs, tabValues]
     );
 
     // 변형 클래스 생성
