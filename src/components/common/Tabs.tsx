@@ -114,9 +114,14 @@ export const Tab = React.forwardRef<HTMLAnchorElement, TabProps>(
       
       if (disabled) return;
 
+      // to 속성이 있으면 항상 navigate 실행 (중복 클릭이어도)
       if (to) {
         navigate(to);
-      } else if (spyScroll && value !== undefined) {
+        return; // navigate 후 다른 로직은 실행하지 않음
+      }
+
+      // spyScroll 모드 처리
+      if (spyScroll && value !== undefined) {
         // 스파이 스크롤 모드에서 value를 앵커로 사용
         const targetElement = document.getElementById(String(value));
         if (targetElement) {
@@ -127,6 +132,7 @@ export const Tab = React.forwardRef<HTMLAnchorElement, TabProps>(
         }
       }
 
+      // to가 없는 경우에만 onClick 실행
       if (onClick) {
         // value가 없으면 인덱스 사용
         onClick(value !== undefined ? value : index !== undefined ? index : 0);
@@ -857,11 +863,39 @@ export const Tabs = React.forwardRef(
       };
     }, [updateActiveIndicator]);
 
-    // 탭 클릭 핸들러
+    // 탭 클릭 핸들러 - to 속성 처리 개선
     const handleTabClick = useCallback(
       (clickedValue: string | number) => {
-        // 이미 활성화된 탭 클릭시 중복 실행 방지
-        if (clickedValue === activeValue) return;
+        // 먼저 to 속성이 있는지 확인하고 navigate 실행
+        let hasToAttribute = false;
+        
+        // items 배열을 사용하는 경우
+        if (processedItems) {
+          const clickedTab = processedItems.find(
+            (item) => item.value === clickedValue
+          );
+          if (clickedTab?.to) {
+            navigate(clickedTab.to);
+            hasToAttribute = true;
+          }
+        } else if (tabs.length > 0) {
+          // children을 사용하는 경우, value로 탭 찾기
+          for (let i = 0; i < tabs.length; i++) {
+            if (tabValues[i] === clickedValue) {
+              const tabProps = tabs[i].props as TabProps;
+              if (tabProps.to) {
+                navigate(tabProps.to);
+                hasToAttribute = true;
+              }
+              break;
+            }
+          }
+        }
+
+        // to 속성이 없고 이미 활성화된 탭 클릭시 중복 실행 방지
+        if (!hasToAttribute && clickedValue === activeValue) {
+          return;
+        }
 
         // 내부 상태 업데이트
         setActiveValue(clickedValue);
@@ -887,28 +921,6 @@ export const Tabs = React.forwardRef(
         // 이전 방식 콜백 지원 (하위호환성)
         if (onChange) {
           onChange(clickedValue);
-        }
-
-        // items 배열을 사용하는 경우
-        if (processedItems) {
-          // 탭 클릭시 to 속성이 있으면 해당 경로로 이동
-          const clickedTab = processedItems.find(
-            (item) => item.value === clickedValue
-          );
-          if (clickedTab?.to) {
-            navigate(clickedTab.to);
-          }
-        } else if (tabs.length > 0) {
-          // children을 사용하는 경우, value로 탭 찾기
-          for (let i = 0; i < tabs.length; i++) {
-            if (tabValues[i] === clickedValue) {
-              const tabProps = tabs[i].props as TabProps;
-              if (tabProps.to) {
-                navigate(tabProps.to);
-              }
-              break;
-            }
-          }
         }
       },
       [
