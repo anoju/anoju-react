@@ -1,0 +1,212 @@
+// src/assets/scss/components/swiper.module.scss
+@use '@/assets/scss' as s;
+@use 'sass:color';
+@use 'sass:math';
+
+:global(.swiper-slide) {
+  width: 30rem;
+  height: 20rem;
+  background: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
+  overflow: hidden;
+
+  &:not(.swiper-slide-active) {
+    transform: scale(0.9);
+    opacity: 0.7;
+  }
+}
+
+.preset-banner {
+  height: 40rem;
+
+  :global(.swiper-slide) {
+    height: 100%;
+  }
+
+  :global(.swiper-pagination) {
+    position: absolute;
+    bottom: 2rem;
+    margin-top: 0;
+
+    :global(.swiper-pagination-bullet) {
+      width: 1.2rem;
+      height: 1.2rem;
+      background: rgb(255 255 255 / 50%);
+
+      &:global(.swiper-pagination-bullet-active) {
+        background: #fff;
+      }
+    }
+  }
+
+  :global(.swiper-button-prev),
+  :global(.swiper-button-next) {
+    background: rgb(0 0 0 / 30%);
+    color: #fff;
+
+    &:hover {
+      background: rgb(0 0 0 / 50%);
+    }
+  }
+}
+
+.preset-gallery {
+  :global(.swiper-slide) {
+    height: 25rem;
+    cursor: pointer;
+
+    &:hover {
+      transform: scale(1.05);
+    }
+  }
+}
+
+.preset-thumbs {
+  height: 8rem;
+
+  :global(.swiper-slide) {
+    height: 100%;
+    opacity: 0.4;
+    cursor: pointer;
+    border-radius: 0.5rem;
+    overflow: hidden;
+
+    &:global(.swiper-slide-thumb-active) {
+      opacity: 1;
+      border: 2px solid var(--primary-color);
+    }
+  }
+}
+
+.preset-fade {
+  :global(.swiper-slide) {
+    background: #000;
+  }
+}
+
+.preset-cube {
+  height: 30rem;
+  perspective: 120rem;
+
+  :global(.swiper-slide) {
+    background-position: center;
+    background-size: cover;
+  }
+}
+
+.preset-coverflow {
+  padding: 5rem 0;
+
+  :global(.swiper-slide) {
+    width: 30rem;
+    height: 30rem;
+    background-position: center;
+    background-size: cover;
+    border-radius: 1rem;
+  }
+}
+
+.preset-cards {
+  width: 24rem;
+  height: 30rem;
+
+  :global(.swiper-slide) {
+    border-radius: 1.8rem;
+    background-position: center;
+    background-size: cover;
+  }
+}
+
+// 반응형 스타일
+@media (width <= 768px) {
+  .swiper {
+    :global(.swiper-button-prev),
+    :global(.swiper-button-next) {
+      width: 3rem;
+      height: 3rem;
+      margin-top: calc(0px - (3rem / 2));
+
+      &::after {
+        font-size: 1.4rem;
+      }
+    }
+  }
+
+  .preset-card {
+    :global(.swiper-slide) {
+      width: 25rem;
+      height: 18rem;
+    }
+  }
+
+  .preset-banner {
+    height: 25rem;
+  }
+
+  .preset-gallery {
+    :global(.swiper-slide) {
+      height: 20rem;
+    }
+  }
+
+  .preset-coverflow {
+    :global(.swiper-slide) {
+      width: 25rem;
+      height: 25rem;
+    }
+  }
+
+  .preset-cards {
+    width: 20rem;
+    height: 25rem;
+  }
+}
+
+// 라이트 모드 스타일
+@include s.light-mode {
+  .swiper {
+    :global(.swiper-button-prev),
+    :global(.swiper-button-next) {
+      background: rgb(255 255 255 / 95%);
+      box-shadow: 0 2px 12px rgb(0 0 0 / 10%);
+    }
+  }
+}
+
+// 로딩 상태
+.swiper-loading {
+  :global(.swiper-slide) {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+  }
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+// 접근성 개선
+.swiper {
+  :global(.swiper-button-prev),
+  :global(.swiper-button-next) {
+    &:focus {
+      outline: 2px solid var(--primary-color);
+      outline-offset: 2px;
+    }
+  }
+
+  :global(.swiper-pagination-bullet) {
+    &:focus {
+      outline: 2px solid var(--primary-color);
+      outline-offset: 2px;
+    }
+  }
+}

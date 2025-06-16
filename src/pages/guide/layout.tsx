@@ -68,6 +68,10 @@ const GuideLayout: React.FC<GuideLayoutProps> = ({ children }) => {
               label: 'Device',
               to: '/guide/device',
             },
+            {
+              label: 'Swiper',
+              to: '/guide/swiper',
+            },
           ]}
         />
       </Sticky>

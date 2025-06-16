@@ -32,3 +32,5 @@ export type {
   UsePopupsReturn,
 } from './Popup';
 export { Toast, ToastContainer } from './Toast';
+export { default as Swiper, SwiperSlide } from './Swiper';
+export type { SwiperProps, SwiperRef, SwiperPreset } from './Swiper';

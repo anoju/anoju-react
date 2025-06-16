@@ -1,0 +1,233 @@
+      <section className={styles.section}>
+        <h2 className={styles['section-title']}>카드 스와이퍼</h2>
+        <p className={styles.txt}>
+          카드 형태의 스와이퍼로, 중앙 정렬되고 비활성 슬라이드는 작게 표시됩니다.
+        </p>
+        <div className={styles.showcase}>
+          <Swiper preset="card">
+            {images.map((src, index) => (
+              <SwiperSlide key={index}>
+                <img 
+                  src={src} 
+                  alt={`카드 ${index + 1}`}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        </div>
+
+        <h3 className={styles['sub-title']}>참조 소스코드</h3>
+        <CodeHighlight
+          code={`<Swiper preset="card">
+  {images.map((src, index) => (
+    <SwiperSlide key={index}>
+      <img 
+        src={src} 
+        alt={\`카드 \${index + 1}\`}
+        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+      />
+    </SwiperSlide>
+  ))}
+</Swiper>`}
+          language="jsx"
+        />
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles['section-title']}>갤러리 스와이퍼</h2>
+        <p className={styles.txt}>
+          반응형 갤러리 스와이퍼로, 화면 크기에 따라 슬라이드 개수가 변경됩니다.
+        </p>
+        <div className={styles.showcase}>
+          <Swiper preset="gallery">
+            {images.map((src, index) => (
+              <SwiperSlide key={index}>
+                <img 
+                  src={src} 
+                  alt={`갤러리 ${index + 1}`}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        </div>
+
+        <h3 className={styles['sub-title']}>참조 소스코드</h3>
+        <CodeHighlight
+          code={`<Swiper preset="gallery">
+  {images.map((src, index) => (
+    <SwiperSlide key={index}>
+      <img 
+        src={src} 
+        alt={\`갤러리 \${index + 1}\`}
+        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+      />
+    </SwiperSlide>
+  ))}
+</Swiper>`}
+          language="jsx"
+        />
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles['section-title']}>페이드 효과</h2>
+        <p className={styles.txt}>
+          슬라이드가 페이드 인/아웃 효과로 전환됩니다.
+        </p>
+        <div className={styles.showcase}>
+          <Swiper preset="fade" navigation pagination>
+            {images.slice(0, 3).map((src, index) => (
+              <SwiperSlide key={index}>
+                <img 
+                  src={src} 
+                  alt={`페이드 ${index + 1}`}
+                  style={{ width: '100%', height: '300px', objectFit: 'cover' }}
+                />
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        </div>
+
+        <h3 className={styles['sub-title']}>참조 소스코드</h3>
+        <CodeHighlight
+          code={`<Swiper preset="fade" navigation pagination>
+  {images.slice(0, 3).map((src, index) => (
+    <SwiperSlide key={index}>
+      <img 
+        src={src} 
+        alt={\`페이드 \${index + 1}\`}
+        style={{ width: '100%', height: '300px', objectFit: 'cover' }}
+      />
+    </SwiperSlide>
+  ))}
+</Swiper>`}
+          language="jsx"
+        />
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles['section-title']}>커버플로우 효과</h2>
+        <p className={styles.txt}>
+          3D 커버플로우 효과가 적용된 스와이퍼입니다.
+        </p>
+        <div className={styles.showcase}>
+          <Swiper preset="coverflow" navigation>
+            {images.map((src, index) => (
+              <SwiperSlide key={index}>
+                <div style={{
+                  backgroundImage: `url(${src})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  width: '100%',
+                  height: '100%'
+                }} />
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        </div>
+
+        <h3 className={styles['sub-title']}>참조 소스코드</h3>
+        <CodeHighlight
+          code={`<Swiper preset="coverflow" navigation>
+  {images.map((src, index) => (
+    <SwiperSlide key={index}>
+      <div style={{
+        backgroundImage: \`url(\${src})\`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        width: '100%',
+        height: '100%'
+      }} />
+    </SwiperSlide>
+  ))}
+</Swiper>`}
+          language="jsx"
+        />
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles['section-title']}>외부 제어</h2>
+        <p className={styles.txt}>
+          ref를 사용하여 외부에서 스와이퍼를 제어할 수 있습니다.
+        </p>
+        <div className={styles.showcase}>
+          <div style={{ marginBottom: '2rem' }}>
+            <p>현재 슬라이드: {currentSlide + 1}</p>
+            <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+              <Button 
+                size="sm" 
+                className="primary"
+                onClick={() => swiperRef.current?.slidePrev()}
+              >
+                이전
+              </Button>
+              <Button 
+                size="sm" 
+                className="primary"
+                onClick={() => swiperRef.current?.slideNext()}
+              >
+                다음
+              </Button>
+              <Button 
+                size="sm" 
+                className="secondary"
+                onClick={() => swiperRef.current?.slideTo(0)}
+              >
+                첫 번째로
+              </Button>
+            </div>
+          </div>
+          
+          <Swiper 
+            ref={swiperRef}
+            slidesPerView={1}
+            spaceBetween={0}
+            onSlideChange={handleSlideChange}
+          >
+            {images.slice(0, 3).map((src, index) => (
+              <SwiperSlide key={index}>
+                <img 
+                  src={src} 
+                  alt={`제어 ${index + 1}`}
+                  style={{ width: '100%', height: '250px', objectFit: 'cover' }}
+                />
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        </div>
+
+        <h3 className={styles['sub-title']}>참조 소스코드</h3>
+        <CodeHighlight
+          code={`const [currentSlide, setCurrentSlide] = useState(0);
+const swiperRef = useRef<SwiperRef>(null);
+
+const handleSlideChange = (swiper: any) => {
+  setCurrentSlide(swiper.activeIndex);
+};
+
+// 버튼 클릭 핸들러
+<Button onClick={() => swiperRef.current?.slidePrev()}>이전</Button>
+<Button onClick={() => swiperRef.current?.slideNext()}>다음</Button>
+<Button onClick={() => swiperRef.current?.slideTo(0)}>첫 번째로</Button>
+
+// Swiper 컴포넌트
+<Swiper 
+  ref={swiperRef}
+  slidesPerView={1}
+  spaceBetween={0}
+  onSlideChange={handleSlideChange}
+>
+  {images.slice(0, 3).map((src, index) => (
+    <SwiperSlide key={index}>
+      <img 
+        src={src} 
+        alt={\`제어 \${index + 1}\`}
+        style={{ width: '100%', height: '250px', objectFit: 'cover' }}
+      />
+    </SwiperSlide>
+  ))}
+</Swiper>`}
+          language="jsx"
+        />
+      </section>

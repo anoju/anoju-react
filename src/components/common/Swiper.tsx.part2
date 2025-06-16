@@ -1,0 +1,157 @@
+// Preset 설정 함수
+const getPresetOptions = (preset: SwiperPreset): Partial<SwiperOptions> => {
+  const presets: Record<SwiperPreset, Partial<SwiperOptions>> = {
+    basic: {
+      slidesPerView: 1,
+      spaceBetween: 0,
+      loop: false,
+    },
+    autoplay: {
+      slidesPerView: 1,
+      spaceBetween: 0,
+      loop: true,
+      autoplay: {
+        delay: 3000,
+        disableOnInteraction: false,
+      },
+    },
+    card: {
+      slidesPerView: 'auto',
+      spaceBetween: 20,
+      centeredSlides: true,
+      loop: true,
+    },
+    banner: {
+      slidesPerView: 1,
+      spaceBetween: 0,
+      loop: true,
+      autoplay: {
+        delay: 5000,
+        disableOnInteraction: false,
+      },
+      pagination: {
+        clickable: true,
+      },
+    },
+    gallery: {
+      slidesPerView: 3,
+      spaceBetween: 10,
+      navigation: true,
+      pagination: {
+        clickable: true,
+      },
+      breakpoints: {
+        640: {
+          slidesPerView: 1,
+          spaceBetween: 0,
+        },
+        768: {
+          slidesPerView: 2,
+          spaceBetween: 10,
+        },
+        1024: {
+          slidesPerView: 3,
+          spaceBetween: 10,
+        },
+      },
+    },
+    thumbs: {
+      spaceBetween: 10,
+      slidesPerView: 4,
+      freeMode: true,
+      watchSlidesProgress: true,
+    },
+    fade: {
+      slidesPerView: 1,
+      spaceBetween: 0,
+      effect: 'fade',
+      fadeEffect: {
+        crossFade: true,
+      },
+    },
+    cube: {
+      slidesPerView: 1,
+      spaceBetween: 0,
+      effect: 'cube',
+      cubeEffect: {
+        shadow: true,
+        slideShadows: true,
+        shadowOffset: 20,
+        shadowScale: 0.94,
+      },
+    },
+    coverflow: {
+      slidesPerView: 3,
+      spaceBetween: 0,
+      centeredSlides: true,
+      effect: 'coverflow',
+      coverflowEffect: {
+        rotate: 50,
+        stretch: 0,
+        depth: 100,
+        modifier: 1,
+        slideShadows: true,
+      },
+    },
+    cards: {
+      slidesPerView: 1,
+      spaceBetween: 0,
+      effect: 'cards',
+      cardsEffect: {
+        slideShadows: true,
+        transformEl: null,
+      },
+    },
+  };
+
+  return presets[preset] || presets.basic;
+};
+
+// 필요한 모듈들을 자동으로 결정
+const getRequiredModules = (
+  options: Partial<SwiperOptions>,
+  navigation?: boolean | NavigationOptions,
+  pagination?: boolean | PaginationOptions,
+  autoplay?: boolean | AutoplayOptions,
+  effect?: string
+): unknown[] => {
+  const modules: unknown[] = [];
+
+  if (navigation || options.navigation) {
+    modules.push(Navigation);
+  }
+
+  if (pagination || options.pagination) {
+    modules.push(Pagination);
+  }
+
+  if (autoplay || options.autoplay) {
+    modules.push(Autoplay);
+  }
+
+  if (options.thumbs) {
+    modules.push(Thumbs);
+  }
+
+  if (options.freeMode) {
+    modules.push(FreeMode);
+  }
+
+  // 이펙트별 모듈 추가
+  switch (effect || options.effect) {
+    case 'fade':
+      modules.push(EffectFade);
+      break;
+    case 'cube':
+      modules.push(EffectCube);
+      break;
+    case 'coverflow':
+      modules.push(EffectCoverflow);
+      break;
+    case 'cards':
+      modules.push(EffectCards);
+      break;
+  }
+
+  return modules;
+};
