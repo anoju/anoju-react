@@ -5,6 +5,7 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import styles from '@/assets/scss/components/button.module.scss';
+import { getStickyHeightForScroll } from '@/utils/stickyUtils';
 
 // 객체에서 특정 키들을 제외한 새로운 객체를 반환하는 유틸리티 함수
 function omitProps<T, K extends keyof T>(obj: T, keysToOmit: K[]): Omit<T, K> {
@@ -54,6 +55,29 @@ interface ScrollToOptions {
   duration?: number;
 }
 
+// 스크롤 유틸리티 함수 - sticky 높이를 고려한 스크롤 (Tabs와 동일한 로직)
+function scrollToElementWithStickyOffset(
+  element: HTMLElement,
+  spyOffset: number = 0
+): void {
+  const elementRect = element.getBoundingClientRect();
+  const elementTop = window.pageYOffset + elementRect.top;
+
+  // 목표 스크롤 위치 계산
+  const targetScrollY = elementTop - spyOffset;
+
+  // 스크롤 방향에 따른 sticky 높이 가져오기
+  const stickyHeight = getStickyHeightForScroll(targetScrollY);
+
+  // 최종 스크롤 위치 (sticky 높이 + 추가 오프셋 고려)
+  const finalScrollY = targetScrollY - stickyHeight;
+
+  window.scrollTo({
+    top: Math.max(0, finalScrollY), // 음수 방지
+    behavior: 'smooth',
+  });
+}
+
 // 공통 속성 타입 정의
 type CommonButtonProps = {
   size?: ButtonSize;
@@ -91,22 +115,29 @@ const scrollUtils = {
     return document.querySelector(target);
   },
 
-  // 요소가 뷰포트에 있는지 확인 (활성화 상태 판단용)
+  // 요소가 뷰포트에 있는지 확인 (활성화 상태 판단용) - sticky 높이 고려
   isElementInViewport: (element: HTMLElement, offset: number = 0): boolean => {
     const rect = element.getBoundingClientRect();
     const windowHeight =
       window.innerHeight || document.documentElement.clientHeight;
 
+    // sticky 높이 계산
+    const currentScrollY = window.pageYOffset || document.documentElement.scrollTop;
+    const stickyHeight = getStickyHeightForScroll(currentScrollY);
+    
+    // sticky 높이를 고려한 최종 오프셋
+    const finalOffset = offset + stickyHeight;
+
     // 더 관대한 조건으로 변경: 요소의 일부라도 뷰포트에 보이면 활성화
     // 요소의 하단이 뷰포트 상단 + offset보다 아래에 있고
     // 요소의 상단이 뷰포트 하단 - offset보다 위에 있으면 뷰포트에 있는 것으로 판단
-    return rect.bottom >= offset && rect.top <= windowHeight - offset;
+    return rect.bottom >= finalOffset && rect.top <= windowHeight - finalOffset;
   },
 
-  // 부드러운 스크롤 함수
+  // 부드러운 스크롤 함수 - sticky 높이를 고려한 버전으로 교체
   scrollToElement: (options: ScrollToOptions): Promise<void> => {
     return new Promise((resolve) => {
-      const { target, offset = 0, duration = 500 } = options;
+      const { target, offset = 0 } = options;
       const targetElement = scrollUtils.getElementByScrollTarget(target);
 
       if (!targetElement) {
@@ -115,34 +146,13 @@ const scrollUtils = {
         return;
       }
 
-      const startPosition = window.pageYOffset;
-      const targetPosition =
-        targetElement.getBoundingClientRect().top + window.pageYOffset - offset;
-      const distance = targetPosition - startPosition;
-      const startTime = performance.now();
-
-      // easeInOutQuad 이징 함수
-      const easeInOutQuad = (t: number): number => {
-        return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-      };
-
-      const scrollAnimation = (currentTime: number) => {
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-
-        const easedProgress = easeInOutQuad(progress);
-        const currentPosition = startPosition + distance * easedProgress;
-
-        window.scrollTo(0, currentPosition);
-
-        if (progress < 1) {
-          requestAnimationFrame(scrollAnimation);
-        } else {
-          resolve();
-        }
-      };
-
-      requestAnimationFrame(scrollAnimation);
+      // Tabs와 동일한 sticky 스크롤 함수 사용
+      scrollToElementWithStickyOffset(targetElement, offset);
+      
+      // 스크롤 완료를 기다리기 위한 타이머 (smooth 스크롤은 Promise를 반환하지 않음)
+      setTimeout(() => {
+        resolve();
+      }, options.duration || 500);
     });
   },
 
@@ -182,18 +192,22 @@ const Button = React.forwardRef<HTMLElement, ButtonProps>((props, ref) => {
       );
 
       // 디버깅용 로그 (개발 중에만 사용)
-      // if (process.env.NODE_ENV === 'development') {
-      //   const rect = element.getBoundingClientRect();
-      //   console.log('Scroll check:', {
-      //     target: props.toScroll,
-      //     isActive,
-      //     currentActive: isScrollActive,
-      //     elementTop: rect.top,
-      //     elementBottom: rect.bottom,
-      //     windowHeight: window.innerHeight,
-      //     offset: props.scrollOffset || 0,
-      //   });
-      // }
+      if (process.env.NODE_ENV === 'development') {
+        const rect = element.getBoundingClientRect();
+        const currentScrollY = window.pageYOffset || document.documentElement.scrollTop;
+        const stickyHeight = getStickyHeightForScroll(currentScrollY);
+        console.log('Button Scroll check:', {
+          target: props.toScroll,
+          isActive,
+          currentActive: isScrollActive,
+          elementTop: rect.top,
+          elementBottom: rect.bottom,
+          windowHeight: window.innerHeight,
+          userOffset: props.scrollOffset || 0,
+          stickyHeight,
+          finalOffset: (props.scrollOffset || 0) + stickyHeight,
+        });
+      }
 
       if (isActive !== isScrollActive) {
         setIsScrollActive(isActive);
@@ -372,7 +386,7 @@ const Button = React.forwardRef<HTMLElement, ButtonProps>((props, ref) => {
     }
   };
 
-  // 스크롤 함수
+  // 스크롤 함수 (sticky 높이 고려)
   const handleScrollTo = async (target: string) => {
     try {
       await scrollUtils.scrollToElement({
