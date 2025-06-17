@@ -16,6 +16,7 @@ import React, {
 import { useLocation, Link } from 'react-router-dom';
 import styles from '@/assets/scss/components/tabs.module.scss';
 import cx from '@/utils/cx';
+import { getStickyHeightForScroll } from '@/utils/stickyUtils';
 
 // 고유 ID 생성을 위한 유틸리티 함수
 let uniqueIdCounter = 0;
@@ -24,6 +25,29 @@ const generateUniqueId = (): string => {
   const id = `tab_${uniqueIdCounter++}_${Math.random().toString(36).substring(2, 9)}`;
   return id;
 };
+
+// 스크롤 유틸리티 함수 - sticky 높이를 고려한 스크롤
+function scrollToElementWithStickyOffset(
+  element: HTMLElement,
+  spyOffset: number = 0
+): void {
+  const elementRect = element.getBoundingClientRect();
+  const elementTop = window.pageYOffset + elementRect.top;
+
+  // 목표 스크롤 위치 계산
+  const targetScrollY = elementTop - spyOffset;
+
+  // 스크롤 방향에 따른 sticky 높이 가져오기
+  const stickyHeight = getStickyHeightForScroll(targetScrollY);
+
+  // 최종 스크롤 위치 (sticky 높이 + 추가 오프셋 고려)
+  const finalScrollY = targetScrollY - stickyHeight;
+
+  window.scrollTo({
+    top: Math.max(0, finalScrollY), // 음수 방지
+    behavior: 'smooth',
+  });
+}
 
 // Tab 아이템 인터페이스
 export interface TabItem {
@@ -46,6 +70,7 @@ interface TabProps {
   onClick?: (value: string | number) => void;
   to?: string;
   spyScroll?: boolean; // 스파이 스크롤 모드인지 여부
+  spyOffset?: number; // 스파이 스크롤 오프셋
   controls?: string; // aria-controls 속성을 위한 prop
 }
 
@@ -99,6 +124,7 @@ export const Tab = React.forwardRef<HTMLAnchorElement, TabProps>(
       onClick,
       to,
       spyScroll = false,
+      spyOffset = 0,
       controls,
     },
     ref
@@ -125,10 +151,8 @@ export const Tab = React.forwardRef<HTMLAnchorElement, TabProps>(
         // 스파이 스크롤 모드에서 value를 앵커로 사용
         const targetElement = document.getElementById(String(value));
         if (targetElement) {
-          targetElement.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start',
-          });
+          // sticky 높이를 고려한 스크롤 함수 사용
+          scrollToElementWithStickyOffset(targetElement, spyOffset);
         }
       }
 
@@ -210,7 +234,7 @@ export const TabPanel = React.forwardRef<HTMLDivElement, TabPanelProps>(
   }
 );
 
-// Tabs 컴포넌트
+// Tabs 컴포넌트 시작
 export const Tabs = React.forwardRef(
   <T extends string | number = string | number>(
     props: TabsProps<T>,
@@ -526,7 +550,7 @@ export const Tabs = React.forwardRef(
     useEffect(() => {
       if (!spyScroll) return;
 
-      // 스크롤 컴테이너 결정
+      // 스크롤 컨테이너 결정
       const getScrollContainer = (): Element | Window => {
         if (scrollContainer) {
           if (typeof scrollContainer === 'string') {
@@ -986,6 +1010,7 @@ export const Tabs = React.forwardRef(
                     onClick={handleTabClick}
                     to={item.to}
                     spyScroll={spyScroll}
+                    spyOffset={spyOffset} // spyOffset 전달
                     controls={panelId}
                   />
                 );
@@ -1033,6 +1058,7 @@ export const Tabs = React.forwardRef(
         onClick: handleTabClick,
         controls: `panel-${tabId}`,
         spyScroll: spyScroll, // 스파이 스크롤 전달
+        spyOffset: spyOffset, // spyOffset 전달
       } as Partial<TabProps>);
     });
 

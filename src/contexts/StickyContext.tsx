@@ -23,6 +23,18 @@ function throttle<T extends unknown[]>(
   };
 }
 
+// CSS 변수 업데이트 함수들
+function updateStickyHeightCSSVariables(
+  currentHeight: number,
+  minHeight: number,
+  maxHeight: number
+): void {
+  const htmlElement = document.documentElement;
+  htmlElement.style.setProperty('--sticky-height', `${currentHeight}px`);
+  htmlElement.style.setProperty('--sticky-min-height', `${minHeight}px`);
+  htmlElement.style.setProperty('--sticky-max-height', `${maxHeight}px`);
+}
+
 // 컨텍스트 생성
 const StickyContext = createContext<StickyContextType | undefined>(undefined);
 
@@ -34,6 +46,11 @@ const StickyProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   );
   const lastScrollYRef = useRef<number>(0);
   const processingRef = useRef<boolean>(false); // 처리 중 플래그 추가
+  const lastStickyHeightsRef = useRef<{
+    current: number;
+    min: number;
+    max: number;
+  }>({ current: 0, min: 0, max: 0 }); // 마지막 sticky 높이들 저장
 
   // 모든 인스턴스의 상태를 순차적으로 처리
   const processAllInstances = useCallback(() => {
@@ -114,6 +131,9 @@ const StickyProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
       .sort((a, b) => a.originalTop - b.originalTop);
 
     let currentTop = 0;
+    let currentStickyHeight = 0; // 현재 화면에 보이는 sticky 요소들의 총 높이
+    let minStickyHeight = 0; // hideScrolling이 false인 요소들의 높이 총합
+    let maxStickyHeight = 0; // 모든 sticky 요소들의 높이 총합
     const baseZIndex = 200; // 기본 z-index 시작값
 
     fixedInstances.forEach((instance, index) => {
@@ -139,11 +159,39 @@ const StickyProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
         });
       }
 
+      // 높이 계산
+      maxStickyHeight += instance.height; // 모든 고정된 요소의 높이 합산
+
+      if (!instance.hideScrolling) {
+        // hideScrolling이 false인 요소들만 min 높이에 포함
+        minStickyHeight += instance.height;
+      }
+
       // 숨겨지지 않은 요소만 다음 위치에 영향을 줌
       if (!instance.isHidden) {
         currentTop += instance.height;
+        currentStickyHeight += instance.height; // 현재 보이는 높이에 추가
       }
     });
+
+    // CSS 변수 업데이트 - 높이가 변경된 경우에만
+    const lastHeights = lastStickyHeightsRef.current;
+    if (
+      currentStickyHeight !== lastHeights.current ||
+      minStickyHeight !== lastHeights.min ||
+      maxStickyHeight !== lastHeights.max
+    ) {
+      updateStickyHeightCSSVariables(
+        currentStickyHeight,
+        minStickyHeight,
+        maxStickyHeight
+      );
+      lastStickyHeightsRef.current = {
+        current: currentStickyHeight,
+        min: minStickyHeight,
+        max: maxStickyHeight,
+      };
+    }
 
     // 스타일 업데이트 및 onChange 콜백 호출
     requestAnimationFrame(() => {
@@ -201,9 +249,14 @@ const StickyProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     });
     window.addEventListener('resize', throttledResizeHandler);
 
+    // 컴포넌트 마운트 시 초기 CSS 변수 설정
+    updateStickyHeightCSSVariables(0, 0, 0);
+
     return () => {
       window.removeEventListener('scroll', throttledScrollHandler);
       window.removeEventListener('resize', throttledResizeHandler);
+      // 컴포넌트 언마운트 시 CSS 변수 초기화
+      updateStickyHeightCSSVariables(0, 0, 0);
     };
   }, [throttledScrollHandler, throttledResizeHandler]);
 

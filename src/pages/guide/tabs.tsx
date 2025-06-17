@@ -582,7 +582,6 @@ const [itemsTab, setItemsTab] = useState(1);
         <Sticky>
           <Tabs
             spyScroll={true}
-            spyOffset={86}
             items={[
               { value: 'section1', label: '섹션 1' },
               { value: 'section2', label: '섹션 2' },
