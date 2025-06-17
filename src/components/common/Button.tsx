@@ -7,10 +7,7 @@ import { Link } from 'react-router-dom';
 import styles from '@/assets/scss/components/button.module.scss';
 
 // 객체에서 특정 키들을 제외한 새로운 객체를 반환하는 유틸리티 함수
-function omitProps<T, K extends keyof T>(
-  obj: T,
-  keysToOmit: K[]
-): Omit<T, K> {
+function omitProps<T, K extends keyof T>(obj: T, keysToOmit: K[]): Omit<T, K> {
   const result = { ...obj } as Record<string, unknown>;
   keysToOmit.forEach((key) => {
     delete result[key as string];
@@ -306,7 +303,14 @@ const Button = React.forwardRef<HTMLElement, ButtonProps>((props, ref) => {
       return;
     }
 
-    const target = event.currentTarget;
+    const target = event.currentTarget || event.target;
+
+    // currentTarget이 null인 경우 에러 방지
+    if (!target) {
+      console.warn('Button createRipple: currentTarget is null');
+      return;
+    }
+
     const rect = target.getBoundingClientRect();
 
     // 모바일 터치 이벤트인지 확인
@@ -402,18 +406,18 @@ const Button = React.forwardRef<HTMLElement, ButtonProps>((props, ref) => {
     // Link에서 지원하지 않는 속성들 제거
     const rest = omitProps(props, [
       'to',
-      'children', 
+      'children',
       'className',
       'size',
-      'not', 
+      'not',
       'effect',
       'onClick',
       'activeClassName',
       'target',
       'toScroll',
       'scrollOffset',
-      'scrollDuration', 
-      'onScrollToTarget'
+      'scrollDuration',
+      'onScrollToTarget',
     ]);
 
     // 클릭 이벤트 핸들러
@@ -499,19 +503,19 @@ const Button = React.forwardRef<HTMLElement, ButtonProps>((props, ref) => {
       'anchor',
       'scrollOffset',
       'scrollDuration',
-      'onScrollToTarget'
+      'onScrollToTarget',
     ]);
 
     // toScroll이 있으면 href 설정, 없으면 기본값 '#'
     const finalHref = toScroll || href || '#';
 
-    const handleClick = async (
+    const handleClick = (
       e: React.MouseEvent<HTMLAnchorElement, MouseEvent>
     ) => {
       // toScroll이 있으면 스크롤 우선 실행
       if (toScroll) {
         e.preventDefault();
-        await handleScrollTo(toScroll);
+        handleScrollTo(toScroll);
       } else if (finalHref === '#') {
         e.preventDefault();
       }
