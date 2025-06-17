@@ -6,6 +6,18 @@ import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import styles from '@/assets/scss/components/button.module.scss';
 
+// 객체에서 특정 키들을 제외한 새로운 객체를 반환하는 유틸리티 함수
+function omitProps<T, K extends keyof T>(
+  obj: T,
+  keysToOmit: K[]
+): Omit<T, K> {
+  const result = { ...obj } as Record<string, unknown>;
+  keysToOmit.forEach((key) => {
+    delete result[key as string];
+  });
+  return result as Omit<T, K>;
+}
+
 // 터치 이벤트 인터페이스
 interface TouchList {
   length: number;
@@ -385,13 +397,24 @@ const Button = React.forwardRef<HTMLElement, ButtonProps>((props, ref) => {
       effect,
       onClick,
       activeClassName,
-      target: _target, // eslint-disable-line @typescript-eslint/no-unused-vars
-      toScroll: _toScroll, // eslint-disable-line @typescript-eslint/no-unused-vars
-      scrollOffset: _scrollOffset, // eslint-disable-line @typescript-eslint/no-unused-vars
-      scrollDuration: _scrollDuration, // eslint-disable-line @typescript-eslint/no-unused-vars
-      onScrollToTarget: _onScrollToTarget, // eslint-disable-line @typescript-eslint/no-unused-vars
-      ...rest
     } = props;
+
+    // Link에서 지원하지 않는 속성들 제거
+    const rest = omitProps(props, [
+      'to',
+      'children', 
+      'className',
+      'size',
+      'not', 
+      'effect',
+      'onClick',
+      'activeClassName',
+      'target',
+      'toScroll',
+      'scrollOffset',
+      'scrollDuration', 
+      'onScrollToTarget'
+    ]);
 
     // 클릭 이벤트 핸들러
     const handleLinkClick = async (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -443,7 +466,6 @@ const Button = React.forwardRef<HTMLElement, ButtonProps>((props, ref) => {
 
   // toScroll이 있으면 anchor 모드로 처리 (a 태그)
   if (props.toScroll || 'anchor' in props || 'href' in props) {
-    // anchor 모드로 처리하는 props
     const anchorProps = props as React.AnchorHTMLAttributes<HTMLAnchorElement> &
       CommonButtonProps & {
         anchor?: boolean;
@@ -460,12 +482,25 @@ const Button = React.forwardRef<HTMLElement, ButtonProps>((props, ref) => {
       effect,
       toScroll,
       activeClassName,
-      anchor: _anchor, // eslint-disable-line @typescript-eslint/no-unused-vars
-      scrollOffset: _scrollOffset, // eslint-disable-line @typescript-eslint/no-unused-vars
-      scrollDuration: _scrollDuration, // eslint-disable-line @typescript-eslint/no-unused-vars
-      onScrollToTarget: _onScrollToTarget, // eslint-disable-line @typescript-eslint/no-unused-vars
-      ...rest
     } = anchorProps;
+
+    // DOM에 전달하지 않을 커스텀 속성들 제거
+    const rest = omitProps(anchorProps, [
+      'href',
+      'target',
+      'onClick',
+      'children',
+      'className',
+      'size',
+      'not',
+      'effect',
+      'toScroll',
+      'activeClassName',
+      'anchor',
+      'scrollOffset',
+      'scrollDuration',
+      'onScrollToTarget'
+    ]);
 
     // toScroll이 있으면 href 설정, 없으면 기본값 '#'
     const finalHref = toScroll || href || '#';
