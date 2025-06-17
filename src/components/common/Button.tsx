@@ -384,22 +384,17 @@ const Button = React.forwardRef<HTMLElement, ButtonProps>((props, ref) => {
       not,
       effect,
       onClick,
-      toScroll,
       activeClassName,
+      target: _target, // eslint-disable-line @typescript-eslint/no-unused-vars
+      toScroll: _toScroll, // eslint-disable-line @typescript-eslint/no-unused-vars
+      scrollOffset: _scrollOffset, // eslint-disable-line @typescript-eslint/no-unused-vars
+      scrollDuration: _scrollDuration, // eslint-disable-line @typescript-eslint/no-unused-vars
+      onScrollToTarget: _onScrollToTarget, // eslint-disable-line @typescript-eslint/no-unused-vars
       ...rest
     } = props;
 
-    // Link는 target 속성을 지원하지 않으므로 제거된 rest 사용
-    const linkProps = { ...rest };
-
-    // 클릭 이벤트 핸들러 결합
+    // 클릭 이벤트 핸들러
     const handleLinkClick = async (e: React.MouseEvent<HTMLAnchorElement>) => {
-      // toScroll이 있으면 스크롤 우선 실행
-      if (toScroll) {
-        e.preventDefault();
-        await handleScrollTo(toScroll);
-      }
-
       createRipple(e);
 
       // scale 효과 적용
@@ -424,7 +419,7 @@ const Button = React.forwardRef<HTMLElement, ButtonProps>((props, ref) => {
           activeClassName
         )}
         onClick={handleLinkClick}
-        {...linkProps}
+        {...rest}
         ref={ref as React.Ref<HTMLAnchorElement>}
       >
         {children}
