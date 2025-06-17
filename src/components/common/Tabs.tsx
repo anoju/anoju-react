@@ -15,6 +15,7 @@ import React, {
 } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import styles from '@/assets/scss/components/tabs.module.scss';
+import stickyStyles from '@/assets/scss/components/sticky.module.scss';
 import cx from '@/utils/cx';
 import { getStickyHeightForScroll } from '@/utils/stickyUtils';
 
@@ -29,7 +30,8 @@ const generateUniqueId = (): string => {
 // 스크롤 유틸리티 함수 - sticky 높이를 고려한 스크롤
 function scrollToElementWithStickyOffset(
   element: HTMLElement,
-  spyOffset: number = 0
+  spyOffset: number = 0,
+  eventTarget: HTMLElement
 ): void {
   const elementRect = element.getBoundingClientRect();
   const elementTop = window.pageYOffset + elementRect.top;
@@ -41,7 +43,17 @@ function scrollToElementWithStickyOffset(
   const stickyHeight = getStickyHeightForScroll(targetScrollY);
 
   // 최종 스크롤 위치 (sticky 높이 + 추가 오프셋 고려)
-  const finalScrollY = targetScrollY - stickyHeight;
+  let finalScrollY = targetScrollY - stickyHeight;
+
+  const stickyElement = eventTarget.closest(
+    `.${stickyStyles['sticky-wrap']}`
+  ) as HTMLElement | null;
+  if (
+    stickyElement &&
+    !stickyElement.classList.contains(stickyStyles['fixed'])
+  ) {
+    finalScrollY = finalScrollY - stickyElement.offsetHeight;
+  }
 
   window.scrollTo({
     top: Math.max(0, finalScrollY), // 음수 방지
@@ -152,7 +164,12 @@ export const Tab = React.forwardRef<HTMLAnchorElement, TabProps>(
         const targetElement = document.getElementById(String(value));
         if (targetElement) {
           // sticky 높이를 고려한 스크롤 함수 사용
-          scrollToElementWithStickyOffset(targetElement, spyOffset);
+          const eventTarget = (e.currentTarget || e.target) as HTMLElement;
+          scrollToElementWithStickyOffset(
+            targetElement,
+            spyOffset,
+            eventTarget
+          );
         }
       }
 
@@ -612,7 +629,11 @@ export const Tabs = React.forwardRef(
             const elementTop = scrollTop + rect.top;
 
             // 요소가 화면 상단에 도달했거나 지나갔을 때
-            const triggerPoint = scrollTop + spyOffset + 50; // 50px 여유 공간
+            const htmlElement = document.documentElement;
+            const stickyHeight =
+              parseInt(htmlElement.style.getPropertyValue('--sticky-height')) ||
+              0;
+            const triggerPoint = scrollTop + spyOffset + stickyHeight; // 50px 여유 공간
 
             if (elementTop <= triggerPoint) {
               const distance = triggerPoint - elementTop;
@@ -1016,29 +1037,29 @@ export const Tabs = React.forwardRef(
                 );
               })}
             </ul>
-            {hasAnyContent && (
-              <div className={cx(styles['tabs-content'], contentClassName)}>
-                {processedItems.map((item, index) => {
-                  const itemId = item.id as string;
-                  const itemValue = item.value as string | number;
-                  const tabId = `tab-${itemId}`;
-
-                  return item.content ? (
-                    <TabPanel
-                      key={`panel-${itemId}`}
-                      id={itemId}
-                      value={itemValue}
-                      index={index}
-                      active={activeValue === itemValue}
-                      labelledby={tabId}
-                    >
-                      {item.content}
-                    </TabPanel>
-                  ) : null;
-                })}
-              </div>
-            )}
           </div>
+          {hasAnyContent && (
+            <div className={cx(styles['tabs-content'], contentClassName)}>
+              {processedItems.map((item, index) => {
+                const itemId = item.id as string;
+                const itemValue = item.value as string | number;
+                const tabId = `tab-${itemId}`;
+
+                return item.content ? (
+                  <TabPanel
+                    key={`panel-${itemId}`}
+                    id={itemId}
+                    value={itemValue}
+                    index={index}
+                    active={activeValue === itemValue}
+                    labelledby={tabId}
+                  >
+                    {item.content}
+                  </TabPanel>
+                ) : null;
+              })}
+            </div>
+          )}
         </div>
       );
     }
