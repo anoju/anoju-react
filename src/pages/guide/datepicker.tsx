@@ -349,10 +349,8 @@ const handleGoToToday = () => {
         <h2 className={styles['section-title']}>range</h2>
         <div className={styles.showcase}>
           <p className={styles.txt}>
-            시작 날짜: {formatDate(dateRange.startDate) || '선택 안함'}
-          </p>
-          <p className={styles.txt}>
-            끝 날짜: {formatDate(dateRange.endDate) || '선택 안함'}
+            선택 날짜: {formatDate(dateRange.startDate) || '선택 안함'} ~
+            {formatDate(dateRange.endDate) || '선택 안함'}
           </p>
           <Calendar
             mode="range"
@@ -364,10 +362,8 @@ const handleGoToToday = () => {
           <br />
 
           <p className={styles.txt}>
-            시작 날짜: {formatDate(dateRange2.startDate) || '선택 안함'}
-          </p>
-          <p className={styles.txt}>
-            끝 날짜: {formatDate(dateRange2.endDate) || '선택 안함'}
+            선택 날짜: {formatDate(dateRange2.startDate) || '선택 안함'} ~
+            {formatDate(dateRange2.endDate) || '선택 안함'}
           </p>
           <Calendar
             mode="range"

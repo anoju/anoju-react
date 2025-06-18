@@ -3,7 +3,7 @@
 @use 'sass:color';
 @use 'sass:math';
 
-%btn-selected {
+@mixin btn-selected {
   background-color: var(--primary-color);
   color: #fff;
   font-weight: 600;
@@ -12,7 +12,8 @@
     background-color: color.adjust(s.$primary-color, $lightness: -10%);
   }
 }
-%range-before {
+
+@mixin range-before {
   content: '';
   position: absolute;
   top: 20%;
@@ -108,20 +109,6 @@
     border-right: none;
   }
 
-  // 오늘
-  &.today {
-    .calendar-cell-btn {
-      border: 2px solid var(--primary-color);
-    }
-  }
-
-  // 선택된 날짜
-  &.selected {
-    .calendar-cell-btn {
-      @extend %btn-selected;
-    }
-  }
-
   // 주말
   &.weekend {
     .calendar-cell-btn {
@@ -149,6 +136,20 @@
     // &.disabled .calendar-cell-btn {
     //   color: color.mix(#1890ff, #4c4c4c, 50%);
     // }
+  }
+
+  // 오늘
+  &.today {
+    .calendar-cell-btn {
+      border: 2px solid var(--primary-color);
+    }
+  }
+
+  // 선택된 날짜
+  &.selected {
+    .calendar-cell-btn {
+      @include btn-selected;
+    }
   }
 
   // 현재 월
@@ -190,19 +191,19 @@
   // Range 기능 관련 스타일
   &.range-start {
     .calendar-cell-btn {
-      @extend %btn-selected;
+      @include btn-selected;
     }
   }
 
   &.range-end {
     .calendar-cell-btn {
-      @extend %btn-selected;
+      @include btn-selected;
     }
   }
 
   &.in-range {
     &::before {
-      @extend %range-before;
+      @include range-before;
 
       background-color: color.mix(s.$primary-color, #fff, 40%);
     }
@@ -224,16 +225,15 @@
 
   &.range-hover {
     &::before {
-      @extend %range-before;
+      @include range-before;
 
       background-color: color.mix(s.$primary-color, #fff, 40%);
     }
-  }
 
-  // 단일 날짜 선택 (범위 시작과 끝이 같은 경우)
-  &.range-start.range-end {
     .calendar-cell-btn {
-      border-radius: 50%;
+      &:hover {
+        @include btn-selected;
+      }
     }
   }
 
@@ -270,27 +270,10 @@
   border-radius: 0.4rem;
 
   &:hover:not(:disabled) {
-    background-color: var(--bg-dark-3);
+    background-color: color.mix(s.$primary-color, #000, 60%);
   }
-
-  // &:disabled {
-  //   color: var(--bg-dark-30);
-  //   background: none;
-
-  //   &:hover {
-  //     background: none;
-  //   }
-  // }
 
   @include s.dark-mode {
     color: var(--bg-light-80);
-
-    &:hover:not(:disabled) {
-      background-color: var(--bg-light-5);
-    }
-
-    // &:disabled {
-    //   color: var(--bg-light-30);
-    // }
   }
 }
