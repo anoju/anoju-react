@@ -36,9 +36,11 @@ interface CalendarProps {
   selectedDate?: Date; // 선택된 날짜
   defaultValue?: Date; // 기본값
   onChange?: (date: Date) => void; // 날짜 선택시 콜백
+  onSelected?: (date: Date) => void; // 날짜 선택시 추가 콜백
   onViewChange?: (date: Date) => void; // 표시 년월 변경시 콜백
   disabledDate?: (date: Date) => boolean; // 비활성화할 날짜 판별 함수
   showAdjacentMonths?: boolean; // 이전/다음달 날짜 표시 여부
+  weekdays?: string[]; // 요일 헤더 배열
   className?: string;
   cellRender?: (date: Date, info: CalendarCell) => React.ReactNode; // 커스텀 셀 렌더러
 }
@@ -142,9 +144,11 @@ const Calendar = forwardRef<CalendarRef, CalendarProps>(
       selectedDate,
       defaultValue,
       onChange,
+      onSelected,
       onViewChange,
       disabledDate,
       showAdjacentMonths = false,
+      weekdays = ['일', '월', '화', '수', '목', '금', '토'],
       className = '',
       cellRender,
     },
@@ -219,12 +223,14 @@ const Calendar = forwardRef<CalendarRef, CalendarProps>(
         if (onChange) {
           onChange(cell.date);
         }
+        
+        // onSelected 콜백 실행
+        if (onSelected) {
+          onSelected(cell.date);
+        }
       },
-      [onChange]
+      [onChange, onSelected]
     );
-
-    // 요일 헤더
-    const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
 
     const getAriaLabel = (cell: CalendarCell): string => {
       if (cell.day === 0) return '';
