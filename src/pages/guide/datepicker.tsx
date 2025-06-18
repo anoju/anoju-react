@@ -7,6 +7,7 @@ import {
   CodeHighlight,
   Calendar,
   type CalendarRef,
+  type DateRange,
 } from '@/components/common';
 import styles from '@/assets/scss/pages/guide.module.scss';
 import { formatDate } from '@/utils/dateFormat';
@@ -79,6 +80,13 @@ const DatepickerGuide = () => {
   const [currentMonth, setCurrentMonth] = useState(12);
   const [selectedDate2, setSelectedDate2] = useState<Date>(new Date());
   const viewDate2 = new Date(currentYear, currentMonth - 1, 1);
+
+  const [dateRange, setDateRange] = useState<DateRange>({});
+
+  const [dateRange2, setDateRange2] = useState<DateRange>({
+    startDate: new Date(2024, 11, 10), // 2024년 12월 10일
+    endDate: new Date(2024, 11, 15), // 2024년 12월 15일
+  });
 
   return (
     <div className="page-inner">
@@ -332,6 +340,53 @@ const handleGoToToday = () => {
   selectedDate={customSelectedDate}
   onChange={setCustomSelectedDate}
   onViewChange={setViewDate}
+/>`}
+          language="jsx"
+        />
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles['section-title']}>range</h2>
+        <div className={styles.showcase}>
+          <p className={styles.txt}>
+            시작 날짜: {formatDate(dateRange.startDate) || '선택 안함'}
+          </p>
+          <p className={styles.txt}>
+            끝 날짜: {formatDate(dateRange.endDate) || '선택 안함'}
+          </p>
+          <Calendar
+            mode="range"
+            range={dateRange}
+            onRangeChange={setDateRange}
+            showAdjacentMonths={true}
+          />
+
+          <br />
+
+          <p className={styles.txt}>
+            시작 날짜: {formatDate(dateRange2.startDate) || '선택 안함'}
+          </p>
+          <p className={styles.txt}>
+            끝 날짜: {formatDate(dateRange2.endDate) || '선택 안함'}
+          </p>
+          <Calendar
+            mode="range"
+            value={new Date(2024, 11, 1)}
+            range={dateRange2}
+            onRangeChange={setDateRange2}
+            showAdjacentMonths={true}
+          />
+        </div>
+
+        <h3 className={styles['sub-title']}>참조 소스코드</h3>
+        <CodeHighlight
+          code={`const [dateRange, setDateRange] = useState<DateRange>({});
+
+<Calendar
+  mode="range"
+  range={dateRange}
+  onRangeChange={setDateRange}
+  showAdjacentMonths={true}
 />`}
           language="jsx"
         />

@@ -3,6 +3,24 @@
 @use 'sass:color';
 @use 'sass:math';
 
+%btn-selected {
+  background-color: var(--primary-color);
+  color: #fff;
+  font-weight: 600;
+
+  &:hover {
+    background-color: color.adjust(s.$primary-color, $lightness: -10%);
+  }
+}
+%range-before {
+  content: '';
+  position: absolute;
+  top: 20%;
+  left: 0;
+  width: 100%;
+  height: 60%;
+}
+
 .calendar {
   width: 100%;
   font-size: 1.4rem;
@@ -100,13 +118,7 @@
   // 선택된 날짜
   &.selected {
     .calendar-cell-btn {
-      background-color: var(--primary-color);
-      color: #fff;
-      font-weight: 600;
-
-      &:hover {
-        background-color: color.adjust(s.$primary-color, $lightness: -10%);
-      }
+      @extend %btn-selected;
     }
   }
 
@@ -175,16 +187,69 @@
     }
   }
 
+  // Range 기능 관련 스타일
+  &.range-start {
+    .calendar-cell-btn {
+      @extend %btn-selected;
+    }
+  }
+
+  &.range-end {
+    .calendar-cell-btn {
+      @extend %btn-selected;
+    }
+  }
+
+  &.in-range {
+    &::before {
+      @extend %range-before;
+
+      background-color: color.mix(s.$primary-color, #fff, 40%);
+    }
+
+    &.range-start {
+      &::before {
+        width: 50%;
+        left: 50%;
+      }
+    }
+
+    &.range-end {
+      &::before {
+        width: 50%;
+        left: 0;
+      }
+    }
+  }
+
+  &.range-hover {
+    &::before {
+      @extend %range-before;
+
+      background-color: color.mix(s.$primary-color, #fff, 40%);
+    }
+  }
+
+  // 단일 날짜 선택 (범위 시작과 끝이 같은 경우)
+  &.range-start.range-end {
+    .calendar-cell-btn {
+      border-radius: 50%;
+    }
+  }
+
   @include s.dark-mode {
     border-right-color: var(--bg-light-10);
 
-    &.selected {
-      .calendar-cell-btn {
-        background-color: var(--primary-color);
+    // Range 기능 다크모드 스타일
+    &.in-range {
+      &::before {
+        background-color: color.mix(s.$primary-color, #000, 40%);
+      }
+    }
 
-        &:hover {
-          background-color: color.adjust(s.$primary-color, $lightness: 5%);
-        }
+    &.range-hover {
+      &::before {
+        background-color: color.mix(s.$primary-color, #000, 40%);
       }
     }
   }

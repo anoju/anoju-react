@@ -18,6 +18,17 @@ interface CalendarCell {
   isWeekend: boolean;
   isSunday: boolean;
   isSaturday: boolean;
+  // range 기능 추가
+  isRangeStart: boolean;
+  isRangeEnd: boolean;
+  isInRange: boolean;
+  isRangeHover: boolean;
+}
+
+// Range 값 타입
+export interface DateRange {
+  startDate?: Date;
+  endDate?: Date;
 }
 
 // Calendar 컴포넌트 외부에서 사용할 수 있는 메서드
@@ -43,6 +54,11 @@ interface CalendarProps {
   weekdays?: string[]; // 요일 헤더 배열
   className?: string;
   cellRender?: (date: Date, info: CalendarCell) => React.ReactNode; // 커스텀 셀 렌더러
+  
+  // Range 기능 추가
+  mode?: 'single' | 'range'; // 선택 모드
+  range?: DateRange; // 날짜 범위
+  onRangeChange?: (range: DateRange) => void; // 날짜 범위 변경시 콜백
 }
 
 // 유틸리티 함수들
@@ -65,13 +81,37 @@ const formatDateToString = (date: Date): string => {
   return `${year}-${month}-${day}`;
 };
 
+// Range 관련 유틸리티 함수들
+const isDateInRange = (date: Date, startDate?: Date, endDate?: Date): boolean => {
+  if (!startDate || !endDate) return false;
+  const compareDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const start = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+  const end = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
+  return compareDate >= start && compareDate <= end;
+};
+
+const getHoverRange = (startDate: Date, hoverDate: Date): { start: Date; end: Date } => {
+  const start = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+  const hover = new Date(hoverDate.getFullYear(), hoverDate.getMonth(), hoverDate.getDate());
+  
+  if (start <= hover) {
+    return { start, end: hover };
+  } else {
+    return { start: hover, end: start };
+  }
+};
+
 // 특정 년월의 달력 데이터 생성
 const getMonthData = (
   year: number,
   month: number,
   selectedDate?: Date,
   disabledDate?: (date: Date) => boolean,
-  showAdjacentMonths = false
+  showAdjacentMonths = false,
+  // Range 기능 추가
+  mode: 'single' | 'range' = 'single',
+  range?: DateRange,
+  hoverDate?: Date
 ): CalendarCell[][] => {
   const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
@@ -109,18 +149,46 @@ const getMonthData = (
         isWeekend: dayOfWeek === 0 || dayOfWeek === 6,
         isSunday: dayOfWeek === 0,
         isSaturday: dayOfWeek === 6,
+        // Range 기능
+        isRangeStart: false,
+        isRangeEnd: false,
+        isInRange: false,
+        isRangeHover: false,
       });
     } else {
+      // Range 관련 상태 계산
+      let isRangeStart = false;
+      let isRangeEnd = false;
+      let isInRange = false;
+      let isRangeHover = false;
+      
+      if (mode === 'range' && range) {
+        isRangeStart = range.startDate ? isSameDay(currentDate, range.startDate) : false;
+        isRangeEnd = range.endDate ? isSameDay(currentDate, range.endDate) : false;
+        isInRange = isDateInRange(currentDate, range.startDate, range.endDate);
+        
+        // 호버 상태 계산
+        if (range.startDate && !range.endDate && hoverDate) {
+          const hoverRange = getHoverRange(range.startDate, hoverDate);
+          isRangeHover = isDateInRange(currentDate, hoverRange.start, hoverRange.end);
+        }
+      }
+      
       const cell: CalendarCell = {
         date: currentDate,
         day: currentDate.getDate(),
         isCurrentMonth,
         isToday: isToday(currentDate),
-        isSelected: selectedDate ? isSameDay(currentDate, selectedDate) : false,
+        isSelected: mode === 'single' && selectedDate ? isSameDay(currentDate, selectedDate) : false,
         isDisabled: disabledDate ? disabledDate(currentDate) : false,
         isWeekend: dayOfWeek === 0 || dayOfWeek === 6,
         isSunday: dayOfWeek === 0,
         isSaturday: dayOfWeek === 6,
+        // Range 기능
+        isRangeStart,
+        isRangeEnd,
+        isInRange,
+        isRangeHover,
       };
 
       currentWeek.push(cell);
@@ -151,6 +219,10 @@ const Calendar = forwardRef<CalendarRef, CalendarProps>(
       weekdays = ['일', '월', '화', '수', '목', '금', '토'],
       className = '',
       cellRender,
+      // Range 기능
+      mode = 'single',
+      range,
+      onRangeChange,
     },
     ref
   ) => {
@@ -158,6 +230,9 @@ const Calendar = forwardRef<CalendarRef, CalendarProps>(
     const currentDate = value || defaultValue || new Date();
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
+    
+    // Range 모드에서 호버 상태 관리
+    const [hoverDate, setHoverDate] = React.useState<Date | undefined>(undefined);
 
     // 달력 데이터 생성 (메모이제이션)
     const monthData = useMemo(
@@ -167,9 +242,12 @@ const Calendar = forwardRef<CalendarRef, CalendarProps>(
           month,
           selectedDate,
           disabledDate,
-          showAdjacentMonths
+          showAdjacentMonths,
+          mode,
+          range,
+          hoverDate
         ),
-      [year, month, selectedDate, disabledDate, showAdjacentMonths]
+      [year, month, selectedDate, disabledDate, showAdjacentMonths, mode, range, hoverDate]
     );
 
     // 외부에서 사용할 메서드 정의
@@ -220,17 +298,64 @@ const Calendar = forwardRef<CalendarRef, CalendarProps>(
       (cell: CalendarCell) => {
         if (cell.isDisabled || cell.day === 0) return;
 
-        if (onChange) {
-          onChange(cell.date);
-        }
-
-        // onSelected 콜백 실행
-        if (onSelected) {
-          onSelected(cell.date);
+        if (mode === 'single') {
+          // Single 모드: 기존 로직
+          if (onChange) {
+            onChange(cell.date);
+          }
+          
+          if (onSelected) {
+            onSelected(cell.date);
+          }
+        } else if (mode === 'range') {
+          // Range 모드: 날짜 범위 선택 로직
+          if (!range?.startDate || (range.startDate && range.endDate)) {
+            // 시작 날짜 선택 또는 범위 리셋
+            const newRange = { startDate: cell.date, endDate: undefined };
+            if (onRangeChange) {
+              onRangeChange(newRange);
+            }
+          } else if (range.startDate && !range.endDate) {
+            // 끝 날짜 선택
+            const startDate = range.startDate;
+            const endDate = cell.date;
+            
+            // 날짜 순서 정렬
+            const sortedRange = startDate <= endDate 
+              ? { startDate, endDate }
+              : { startDate: endDate, endDate: startDate };
+            
+            if (onRangeChange) {
+              onRangeChange(sortedRange);
+            }
+            
+            // 호버 상태 초기화
+            setHoverDate(undefined);
+          }
+          
+          if (onSelected) {
+            onSelected(cell.date);
+          }
         }
       },
-      [onChange, onSelected]
+      [onChange, onSelected, mode, range, onRangeChange]
     );
+
+    // Range 모드에서 호버 핸들러
+    const handleCellHover = useCallback(
+      (cell: CalendarCell) => {
+        if (mode === 'range' && range?.startDate && !range.endDate && !cell.isDisabled && cell.day > 0) {
+          setHoverDate(cell.date);
+        }
+      },
+      [mode, range]
+    );
+
+    const handleCellLeave = useCallback(() => {
+      if (mode === 'range') {
+        setHoverDate(undefined);
+      }
+    }, [mode]);
 
     const getAriaLabel = (cell: CalendarCell): string => {
       if (cell.day === 0) return '';
@@ -238,8 +363,16 @@ const Calendar = forwardRef<CalendarRef, CalendarProps>(
       const dateStr = formatDateToString(cell.date);
       const todayStr = cell.isToday ? '(오늘)' : '';
       const selectedStr = cell.isSelected ? '(현재 선택됨)' : '';
+      
+      // Range 모드에서의 추가 정보
+      let rangeStr = '';
+      if (mode === 'range') {
+        if (cell.isRangeStart) rangeStr += '(범위 시작)';
+        if (cell.isRangeEnd) rangeStr += '(범위 끝)';
+        if (cell.isInRange && !cell.isRangeStart && !cell.isRangeEnd) rangeStr += '(범위 내)';
+      }
 
-      return `${dateStr}${todayStr}${selectedStr} 선택`;
+      return `${dateStr}${todayStr}${selectedStr}${rangeStr} 선택`;
     };
 
     return (
@@ -283,6 +416,11 @@ const Calendar = forwardRef<CalendarRef, CalendarProps>(
                       ? styles['current-month']
                       : styles['adjacent-month'],
                     cell.day === 0 && styles.empty, // 빈 셀
+                    // Range 기능 관련 클래스
+                    cell.isRangeStart && styles['range-start'],
+                    cell.isRangeEnd && styles['range-end'],
+                    cell.isInRange && styles['in-range'],
+                    cell.isRangeHover && styles['range-hover'],
                   ]
                     .filter(Boolean)
                     .join(' ');
@@ -293,6 +431,8 @@ const Calendar = forwardRef<CalendarRef, CalendarProps>(
                       className={cellClasses}
                       data-date={formatDateToString(cell.date)}
                       aria-selected={cell.isSelected ? 'true' : undefined}
+                      onMouseEnter={() => handleCellHover(cell)}
+                      onMouseLeave={handleCellLeave}
                     >
                       <button
                         type="button"
