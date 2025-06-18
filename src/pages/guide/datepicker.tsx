@@ -3,11 +3,13 @@ import { useState, useRef } from 'react';
 import { usePageLayout } from '@/hooks/usePageLayout';
 import {
   Button,
+  Select,
   CodeHighlight,
   Calendar,
   type CalendarRef,
 } from '@/components/common';
 import styles from '@/assets/scss/pages/guide.module.scss';
+import { formatDate } from '@/utils/dateFormat';
 
 const DatepickerGuide = () => {
   usePageLayout({
@@ -73,6 +75,11 @@ const DatepickerGuide = () => {
     setViewDate(today);
   };
 
+  const [currentYear, setCurrentYear] = useState(2024);
+  const [currentMonth, setCurrentMonth] = useState(12);
+  const [selectedDate2, setSelectedDate2] = useState<Date>(new Date());
+  const viewDate2 = new Date(currentYear, currentMonth - 1, 1);
+
   return (
     <div className="page-inner">
       <h1 className={styles.title}>Calendar Component</h1>
@@ -88,9 +95,7 @@ const DatepickerGuide = () => {
       <section className={styles.section}>
         <h2 className={styles['section-title']}>기본 Calendar</h2>
         <div className={styles.showcase}>
-          <p className={styles.txt}>
-            선택된 날짜: {selectedDate.toLocaleDateString('ko-KR')}
-          </p>
+          <p className={styles.txt}>선택된 날짜: {formatDate(selectedDate)}</p>
           <Calendar
             value={selectedDate}
             selectedDate={selectedDate}
@@ -114,9 +119,7 @@ const DatepickerGuide = () => {
       <section className={styles.section}>
         <h2 className={styles['section-title']}>이전/다음달 보임</h2>
         <div className={styles.showcase}>
-          <p className={styles.txt}>
-            선택된 날짜: {selectedDate.toLocaleDateString('ko-KR')}
-          </p>
+          <p className={styles.txt}>선택된 날짜: {formatDate(selectedDate)}</p>
           <Calendar
             value={selectedDate}
             selectedDate={selectedDate}
@@ -199,6 +202,55 @@ const DatepickerGuide = () => {
       </section>
 
       <section className={styles.section}>
+        <h2 className={styles['section-title']}>특정 월 세팅</h2>
+        <div className={styles.showcase}>
+          <p className={styles.txt}>선택된 날짜: {formatDate(selectedDate)}</p>
+          <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
+            <Select
+              value={currentYear}
+              onChange={setCurrentYear}
+              options={Array.from({ length: 10 }, (_, i) => 2020 + i).map(
+                (year) => ({
+                  value: year,
+                  label: `${year}년`,
+                })
+              )}
+            />
+
+            <Select
+              value={currentMonth}
+              onChange={setCurrentMonth}
+              options={Array.from({ length: 12 }, (_, i) => i + 1).map(
+                (month) => ({
+                  value: month,
+                  label: `${month}월`,
+                })
+              )}
+            />
+          </div>
+
+          <Calendar
+            value={viewDate2}
+            selectedDate={selectedDate2}
+            onChange={setSelectedDate2}
+            showAdjacentMonths={true}
+          />
+        </div>
+
+        <h3 className={styles['sub-title']}>참조 소스코드</h3>
+        <CodeHighlight
+          code={`const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+
+<Calendar
+  value={selectedDate}
+  selectedDate={selectedDate}
+  onChange={setSelectedDate}
+/>`}
+          language="jsx"
+        />
+      </section>
+
+      <section className={styles.section}>
         <h2 className={styles['section-title']}>외부제어</h2>
         <div className={styles.showcase}>
           <div style={{ display: 'flex', gap: '8px', marginBottom: '20px' }}>
@@ -222,8 +274,7 @@ const DatepickerGuide = () => {
             표시 년월: {viewDate.getFullYear()}년 {viewDate.getMonth() + 1}월
           </p>
           <p className={styles.txt}>
-            선택된 날짜:
-            {customSelectedDate?.toLocaleDateString('ko-KR') || '선택 안함'}
+            선택된 날짜:{formatDate(customSelectedDate) || '선택 안함'}
           </p>
           <Calendar
             ref={calendarRef}
