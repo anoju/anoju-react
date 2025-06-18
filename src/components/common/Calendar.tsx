@@ -163,14 +163,39 @@ const getMonthData = (
       let isRangeHover = false;
       
       if (mode === 'range' && range) {
-        isRangeStart = range.startDate ? isSameDay(currentDate, range.startDate) : false;
-        isRangeEnd = range.endDate ? isSameDay(currentDate, range.endDate) : false;
-        isInRange = isDateInRange(currentDate, range.startDate, range.endDate);
+        // 기본 range 상태
+        const isOriginalStart = range.startDate ? isSameDay(currentDate, range.startDate) : false;
+        const isOriginalEnd = range.endDate ? isSameDay(currentDate, range.endDate) : false;
         
-        // 호버 상태 계산
-        if (range.startDate && !range.endDate && hoverDate) {
-          const hoverRange = getHoverRange(range.startDate, hoverDate);
-          isRangeHover = isDateInRange(currentDate, hoverRange.start, hoverRange.end);
+        if (range.startDate && range.endDate) {
+          // 범위가 완성된 상태
+          isRangeStart = isOriginalStart;
+          isRangeEnd = isOriginalEnd;
+          isInRange = isDateInRange(currentDate, range.startDate, range.endDate);
+        } else if (range.startDate && !range.endDate && hoverDate) {
+          // 호버 상태에서 동적 역할 변경
+          const selectedDate = range.startDate;
+          const compareSelected = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate());
+          const compareHover = new Date(hoverDate.getFullYear(), hoverDate.getMonth(), hoverDate.getDate());
+          
+          if (compareHover < compareSelected) {
+            // 호버가 선택된 날짜보다 이전: 선택된 날짜가 end가 됨
+            const hoverRange = getHoverRange(selectedDate, hoverDate);
+            isRangeStart = isSameDay(currentDate, hoverRange.start);
+            isRangeEnd = isSameDay(currentDate, hoverRange.end);
+            isRangeHover = isDateInRange(currentDate, hoverRange.start, hoverRange.end);
+          } else {
+            // 호버가 선택된 날짜보다 이후: 선택된 날짜가 start가 됨
+            const hoverRange = getHoverRange(selectedDate, hoverDate);
+            isRangeStart = isSameDay(currentDate, hoverRange.start);
+            isRangeEnd = isSameDay(currentDate, hoverRange.end);
+            isRangeHover = isDateInRange(currentDate, hoverRange.start, hoverRange.end);
+          }
+        } else {
+          // 호버가 없거나 startDate만 있는 상태
+          isRangeStart = isOriginalStart;
+          isRangeEnd = isOriginalEnd;
+          isInRange = isDateInRange(currentDate, range.startDate, range.endDate);
         }
       }
       

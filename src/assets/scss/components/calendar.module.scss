@@ -235,6 +235,20 @@
         @include btn-selected;
       }
     }
+
+    &.range-start {
+      &::before {
+        width: 50%;
+        left: 50%;
+      }
+    }
+
+    &.range-end {
+      &::before {
+        width: 50%;
+        left: 0;
+      }
+    }
   }
 
   @include s.dark-mode {
