@@ -45,6 +45,10 @@ const GuideLayout: React.FC<GuideLayoutProps> = ({ children }) => {
               to: '/guide/tooltip',
             },
             {
+              label: 'Expand',
+              to: '/guide/expand',
+            },
+            {
               label: 'Datepicker',
               to: '/guide/datepicker',
             },
@@ -53,8 +57,8 @@ const GuideLayout: React.FC<GuideLayoutProps> = ({ children }) => {
               to: '/guide/sticky',
             },
             {
-              label: 'Expand',
-              to: '/guide/expand',
+              label: 'Dropdown',
+              to: '/guide/dropdown',
             },
             {
               label: 'Loading',
