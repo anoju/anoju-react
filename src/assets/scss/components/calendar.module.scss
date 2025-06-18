@@ -138,9 +138,9 @@
       color: #ff4d4f;
     }
 
-    &.disabled .calendar-cell-btn {
-      color: color.mix(#ff4d4f, #4c4c4c, 50%);
-    }
+    // &.disabled .calendar-cell-btn {
+    //   color: color.mix(#ff4d4f, #4c4c4c, 50%);
+    // }
   }
 
   // 토요일
@@ -149,9 +149,9 @@
       color: #1890ff;
     }
 
-    &.disabled .calendar-cell-btn {
-      color: color.mix(#1890ff, #4c4c4c, 50%);
-    }
+    // &.disabled .calendar-cell-btn {
+    //   color: color.mix(#1890ff, #4c4c4c, 50%);
+    // }
   }
 
   // 현재 월
@@ -164,7 +164,7 @@
   // 이전/다음 월 (흐릿하게)
   &.adjacent-month {
     .calendar-cell-btn {
-      opacity: 0.6;
+      opacity: 0.75;
     }
 
     &:hover {
@@ -175,7 +175,7 @@
   // 비활성화
   &.disabled {
     .calendar-cell-btn {
-      opacity: 0.4;
+      opacity: 0.3;
     }
 
     &:hover {

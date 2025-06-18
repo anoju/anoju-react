@@ -43,6 +43,13 @@ const DatepickerGuide = () => {
     return date < today;
   };
 
+  // 미래 날짜 비활성화 함수
+  const disabledFutureDates = (date: Date): boolean => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return date > today;
+  };
+
   // 외부 버튼으로 달력 제어
   const handlePrevMonth = () => {
     calendarRef.current?.goToPrevMonth();
@@ -135,6 +142,7 @@ const DatepickerGuide = () => {
       <section className={styles.section}>
         <h2 className={styles['section-title']}>비활성화</h2>
         <div className={styles.showcase}>
+          <p className={styles.txt}>주말 비활성화</p>
           <Calendar
             selectedDate={selectedDate}
             onChange={setSelectedDate}
@@ -142,10 +150,19 @@ const DatepickerGuide = () => {
             showAdjacentMonths={true}
           />
           <br />
+          <p className={styles.txt}>과거 날짜 비활성화</p>
           <Calendar
             selectedDate={selectedDate}
             onChange={setSelectedDate}
             disabledDate={disabledPastDates}
+            showAdjacentMonths={true}
+          />
+          <br />
+          <p className={styles.txt}>미래 날짜 비활성화</p>
+          <Calendar
+            selectedDate={selectedDate}
+            onChange={setSelectedDate}
+            disabledDate={disabledFutureDates}
             showAdjacentMonths={true}
           />
         </div>
@@ -167,6 +184,14 @@ const DatepickerGuide = () => {
   selectedDate={selectedDate}
   onChange={setSelectedDate}
   disabledDate={disabledPastDates}
+  showAdjacentMonths={true}
+/>
+
+// 미래 날짜 비활성화
+<Calendar
+  selectedDate={selectedDate}
+  onChange={setSelectedDate}
+  disabledDate={disabledFutureDates}
   showAdjacentMonths={true}
 />`}
           language="jsx"
