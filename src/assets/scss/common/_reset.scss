@@ -165,6 +165,11 @@ input[type='button'] {
   color: inherit;
 }
 
+button:disabled,
+input[type='button']:disabled {
+  cursor: default;
+}
+
 optgroup,
 pre {
   font-family: inherit;

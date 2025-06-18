@@ -34,3 +34,4 @@ export type {
 export { Toast, ToastContainer } from './Toast';
 export { default as Swiper, SwiperSlide } from './Swiper';
 export type { SwiperProps, SwiperRef, SwiperPreset } from './Swiper';
+export { default as Calendar, type CalendarRef } from './Calendar';
