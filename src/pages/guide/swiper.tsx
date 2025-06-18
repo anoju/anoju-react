@@ -915,8 +915,7 @@ const handleSlideChange = (swiper: SwiperType) => {
               overflow: 'auto',
             }}
           >
-            <code>{`import { useState, useRef } from 'react';
-import { Swiper, SwiperSlide } from '@/components/common';
+            <code>{`import { Swiper, SwiperSlide } from '@/components/common';
 import type { SwiperRef } from '@/components/common';
 
 function MyComponent() {

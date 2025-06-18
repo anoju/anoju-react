@@ -1,5 +1,5 @@
 // src/pages/guide/textarea.tsx
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { usePageLayout } from '@/hooks/usePageLayout';
 import {
   Button,
@@ -8,7 +8,6 @@ import {
   TextareaHandle,
 } from '@/components/common';
 import styles from '@/assets/scss/pages/guide.module.scss';
-import { useState } from 'react';
 
 const TextareaGuide = () => {
   usePageLayout({
@@ -284,8 +283,7 @@ const TextareaGuide = () => {
 
         <h3 className={styles['sub-title']}>참조 소스코드</h3>
         <CodeHighlight
-          code={`import { useRef } from 'react';
-import { Textarea, TextareaHandle } from '@/components/common';
+          code={`import { Textarea, TextareaHandle } from '@/components/common';
 
 // 가이드 컴포넌트 내에서
 const textareaRef = useRef<TextareaHandle>(null);

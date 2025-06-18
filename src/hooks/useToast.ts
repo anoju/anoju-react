@@ -1,11 +1,10 @@
 // src/hooks/useToast.ts
-import { useContext } from 'react';
+import { useContext, createContext } from 'react';
 import type { ToastContextType } from '@/types/toast';
 
-// 토스트 컨텍스트 생성 (Context 자체는 여기서 생성)
-import { createContext } from 'react';
-
-export const ToastContext = createContext<ToastContextType | undefined>(undefined);
+export const ToastContext = createContext<ToastContextType | undefined>(
+  undefined
+);
 
 // 컨텍스트 훅
 export const useToast = (): ToastContextType => {

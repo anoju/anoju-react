@@ -45,6 +45,10 @@ const GuideLayout: React.FC<GuideLayoutProps> = ({ children }) => {
               to: '/guide/tooltip',
             },
             {
+              label: 'Datepicker',
+              to: '/guide/datepicker',
+            },
+            {
               label: 'sticky',
               to: '/guide/sticky',
             },

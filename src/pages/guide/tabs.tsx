@@ -605,8 +605,7 @@ const [itemsTab, setItemsTab] = useState(1);
         <p className={styles.txt}>useState를 통한 상태 관리 예시입니다.</p>
 
         <CodeHighlight
-          code={`import { useState } from 'react';
-import { Tabs } from '@/components/common';
+          code={`import { Tabs } from '@/components/common';
 
 const MyComponent = () => {
   // 문자열 값을 갖는 탭 상태

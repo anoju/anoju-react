@@ -594,7 +594,6 @@ const [basicValue, setBasicValue] = useState<string>('apple');
         <h3 className={styles['sub-title']}>참조 소스코드</h3>
         <CodeHighlight
           code={`// 상태 관리 설정
-import { useState } from 'react';
 const [selectedColors, setSelectedColors] = useState(['red', 'blue']);
 
 // 기본 다중 선택
@@ -1705,8 +1704,7 @@ const [open, setOpen] = useState<boolean>(false);
 
         <h3 className={styles['sub-title']}>사용 예시</h3>
         <CodeHighlight
-          code={`import { useRef } from 'react';
-import { Select, SelectHandle } from '@/components/common';
+          code={`import { Select, SelectHandle } from '@/components/common';
 
 const MyComponent = () => {
   // Select 컴포넌트에 접근하기 위한 Ref 생성

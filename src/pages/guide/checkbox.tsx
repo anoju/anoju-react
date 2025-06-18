@@ -514,7 +514,6 @@ const [booleanValues, setBooleanValues] = useState<(string | number | boolean)[]
         <h3 className={styles['sub-title']}>참조 소스코드</h3>
         <CodeHighlight
           code={`// 메서드 호출 예시 컴포넌트
-import { useRef } from 'react';
 import { Checkbox, CheckboxHandle } from '@/components/common';
 
 const MyCheckboxWithRef = () => {

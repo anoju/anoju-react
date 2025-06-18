@@ -760,7 +760,6 @@ const [selectedColor, setSelectedColor] = useState<string | number>('blue');
         <h3 className={styles['sub-title']}>참조 소스코드</h3>
         <CodeHighlight
           code={`// 메서드 호출 예시 컴포넌트
-import { useRef, useState } from 'react';
 import { Radio, RadioHandle } from '@/components/common';
 
 const MyRadioWithRef = () => {
@@ -1093,7 +1092,6 @@ const MyRadioWithRef = () => {
           <h3 className={styles['sub-title']}>참조 소스코드</h3>
           <CodeHighlight
             code={`// RadioGroupHandle 타입 가져오기
-import { useRef, useState } from 'react';
 import { Radio } from '@/components/common';
 import type { RadioGroupHandle } from '@/components/common/Radio';
 

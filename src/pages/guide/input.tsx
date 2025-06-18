@@ -603,8 +603,7 @@ const handleInputChange = (
 
         <h3 className={styles['sub-title']}>참조 소스코드</h3>
         <CodeHighlight
-          code={`import { useRef } from 'react';
-import { Input, InputHandle } from '@/components/common';
+          code={`import { Input, InputHandle } from '@/components/common';
 
 // ref 선언
 const inputRef = useRef<InputHandle>(null);
