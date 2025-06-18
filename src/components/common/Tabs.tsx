@@ -80,8 +80,8 @@ interface TabProps {
   disabled?: boolean;
   onClick?: (value: string | number) => void;
   to?: string;
-  spyScroll?: boolean; // 스파이 스크롤 모드인지 여부
-  spyOffset?: number; // 스파이 스크롤 오프셋
+  scrollSpy?: boolean; // 스크롤스파이 모드인지 여부
+  spyOffset?: number; // 스크롤스파이 오프셋
   controls?: string; // aria-controls 속성을 위한 prop
 }
 
@@ -116,9 +116,9 @@ type TabsProps<T extends string | number = string | number> = {
   tabsClassName?: string;
   contentClassName?: string;
   forceUsePathname?: boolean;
-  // 스파이 스크롤 옵션
-  spyScroll?: boolean; // 스파이 스크롤 활성화 여부
-  spyOffset?: number; // 스파이 스크롤 오프셋 (px)
+  // 스크롤스파이 옵션
+  scrollSpy?: boolean; // 스크롤스파이 활성화 여부
+  spyOffset?: number; // 스크롤스파이 오프셋 (px)
   scrollContainer?: string | HTMLElement; // 스크롤 컨테이너 지정
 };
 
@@ -134,7 +134,7 @@ export const Tab = React.forwardRef<HTMLAnchorElement, TabProps>(
       disabled = undefined,
       onClick,
       to,
-      spyScroll = false,
+      scrollSpy = false,
       spyOffset = 0,
       controls,
     },
@@ -157,9 +157,9 @@ export const Tab = React.forwardRef<HTMLAnchorElement, TabProps>(
 
       if (disabled) return;
 
-      // spyScroll 모드 처리
-      if (spyScroll && value !== undefined) {
-        // 스파이 스크롤 모드에서 value를 앵커로 사용
+      // scrollSpy 모드 처리
+      if (scrollSpy && value !== undefined) {
+        // 스크롤스파이 모드에서 value를 앵커로 사용
         const targetElement = document.getElementById(String(value));
         if (targetElement) {
           // sticky 높이를 고려한 스크롤 함수 사용
@@ -180,8 +180,8 @@ export const Tab = React.forwardRef<HTMLAnchorElement, TabProps>(
     };
 
     const panelId = controls || `panel-${tabId}`;
-    // spyScroll 모드에서는 value를 href로 사용, 아니면 기본 panelId 사용
-    const href = spyScroll && value !== undefined ? `#${value}` : `#${panelId}`;
+    // scrollSpy 모드에서는 value를 href로 사용, 아니면 기본 panelId 사용
+    const href = scrollSpy && value !== undefined ? `#${value}` : `#${panelId}`;
 
     return (
       <li role="presentation" className={styles['tab-li']}>
@@ -269,8 +269,8 @@ export const Tabs = React.forwardRef(
       tabsClassName = '',
       contentClassName = '',
       forceUsePathname = false,
-      // 스파이 스크롤 옵션
-      spyScroll = false,
+      // 스크롤스파이 옵션
+      scrollSpy = false,
       spyOffset = 0,
       scrollContainer,
     } = props;
@@ -580,9 +580,9 @@ export const Tabs = React.forwardRef(
         resizeObserver.disconnect();
       };
     }, [checkScrollable]);
-    // 스파이 스크롤 기능
+    // 스크롤스파이 기능
     useEffect(() => {
-      if (!spyScroll) return;
+      if (!scrollSpy) return;
 
       // 스크롤 컨테이너 결정
       const getScrollContainer = (): Element | Window => {
@@ -600,7 +600,7 @@ export const Tabs = React.forwardRef(
       const findActiveSection = (): string | number | undefined => {
         if (!processedItems && tabs.length === 0) return undefined;
 
-        // value를 가진 아이템들 수집 (스파이 스크롤에서는 value가 앵커 ID역할)
+        // value를 가진 아이템들 수집 (스크롤스파이에서는 value가 앵커 ID역할)
         const validAnchors: Array<{ value: string | number; anchor: string }> =
           [];
 
@@ -722,7 +722,7 @@ export const Tabs = React.forwardRef(
         clearTimeout(scrollTimer);
       };
     }, [
-      spyScroll,
+      scrollSpy,
       spyOffset,
       scrollContainer,
       processedItems,
@@ -1033,7 +1033,7 @@ export const Tabs = React.forwardRef(
                     disabled={item.disabled}
                     onClick={handleTabClick}
                     to={item.to}
-                    spyScroll={spyScroll}
+                    scrollSpy={scrollSpy}
                     spyOffset={spyOffset}
                     controls={panelId}
                   />
@@ -1081,7 +1081,7 @@ export const Tabs = React.forwardRef(
         active: isActive,
         onClick: handleTabClick,
         controls: `panel-${tabId}`,
-        spyScroll: spyScroll, // 스파이 스크롤 전달
+        scrollSpy: scrollSpy, // 스크롤스파이 전달
         spyOffset: spyOffset, // spyOffset 전달
       } as Partial<TabProps>);
     });

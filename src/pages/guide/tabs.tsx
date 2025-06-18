@@ -607,7 +607,7 @@ const [itemsTab, setItemsTab] = useState(1);
         <h2 className={styles['section-title']}>ScrollSpy</h2>
         <Sticky>
           <Tabs
-            spyScroll={true}
+            scrollSpy
             items={[
               { value: 'section1', label: '섹션 1' },
               { value: 'section2', label: '섹션 2' },
