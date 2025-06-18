@@ -22,7 +22,6 @@ import { getStickyHeightForScroll } from '@/utils/stickyUtils';
 // 고유 ID 생성을 위한 유틸리티 함수
 let uniqueIdCounter = 0;
 const generateUniqueId = (): string => {
-  // 컴포넌트 내에서 사용하는 지역 변수로 변경되었으므로 전역 Set 체크 제거
   const id = `tab_${uniqueIdCounter++}_${Math.random().toString(36).substring(2, 9)}`;
   return id;
 };
@@ -120,7 +119,7 @@ type TabsProps<T extends string | number = string | number> = {
   // 스파이 스크롤 옵션
   spyScroll?: boolean; // 스파이 스크롤 활성화 여부
   spyOffset?: number; // 스파이 스크롤 오프셋 (px)
-  scrollContainer?: string | HTMLElement; // 스크롤 컴테이너 지정
+  scrollContainer?: string | HTMLElement; // 스크롤 컨테이너 지정
 };
 
 // Tab 컴포넌트
@@ -296,6 +295,9 @@ export const Tabs = React.forwardRef(
     const tablistRef = useRef<HTMLUListElement>(null);
     const initializedRef = useRef<boolean>(false);
 
+    // debounce를 위한 타이머 참조
+    const debounceTimerRef = useRef<NodeJS.Timeout | undefined>(undefined);
+
     // 이전 value 값 저장
     const prevValueRef = useRef<string | number | undefined>(value);
 
@@ -431,6 +433,51 @@ export const Tabs = React.forwardRef(
       }
     }, []);
 
+    // 활성 탭의 위치를 업데이트하는 함수 (debounce 적용)
+    const updateActiveIndicator = useCallback(() => {
+      // 기존 타이머가 있으면 취소
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+
+      // 새로운 타이머 설정 (150ms 지연)
+      debounceTimerRef.current = setTimeout(() => {
+        if (!tablistRef.current) return;
+
+        const tablist = tablistRef.current;
+        const activeTab = tablist.querySelector(
+          `.${styles.active}`
+        ) as HTMLElement;
+
+        if (activeTab) {
+          // 탭의 위치 계산
+          const left = activeTab.offsetLeft;
+          const width = activeTab.offsetWidth;
+
+          // 탭 컨테이너 찾기
+          const tabsContainer = tablist.closest(
+            `.${styles.tabs}`
+          ) as HTMLElement;
+          if (tabsContainer) {
+            // CSS 변수 적용
+            tabsContainer.style.setProperty('--active-tab-left', `${left}px`);
+            tabsContainer.style.setProperty('--active-tab-width', `${width}px`);
+          }
+
+          // 활성 탭을 중앙으로 스크롤
+          scrollToActiveTab();
+        }
+      }, 150);
+    }, [scrollToActiveTab]);
+
+    // 컴포넌트 언마운트 시 타이머 정리
+    useEffect(() => {
+      return () => {
+        if (debounceTimerRef.current) {
+          clearTimeout(debounceTimerRef.current);
+        }
+      };
+    }, []);
     // 마우스 드래그 스크롤 기능
     useEffect(() => {
       if (!tablistRef.current) return;
@@ -446,11 +493,9 @@ export const Tabs = React.forwardRef(
         if (!isScrollable) return;
 
         isMouseDown = true;
-        // setIsDragging(true); // 즉시 설정하지 않음
         startX = e.pageX - tablist.offsetLeft;
         scrollLeft = tablist.scrollLeft;
         hasMoved = false; // 초기화
-        // e.preventDefault(); // 즉시 호출하지 않음
       };
 
       const handleMouseLeave = () => {
@@ -535,34 +580,6 @@ export const Tabs = React.forwardRef(
         resizeObserver.disconnect();
       };
     }, [checkScrollable]);
-
-    // 활성 탭의 위치를 업데이트하는 함수
-    const updateActiveIndicator = useCallback(() => {
-      if (!tablistRef.current) return;
-
-      const tablist = tablistRef.current;
-      const activeTab = tablist.querySelector(
-        `.${styles.active}`
-      ) as HTMLElement;
-
-      if (activeTab) {
-        // 탭의 위치 계산
-        const left = activeTab.offsetLeft;
-        const width = activeTab.offsetWidth;
-
-        // 탭 컨테이너 찾기
-        const tabsContainer = tablist.closest(`.${styles.tabs}`) as HTMLElement;
-        if (tabsContainer) {
-          // CSS 변수 적용
-          tabsContainer.style.setProperty('--active-tab-left', `${left}px`);
-          tabsContainer.style.setProperty('--active-tab-width', `${width}px`);
-        }
-
-        // 활성 탭을 중앙으로 스크롤 (이 줄이 새로 추가되는 부분입니다)
-        scrollToActiveTab();
-      }
-    }, [scrollToActiveTab]); // dependency에 scrollToActiveTab 추가
-
     // 스파이 스크롤 기능
     useEffect(() => {
       if (!spyScroll) return;
@@ -633,7 +650,7 @@ export const Tabs = React.forwardRef(
             const stickyHeight =
               parseInt(htmlElement.style.getPropertyValue('--sticky-height')) ||
               0;
-            const triggerPoint = scrollTop + spyOffset + stickyHeight; // 50px 여유 공간
+            const triggerPoint = scrollTop + spyOffset + stickyHeight;
 
             if (elementTop <= triggerPoint) {
               const distance = triggerPoint - elementTop;
@@ -886,25 +903,20 @@ export const Tabs = React.forwardRef(
       setValue,
     ]);
 
-    // 활성 탭이 변경될 때 인디케이터 업데이트
+    // 활성 탭이 변경될 때 인디케이터 업데이트 (debounce 적용된 함수 사용)
     useEffect(() => {
       if (activeValue !== undefined) {
-        const timer = setTimeout(() => {
-          updateActiveIndicator();
-        }, 50);
-        return () => clearTimeout(timer);
+        updateActiveIndicator();
       }
     }, [activeValue, updateActiveIndicator]);
 
-    // 컴포넌트가 마운트된 후 항상 인디케이터 업데이트
+    // 컴포넌트가 마운트된 후 인디케이터 업데이트
     useEffect(() => {
-      const timers = [
-        setTimeout(() => updateActiveIndicator(), 50),
-        setTimeout(() => updateActiveIndicator(), 200),
-        setTimeout(() => updateActiveIndicator(), 500),
-      ];
+      const timer = setTimeout(() => {
+        updateActiveIndicator();
+      }, 100);
 
-      return () => timers.forEach((timer) => clearTimeout(timer));
+      return () => clearTimeout(timer);
     }, [updateActiveIndicator]);
 
     // 윈도우 크기 변경 시 인디케이터 위치 업데이트
@@ -915,48 +927,39 @@ export const Tabs = React.forwardRef(
 
       window.addEventListener('resize', handleResize);
 
-      // 컴포넌트 마운트된 후 초기화
-      const timer = setTimeout(() => {
-        updateActiveIndicator();
-      }, 100);
-
       return () => {
         window.removeEventListener('resize', handleResize);
-        clearTimeout(timer);
       };
     }, [updateActiveIndicator]);
-
     // 탭 클릭 핸들러 - 상태 업데이트만 처리 (페이지 이동은 Link가 담당)
     const handleTabClick = useCallback(
       (clickedValue: string | number) => {
-        // to 속성이 있는지 확인 (페이지 이동은 Link가 처리하므로 navigate 호출하지 않음)
-        let hasToAttribute = false;
+        // to 속성이 없고 이미 활성화된 탭 클릭시 중복 실행 방지
+        if (clickedValue === activeValue) {
+          // to 속성이 있는지 확인
+          let hasTo = false;
 
-        // items 배열을 사용하는 경우
-        if (processedItems) {
-          const clickedTab = processedItems.find(
-            (item) => item.value === clickedValue
-          );
-          if (clickedTab?.to) {
-            hasToAttribute = true;
-          }
-        } else if (tabs.length > 0) {
-          // children을 사용하는 경우, value로 탭 찾기
-          for (let i = 0; i < tabs.length; i++) {
-            if (tabValues[i] === clickedValue) {
-              const tabProps = tabs[i].props as TabProps;
-              if (tabProps.to) {
-                hasToAttribute = true;
+          // items 배열을 사용하는 경우
+          if (processedItems) {
+            const clickedTab = processedItems.find(
+              (item) => item.value === clickedValue
+            );
+            hasTo = !!clickedTab?.to;
+          } else if (tabs.length > 0) {
+            // children을 사용하는 경우
+            for (let i = 0; i < tabs.length; i++) {
+              if (tabValues[i] === clickedValue) {
+                const tabProps = tabs[i].props as TabProps;
+                hasTo = !!tabProps.to;
+                break;
               }
-              break;
             }
           }
-        }
 
-        // to 속성이 없고 이미 활성화된 탭 클릭시에만 중복 실행 방지
-        // to 속성이 있는 경우에도 상태 업데이트는 필요함
-        if (!hasToAttribute && clickedValue === activeValue) {
-          return;
+          // to 속성이 없으면 중복 실행 방지
+          if (!hasTo) {
+            return;
+          }
         }
 
         // 내부 상태 업데이트
@@ -1031,7 +1034,7 @@ export const Tabs = React.forwardRef(
                     onClick={handleTabClick}
                     to={item.to}
                     spyScroll={spyScroll}
-                    spyOffset={spyOffset} // spyOffset 전달
+                    spyOffset={spyOffset}
                     controls={panelId}
                   />
                 );

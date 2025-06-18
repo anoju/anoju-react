@@ -87,6 +87,32 @@ import { Tabs ,Tab, TabPanel } from '@/components/common';`}
               </p>
             </TabPanel>
           </Tabs>
+
+          <br />
+          <Tabs
+            items={[
+              {
+                value: 'tab1',
+                label: '스크롤 확인용 탭 1',
+              },
+              {
+                value: 'tab2',
+                label: '스크롤 확인용 탭 2',
+              },
+              {
+                value: 'tab3',
+                label: '스크롤 확인용 탭 3',
+              },
+              {
+                value: 'tab4',
+                label: '스크롤 확인용 탭 4',
+              },
+              {
+                value: 'tab5',
+                label: '스크롤 확인용 탭 5',
+              },
+            ]}
+          />
         </div>
 
         <h3 className={styles['sub-title']}>참조 소스코드</h3>
