@@ -24,18 +24,11 @@
 
 .dropdown-trigger {
   position: relative;
-  cursor: pointer;
-  outline: none;
-
-  &.disabled {
-    cursor: not-allowed;
-    opacity: 0.5;
-  }
 }
 
 .dropdown-content {
   position: fixed;
-  z-index: 1050;
+  z-index: 100;
   min-width: 120px;
   max-height: var(--dropdown-max-height);
   padding: var(--dropdown-padding);
@@ -109,89 +102,4 @@
       0 6px 16px 0 rgb(0 0 0 / 32%), 0 3px 6px -4px rgb(0 0 0 / 32%),
       0 9px 28px 8px rgb(0 0 0 / 20%);
   }
-}
-
-// 라이트 모드 스타일
-@include s.light-mode {
-  :root {
-    --dropdown-bg: #fff;
-    --dropdown-border: #d9d9d9;
-    --dropdown-shadow:
-      0 6px 16px 0 rgb(0 0 0 / 8%), 0 3px 6px -4px rgb(0 0 0 / 12%),
-      0 9px 28px 8px rgb(0 0 0 / 5%);
-  }
-}
-
-// 드롭다운 아이템 기본 스타일 (옵션)
-.dropdown-item {
-  display: flex;
-  align-items: center;
-  min-height: var(--dropdown-item-height);
-  padding: 5px 12px;
-  font-size: 14px;
-  line-height: 22px;
-  color: inherit;
-  cursor: pointer;
-  border-radius: 4px;
-  transition: background-color 0.2s;
-
-  &:hover {
-    background-color: #f5f5f5;
-  }
-
-  &:active {
-    background-color: #e6f7ff;
-  }
-
-  &.disabled {
-    color: #bfbfbf;
-    cursor: not-allowed;
-
-    &:hover {
-      background-color: transparent;
-    }
-  }
-
-  &.selected {
-    background-color: #e6f7ff;
-    color: var(--primary-color);
-  }
-}
-
-// 다크 모드 아이템 스타일
-@include s.dark-mode {
-  .dropdown-item {
-    &:hover {
-      background-color: #262626;
-    }
-
-    &:active {
-      background-color: #177ddc;
-    }
-
-    &.disabled {
-      color: #434343;
-    }
-
-    &.selected {
-      background-color: #111b26;
-      color: #177ddc;
-    }
-  }
-}
-
-// 빈 상태 스타일
-.dropdown-empty {
-  padding: 16px;
-  text-align: center;
-  color: #bfbfbf;
-  font-size: 14px;
-}
-
-// 로딩 상태 스타일
-.dropdown-loading {
-  padding: 16px;
-  text-align: center;
-  color: #bfbfbf;
-  font-size: 14px;
 }

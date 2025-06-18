@@ -136,10 +136,10 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
 
       // placement에 따른 초기 위치 설정
       if (placement === 'top') {
-        top = triggerRect.top + scrollTop - contentRect.height - offset[1];
+        top = triggerRect.top - content.offsetHeight - offset[1];
         actualPlacement = 'top';
       } else if (placement === 'bottom') {
-        top = triggerRect.bottom + scrollTop + offset[1];
+        top = triggerRect.bottom + offset[1];
         actualPlacement = 'bottom';
       } else {
         // auto: 공간이 더 많은 쪽으로 배치
@@ -147,11 +147,11 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
         const spaceAbove = triggerRect.top;
 
         if (autoAdjustOverflow) {
-          if (spaceBelow >= contentRect.height || spaceBelow >= spaceAbove) {
+          if (spaceBelow >= content.offsetHeight || spaceBelow >= spaceAbove) {
             top = triggerRect.bottom + offset[1];
             actualPlacement = 'bottom';
           } else {
-            top = triggerRect.top - contentRect.height - offset[1];
+            top = triggerRect.top - content.offsetHeight - offset[1];
             actualPlacement = 'top';
           }
         } else {
@@ -178,18 +178,17 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
 
         if (
           actualPlacement === 'bottom' &&
-          top + contentRect.height > windowHeight + scrollTop - 10
+          top + content.offsetHeight > windowHeight + scrollTop - 10
         ) {
           // 아래쪽 공간이 부족하면 위로
-          const newTop =
-            triggerRect.top + scrollTop - contentRect.height - offset[1];
+          const newTop = triggerRect.top - content.offsetHeight - offset[1];
           if (newTop >= scrollTop + 10) {
             top = newTop;
             actualPlacement = 'top';
           }
         } else if (actualPlacement === 'top' && top < scrollTop + 10) {
           // 위쪽 공간이 부족하면 아래로
-          top = triggerRect.bottom + scrollTop + offset[1];
+          top = triggerRect.bottom + offset[1];
           actualPlacement = 'bottom';
         }
       }
@@ -236,7 +235,7 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
     const handleTriggerClick = useCallback(
       (e: React.MouseEvent) => {
         if (!triggerTypes.includes('click')) return;
-        
+
         e.preventDefault();
         e.stopPropagation();
 
@@ -285,10 +284,24 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
       setVisible(true);
     }, [triggerTypes, disabled, setVisible]);
 
-    // 블러 핸들러
+    // 블러 핸들러 (수정된 버전)
     const handleBlur = useCallback(() => {
       if (!triggerTypes.includes('focus') || disabled) return;
-      setVisible(false);
+
+      // 포커스가 드롭다운 영역을 완전히 벗어났는지 확인
+      setTimeout(() => {
+        const focusedElement = document.activeElement;
+        const isInsideDropdown = contentRef.current?.contains(
+          focusedElement as Node
+        );
+        const isInsideTrigger = triggerRef.current?.contains(
+          focusedElement as Node
+        );
+
+        if (!isInsideDropdown && !isInsideTrigger) {
+          setVisible(false);
+        }
+      }, 0);
     }, [triggerTypes, disabled, setVisible]);
 
     // 컸텍스트 메뉴 핸들러
@@ -300,6 +313,27 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
       },
       [triggerTypes, disabled, isVisible, setVisible]
     );
+
+    // 드롭다운 컨텐츠의 마우스 진입 핸들러
+    const handleContentMouseEnter = useCallback(() => {
+      if (!triggerTypes.includes('hover') || disabled) return;
+
+      // 나가기 타이머 취소
+      if (leaveTimerRef.current) {
+        clearTimeout(leaveTimerRef.current);
+        leaveTimerRef.current = null;
+      }
+    }, [triggerTypes, disabled]);
+
+    // 드롭다운 컨텐츠의 마우스 이탈 핸들러
+    const handleContentMouseLeave = useCallback(() => {
+      if (!triggerTypes.includes('hover') || disabled) return;
+
+      // 이탈 타이머 설정
+      leaveTimerRef.current = setTimeout(() => {
+        setVisible(false);
+      }, mouseLeaveDelay);
+    }, [triggerTypes, disabled, setVisible, mouseLeaveDelay]);
 
     // 외부 클릭 감지
     useEffect(() => {
@@ -479,6 +513,11 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
           id={idRef.current}
           role="menu"
           aria-hidden={!isVisible}
+          onMouseEnter={handleContentMouseEnter} // hover 모드에서 마우스 진입 시 드롭다운 유지
+          onMouseLeave={handleContentMouseLeave} // hover 모드에서 마우스 이탈 시 드롭다운 닫기
+          onFocus={handleFocus} // focus 모드에서 포커스 진입 시 드롭다운 유지
+          onBlur={handleBlur} // focus 모드에서 포커스 이탈 시 드롭다운 닫기
+          tabIndex={-1} // 포커스 가능하도록 설정
           onClick={(e) => e.stopPropagation()} // 내부 클릭시 이벤트 전파 방지
         >
           {children}
