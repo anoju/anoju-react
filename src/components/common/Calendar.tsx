@@ -223,7 +223,7 @@ const Calendar = forwardRef<CalendarRef, CalendarProps>(
         if (onChange) {
           onChange(cell.date);
         }
-        
+
         // onSelected 콜백 실행
         if (onSelected) {
           onSelected(cell.date);
@@ -237,7 +237,7 @@ const Calendar = forwardRef<CalendarRef, CalendarProps>(
 
       const dateStr = formatDateToString(cell.date);
       const todayStr = cell.isToday ? '(오늘)' : '';
-      const selectedStr = cell.isSelected ? '(선택됨)' : '';
+      const selectedStr = cell.isSelected ? '(현재 선택됨)' : '';
 
       return `${dateStr}${todayStr}${selectedStr} 선택`;
     };
