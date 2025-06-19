@@ -338,7 +338,7 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
       }, 0);
     }, [triggerTypes, disabled, setVisible]);
 
-    // 컸텍스트 메뉴 핸들러
+    // 컨텍스트 메뉴 핸들러
     const handleContextMenu = useCallback(
       (e: React.MouseEvent) => {
         if (!triggerTypes.includes('contextMenu') || disabled) return;
@@ -413,11 +413,27 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
       };
     }, [isVisible, setVisible]);
 
-    // 스크롤 감지
+    // 스크롤 감지 (수정된 버전)
     useEffect(() => {
       if (!isVisible) return;
 
-      const handleScroll = () => {
+      const handleScroll = (event: Event) => {
+        const target = event.target as HTMLElement;
+        
+        // 드롭다운 내부에서 발생한 스크롤인지 확인
+        const isDropdownInternalScroll = contentRef.current?.contains(target);
+        
+        if (isDropdownInternalScroll) {
+          // 드롭다운 내부 스크롤인 경우
+          if (followScroll) {
+            // followScroll이 true인 경우에만 위치 재조정
+            adjustPosition();
+          }
+          // 드롭다운을 닫지 않음
+          return;
+        }
+
+        // 외부 스크롤인 경우
         if (followScroll) {
           // 스크롤시 위치 재조정
           adjustPosition();
