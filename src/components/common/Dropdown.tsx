@@ -46,6 +46,7 @@ interface DropdownProps {
   mouseEnterDelay?: number; // 마우스 진입 지연 시간 (ms)
   mouseLeaveDelay?: number; // 마우스 이탈 지연 시간 (ms)
   usePortal?: boolean; // Portal 사용 여부 (기본값: false)
+  positionTarget?: HTMLElement | React.RefObject<HTMLElement> | null; // 위치 계산 기준 요소 (외부 제어 시 사용)
 }
 
 // 고유 ID 생성을 위한 유틸리티 함수
@@ -79,6 +80,7 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
       mouseEnterDelay = 100,
       mouseLeaveDelay = 100,
       usePortal = false,
+      positionTarget = null,
     },
     ref
   ) => {
@@ -145,11 +147,30 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
 
     // 위치 계산 및 조정 함수
     const adjustPosition = useCallback(() => {
-      if (!isVisible || !triggerRef.current || !contentRef.current) return;
+      if (!isVisible || !contentRef.current) return;
 
-      const trigger = triggerRef.current;
       const content = contentRef.current;
-      const triggerRect = trigger.getBoundingClientRect();
+
+      // 위치 계산 기준 요소 결정
+      let targetElement: HTMLElement | null = null;
+
+      if (positionTarget) {
+        // positionTarget이 제공된 경우
+        if ('current' in positionTarget) {
+          // RefObject인 경우
+          targetElement = positionTarget.current;
+        } else {
+          // HTMLElement인 경우
+          targetElement = positionTarget;
+        }
+      } else if (triggerRef.current) {
+        // 기본: trigger 요소 사용
+        targetElement = triggerRef.current;
+      }
+
+      if (!targetElement) return;
+
+      const targetRect = targetElement.getBoundingClientRect();
       const contentRect = content.getBoundingClientRect();
 
       // 스크롤 위치 고려
@@ -159,32 +180,32 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
         window.pageXOffset || document.documentElement.scrollLeft;
 
       // 기본 위치 계산
-      let left = triggerRect.left + scrollLeft + offset[0];
+      let left = targetRect.left + scrollLeft + offset[0];
       let top: number;
       let actualPlacement: 'top' | 'bottom' = 'bottom';
 
       // placement에 따른 초기 위치 설정
       if (placement === 'top') {
-        top = triggerRect.top - content.offsetHeight - offset[1];
+        top = targetRect.top - content.offsetHeight - offset[1];
         actualPlacement = 'top';
       } else if (placement === 'bottom') {
-        top = triggerRect.bottom + offset[1];
+        top = targetRect.bottom + offset[1];
         actualPlacement = 'bottom';
       } else {
         // auto: 공간이 더 많은 쪽으로 배치
-        const spaceBelow = window.innerHeight - triggerRect.bottom;
-        const spaceAbove = triggerRect.top;
+        const spaceBelow = window.innerHeight - targetRect.bottom;
+        const spaceAbove = targetRect.top;
 
         if (autoAdjustOverflow) {
           if (spaceBelow >= content.offsetHeight || spaceBelow >= spaceAbove) {
-            top = triggerRect.bottom + offset[1];
+            top = targetRect.bottom + offset[1];
             actualPlacement = 'bottom';
           } else {
-            top = triggerRect.top - content.offsetHeight - offset[1];
+            top = targetRect.top - content.offsetHeight - offset[1];
             actualPlacement = 'top';
           }
         } else {
-          top = triggerRect.bottom + offset[1];
+          top = targetRect.bottom + offset[1];
           actualPlacement = 'bottom';
         }
       }
@@ -210,14 +231,14 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
           top + content.offsetHeight > windowHeight + scrollTop - 10
         ) {
           // 아래쪽 공간이 부족하면 위로
-          const newTop = triggerRect.top - content.offsetHeight - offset[1];
+          const newTop = targetRect.top - content.offsetHeight - offset[1];
           if (newTop >= 10) {
             top = newTop;
             actualPlacement = 'top';
           }
         } else if (actualPlacement === 'top' && top < 10) {
           // 위쪽 공간이 부족하면 아래로
-          top = triggerRect.bottom + offset[1];
+          top = targetRect.bottom + offset[1];
           actualPlacement = 'bottom';
         }
       }
@@ -244,7 +265,7 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
 
       // 트리거와 같은 너비로 설정하는 옵션 (필요시)
       if (!minWidth && !maxWidth) {
-        style.minWidth = `${triggerRect.width}px`;
+        style.minWidth = `${targetRect.width}px`;
       }
 
       // 스타일 적용
@@ -264,6 +285,7 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
       maxWidth,
       maxHeight,
       currentPlacement,
+      positionTarget, // positionTarget 의존성 추가
     ]);
 
     // 트리거 클릭 핸들러
@@ -458,6 +480,21 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
         window.removeEventListener('resize', handleResize);
       };
     }, [isVisible, adjustPosition]);
+
+    // 외부 visible prop 변경 감지 및 애니메이션 상태 동기화
+    useEffect(() => {
+      if (controlledVisible !== undefined) {
+        if (controlledVisible) {
+          // 외부에서 visible을 true로 설정한 경우
+          setTimeout(() => {
+            setIsAnimating(true);
+          }, 10);
+        } else {
+          // 외부에서 visible을 false로 설정한 경우
+          setIsAnimating(false);
+        }
+      }
+    }, [controlledVisible]);
 
     // visible 상태 변경시 위치 조정
     useEffect(() => {

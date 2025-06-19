@@ -17,6 +17,7 @@ const DropdownGuide = () => {
   });
 
   const [visible, setVisible] = useState(false);
+  const [visible2, setVisible2] = useState(false);
 
   return (
     <div className="page-inner">
@@ -318,40 +319,47 @@ const DropdownGuide = () => {
       </section>
 
       <section className={styles.section}>
+        <Dropdown
+          trigger={
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <span>선택된 값</span>
+              <button style={{ marginLeft: '8px' }}>▼</button>{' '}
+              {/* 이 버튼만 클릭 가능 */}
+            </div>
+          }
+        >
+          <div>옵션들...</div>
+        </Dropdown>
+        <br />
+        <br />
+        <br />
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <span>선택된 값</span>
+          <button onClick={() => setVisible2(!visible2)}>▼</button>
+          <Dropdown
+            trigger={<span />} // 빈 트리거
+            visible={visible2}
+            onVisibleChange={setVisible2}
+          >
+            <div>옵션들...</div>
+          </Dropdown>
+        </div>
+        <br />
+        <br />
+        <br />
         {/* // 외부 상태 제어 */}
         노출 여부: {visible}
+        <br />
         <Dropdown
           trigger={<Button>제어되는 드롭다운</Button>}
           visible={visible}
           onVisibleChange={setVisible}
-          placement="top"
-          followScroll={true}
         >
           <div>내용...</div>
         </Dropdown>
         <br />
         <br />
         <br />
-        {/* // Select와 같은 스타일로 사용 */}
-        <Dropdown
-          trigger={
-            <div
-              style={{
-                border: '1px solid #d9d9d9',
-                padding: '4px 11px',
-                borderRadius: '6px',
-                cursor: 'pointer',
-              }}
-            >
-              선택하세요 ▼
-            </div>
-          }
-          overlayClassName="custom-dropdown"
-        >
-          <div className="dropdown-item">옵션 1</div>
-          <div className="dropdown-item">옵션 2</div>
-          <div className="dropdown-item">옵션 3</div>
-        </Dropdown>
       </section>
     </div>
   );
