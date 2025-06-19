@@ -44,12 +44,6 @@ const SwiperGuide = () => {
       <h1 className={styles.title}>Swiper Component</h1>
 
       <section className={styles.section}>
-        <h2 className={styles['section-title']}>설치</h2>
-        <p className={styles.txt}>먼저 swiper 패키지를 설치해야 합니다.</p>
-        <CodeHighlight code={`npm install swiper`} language="bash" />
-      </section>
-
-      <section className={styles.section}>
         <h2 className={styles['section-title']}>import</h2>
         <CodeHighlight
           code={`import { Swiper, SwiperSlide } from '@/components/common';

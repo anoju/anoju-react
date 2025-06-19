@@ -40,9 +40,11 @@ interface DropdownProps {
   followScroll?: boolean; // 스크롤시 따라가기 여부 (기본 false)
   minWidth?: number; // 최소 너비
   maxWidth?: number; // 최대 너비
+  maxHeight?: number | null; // 최대 높이 (기본값: null)
   offset?: [number, number]; // [x, y] 오프셋
   mouseEnterDelay?: number; // 마우스 진입 지연 시간 (ms)
   mouseLeaveDelay?: number; // 마우스 이탈 지연 시간 (ms)
+  usePortal?: boolean; // Portal 사용 여부 (기본값: false)
 }
 
 // 고유 ID 생성을 위한 유틸리티 함수
@@ -71,9 +73,11 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
       followScroll = false,
       minWidth,
       maxWidth,
+      maxHeight = null,
       offset = [0, 0],
       mouseEnterDelay = 100,
       mouseLeaveDelay = 100,
+      usePortal = false,
     },
     ref
   ) => {
@@ -82,6 +86,7 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
     const [currentPlacement, setCurrentPlacement] = useState<'top' | 'bottom'>(
       'bottom'
     );
+    const [isAnimating, setIsAnimating] = useState(false); // 애니메이션 상태 추가
 
     // visible 상태 결정 (외부 제어 우선)
     const isVisible =
@@ -105,13 +110,34 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
       (visible: boolean) => {
         if (disabled) return;
 
-        if (controlledVisible === undefined) {
-          setInternalVisible(visible);
+        if (visible) {
+          // 표시할 때
+          setIsAnimating(true);
+          if (controlledVisible === undefined) {
+            setInternalVisible(visible);
+          }
+          onVisibleChange?.(visible);
+        } else {
+          // 숨김 때 - destroyPopupOnHide가 true라도 애니메이션 위해 지연
+          if (destroyPopupOnHide) {
+            setIsAnimating(false);
+            // 애니메이션 완료 후 DOM 제거
+            setTimeout(() => {
+              if (controlledVisible === undefined) {
+                setInternalVisible(visible);
+              }
+              onVisibleChange?.(visible);
+            }, 200); // CSS transition 시간과 맞춤
+          } else {
+            setIsAnimating(false);
+            if (controlledVisible === undefined) {
+              setInternalVisible(visible);
+            }
+            onVisibleChange?.(visible);
+          }
         }
-
-        onVisibleChange?.(visible);
       },
-      [controlledVisible, onVisibleChange, disabled]
+      [controlledVisible, onVisibleChange, disabled, destroyPopupOnHide]
     );
 
     // 위치 계산 및 조정 함수
@@ -208,6 +234,11 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
         style.maxWidth = `${maxWidth}px`;
       }
 
+      // maxHeight 설정
+      if (maxHeight) {
+        style.maxHeight = `${maxHeight}px`;
+      }
+
       // 트리거와 같은 너비로 설정하는 옵션 (필요시)
       if (!minWidth && !maxWidth) {
         style.minWidth = `${triggerRect.width}px`;
@@ -228,6 +259,7 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
       overlayStyle,
       minWidth,
       maxWidth,
+      maxHeight,
       currentPlacement,
     ]);
 
@@ -489,7 +521,8 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
 
     // 드롭다운 내용 렌더링
     const renderDropdownContent = () => {
-      if (!isVisible && destroyPopupOnHide) {
+      // destroyPopupOnHide가 true이고 비가시상태이며 애니메이션도 아닌 경우 null 반환
+      if (!isVisible && destroyPopupOnHide && !isAnimating) {
         return null;
       }
 
@@ -502,14 +535,23 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
         .filter(Boolean)
         .join(' ');
 
+      // 스타일 객체 생성
+      const contentStyle: CSSProperties = {
+        display: 'block',
+        ...overlayStyle,
+      };
+
+      // maxHeight 옵션 반영
+      if (maxHeight) {
+        contentStyle.maxHeight = `${maxHeight}px`;
+        contentStyle.overflowY = 'auto';
+      }
+
       return (
         <div
           ref={contentRef}
           className={contentClasses}
-          style={{
-            display: isVisible || !destroyPopupOnHide ? 'block' : 'none',
-            ...overlayStyle,
-          }}
+          style={contentStyle}
           id={idRef.current}
           role="menu"
           aria-hidden={!isVisible}
@@ -530,8 +572,8 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
       if (getPopupContainer) {
         return getPopupContainer();
       }
-      return document.body;
-    }, [getPopupContainer]);
+      return usePortal ? document.body : dropdownRef.current?.parentElement || document.body;
+    }, [getPopupContainer, usePortal]);
 
     return (
       <div
@@ -553,8 +595,10 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
           {enhancedTrigger}
         </div>
 
-        {/* Portal을 사용해서 드롭다운 내용을 body에 렌더링 */}
-        {createPortal(renderDropdownContent(), getContainer())}
+        {/* Portal 옵션에 따라 렌더링 방식 결정 */}
+        {usePortal
+          ? createPortal(renderDropdownContent(), getContainer())
+          : renderDropdownContent()}
       </div>
     );
   }

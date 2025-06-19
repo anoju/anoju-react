@@ -39,6 +39,7 @@ const DropdownGuide = () => {
                 클릭하세요
               </Button>
             }
+            destroyPopupOnHide
           >
             <ul>
               <li>옵션 1</li>
