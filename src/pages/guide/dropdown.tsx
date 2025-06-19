@@ -1,4 +1,4 @@
-// src/pages/guide/textarea.tsx
+// src/pages/guide/dropdown.tsx
 import { useState } from 'react';
 import { usePageLayout } from '@/hooks/usePageLayout';
 import { Button, CodeHighlight, Dropdown } from '@/components/common';
@@ -39,7 +39,6 @@ const DropdownGuide = () => {
                 클릭하세요
               </Button>
             }
-            destroyPopupOnHide
           >
             <ul>
               <li>옵션 1</li>
@@ -228,6 +227,94 @@ const DropdownGuide = () => {
 </Dropdown>`}
           language="jsx"
         />
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles['section-title']}>
+          드랍박스가 보여질때 생성(destroyPopupOnHide)
+        </h2>
+        <div className={styles.showcase}>
+          <Dropdown
+            trigger={
+              <Button size="sm" className="line">
+                클릭하세요
+              </Button>
+            }
+            destroyPopupOnHide
+          >
+            <ul>
+              <li>옵션 1</li>
+              <li>옵션 2</li>
+              <li>옵션 3</li>
+            </ul>
+          </Dropdown>
+        </div>
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles['section-title']}>
+          드랍박스가 body 아래 생성(usePortal)
+        </h2>
+        <div className={styles.showcase}>
+          <Dropdown
+            trigger={
+              <Button size="sm" className="line">
+                클릭하세요
+              </Button>
+            }
+            usePortal
+          >
+            <ul>
+              <li>옵션 1</li>
+              <li>옵션 2</li>
+              <li>옵션 3</li>
+            </ul>
+          </Dropdown>
+        </div>
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles['section-title']}>
+          드랍박스가 스크롤시 사라지지않고 따라감(followScroll)
+        </h2>
+        <div className={styles.showcase}>
+          <Dropdown
+            trigger={
+              <Button size="sm" className="line">
+                클릭하세요
+              </Button>
+            }
+            followScroll
+          >
+            <ul>
+              <li>옵션 1</li>
+              <li>옵션 2</li>
+              <li>옵션 3</li>
+            </ul>
+          </Dropdown>
+        </div>
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles['section-title']}>
+          드랍박스 최대높이값 조절(maxHeight)
+        </h2>
+        <div className={styles.showcase}>
+          <Dropdown
+            trigger={
+              <Button size="sm" className="line">
+                클릭하세요
+              </Button>
+            }
+            maxHeight={50}
+          >
+            <ul>
+              <li>옵션 1</li>
+              <li>옵션 2</li>
+              <li>옵션 3</li>
+            </ul>
+          </Dropdown>
+        </div>
       </section>
 
       <section className={styles.section}>

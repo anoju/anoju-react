@@ -210,11 +210,11 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
         ) {
           // 아래쪽 공간이 부족하면 위로
           const newTop = triggerRect.top - content.offsetHeight - offset[1];
-          if (newTop >= scrollTop + 10) {
+          if (newTop >= 10) {
             top = newTop;
             actualPlacement = 'top';
           }
-        } else if (actualPlacement === 'top' && top < scrollTop + 10) {
+        } else if (actualPlacement === 'top' && top < 10) {
           // 위쪽 공간이 부족하면 아래로
           top = triggerRect.bottom + offset[1];
           actualPlacement = 'bottom';
@@ -531,7 +531,7 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
       const contentClasses = [
         styles['dropdown-content'],
         styles[`placement-${currentPlacement}`],
-        (isVisible && isAnimating) ? styles.visible : '', // 둘 다 true일 때만 visible 클래스 추가
+        isVisible && isAnimating ? styles.visible : '', // 둘 다 true일 때만 visible 클래스 추가
         overlayClassName,
       ]
         .filter(Boolean)
@@ -574,7 +574,9 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
       if (getPopupContainer) {
         return getPopupContainer();
       }
-      return usePortal ? document.body : dropdownRef.current?.parentElement || document.body;
+      return usePortal
+        ? document.body
+        : dropdownRef.current?.parentElement || document.body;
     }, [getPopupContainer, usePortal]);
 
     return (
