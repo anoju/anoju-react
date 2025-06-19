@@ -26,7 +26,7 @@ type TriggerType = 'click' | 'hover' | 'focus' | 'contextMenu';
 // 드롭다운 Props 인터페이스
 interface DropdownProps {
   children: ReactNode; // 드롭다운 내용
-  trigger: ReactNode; // 드롭다운을 여는 트리거 요소
+  trigger?: ReactNode; // 드롭다운을 여는 트리거 요소 (선택사항)
   triggerType?: TriggerType | TriggerType[]; // 트리거 방식 (기본값: 'click')
   visible?: boolean; // 드롭다운 표시 여부 (외부 제어)
   onVisibleChange?: (visible: boolean) => void; // 표시 상태 변경 콜백
@@ -46,7 +46,7 @@ interface DropdownProps {
   mouseEnterDelay?: number; // 마우스 진입 지연 시간 (ms)
   mouseLeaveDelay?: number; // 마우스 이탈 지연 시간 (ms)
   usePortal?: boolean; // Portal 사용 여부 (기본값: false)
-  positionTarget?: HTMLElement | React.RefObject<HTMLElement> | null; // 위치 계산 기준 요소 (외부 제어 시 사용)
+  positionTarget?: HTMLElement | React.RefObject<HTMLElement | null> | null; // 위치 계산 기준 요소 (외부 제어 시 사용)
 }
 
 // 고유 ID 생성을 위한 유틸리티 함수
@@ -521,7 +521,7 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
     }, []);
 
     // 트리거 요소에 이벤트 추가
-    const enhancedTrigger = isValidElement(trigger)
+    const enhancedTrigger = trigger && isValidElement(trigger)
       ? cloneElement(
           trigger as ReactElement<{
             onClick?: MouseEventHandler<Element>;
@@ -630,32 +630,37 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
     }, [getPopupContainer, usePortal]);
 
     return (
-      <div
-        ref={(node) => {
-          // ref 처리
-          if (typeof ref === 'function') {
-            ref(node);
-          } else if (ref) {
-            ref.current = node;
-          }
-          dropdownRef.current = node;
-        }}
-        className={cx(styles.dropdown, className)}
-      >
-        <div
-          ref={triggerRef}
-          className={cx(styles['dropdown-trigger'], {
-            [styles.disabled]: disabled,
-          })}
-        >
-          {enhancedTrigger}
-        </div>
+      <>
+        {/* trigger가 있을 때만 래퍼와 트리거 영역 렌더링 */}
+        {trigger && (
+          <div
+            ref={(node) => {
+              // ref 처리
+              if (typeof ref === 'function') {
+                ref(node);
+              } else if (ref) {
+                ref.current = node;
+              }
+              dropdownRef.current = node;
+            }}
+            className={cx(styles.dropdown, className)}
+          >
+            <div
+              ref={triggerRef}
+              className={cx(styles['dropdown-trigger'], {
+                [styles.disabled]: disabled,
+              })}
+            >
+              {enhancedTrigger}
+            </div>
+          </div>
+        )}
 
         {/* Portal 옵션에 따라 렌더링 방식 결정 */}
         {usePortal
           ? createPortal(renderDropdownContent(), getContainer())
           : renderDropdownContent()}
-      </div>
+      </>
     );
   }
 );

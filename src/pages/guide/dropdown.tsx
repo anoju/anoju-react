@@ -1,5 +1,5 @@
 // src/pages/guide/dropdown.tsx
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { usePageLayout } from '@/hooks/usePageLayout';
 import { Button, CodeHighlight, Dropdown } from '@/components/common';
 import styles from '@/assets/scss/pages/guide.module.scss';
@@ -18,6 +18,7 @@ const DropdownGuide = () => {
 
   const [visible, setVisible] = useState(false);
   const [visible2, setVisible2] = useState(false);
+  const targetRef = useRef<HTMLDivElement>(null);
 
   return (
     <div className="page-inner">
@@ -333,11 +334,18 @@ const DropdownGuide = () => {
         <br />
         <br />
         <br />
-        <div style={{ display: 'flex', alignItems: 'center' }}>
+        <div
+          ref={targetRef}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            border: '1px solid #ccc',
+          }}
+        >
           <span>선택된 값</span>
           <button onClick={() => setVisible2(!visible2)}>▼</button>
           <Dropdown
-            trigger={<span />} // 빈 트리거
+            positionTarget={targetRef}
             visible={visible2}
             onVisibleChange={setVisible2}
           >
