@@ -112,15 +112,18 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
 
         if (visible) {
           // 표시할 때
-          setIsAnimating(true);
           if (controlledVisible === undefined) {
             setInternalVisible(visible);
           }
           onVisibleChange?.(visible);
+          // DOM이 생성된 후 애니메이션 시작
+          setTimeout(() => {
+            setIsAnimating(true);
+          }, 10);
         } else {
-          // 숨김 때 - destroyPopupOnHide가 true라도 애니메이션 위해 지연
+          // 숨김 때
+          setIsAnimating(false);
           if (destroyPopupOnHide) {
-            setIsAnimating(false);
             // 애니메이션 완료 후 DOM 제거
             setTimeout(() => {
               if (controlledVisible === undefined) {
@@ -129,7 +132,6 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
               onVisibleChange?.(visible);
             }, 200); // CSS transition 시간과 맞춤
           } else {
-            setIsAnimating(false);
             if (controlledVisible === undefined) {
               setInternalVisible(visible);
             }
@@ -529,7 +531,7 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
       const contentClasses = [
         styles['dropdown-content'],
         styles[`placement-${currentPlacement}`],
-        isVisible ? styles.visible : '',
+        (isVisible && isAnimating) ? styles.visible : '', // 둘 다 true일 때만 visible 클래스 추가
         overlayClassName,
       ]
         .filter(Boolean)
