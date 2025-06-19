@@ -28,7 +28,7 @@
 
 .dropdown-content {
   position: fixed;
-  z-index: 100;
+  z-index: 10;
   min-width: 120px;
   max-height: var(--dropdown-max-height);
   padding: var(--dropdown-padding);
@@ -66,6 +66,10 @@
     &:hover {
       background-color: #999;
     }
+  }
+
+  &.portal {
+    z-index: 100;
   }
 
   // 표시 상태

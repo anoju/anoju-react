@@ -15,6 +15,7 @@ import React, {
 } from 'react';
 import { createPortal } from 'react-dom';
 import styles from '@/assets/scss/components/dropdown.module.scss';
+import cx from '@/utils/cx';
 
 // 배치 타입 정의
 type PlacementType = 'top' | 'bottom' | 'auto';
@@ -419,17 +420,12 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
 
       const handleScroll = (event: Event) => {
         const target = event.target as HTMLElement;
-        
+
         // 드롭다운 내부에서 발생한 스크롤인지 확인
         const isDropdownInternalScroll = contentRef.current?.contains(target);
-        
+
         if (isDropdownInternalScroll) {
-          // 드롭다운 내부 스크롤인 경우
-          if (followScroll) {
-            // followScroll이 true인 경우에만 위치 재조정
-            adjustPosition();
-          }
-          // 드롭다운을 닫지 않음
+          // 드롭다운 내부 스크롤인 경우 - 아무것도 하지 않음
           return;
         }
 
@@ -544,14 +540,15 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
         return null;
       }
 
-      const contentClasses = [
+      const contentClasses = cx(
         styles['dropdown-content'],
         styles[`placement-${currentPlacement}`],
-        isVisible && isAnimating ? styles.visible : '', // 둘 다 true일 때만 visible 클래스 추가
-        overlayClassName,
-      ]
-        .filter(Boolean)
-        .join(' ');
+        {
+          [styles.visible]: isVisible && isAnimating,
+          [styles.portal]: usePortal, // portal 클래스 추가
+        },
+        overlayClassName
+      );
 
       // 스타일 객체 생성
       const contentStyle: CSSProperties = {
@@ -606,11 +603,13 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
           }
           dropdownRef.current = node;
         }}
-        className={`${styles.dropdown} ${className}`}
+        className={cx(styles.dropdown, className)}
       >
         <div
           ref={triggerRef}
-          className={`${styles['dropdown-trigger']} ${disabled ? styles.disabled : ''}`}
+          className={cx(styles['dropdown-trigger'], {
+            [styles.disabled]: disabled,
+          })}
         >
           {enhancedTrigger}
         </div>
