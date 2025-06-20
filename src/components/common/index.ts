@@ -16,6 +16,7 @@ export {
 export { default as Input, type InputHandle } from './Input';
 export { default as Textarea, type TextareaHandle } from './Textarea';
 export { default as Tooltip } from './Tooltip';
+export { default as PageTransition } from './PageTransition';
 export { default as Dropdown } from './Dropdown';
 export { default as Sticky } from './Sticky';
 export {
