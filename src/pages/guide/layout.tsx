@@ -1,6 +1,6 @@
 // src/pages/guide/layout.tsx
 import React, { ReactNode } from 'react';
-import { Tabs, Sticky, PageTransition } from '@/components/common';
+import { Tabs, Sticky } from '@/components/common';
 
 interface GuideLayoutProps {
   children: ReactNode;
@@ -45,10 +45,6 @@ const GuideLayout: React.FC<GuideLayoutProps> = ({ children }) => {
               to: '/guide/tooltip',
             },
             {
-              label: 'PageTransition',
-              to: '/guide/page-transition',
-            },
-            {
               label: 'Expand',
               to: '/guide/expand',
             },
@@ -87,13 +83,7 @@ const GuideLayout: React.FC<GuideLayoutProps> = ({ children }) => {
           ]}
         />
       </Sticky>
-      <PageTransition
-        transitionType="slide-right"
-        duration={300}
-        className="mt-30"
-      >
-        {children}
-      </PageTransition>
+      <div style={{ marginTop: '3rem' }}>{children}</div>
     </>
   );
 };

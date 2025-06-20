@@ -3,7 +3,7 @@ import React, { ReactNode, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLayout } from '@/contexts/LayoutContext';
 import styles from '@/assets/scss/layouts/layouts.module.scss';
-import { Button, Sticky, PageTransition } from '@/components/common';
+import { Button, Sticky } from '@/components/common';
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -104,11 +104,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           </header>
         </Sticky>
       )}
-      <main className={styles.container}>
-        {/* <PageTransition transitionType="fade" duration={300}> */}
-        {children}
-        {/* </PageTransition> */}
-      </main>
+      <main className={styles.container}>{children}</main>
       {config.showFooter && (
         <footer className={styles.footer}>
           Copyright © 2025 ANOJU. All rights reserved.
