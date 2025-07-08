@@ -40,3 +40,4 @@ export {
   type CalendarRef,
   type DateRange,
 } from './Calendar';
+export { default as DatePicker, type DatePickerRef } from './DatePicker';

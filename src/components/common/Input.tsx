@@ -1,4 +1,4 @@
-// src/components/common/Input.tsx
+// src/components/common/Input.tsx.part1
 import React, {
   forwardRef,
   useState,
@@ -12,6 +12,7 @@ import React, {
 } from 'react';
 import styles from '@/assets/scss/components/input.module.scss';
 import cx from '@/utils/cx';
+import DatePicker, { formatDate, parseDate } from './DatePicker';
 
 // ---------------------- Types ----------------------
 
@@ -69,6 +70,11 @@ export interface InputProps {
   afterEl?: ReactNode;
   onlyNumber?: boolean;
   addComma?: boolean;
+  // DatePicker 관련
+  datepicker?: boolean;
+  dateFormat?: string;
+  onDateChange?: (date: Date | null) => void;
+  disabledDate?: (date: Date) => boolean;
   // 다중 input 태그 관련
   values?: (string | number)[];
   setValues?: (values: (string | number)[]) => void;
@@ -99,8 +105,12 @@ interface UseInputValueReturn extends InputRefs {
   ) => void;
   isControlled: boolean;
   isMultipleInputs: boolean;
+  // DatePicker 관련
+  selectedDate: Date | null;
+  handleDateSelect: (date: Date) => void;
 }
 
+// src/components/common/Input.tsx.part2
 // ---------------------- Utils ----------------------
 
 /**
@@ -150,9 +160,13 @@ function useInputValue(props: {
   disabled?: boolean;
   readOnly?: boolean;
   inputFields?: InputFieldProps[];
+  // DatePicker 관련
+  datepicker?: boolean;
+  dateFormat?: string;
+  onDateChange?: (date: Date | null) => void;
 }): UseInputValueReturn {
   const {
-    value,
+    value: rawValue,
     defaultValue,
     values,
     setValue,
@@ -163,20 +177,37 @@ function useInputValue(props: {
     disabled,
     readOnly,
     inputFields = [],
+    datepicker,
+    dateFormat = 'YYYY-MM-DD',
+    onDateChange,
   } = props;
 
+  // Handle Date type properly
+  const value = rawValue as string | number | Date | undefined;
+
   // 상태 관리
-  const [inputValue, setInputValue] = useState<string>(
-    value !== undefined
-      ? String(value)
-      : defaultValue !== undefined
-        ? String(defaultValue)
-        : ''
-  );
+  const [inputValue, setInputValue] = useState<string>(() => {
+    if (datepicker && value) {
+      const dateValue = typeof value === 'number' ? new Date(value) : value;
+      if (dateValue instanceof Date && !isNaN(dateValue.getTime())) {
+        return formatDate(dateValue, dateFormat);
+      }
+    }
+    return defaultValue !== undefined ? String(defaultValue) : '';
+  });
 
   const [inputValues, setInputValues] = useState<string[]>(
     values ? values.map((val) => (val !== undefined ? String(val) : '')) : []
   );
+
+  // DatePicker 관련 상태
+  const [selectedDate, setSelectedDate] = useState<Date | null>(() => {
+    if (datepicker && value) {
+      if (value instanceof Date) return value;
+      if (typeof value === 'string') return parseDate(value, dateFormat);
+    }
+    return null;
+  });
 
   // 참조 객체들
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -190,12 +221,21 @@ function useInputValue(props: {
     (newValue: string) => {
       setInputValue(newValue);
 
+      // DatePicker 모드에서는 날짜 파싱도 함께 처리
+      if (datepicker) {
+        const parsedDate = parseDate(newValue, dateFormat);
+        setSelectedDate(parsedDate);
+        if (onDateChange) {
+          onDateChange(parsedDate);
+        }
+      }
+
       // 외부에서 제공한 setValue 호출
       if (setValue) {
         setValue(newValue);
       }
     },
-    [setValue]
+    [setValue, datepicker, dateFormat, onDateChange]
   );
 
   // 다중 값 직접 설정 함수
@@ -214,10 +254,46 @@ function useInputValue(props: {
     [setValues]
   );
 
+  // DatePicker에서 날짜 선택 시 처리
+  const handleDateSelect = useCallback(
+    (date: Date) => {
+      setSelectedDate(date);
+      const formattedDate = formatDate(date, dateFormat);
+      setInputValue(formattedDate);
+
+      if (setValue) {
+        setValue(formattedDate);
+      }
+
+      if (onDateChange) {
+        onDateChange(date);
+      }
+
+      // onChange 콜백도 호출
+      if (onChange) {
+        const syntheticEvent = {
+          target: { value: formattedDate },
+          currentTarget: { value: formattedDate },
+        } as React.ChangeEvent<HTMLInputElement>;
+        onChange(syntheticEvent);
+      }
+    },
+    [setValue, onDateChange, onChange, dateFormat]
+  );
+
   // 외부 value/values prop이 변경되면 내부 상태 업데이트
   useEffect(() => {
     if (value !== undefined) {
-      setInputValue(String(value));
+      if (datepicker && value instanceof Date) {
+        const formattedDate = formatDate(value, dateFormat);
+        setInputValue(formattedDate);
+        setSelectedDate(value);
+      } else {
+        setInputValue(String(value));
+        if (datepicker && typeof value === 'string') {
+          setSelectedDate(parseDate(value, dateFormat));
+        }
+      }
     }
     if (values !== undefined) {
       const newInputValues = values.map((val) =>
@@ -225,11 +301,18 @@ function useInputValue(props: {
       );
       setInputValues(newInputValues);
     }
-  }, [value, values]);
+  }, [value, values, datepicker, dateFormat]);
 
+  // src/components/common/Input.tsx.part3
   // 입력 처리 핸들러
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>, index?: number) => {
+      // DatePicker 모드에서는 직접 입력 막기
+      if (datepicker) {
+        e.preventDefault();
+        return;
+      }
+
       let newValue = e.target.value;
 
       // 숫자만 입력 처리
@@ -351,6 +434,7 @@ function useInputValue(props: {
       }
     },
     [
+      datepicker,
       onlyNumber,
       addComma,
       isMultipleInputs,
@@ -374,6 +458,9 @@ function useInputValue(props: {
     isMultipleInputs,
     inputRef,
     inputRefs,
+    // DatePicker 관련
+    selectedDate,
+    handleDateSelect,
   };
 }
 
@@ -410,6 +497,7 @@ function useFocusState(props: {
   return { isFocused, handleFocus, handleBlur };
 }
 
+// src/components/common/Input.tsx.part4
 // ---------------------- Components ----------------------
 
 /**
@@ -479,6 +567,12 @@ const Input = forwardRef<InputHandle, InputProps>(
       onlyNumber = false,
       addComma = false,
 
+      // DatePicker 관련
+      datepicker = false,
+      dateFormat = 'YYYY-MM-DD',
+      onDateChange,
+      disabledDate,
+
       // 값 제어 함수
       setValue,
       setValues,
@@ -499,6 +593,9 @@ const Input = forwardRef<InputHandle, InputProps>(
     },
     ref
   ) => {
+    // DatePicker 관련 상태
+    const [datePickerVisible, setDatePickerVisible] = useState(false);
+
     // 입력값 상태 관리 훅
     const {
       inputValue,
@@ -510,6 +607,8 @@ const Input = forwardRef<InputHandle, InputProps>(
       isMultipleInputs,
       inputRef,
       inputRefs,
+      selectedDate,
+      handleDateSelect,
     } = useInputValue({
       value,
       defaultValue,
@@ -522,6 +621,9 @@ const Input = forwardRef<InputHandle, InputProps>(
       inputFields,
       setValue,
       setValues,
+      datepicker,
+      dateFormat,
+      onDateChange,
     });
 
     // useImperativeHandle을 사용하여 외부에서 호출 가능한 메서드 정의
@@ -597,6 +699,32 @@ const Input = forwardRef<InputHandle, InputProps>(
     const [passwordVisible, setPasswordVisible] = useState<boolean>(false);
     const actualType = type === 'password' && passwordVisible ? 'text' : type;
 
+    // DatePicker input 클릭 핸들러
+    const handleDatePickerClick = useCallback(() => {
+      if (disabled || readOnly) return;
+
+      if (datepicker) {
+        setDatePickerVisible(true);
+      }
+    }, [disabled, readOnly, datepicker]);
+
+    // DatePicker 날짜 변경 핸들러
+    const handleDatePickerChange = useCallback(
+      (date: Date | null) => {
+        if (date) {
+          handleDateSelect(date);
+        }
+        setDatePickerVisible(false);
+      },
+      [handleDateSelect]
+    );
+
+    // DatePicker 가시성 변경 핸들러
+    const handleDatePickerVisibleChange = useCallback((visible: boolean) => {
+      setDatePickerVisible(visible);
+    }, []);
+
+    // src/components/common/Input.tsx.part5
     // 입력값 초기화 함수
     const handleReset = useCallback(() => {
       if (disabled || readOnly) return;
@@ -708,6 +836,12 @@ const Input = forwardRef<InputHandle, InputProps>(
 
         if (isFormControl || disabled || readOnly) return;
 
+        // DatePicker 모드에서는 팝업 열기
+        if (datepicker) {
+          handleDatePickerClick();
+          return;
+        }
+
         if (isMultipleInputs) {
           // 다중 input의 경우 사용 가능한 첫 번째 필드에 포커스
           const nextEnabledInput = inputRefs.current.find((el, idx) => {
@@ -732,7 +866,16 @@ const Input = forwardRef<InputHandle, InputProps>(
           inputRef.current.focus();
         }
       },
-      [isMultipleInputs, inputFields, disabled, readOnly, inputRefs, inputRef]
+      [
+        isMultipleInputs,
+        inputFields,
+        disabled,
+        readOnly,
+        inputRefs,
+        inputRef,
+        datepicker,
+        handleDatePickerClick,
+      ]
     );
 
     // 개별 입력 필드 생성 함수
@@ -849,6 +992,7 @@ const Input = forwardRef<InputHandle, InputProps>(
       showReset &&
       !disabled &&
       !readOnly &&
+      !datepicker && // DatePicker 모드에서는 리셋 버튼 숨김
       ((isMultipleInputs &&
         // 다중 입력 필드에서 값이 있는 필드가 하나라도 있는지 확인
         inputValues.some((value, index) => {
@@ -864,11 +1008,16 @@ const Input = forwardRef<InputHandle, InputProps>(
 
     // 비밀번호 토글 버튼 표시 조건
     const showPasswordToggle =
-      type === 'password' && showPassword && !disabled && !readOnly;
+      type === 'password' &&
+      showPassword &&
+      !disabled &&
+      !readOnly &&
+      !datepicker;
 
     // 버튼 영역 표시 조건
     const hasButtons =
-      (showReset && !disabled && !readOnly) || showPasswordToggle;
+      (showReset && !disabled && !readOnly && !datepicker) ||
+      showPasswordToggle;
 
     // 단일 input 태그의 표시 값 계산
     const displayValue =
@@ -888,6 +1037,7 @@ const Input = forwardRef<InputHandle, InputProps>(
       [styles.success]: status === 'success',
       [styles.error]: status === 'error',
       [styles.warning]: status === 'warning',
+      [styles.datepicker]: datepicker, // DatePicker 모드 스타일
     });
 
     // 입력 필드 클래스 이름
@@ -898,58 +1048,73 @@ const Input = forwardRef<InputHandle, InputProps>(
     );
 
     return (
-      <div
-        className={wrapperClasses}
-        style={style}
-        onClick={handleWrapperClick}
-      >
-        {/* 입력 필드 앞에 표시할 요소 */}
-        {beforeEl && <div className={styles['inp-before']}>{beforeEl}</div>}
+      <>
+        <div
+          className={wrapperClasses}
+          style={style}
+          onClick={handleWrapperClick}
+        >
+          {/* 입력 필드 앞에 표시할 요소 */}
+          {beforeEl && <div className={styles['inp-before']}>{beforeEl}</div>}
 
-        {/* 실제 입력 필드 - 다중 또는 단일 */}
-        {isMultipleInputs ? (
-          renderInputFields()
-        ) : (
-          <input
-            ref={(node) => {
-              // 내부 ref만 설정 (외부 ref는 useImperativeHandle에서 처리)
-              inputRef.current = node;
-            }}
-            id={id}
-            type={actualType}
-            className={inputClasses}
-            value={displayValue}
-            placeholder={placeholder}
-            disabled={disabled}
-            readOnly={readOnly}
-            onChange={(e) => handleChange(e)}
-            onFocus={(e) => handleFocus(e)}
-            onBlur={(e) => handleBlur(e)}
-            {...restProps}
+          {/* 실제 입력 필드 - 다중 또는 단일 */}
+          {isMultipleInputs ? (
+            renderInputFields()
+          ) : (
+            <input
+              ref={(node) => {
+                // 내부 ref만 설정 (외부 ref는 useImperativeHandle에서 처리)
+                inputRef.current = node;
+              }}
+              id={id}
+              type={actualType}
+              className={inputClasses}
+              value={displayValue}
+              placeholder={placeholder}
+              disabled={disabled}
+              readOnly={datepicker ? true : readOnly} // DatePicker 모드에서는 readOnly
+              onChange={(e) => handleChange(e)}
+              onFocus={(e) => handleFocus(e)}
+              onBlur={(e) => handleBlur(e)}
+              onClick={datepicker ? handleDatePickerClick : undefined} // DatePicker 클릭 핸들러
+              {...restProps}
+            />
+          )}
+
+          {/* 입력 필드 뒤에 표시할 버튼 영역 */}
+          {hasButtons && (
+            <div className={styles['inp-buttons']} ref={buttonsRef}>
+              {/* 리셋 버튼 */}
+              {showReset && !datepicker && (
+                <ResetButton show={showResetButton} onClick={handleReset} />
+              )}
+
+              {/* 비밀번호 토글 버튼 */}
+              {showPasswordToggle && (
+                <PasswordToggleButton
+                  isVisible={passwordVisible}
+                  onClick={togglePasswordVisibility}
+                />
+              )}
+            </div>
+          )}
+
+          {/* 사용자 정의 추가 요소 */}
+          {afterEl && <div className={styles['inp-after']}>{afterEl}</div>}
+        </div>
+
+        {/* DatePicker 팝업 */}
+        {datepicker && (
+          <DatePicker
+            visible={datePickerVisible}
+            value={selectedDate}
+            onVisibleChange={handleDatePickerVisibleChange}
+            onChange={handleDatePickerChange}
+            format={dateFormat}
+            disabledDate={disabledDate}
           />
         )}
-
-        {/* 입력 필드 뒤에 표시할 버튼 영역 */}
-        {hasButtons && (
-          <div className={styles['inp-buttons']} ref={buttonsRef}>
-            {/* 리셋 버튼 */}
-            {showReset && (
-              <ResetButton show={showResetButton} onClick={handleReset} />
-            )}
-
-            {/* 비밀번호 토글 버튼 */}
-            {showPasswordToggle && (
-              <PasswordToggleButton
-                isVisible={passwordVisible}
-                onClick={togglePasswordVisibility}
-              />
-            )}
-          </div>
-        )}
-
-        {/* 사용자 정의 추가 요소 */}
-        {afterEl && <div className={styles['inp-after']}>{afterEl}</div>}
-      </div>
+      </>
     );
   }
 );
