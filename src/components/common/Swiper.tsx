@@ -72,6 +72,9 @@ export interface SwiperProps {
   spaceBetween?: number;
   loop?: boolean;
   centeredSlides?: boolean;
+  initialSlide?: number;
+  allowTouchMove?: boolean;
+  autoHeight?: boolean;
 
   // 자동재생
   autoplay?: boolean | AutoplayOptions;
@@ -281,6 +284,9 @@ export const Swiper = forwardRef<SwiperRef, SwiperProps>(
       spaceBetween,
       loop,
       centeredSlides,
+      initialSlide,
+      allowTouchMove,
+      autoHeight,
       autoplay,
       navigation,
       pagination,
@@ -327,6 +333,9 @@ export const Swiper = forwardRef<SwiperRef, SwiperProps>(
       ...(spaceBetween !== undefined && { spaceBetween }),
       ...(loop !== undefined && { loop }),
       ...(centeredSlides !== undefined && { centeredSlides }),
+      ...(initialSlide !== undefined && { initialSlide }),
+      ...(allowTouchMove !== undefined && { allowTouchMove }),
+      ...(autoHeight !== undefined && { autoHeight }),
       ...(effect && { effect }),
       ...(thumbsSwiper && { thumbs: { swiper: thumbsSwiper } }),
       ...swiperOptions,
