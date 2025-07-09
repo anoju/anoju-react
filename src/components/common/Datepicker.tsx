@@ -13,6 +13,7 @@ import {
   Calendar,
   Swiper,
   SwiperSlide,
+  Dropdown,
 } from '@/components/common';
 import type { SwiperRef } from '@/components/common/Swiper';
 import type { DateRange } from '@/components/common/Calendar';
@@ -432,9 +433,9 @@ const CalendarSwiper: React.FC<CalendarSwiperProps> = ({
       currentIndex,
       monthsLength: months.length,
       monthsFirst: months[0]?.toISOString().split('T')[0],
-      monthsLast: months[months.length - 1]?.toISOString().split('T')[0]
+      monthsLast: months[months.length - 1]?.toISOString().split('T')[0],
     });
-    
+
     // 현재 월 배열에 currentDate가 없으면 전체 재생성
     const currentMonth = months.find(
       (month) =>
@@ -472,7 +473,10 @@ const CalendarSwiper: React.FC<CalendarSwiperProps> = ({
       );
 
       if (targetIndex !== -1 && targetIndex !== currentIndex) {
-        console.log('⚠️ currentIndex 변경:', { from: currentIndex, to: targetIndex });
+        console.log('⚠️ currentIndex 변경:', {
+          from: currentIndex,
+          to: targetIndex,
+        });
         setCurrentIndex(targetIndex);
         if (swiperRef.current && popupVisible) {
           swiperRef.current?.slideTo?.(targetIndex, 300);
@@ -583,283 +587,274 @@ interface DatepickerPopupProps {
   selectedDate: DateValue;
   selectedRange: RangeValue;
   onDateSelect: (date: Date) => void;
-  className?: string;
 }
 
-const DatepickerPopup = React.forwardRef<HTMLDivElement, DatepickerPopupProps>(
-  (
-    {
-      visible,
-      mode,
-      type,
-      currentDate,
-      selectedDate,
-      selectedRange,
-      onDateSelect,
-      className = '',
-    },
-    ref
-  ) => {
-    const [viewDate, setViewDate] = useState(currentDate);
-    const [viewMode, setViewMode] = useState<'calendar' | 'month' | 'year'>(
-      'calendar'
-    );
+const DatepickerPopup: React.FC<DatepickerPopupProps> = ({
+  visible,
+  mode,
+  type,
+  currentDate,
+  selectedDate,
+  selectedRange,
+  onDateSelect,
+}) => {
+  const [viewDate, setViewDate] = useState(currentDate);
+  const [viewMode, setViewMode] = useState<'calendar' | 'month' | 'year'>(
+    'calendar'
+  );
 
-    useEffect(() => {
-      if (visible) {
-        setViewDate(selectedDate || new Date());
-        setViewMode('calendar');
-      }
-    }, [visible, selectedDate]);
-
-    const handleMonthClick = () => {
-      if (mode === 'date') {
-        setViewMode('month');
-      }
-    };
-
-    const handleYearClick = () => {
-      setViewMode('year');
-    };
-
-    const handleMonthSelect = (month: number) => {
-      const newDate = new Date(viewDate.getFullYear(), month, 1);
-      setViewDate(newDate);
-
-      if (mode === 'month') {
-        onDateSelect(newDate);
-      } else {
-        setViewMode('calendar');
-      }
-    };
-
-    const handleYearSelect = (year: number) => {
-      const newDate = new Date(year, viewDate.getMonth(), 1);
-      setViewDate(newDate);
-
-      if (mode === 'year') {
-        onDateSelect(newDate);
-      } else if (mode === 'month') {
-        setViewMode('calendar');
-      } else {
-        setViewMode('month');
-      }
-    };
-
-    const handleCancel = () => {
+  useEffect(() => {
+    if (visible) {
+      setViewDate(selectedDate || new Date());
       setViewMode('calendar');
-    };
+    }
+  }, [visible, selectedDate]);
 
-    const handleCalendarViewChange = useCallback((date: Date) => {
-      setViewDate(date);
-    }, []);
+  const handleMonthClick = () => {
+    if (mode === 'date') {
+      setViewMode('month');
+    }
+  };
 
-    const [swiperMethods, setSwiperMethods] = useState<{
-      goToPrevMonth: () => void;
-      goToNextMonth: () => void;
-    } | null>(null);
+  const handleYearClick = () => {
+    setViewMode('year');
+  };
 
-    const handleSwiperReady = useCallback(
-      (methods: { goToPrevMonth: () => void; goToNextMonth: () => void }) => {
-        setSwiperMethods(methods);
-      },
-      []
+  const handleMonthSelect = (month: number) => {
+    const newDate = new Date(viewDate.getFullYear(), month, 1);
+    setViewDate(newDate);
+
+    if (mode === 'month') {
+      onDateSelect(newDate);
+    } else {
+      setViewMode('calendar');
+    }
+  };
+
+  const handleYearSelect = (year: number) => {
+    const newDate = new Date(year, viewDate.getMonth(), 1);
+    setViewDate(newDate);
+
+    if (mode === 'year') {
+      onDateSelect(newDate);
+    } else if (mode === 'month') {
+      setViewMode('calendar');
+    } else {
+      setViewMode('month');
+    }
+  };
+
+  const handleCancel = () => {
+    setViewMode('calendar');
+  };
+
+  const handleCalendarViewChange = useCallback((date: Date) => {
+    setViewDate(date);
+  }, []);
+
+  const [swiperMethods, setSwiperMethods] = useState<{
+    goToPrevMonth: () => void;
+    goToNextMonth: () => void;
+  } | null>(null);
+
+  const handleSwiperReady = useCallback(
+    (methods: { goToPrevMonth: () => void; goToNextMonth: () => void }) => {
+      setSwiperMethods(methods);
+    },
+    []
+  );
+
+  // 월 이동 함수들 - Swiper 메서드 사용
+  const handlePrevMonth = useCallback(() => {
+    if (swiperMethods) {
+      swiperMethods.goToPrevMonth();
+    }
+  }, [swiperMethods]);
+
+  const handleNextMonth = useCallback(() => {
+    if (swiperMethods) {
+      swiperMethods.goToNextMonth();
+    }
+  }, [swiperMethods]);
+
+  // 년도 이동 함수들
+  const handlePrevYear = useCallback(() => {
+    const prevYear = new Date(
+      viewDate.getFullYear() - 1,
+      viewDate.getMonth(),
+      1
     );
+    setViewDate(prevYear);
+  }, [viewDate]);
 
-    // 월 이동 함수들 - Swiper 메서드 사용
-    const handlePrevMonth = useCallback(() => {
-      if (swiperMethods) {
-        swiperMethods.goToPrevMonth();
-      }
-    }, [swiperMethods]);
+  const handleNextYear = useCallback(() => {
+    const nextYear = new Date(
+      viewDate.getFullYear() + 1,
+      viewDate.getMonth(),
+      1
+    );
+    setViewDate(nextYear);
+  }, [viewDate]);
 
-    const handleNextMonth = useCallback(() => {
-      if (swiperMethods) {
-        swiperMethods.goToNextMonth();
-      }
-    }, [swiperMethods]);
+  // 월/년 모드에서 직접 Calendar 사용
+  const renderDirectCalendar = () => {
+    if (mode === 'month') {
+      const months = [
+        '1월',
+        '2월',
+        '3월',
+        '4월',
+        '5월',
+        '6월',
+        '7월',
+        '8월',
+        '9월',
+        '10월',
+        '11월',
+        '12월',
+      ];
 
-    // 년도 이동 함수들
-    const handlePrevYear = useCallback(() => {
-      const prevYear = new Date(
-        viewDate.getFullYear() - 1,
-        viewDate.getMonth(),
-        1
+      return (
+        <div className={styles['month-grid']}>
+          {months.map((month, index) => {
+            const isSelected =
+              type === 'single'
+                ? selectedDate &&
+                  selectedDate.getMonth() === index &&
+                  selectedDate.getFullYear() === viewDate.getFullYear()
+                : selectedRange &&
+                  ((selectedRange[0] &&
+                    selectedRange[0].getMonth() === index &&
+                    selectedRange[0].getFullYear() ===
+                      viewDate.getFullYear()) ||
+                    (selectedRange[1] &&
+                      selectedRange[1].getMonth() === index &&
+                      selectedRange[1].getFullYear() ===
+                        viewDate.getFullYear()));
+
+            return (
+              <button
+                key={index}
+                type="button"
+                className={`${styles['month-item']} ${
+                  isSelected ? styles.selected : ''
+                }`}
+                onClick={() => {
+                  const selectedDate = new Date(
+                    viewDate.getFullYear(),
+                    index,
+                    1
+                  );
+                  onDateSelect(selectedDate);
+                }}
+              >
+                {month}
+              </button>
+            );
+          })}
+        </div>
       );
-      setViewDate(prevYear);
-    }, [viewDate]);
-
-    const handleNextYear = useCallback(() => {
-      const nextYear = new Date(
-        viewDate.getFullYear() + 1,
-        viewDate.getMonth(),
-        1
-      );
-      setViewDate(nextYear);
-    }, [viewDate]);
-
-    // 월/년 모드에서 직접 Calendar 사용
-    const renderDirectCalendar = () => {
-      if (mode === 'month') {
-        const months = [
-          '1월',
-          '2월',
-          '3월',
-          '4월',
-          '5월',
-          '6월',
-          '7월',
-          '8월',
-          '9월',
-          '10월',
-          '11월',
-          '12월',
-        ];
-
-        return (
-          <div className={styles['month-grid']}>
-            {months.map((month, index) => {
-              const isSelected =
-                type === 'single'
-                  ? selectedDate &&
-                    selectedDate.getMonth() === index &&
-                    selectedDate.getFullYear() === viewDate.getFullYear()
-                  : selectedRange &&
-                    ((selectedRange[0] &&
-                      selectedRange[0].getMonth() === index &&
-                      selectedRange[0].getFullYear() ===
-                        viewDate.getFullYear()) ||
-                      (selectedRange[1] &&
-                        selectedRange[1].getMonth() === index &&
-                        selectedRange[1].getFullYear() ===
-                          viewDate.getFullYear()));
-
-              return (
-                <button
-                  key={index}
-                  type="button"
-                  className={`${styles['month-item']} ${
-                    isSelected ? styles.selected : ''
-                  }`}
-                  onClick={() => {
-                    const selectedDate = new Date(
-                      viewDate.getFullYear(),
-                      index,
-                      1
-                    );
-                    onDateSelect(selectedDate);
-                  }}
-                >
-                  {month}
-                </button>
-              );
-            })}
-          </div>
-        );
-      }
-
-      if (mode === 'year') {
-        const currentYear = viewDate.getFullYear();
-        const startYear = Math.floor(currentYear / 10) * 10;
-        const years = Array.from({ length: 12 }, (_, i) => startYear - 1 + i);
-
-        return (
-          <div className={styles['year-grid']}>
-            {years.map((year) => {
-              const isSelected =
-                type === 'single'
-                  ? selectedDate && selectedDate.getFullYear() === year
-                  : selectedRange &&
-                    ((selectedRange[0] &&
-                      selectedRange[0].getFullYear() === year) ||
-                      (selectedRange[1] &&
-                        selectedRange[1].getFullYear() === year));
-              const isOutside = year < startYear || year > startYear + 9;
-
-              return (
-                <button
-                  key={year}
-                  type="button"
-                  className={`${styles['year-item']} ${
-                    isSelected ? styles.selected : ''
-                  } ${isOutside ? styles.outside : ''}`}
-                  onClick={() => {
-                    const selectedDate = new Date(year, 0, 1);
-                    onDateSelect(selectedDate);
-                  }}
-                >
-                  {year}
-                </button>
-              );
-            })}
-          </div>
-        );
-      }
-
-      return null;
-    };
-
-    if (!visible) {
-      return null;
     }
 
-    return (
-      <div ref={ref} className={`${styles.popup} ${className}`}>
-        <div className={styles['popup-content']}>
-          <CalendarHeader
-            currentDate={viewDate}
-            mode={mode}
-            onMonthClick={handleMonthClick}
-            onYearClick={handleYearClick}
-            onPrevMonth={mode === 'date' ? handlePrevMonth : undefined}
-            onNextMonth={mode === 'date' ? handleNextMonth : undefined}
-            onPrevYear={handlePrevYear}
-            onNextYear={handleNextYear}
-          />
+    if (mode === 'year') {
+      const currentYear = viewDate.getFullYear();
+      const startYear = Math.floor(currentYear / 10) * 10;
+      const years = Array.from({ length: 12 }, (_, i) => startYear - 1 + i);
 
-          {viewMode === 'calendar' && mode === 'date' && (
-            <CalendarSwiper
-              currentDate={viewDate}
-              mode={mode}
-              type={type}
-              selectedDate={selectedDate}
-              selectedRange={selectedRange}
-              onDateSelect={onDateSelect}
-              onViewChange={handleCalendarViewChange}
-              onSwiperReady={handleSwiperReady}
-              popupVisible={visible}
-            />
-          )}
+      return (
+        <div className={styles['year-grid']}>
+          {years.map((year) => {
+            const isSelected =
+              type === 'single'
+                ? selectedDate && selectedDate.getFullYear() === year
+                : selectedRange &&
+                  ((selectedRange[0] &&
+                    selectedRange[0].getFullYear() === year) ||
+                    (selectedRange[1] &&
+                      selectedRange[1].getFullYear() === year));
+            const isOutside = year < startYear || year > startYear + 9;
 
-          {viewMode === 'calendar' && mode !== 'date' && (
-            <div className={styles['direct-calendar']}>
-              {renderDirectCalendar()}
-            </div>
-          )}
-
-          {viewMode === 'month' && (
-            <MonthSelector
-              currentYear={viewDate.getFullYear()}
-              selectedMonth={selectedDate?.getMonth()}
-              onMonthSelect={handleMonthSelect}
-              onYearClick={handleYearClick}
-              onCancel={handleCancel}
-            />
-          )}
-
-          {viewMode === 'year' && (
-            <YearSelector
-              currentYear={viewDate.getFullYear()}
-              selectedYear={selectedDate?.getFullYear()}
-              onYearSelect={handleYearSelect}
-              onCancel={handleCancel}
-            />
-          )}
+            return (
+              <button
+                key={year}
+                type="button"
+                className={`${styles['year-item']} ${
+                  isSelected ? styles.selected : ''
+                } ${isOutside ? styles.outside : ''}`}
+                onClick={() => {
+                  const selectedDate = new Date(year, 0, 1);
+                  onDateSelect(selectedDate);
+                }}
+              >
+                {year}
+              </button>
+            );
+          })}
         </div>
-      </div>
-    );
+      );
+    }
+
+    return null;
+  };
+
+  if (!visible) {
+    return null;
   }
-);
+
+  return (
+    <div className={styles['popup-content']}>
+      <CalendarHeader
+        currentDate={viewDate}
+        mode={mode}
+        onMonthClick={handleMonthClick}
+        onYearClick={handleYearClick}
+        onPrevMonth={mode === 'date' ? handlePrevMonth : undefined}
+        onNextMonth={mode === 'date' ? handleNextMonth : undefined}
+        onPrevYear={handlePrevYear}
+        onNextYear={handleNextYear}
+      />
+
+      {viewMode === 'calendar' && mode === 'date' && (
+        <CalendarSwiper
+          currentDate={viewDate}
+          mode={mode}
+          type={type}
+          selectedDate={selectedDate}
+          selectedRange={selectedRange}
+          onDateSelect={onDateSelect}
+          onViewChange={handleCalendarViewChange}
+          onSwiperReady={handleSwiperReady}
+          popupVisible={visible}
+        />
+      )}
+
+      {viewMode === 'calendar' && mode !== 'date' && (
+        <div className={styles['direct-calendar']}>
+          {renderDirectCalendar()}
+        </div>
+      )}
+
+      {viewMode === 'month' && (
+        <MonthSelector
+          currentYear={viewDate.getFullYear()}
+          selectedMonth={selectedDate?.getMonth()}
+          onMonthSelect={handleMonthSelect}
+          onYearClick={handleYearClick}
+          onCancel={handleCancel}
+        />
+      )}
+
+      {viewMode === 'year' && (
+        <YearSelector
+          currentYear={viewDate.getFullYear()}
+          selectedYear={selectedDate?.getFullYear()}
+          onYearSelect={handleYearSelect}
+          onCancel={handleCancel}
+        />
+      )}
+    </div>
+  );
+};
 
 DatepickerPopup.displayName = 'DatepickerPopup';
 
@@ -884,7 +879,6 @@ const DatepickerMain = forwardRef<HTMLDivElement, DatepickerMainProps>(
     const [open, setOpen] = useState(false);
     const [inputValue, setInputValue] = useState('');
     const [rangeInputValues, setRangeInputValues] = useState(['', '']);
-    const popupRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
 
     // 기본 포맷 설정
@@ -928,64 +922,6 @@ const DatepickerMain = forwardRef<HTMLDivElement, DatepickerMainProps>(
         ]);
       }
     }, [value, dateFormat, type]);
-
-    // 외부 클릭 감지
-    useEffect(() => {
-      const handleClickOutside = (event: MouseEvent) => {
-        if (
-          containerRef.current &&
-          !containerRef.current.contains(event.target as Node)
-        ) {
-          setOpen(false);
-        }
-      };
-
-      if (open) {
-        document.addEventListener('mousedown', handleClickOutside);
-      }
-
-      return () => {
-        document.removeEventListener('mousedown', handleClickOutside);
-      };
-    }, [open]);
-
-    // 팝업 위치 조정
-    useEffect(() => {
-      if (open && popupRef.current && containerRef.current) {
-        const container = containerRef.current;
-        const popup = popupRef.current;
-        const containerRect = container.getBoundingClientRect();
-        const popupRect = popup.getBoundingClientRect();
-        const viewportHeight = window.innerHeight;
-        const viewportWidth = window.innerWidth;
-
-        let top = containerRect.bottom + 4;
-        let left = containerRect.left;
-
-        if (top + popupRect.height > viewportHeight - 10) {
-          top = containerRect.top - popupRect.height - 4;
-        }
-
-        if (left + popupRect.width > viewportWidth - 10) {
-          left = viewportWidth - popupRect.width - 10;
-        }
-
-        if (left < 10) {
-          left = 10;
-        }
-
-        popup.style.position = 'fixed';
-        popup.style.top = `${top}px`;
-        popup.style.left = `${left}px`;
-        popup.style.zIndex = '1000';
-      }
-    }, [open]);
-
-    const handleInputClick = () => {
-      if (!disabled) {
-        setOpen(true);
-      }
-    };
 
     const handleInputChange = (newValue: string) => {
       if (type === 'single') {
@@ -1068,87 +1004,99 @@ const DatepickerMain = forwardRef<HTMLDivElement, DatepickerMainProps>(
         }}
         className={`${styles.datepicker} ${styles[type]} ${className}`}
       >
-        {type === 'single' ? (
-          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-            <Input
-              value={inputValue}
-              onValueChange={handleInputChange}
-              placeholder={finalPlaceholder as string}
-              disabled={disabled}
-              readOnly={true}
-              className={inputClassName}
-            />
-            <Button
-              size="sm"
-              className="primary"
-              onClick={handleInputClick}
-              disabled={disabled}
-            >
-              달력
-            </Button>
-          </div>
-        ) : (
-          <div className={styles['range-inputs']}>
-            <div
-              style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}
-            >
-              <Input
-                value={rangeInputValues[0]}
-                onValueChange={handleRangeInputChange(0)}
-                placeholder={(finalPlaceholder as [string, string])[0]}
-                disabled={disabled}
-                readOnly={true}
-                className={inputClassName}
-              />
-            </div>
-            <span className={styles.separator}>~</span>
-            <div
-              style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}
-            >
-              <Input
-                value={rangeInputValues[1]}
-                onValueChange={handleRangeInputChange(1)}
-                placeholder={(finalPlaceholder as [string, string])[1]}
-                disabled={disabled}
-                readOnly={true}
-                className={inputClassName}
-              />
-            </div>
-            <Button
-              size="sm"
-              className="primary"
-              onClick={handleInputClick}
-              disabled={disabled}
-              style={{ marginLeft: '0.5rem' }}
-            >
-              달력
-            </Button>
-            {allowClear &&
-              (rangeInputValues[0] || rangeInputValues[1]) &&
-              !disabled && (
-                <button
-                  type="button"
-                  className={styles['range-clear-btn']}
-                  onClick={handleClear}
-                  aria-label="지우기"
-                >
-                  ✕
-                </button>
-              )}
-          </div>
-        )}
-
-        <DatepickerPopup
-          ref={popupRef}
+        <Dropdown
           visible={open}
-          mode={mode}
-          type={type}
-          currentDate={selectedDate || new Date()}
-          selectedDate={selectedDate}
-          selectedRange={selectedRange}
-          onDateSelect={handleDateSelect}
-          className={popupClassName}
-        />
+          onVisibleChange={setOpen}
+          usePortal={true}
+          placement="auto"
+          autoAdjustOverflow={true}
+          overlayClassName={popupClassName}
+          trigger={
+            type === 'single' ? (
+              <div
+                style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}
+              >
+                <Input
+                  value={inputValue}
+                  onValueChange={handleInputChange}
+                  placeholder={finalPlaceholder as string}
+                  disabled={disabled}
+                  readOnly={true}
+                  className={inputClassName}
+                />
+                <Button size="sm" className="primary" disabled={disabled}>
+                  달력
+                </Button>
+              </div>
+            ) : (
+              <div className={styles['range-inputs']}>
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: '0.5rem',
+                    alignItems: 'center',
+                  }}
+                >
+                  <Input
+                    value={rangeInputValues[0]}
+                    onValueChange={handleRangeInputChange(0)}
+                    placeholder={(finalPlaceholder as [string, string])[0]}
+                    disabled={disabled}
+                    readOnly={true}
+                    className={inputClassName}
+                  />
+                </div>
+                <span className={styles.separator}>~</span>
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: '0.5rem',
+                    alignItems: 'center',
+                  }}
+                >
+                  <Input
+                    value={rangeInputValues[1]}
+                    onValueChange={handleRangeInputChange(1)}
+                    placeholder={(finalPlaceholder as [string, string])[1]}
+                    disabled={disabled}
+                    readOnly={true}
+                    className={inputClassName}
+                  />
+                </div>
+                <Button
+                  size="sm"
+                  className="primary"
+                  disabled={disabled}
+                  style={{ marginLeft: '0.5rem' }}
+                >
+                  달력
+                </Button>
+                {allowClear &&
+                  (rangeInputValues[0] || rangeInputValues[1]) &&
+                  !disabled && (
+                    <button
+                      type="button"
+                      className={styles['range-clear-btn']}
+                      onClick={handleClear}
+                      aria-label="지우기"
+                    >
+                      ✕
+                    </button>
+                  )}
+              </div>
+            )
+          }
+        >
+          <DatepickerPopup
+            visible={open}
+            mode={mode}
+            type={type}
+            currentDate={selectedDate || new Date()}
+            selectedDate={selectedDate}
+            selectedRange={selectedRange}
+            onDateSelect={handleDateSelect}
+          />
+        </Dropdown>
       </div>
     );
   }
