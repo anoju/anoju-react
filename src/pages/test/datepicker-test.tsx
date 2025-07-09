@@ -1,8 +1,7 @@
 // src/pages/test/datepicker-test.tsx
 import { useState } from 'react';
 import { usePageLayout } from '@/hooks/usePageLayout';
-import { Button, CodeHighlight } from '@/components/common';
-import Datepicker from '@/components/common/DatePickerOld';
+import { Button, CodeHighlight, Datepicker } from '@/components/common';
 import styles from '@/assets/scss/pages/guide.module.scss';
 
 const DatepickerTest = () => {
