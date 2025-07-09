@@ -1,130 +1,339 @@
-// src/assets/scss/components/datePicker.module.scss
+// src/assets/scss/components/datepicker.module.scss
 @use '@/assets/scss' as s;
 @use 'sass:color';
 @use 'sass:math';
 
-.datepicker-popup {
-  .pop-body {
-    padding: 0;
+// Datepicker 컴포넌트 스타일
+.datepicker {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  max-width: 300px;
+
+  &.range {
+    max-width: 400px;
   }
 }
 
-.datepicker-container {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-}
-
-// DatePicker 헤더
-.datepicker-header {
+// Range 입력 스타일
+.range-inputs {
+  position: relative;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 16px;
-  border-bottom: 1px solid var(--bg-light-10);
-  background: var(--bg-light-2);
+  gap: 0.8rem;
 }
 
-.datepicker-nav {
-  display: flex;
-  gap: 8px;
+.separator {
+  font-size: 1.4rem;
+  color: #bfbfbf;
 }
 
-.nav-btn {
+.range-clear-btn {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  border: 1px solid var(--bg-light-20);
-  border-radius: 4px;
-  background: transparent;
-  color: var(--text-color);
-  font-size: 16px;
+  width: 1.6rem;
+  height: 1.6rem;
+  border: none;
+  border-radius: 50%;
+  background-color: #bfbfbf;
+  color: #fff;
+  font-size: 1rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.3s;
+  z-index: 10;
 
   &:hover {
-    background: var(--bg-light-10);
-    border-color: var(--primary-color);
-  }
-
-  &:active {
-    background: var(--bg-light-15);
+    background-color: #999;
   }
 }
 
-.datepicker-selectors {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.year-select,
-.month-select {
-  min-width: 80px;
-}
-
-// Swiper 컨테이너
-.datepicker-swiper-container {
-  position: relative;
-  width: 100%;
-  height: 280px;
+// 팝업 스타일
+.popup {
+  position: fixed;
+  z-index: 1000;
+  background: #fff;
+  border: 1px solid #d9d9d9;
+  border-radius: 0.8rem;
+  box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 9px 28px 8px rgba(0, 0, 0, 0.05);
   overflow: hidden;
-  user-select: none;
-  touch-action: pan-y pinch-zoom;
+
+  @include s.light-mode {
+    background: #fff;
+    border-color: #d9d9d9;
+  }
 }
 
-.datepicker-swiper {
-  display: flex;
-  width: 300%;
-  height: 100%;
-  will-change: transform;
+.popup-content {
+  padding: 1.2rem;
 }
 
-.datepicker-slide {
-  flex: 0 0 33.333%;
-  width: 33.333%;
+// 캘린더 헤더
+.calendar-header {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 16px;
+  margin-bottom: 1rem;
+  padding: 0 0.4rem;
 }
 
-// DatePicker 푸터
-.datepicker-footer {
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.prev-btn,
+.next-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  border: none;
+  border-radius: 0.4rem;
+  background: transparent;
+  color: #bfbfbf;
+  font-size: 1.6rem;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+
+  &:hover {
+    background-color: #f5f5f5;
+    color: #1890ff;
+  }
+}
+
+.year-btn,
+.month-btn {
+  padding: 0.4rem 0.8rem;
+  border: none;
+  border-radius: 0.4rem;
+  background: transparent;
+  color: inherit;
+  font-size: 1.4rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s;
+
+  &:hover {
+    background-color: #f5f5f5;
+  }
+}
+
+.year-range {
+  font-size: 1.4rem;
+  font-weight: 500;
+  color: inherit;
+}
+
+// Calendar Swiper
+.calendar-swiper {
+  width: 100%;
+  max-width: 28rem;
+}
+
+// 직접 캘린더 (월/년 모드)
+.direct-calendar {
+  display: flex;
+  justify-content: center;
+}
+
+// 월 선택 그리드
+.month-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.8rem;
+  width: 24rem;
+}
+
+.month-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 6rem;
+  border: none;
+  border-radius: 0.6rem;
+  background: transparent;
+  color: inherit;
+  font-size: 1.4rem;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+
+  &:hover {
+    background-color: #f5f5f5;
+  }
+
+  &.selected {
+    background-color: var(--primary-color);
+    color: #fff;
+
+    &:hover {
+      background-color: var(--primary-color);
+    }
+  }
+
+  &.current {
+    color: var(--primary-color);
+    font-weight: 600;
+  }
+}
+
+// 년도 선택 그리드
+.year-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.8rem;
+  width: 24rem;
+}
+
+.year-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 6rem;
+  border: none;
+  border-radius: 0.6rem;
+  background: transparent;
+  color: inherit;
+  font-size: 1.4rem;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+
+  &:hover {
+    background-color: #f5f5f5;
+  }
+
+  &.selected {
+    background-color: var(--primary-color);
+    color: #fff;
+
+    &:hover {
+      background-color: var(--primary-color);
+    }
+  }
+
+  &.current {
+    color: var(--primary-color);
+    font-weight: 600;
+  }
+
+  &.outside {
+    color: #bfbfbf;
+  }
+}
+
+// 년도 선택기
+.year-selector {
+  width: 24rem;
+}
+
+.year-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
-  border-top: 1px solid var(--bg-light-10);
-  background: var(--bg-light-2);
+  margin-bottom: 1.2rem;
+  padding: 0 0.4rem;
 }
 
-.footer-buttons {
+.year-footer {
   display: flex;
-  gap: 8px;
+  justify-content: center;
+  margin-top: 1.2rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid #f0f0f0;
 }
 
-// 라이트 모드 스타일
-@include s.light-mode {
-  .datepicker-header,
-  .datepicker-footer {
-    background: var(--bg-dark-2);
-    border-color: var(--bg-dark-10);
+// 월 선택기
+.month-selector {
+  width: 24rem;
+}
+
+.month-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.2rem;
+  padding: 0 0.4rem;
+}
+
+.month-footer {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.2rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid #f0f0f0;
+}
+
+// 다크 모드 스타일
+@media (prefers-color-scheme: dark) {
+  .popup {
+    background: #1f1f1f;
+    border-color: #434343;
   }
 
-  .nav-btn {
-    border-color: var(--bg-dark-20);
-    color: var(--text-color);
-
+  .month-item,
+  .year-item {
     &:hover {
-      background: var(--bg-dark-10);
-      border-color: var(--primary-color);
+      background-color: #2a2a2a;
     }
+  }
 
-    &:active {
-      background: var(--bg-dark-15);
+  .prev-btn,
+  .next-btn {
+    &:hover {
+      background-color: #2a2a2a;
+      color: #40a9ff;
+    }
+  }
+
+  .year-btn,
+  .month-btn {
+    &:hover {
+      background-color: #2a2a2a;
+    }
+  }
+
+  .year-footer,
+  .month-footer {
+    border-top-color: #434343;
+  }
+}
+
+// 반응형 디자인
+@media (max-width: 768px) {
+  .popup {
+    position: fixed !important;
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: 90vw;
+    max-width: 35rem;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .calendar-swiper {
+    width: 100%;
+  }
+
+  .month-grid,
+  .year-grid,
+  .year-selector,
+  .month-selector {
+    width: 100%;
+  }
+
+  .range-inputs {
+    flex-direction: column;
+    gap: 0.4rem;
+
+    .separator {
+      display: none;
     }
   }
 }

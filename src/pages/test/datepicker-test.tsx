@@ -1,12 +1,13 @@
 // src/pages/test/datepicker-test.tsx
 import { useState } from 'react';
 import { usePageLayout } from '@/hooks/usePageLayout';
-import { Button, Input, DatePicker } from '@/components/common';
+import { Button, CodeHighlight } from '@/components/common';
+import Datepicker from '@/components/common/DatePickerOld';
 import styles from '@/assets/scss/pages/guide.module.scss';
 
-const DatePickerTest = () => {
+const DatepickerTest = () => {
   usePageLayout({
-    title: 'DatePicker 테스트',
+    title: 'Datepicker 테스트',
     rightButtons: (
       <>
         <Button to="/" size="sm">
@@ -16,169 +17,446 @@ const DatePickerTest = () => {
     ),
   });
 
-  // Input with DatePicker 테스트
-  const [selectedDate1, setSelectedDate1] = useState<string>('');
-  const [selectedDate2, setSelectedDate2] = useState<string>('2024-12-25');
-  const [selectedDate3, setSelectedDate3] = useState<string>('');
+  // 단일 날짜 선택 상태들
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedMonth, setSelectedMonth] = useState<Date | null>(null);
+  const [selectedYear, setSelectedYear] = useState<Date | null>(null);
 
-  // DatePicker 컴포넌트 직접 사용 테스트
-  const [datepickerVisible, setDatepickerVisible] = useState(false);
-  const [standaloneDate, setStandaloneDate] = useState<Date | null>(null);
+  // 범위 선택 상태들
+  const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([
+    null,
+    null,
+  ]);
+  const [monthRange, setMonthRange] = useState<[Date | null, Date | null]>([
+    null,
+    null,
+  ]);
+  const [yearRange, setYearRange] = useState<[Date | null, Date | null]>([
+    null,
+    null,
+  ]);
 
-  // 날짜 변경 핸들러
-  const handleDateChange = (date: Date | null) => {
-    console.log('날짜 변경:', date);
-  };
-
-  // 비활성화할 날짜 (주말)
-  const disableWeekends = (date: Date): boolean => {
-    const day = date.getDay();
-    return day === 0 || day === 6; // 일요일(0), 토요일(6) 비활성화
-  };
-
-  // 과거 날짜 비활성화
-  const disablePastDates = (date: Date): boolean => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return date < today;
-  };
+  // 다양한 설정 테스트
+  const [customFormatDate, setCustomFormatDate] = useState<Date | null>(null);
+  const [disabledDate, setDisabledDate] = useState<Date | null>(null);
+  const [smallDate, setSmallDate] = useState<Date | null>(null);
+  const [largeDate, setLargeDate] = useState<Date | null>(null);
 
   return (
     <div className="page-inner">
-      <h1 className={styles.title}>DatePicker 테스트 페이지</h1>
+      <h1 className={styles.title}>Datepicker 컴포넌트 테스트</h1>
 
       <section className={styles.section}>
-        <h2 className={styles['section-title']}>Input with DatePicker</h2>
-        
-        <div className={styles.showcase}>
-          <h3>기본 DatePicker Input</h3>
-          <Input
-            datepicker
-            placeholder="날짜를 선택하세요"
-            value={selectedDate1}
-            onChange={(e) => setSelectedDate1(e.target.value)}
-            onDateChange={handleDateChange}
-          />
-          <p>선택된 날짜: {selectedDate1 || '없음'}</p>
-        </div>
+        <h2 className={styles['section-title']}>기본 Datepicker</h2>
+        <p className={styles.txt}>
+          날짜를 선택할 수 있는 기본 Datepicker입니다.
+        </p>
 
         <div className={styles.showcase}>
-          <h3>기본값이 있는 DatePicker Input</h3>
-          <Input
-            datepicker
-            placeholder="날짜를 선택하세요"
-            value={selectedDate2}
-            onChange={(e) => setSelectedDate2(e.target.value)}
-            onDateChange={handleDateChange}
-          />
-          <p>선택된 날짜: {selectedDate2}</p>
-        </div>
-
-        <div className={styles.showcase}>
-          <h3>주말 비활성화 DatePicker Input</h3>
-          <Input
-            datepicker
-            placeholder="주말 제외 날짜 선택"
-            value={selectedDate3}
-            onChange={(e) => setSelectedDate3(e.target.value)}
-            onDateChange={handleDateChange}
-            disabledDate={disableWeekends}
-          />
-          <p>선택된 날짜: {selectedDate3 || '없음'}</p>
-        </div>
-
-        <div className={styles.showcase}>
-          <h3>과거 날짜 비활성화 DatePicker Input</h3>
-          <Input
-            datepicker
-            placeholder="오늘 이후 날짜만 선택"
-            disabledDate={disablePastDates}
-            onDateChange={handleDateChange}
-          />
-        </div>
-
-        <div className={styles.showcase}>
-          <h3>커스텀 날짜 포맷 (YYYY/MM/DD)</h3>
-          <Input
-            datepicker
-            dateFormat="YYYY/MM/DD"
-            placeholder="YYYY/MM/DD 형식"
-            onDateChange={handleDateChange}
-          />
-        </div>
-
-        <div className={styles.showcase}>
-          <h3>비활성화된 DatePicker Input</h3>
-          <Input
-            datepicker
-            placeholder="비활성화된 상태"
-            disabled
-            value="2024-12-01"
-          />
-        </div>
-
-        <div className={styles.showcase}>
-          <h3>읽기 전용 DatePicker Input</h3>
-          <Input
-            datepicker
-            placeholder="읽기 전용 상태"
-            readOnly
-            value="2024-12-01"
-          />
-        </div>
-      </section>
-
-      <section className={styles.section}>
-        <h2 className={styles['section-title']}>독립 DatePicker 컴포넌트</h2>
-        
-        <div className={styles.showcase}>
-          <Button 
-            className="primary" 
-            onClick={() => setDatepickerVisible(true)}
+          <div
+            style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
           >
-            DatePicker 팝업 열기
-          </Button>
-          
-          <p>선택된 날짜: {standaloneDate ? standaloneDate.toLocaleDateString('ko-KR') : '없음'}</p>
-
-          <DatePicker
-            visible={datepickerVisible}
-            value={standaloneDate}
-            onChange={setStandaloneDate}
-            onVisibleChange={setDatepickerVisible}
-            format="YYYY-MM-DD"
-          />
+            <Datepicker
+              value={selectedDate}
+              onChange={setSelectedDate}
+              placeholder="날짜를 선택하세요"
+            />
+            <p>
+              선택된 날짜:{' '}
+              {selectedDate ? selectedDate.toLocaleDateString('ko-KR') : '없음'}
+            </p>
+          </div>
         </div>
+
+        <h3 className={styles['sub-title']}>참조 소스코드</h3>
+        <CodeHighlight
+          code={`const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+
+<Datepicker
+  value={selectedDate}
+  onChange={setSelectedDate}
+  placeholder="날짜를 선택하세요"
+/>`}
+          language="tsx"
+        />
       </section>
 
       <section className={styles.section}>
-        <h2 className={styles['section-title']}>테스트 결과</h2>
+        <h2 className={styles['section-title']}>Rangepicker (날짜 범위)</h2>
+        <p className={styles.txt}>
+          시작일과 종료일을 선택할 수 있는 범위 선택기입니다.
+        </p>
+
         <div className={styles.showcase}>
-          <h4>기능 확인 사항:</h4>
-          <ul>
-            <li>✅ Input 클릭 시 DatePicker 팝업 열기</li>
-            <li>✅ 날짜 선택 시 Input 값 업데이트</li>
-            <li>✅ 날짜 선택 후 팝업 자동 닫기</li>
-            <li>✅ 스와이프로 월 이동 (터치/마우스)</li>
-            <li>✅ 상단 네비게이션 버튼으로 월/년 이동</li>
-            <li>✅ Select로 년/월 직접 선택</li>
-            <li>✅ 비활성화 날짜 처리</li>
-            <li>✅ 다양한 날짜 포맷 지원</li>
-            <li>✅ 오늘 버튼</li>
-            <li>✅ 취소 버튼</li>
-          </ul>
-          
-          <h4>스와이프 기능:</h4>
-          <ul>
-            <li>좌우 드래그/스와이프로 이전달/다음달 이동</li>
-            <li>터치 및 마우스 모두 지원</li>
-            <li>애니메이션과 함께 부드러운 전환</li>
-            <li>세로 스크롤 방해하지 않음</li>
-          </ul>
+          <div
+            style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
+          >
+            <Datepicker.Rangepicker
+              value={dateRange}
+              onChange={setDateRange}
+              placeholder={['시작일', '종료일']}
+            />
+            <p>
+              선택된 범위:{' '}
+              {dateRange[0] && dateRange[1]
+                ? `${dateRange[0].toLocaleDateString('ko-KR')} ~ ${dateRange[1].toLocaleDateString('ko-KR')}`
+                : '없음'}
+            </p>
+          </div>
+        </div>
+
+        <h3 className={styles['sub-title']}>참조 소스코드</h3>
+        <CodeHighlight
+          code={`const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([null, null]);
+
+<Datepicker.Rangepicker
+  value={dateRange}
+  onChange={setDateRange}
+  placeholder={['시작일', '종료일']}
+/>`}
+          language="tsx"
+        />
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles['section-title']}>Monthpicker (월 선택)</h2>
+        <p className={styles.txt}>
+          년도와 월을 선택할 수 있는 Monthpicker입니다.
+        </p>
+
+        <div className={styles.showcase}>
+          <div
+            style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
+          >
+            <Datepicker.Monthpicker
+              value={selectedMonth}
+              onChange={setSelectedMonth}
+              placeholder="월을 선택하세요"
+            />
+            <p>
+              선택된 월:{' '}
+              {selectedMonth
+                ? selectedMonth.toLocaleDateString('ko-KR', {
+                    year: 'numeric',
+                    month: 'long',
+                  })
+                : '없음'}
+            </p>
+          </div>
+        </div>
+
+        <h3 className={styles['sub-title']}>참조 소스코드</h3>
+        <CodeHighlight
+          code={`const [selectedMonth, setSelectedMonth] = useState<Date | null>(null);
+
+<Datepicker.Monthpicker
+  value={selectedMonth}
+  onChange={setSelectedMonth}
+  placeholder="월을 선택하세요"
+/>`}
+          language="tsx"
+        />
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles['section-title']}>Yearpicker (년도 선택)</h2>
+        <p className={styles.txt}>년도를 선택할 수 있는 Yearpicker입니다.</p>
+
+        <div className={styles.showcase}>
+          <div
+            style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
+          >
+            <Datepicker.Yearpicker
+              value={selectedYear}
+              onChange={setSelectedYear}
+              placeholder="년도를 선택하세요"
+            />
+            <p>
+              선택된 년도:{' '}
+              {selectedYear ? selectedYear.getFullYear() + '년' : '없음'}
+            </p>
+          </div>
+        </div>
+
+        <h3 className={styles['sub-title']}>참조 소스코드</h3>
+        <CodeHighlight
+          code={`const [selectedYear, setSelectedYear] = useState<Date | null>(null);
+
+<Datepicker.Yearpicker
+  value={selectedYear}
+  onChange={setSelectedYear}
+  placeholder="년도를 선택하세요"
+/>`}
+          language="tsx"
+        />
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles['section-title']}>MonthRangepicker (월 범위)</h2>
+        <p className={styles.txt}>
+          시작 월과 종료 월을 선택할 수 있는 범위 선택기입니다.
+        </p>
+
+        <div className={styles.showcase}>
+          <div
+            style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
+          >
+            <Datepicker.MonthRangepicker
+              value={monthRange}
+              onChange={setMonthRange}
+              placeholder={['시작 월', '종료 월']}
+            />
+            <p>
+              선택된 월 범위:{' '}
+              {monthRange[0] && monthRange[1]
+                ? `${monthRange[0].toLocaleDateString('ko-KR', { year: 'numeric', month: 'long' })} ~ ${monthRange[1].toLocaleDateString('ko-KR', { year: 'numeric', month: 'long' })}`
+                : '없음'}
+            </p>
+          </div>
+        </div>
+
+        <h3 className={styles['sub-title']}>참조 소스코드</h3>
+        <CodeHighlight
+          code={`const [monthRange, setMonthRange] = useState<[Date | null, Date | null]>([null, null]);
+
+<Datepicker.MonthRangepicker
+  value={monthRange}
+  onChange={setMonthRange}
+  placeholder={['시작 월', '종료 월']}
+/>`}
+          language="tsx"
+        />
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles['section-title']}>YearRangepicker (년도 범위)</h2>
+        <p className={styles.txt}>
+          시작 년도와 종료 년도를 선택할 수 있는 범위 선택기입니다.
+        </p>
+
+        <div className={styles.showcase}>
+          <div
+            style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
+          >
+            <Datepicker.YearRangepicker
+              value={yearRange}
+              onChange={setYearRange}
+              placeholder={['시작 년도', '종료 년도']}
+            />
+            <p>
+              선택된 년도 범위:{' '}
+              {yearRange[0] && yearRange[1]
+                ? `${yearRange[0].getFullYear()}년 ~ ${yearRange[1].getFullYear()}년`
+                : '없음'}
+            </p>
+          </div>
+        </div>
+
+        <h3 className={styles['sub-title']}>참조 소스코드</h3>
+        <CodeHighlight
+          code={`const [yearRange, setYearRange] = useState<[Date | null, Date | null]>([null, null]);
+
+<Datepicker.YearRangepicker
+  value={yearRange}
+  onChange={setYearRange}
+  placeholder={['시작 년도', '종료 년도']}
+/>`}
+          language="tsx"
+        />
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles['section-title']}>다양한 설정 옵션</h2>
+        <p className={styles.txt}>
+          사이즈, 포맷, 비활성화 등 다양한 설정을 테스트할 수 있습니다.
+        </p>
+
+        <div className={styles.showcase}>
+          <div
+            style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}
+          >
+            {/* 커스텀 포맷 */}
+            <div>
+              <h4>커스텀 포맷 (YYYY/MM/DD)</h4>
+              <Datepicker
+                value={customFormatDate}
+                onChange={setCustomFormatDate}
+                placeholder="YYYY/MM/DD 형식"
+                format="YYYY/MM/DD"
+              />
+              <p
+                style={{
+                  marginTop: '0.5rem',
+                  fontSize: '1.4rem',
+                  color: '#666',
+                }}
+              >
+                선택된 날짜:{' '}
+                {customFormatDate
+                  ? customFormatDate.toLocaleDateString('ko-KR')
+                  : '없음'}
+              </p>
+            </div>
+
+            {/* 비활성화 */}
+            <div>
+              <h4>비활성화 상태</h4>
+              <Datepicker
+                value={disabledDate}
+                onChange={setDisabledDate}
+                placeholder="비활성화된 Datepicker"
+                disabled={true}
+              />
+            </div>
+
+            {/* 다양한 사이즈 */}
+            <div>
+              <h4>다양한 사이즈</h4>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '1rem',
+                }}
+              >
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.5rem' }}>
+                    Small 사이즈:
+                  </label>
+                  <Datepicker
+                    value={smallDate}
+                    onChange={setSmallDate}
+                    placeholder="Small 사이즈"
+                    size="sm"
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.5rem' }}>
+                    Medium 사이즈 (기본):
+                  </label>
+                  <Datepicker
+                    value={selectedDate}
+                    onChange={setSelectedDate}
+                    placeholder="Medium 사이즈 (기본)"
+                    size="md"
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.5rem' }}>
+                    Large 사이즈:
+                  </label>
+                  <Datepicker
+                    value={largeDate}
+                    onChange={setLargeDate}
+                    placeholder="Large 사이즈"
+                    size="lg"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* 지우기 비허용 */}
+            <div>
+              <h4>지우기 비허용</h4>
+              <Datepicker
+                value={selectedDate}
+                onChange={setSelectedDate}
+                placeholder="지우기 버튼 없음"
+                allowClear={false}
+              />
+            </div>
+          </div>
+        </div>
+
+        <h3 className={styles['sub-title']}>참조 소스코드</h3>
+        <CodeHighlight
+          code={`// 커스텀 포맷
+<Datepicker
+  value={customFormatDate}
+  onChange={setCustomFormatDate}
+  placeholder="YYYY/MM/DD 형식"
+  format="YYYY/MM/DD"
+/>
+
+// 비활성화
+<Datepicker
+  value={disabledDate}
+  onChange={setDisabledDate}
+  placeholder="비활성화된 Datepicker"
+  disabled={true}
+/>
+
+// 사이즈 설정
+<Datepicker size="sm" />  // 작은 사이즈
+<Datepicker size="md" />  // 중간 사이즈 (기본값)
+<Datepicker size="lg" />  // 큰 사이즈
+
+// 지우기 비허용
+<Datepicker
+  value={selectedDate}
+  onChange={setSelectedDate}
+  allowClear={false}
+/>`}
+          language="tsx"
+        />
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles['section-title']}>상태 초기화</h2>
+        <p className={styles.txt}>모든 선택된 날짜를 초기화합니다.</p>
+
+        <div className={styles.showcase}>
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+            <Button
+              className="primary"
+              onClick={() => {
+                setSelectedDate(null);
+                setSelectedMonth(null);
+                setSelectedYear(null);
+                setDateRange([null, null]);
+                setMonthRange([null, null]);
+                setYearRange([null, null]);
+                setCustomFormatDate(null);
+                setDisabledDate(null);
+                setSmallDate(null);
+                setLargeDate(null);
+              }}
+            >
+              모든 날짜 초기화
+            </Button>
+
+            <Button
+              className="secondary"
+              onClick={() => {
+                const now = new Date();
+                setSelectedDate(now);
+                setSelectedMonth(now);
+                setSelectedYear(now);
+                const nextMonth = new Date(
+                  now.getFullYear(),
+                  now.getMonth() + 1,
+                  now.getDate()
+                );
+                setDateRange([now, nextMonth]);
+                setMonthRange([now, nextMonth]);
+                const nextYear = new Date(
+                  now.getFullYear() + 1,
+                  now.getMonth(),
+                  now.getDate()
+                );
+                setYearRange([now, nextYear]);
+                setCustomFormatDate(now);
+                setSmallDate(now);
+                setLargeDate(now);
+              }}
+            >
+              샘플 날짜 설정
+            </Button>
+          </div>
         </div>
       </section>
     </div>
   );
 };
 
-export default DatePickerTest;
+export default DatepickerTest;

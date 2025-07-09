@@ -40,4 +40,11 @@ export {
   type CalendarRef,
   type DateRange,
 } from './Calendar';
-export { default as DatePicker, type DatePickerRef } from './DatePicker';
+export {
+  default as Datepicker,
+  Rangepicker,
+  Monthpicker,
+  Yearpicker,
+  MonthRangepicker,
+  YearRangepicker,
+} from './Datepicker';
