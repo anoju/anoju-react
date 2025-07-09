@@ -18,6 +18,7 @@ import {
 import type { SwiperRef } from '@/components/common/Swiper';
 import type { DateRange } from '@/components/common/Calendar';
 import styles from '@/assets/scss/components/datePicker.module.scss';
+import cx from '@/utils/cx';
 
 // 날짜 유틸리티 함수들
 const formatDate = (date: Date, format: string = 'YYYY-MM-DD'): string => {
@@ -1007,10 +1008,10 @@ const DatepickerMain = forwardRef<HTMLDivElement, DatepickerMainProps>(
         <Dropdown
           visible={open}
           onVisibleChange={setOpen}
-          usePortal={true}
           placement="auto"
+          maxHeight="auto"
           autoAdjustOverflow={true}
-          overlayClassName={popupClassName}
+          overlayClassName={cx('datepicker-dropdown', popupClassName)}
           trigger={
             type === 'single' ? (
               <div

@@ -72,6 +72,10 @@
     z-index: 100;
   }
 
+  &.auto-height {
+    max-height: none;
+  }
+
   // 표시 상태
   &.visible {
     opacity: 1;

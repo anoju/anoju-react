@@ -41,7 +41,7 @@ interface DropdownProps {
   followScroll?: boolean; // 스크롤시 따라가기 여부 (기본 false)
   minWidth?: number; // 최소 너비
   maxWidth?: number; // 최대 너비
-  maxHeight?: number | null; // 최대 높이 (기본값: null)
+  maxHeight?: number | 'auto' | null; // 최대 높이 (기본값: null, 'auto' 지원)
   offset?: [number, number]; // [x, y] 오프셋
   mouseEnterDelay?: number; // 마우스 진입 지연 시간 (ms)
   mouseLeaveDelay?: number; // 마우스 이탈 지연 시간 (ms)
@@ -258,8 +258,8 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
         style.maxWidth = `${maxWidth}px`;
       }
 
-      // maxHeight 설정
-      if (maxHeight) {
+      // maxHeight 설정 (number | 'auto' | null 지원)
+      if (maxHeight && typeof maxHeight === 'number') {
         style.maxHeight = `${maxHeight}px`;
       }
 
@@ -521,54 +521,55 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
     }, []);
 
     // 트리거 요소에 이벤트 추가
-    const enhancedTrigger = trigger && isValidElement(trigger)
-      ? cloneElement(
-          trigger as ReactElement<{
-            onClick?: MouseEventHandler<Element>;
-            onMouseEnter?: () => void;
-            onMouseLeave?: () => void;
-            onFocus?: () => void;
-            onBlur?: () => void;
-            onContextMenu?: (e: React.MouseEvent) => void;
-            'aria-expanded'?: boolean;
-            'aria-haspopup'?:
-              | boolean
-              | 'true'
-              | 'false'
-              | 'menu'
-              | 'listbox'
-              | 'tree'
-              | 'grid'
-              | 'dialog';
-            'aria-controls'?: string;
-          }>,
-          {
-            onClick: (e: React.MouseEvent) => {
-              // 기존 onClick이 있으면 먼저 실행
-              const triggerElement = trigger as ReactElement<{
-                onClick?: MouseEventHandler<Element>;
-              }>;
-              const originalOnClick = triggerElement.props.onClick;
-              if (originalOnClick) {
-                originalOnClick(e);
-              }
+    const enhancedTrigger =
+      trigger && isValidElement(trigger)
+        ? cloneElement(
+            trigger as ReactElement<{
+              onClick?: MouseEventHandler<Element>;
+              onMouseEnter?: () => void;
+              onMouseLeave?: () => void;
+              onFocus?: () => void;
+              onBlur?: () => void;
+              onContextMenu?: (e: React.MouseEvent) => void;
+              'aria-expanded'?: boolean;
+              'aria-haspopup'?:
+                | boolean
+                | 'true'
+                | 'false'
+                | 'menu'
+                | 'listbox'
+                | 'tree'
+                | 'grid'
+                | 'dialog';
+              'aria-controls'?: string;
+            }>,
+            {
+              onClick: (e: React.MouseEvent) => {
+                // 기존 onClick이 있으면 먼저 실행
+                const triggerElement = trigger as ReactElement<{
+                  onClick?: MouseEventHandler<Element>;
+                }>;
+                const originalOnClick = triggerElement.props.onClick;
+                if (originalOnClick) {
+                  originalOnClick(e);
+                }
 
-              // 드롭다운 토글
-              if (!e.defaultPrevented) {
-                handleTriggerClick(e);
-              }
-            },
-            onMouseEnter: handleMouseEnter,
-            onMouseLeave: handleMouseLeave,
-            onFocus: handleFocus,
-            onBlur: handleBlur,
-            onContextMenu: handleContextMenu,
-            'aria-expanded': isVisible,
-            'aria-haspopup': 'true' as const,
-            'aria-controls': idRef.current,
-          }
-        )
-      : trigger;
+                // 드롭다운 토글
+                if (!e.defaultPrevented) {
+                  handleTriggerClick(e);
+                }
+              },
+              onMouseEnter: handleMouseEnter,
+              onMouseLeave: handleMouseLeave,
+              onFocus: handleFocus,
+              onBlur: handleBlur,
+              onContextMenu: handleContextMenu,
+              'aria-expanded': isVisible,
+              'aria-haspopup': 'true' as const,
+              'aria-controls': idRef.current,
+            }
+          )
+        : trigger;
 
     // 드롭다운 내용 렌더링
     const renderDropdownContent = () => {
@@ -582,6 +583,7 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
         styles[`placement-${currentPlacement}`],
         {
           [styles.visible]: isVisible && isAnimating,
+          [styles['auto-height']]: maxHeight === 'auto',
           [styles.portal]: usePortal, // portal 클래스 추가
         },
         overlayClassName
@@ -593,10 +595,9 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>(
         ...overlayStyle,
       };
 
-      // maxHeight 옵션 반영
-      if (maxHeight) {
+      // maxHeight 옵션 반영 (number | 'auto' | null 지원)
+      if (maxHeight && typeof maxHeight === 'number') {
         contentStyle.maxHeight = `${maxHeight}px`;
-        contentStyle.overflowY = 'auto';
       }
 
       return (
