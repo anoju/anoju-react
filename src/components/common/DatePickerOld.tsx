@@ -11,9 +11,12 @@ import { Button, Popup, Calendar, Select } from '@/components/common';
 import styles from '@/assets/scss/components/datePicker.module.scss';
 
 // 날짜 포맷팅 유틸리티
-const formatDate = (date: Date | null, format: string = 'YYYY-MM-DD'): string => {
+const formatDate = (
+  date: Date | null,
+  format: string = 'YYYY-MM-DD'
+): string => {
   if (!date) return '';
-  
+
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
@@ -25,9 +28,12 @@ const formatDate = (date: Date | null, format: string = 'YYYY-MM-DD'): string =>
 };
 
 // 문자열을 Date로 파싱
-const parseDate = (dateString: string, format: string = 'YYYY-MM-DD'): Date | null => {
+const parseDate = (
+  dateString: string,
+  format: string = 'YYYY-MM-DD'
+): Date | null => {
   if (!dateString) return null;
-  
+
   try {
     if (format === 'YYYY-MM-DD') {
       const [year, month, day] = dateString.split('-').map(Number);
@@ -100,19 +106,29 @@ const DatePickerSwiper: React.FC<DatePickerSwiperProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const [currentIndex, setCurrentIndex] = useState(1); // 중간 슬라이드부터 시작
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
-  const [touchMove, setTouchMove] = useState<{ x: number; y: number } | null>(null);
+  const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(
+    null
+  );
+  const [touchMove, setTouchMove] = useState<{ x: number; y: number } | null>(
+    null
+  );
   const [isDragging, setIsDragging] = useState(false);
 
   // 현재 표시할 3개월 정보 (이전달, 현재달, 다음달)
   const [months, setMonths] = useState<MonthInfo[]>(() => {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
-    
+
     return [
-      createMonthInfo(month === 0 ? year - 1 : year, month === 0 ? 11 : month - 1),
+      createMonthInfo(
+        month === 0 ? year - 1 : year,
+        month === 0 ? 11 : month - 1
+      ),
       createMonthInfo(year, month),
-      createMonthInfo(month === 11 ? year + 1 : year, month === 11 ? 0 : month + 1),
+      createMonthInfo(
+        month === 11 ? year + 1 : year,
+        month === 11 ? 0 : month + 1
+      ),
     ];
   });
 
@@ -120,46 +136,55 @@ const DatePickerSwiper: React.FC<DatePickerSwiperProps> = ({
   useEffect(() => {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
-    
+
     setMonths([
-      createMonthInfo(month === 0 ? year - 1 : year, month === 0 ? 11 : month - 1),
+      createMonthInfo(
+        month === 0 ? year - 1 : year,
+        month === 0 ? 11 : month - 1
+      ),
       createMonthInfo(year, month),
-      createMonthInfo(month === 11 ? year + 1 : year, month === 11 ? 0 : month + 1),
+      createMonthInfo(
+        month === 11 ? year + 1 : year,
+        month === 11 ? 0 : month + 1
+      ),
     ]);
   }, [currentDate]);
 
   // 슬라이드 위치 업데이트
-  const updateSlidePosition = useCallback((index: number, animate: boolean = true) => {
-    if (!swiperRef.current) return;
-    
-    if (animate) {
-      setIsTransitioning(true);
-      swiperRef.current.style.transition = 'transform 0.3s ease-out';
-    } else {
-      swiperRef.current.style.transition = 'none';
-    }
-    
-    swiperRef.current.style.transform = `translateX(-${index * 100}%)`;
-    
-    if (animate) {
-      setTimeout(() => setIsTransitioning(false), 300);
-    }
-  }, []);
+  const updateSlidePosition = useCallback(
+    (index: number, animate: boolean = true) => {
+      if (!swiperRef.current) return;
+
+      if (animate) {
+        setIsTransitioning(true);
+        swiperRef.current.style.transition = 'transform 0.3s ease-out';
+      } else {
+        swiperRef.current.style.transition = 'none';
+      }
+
+      swiperRef.current.style.transform = `translateX(-${index * 100}%)`;
+
+      if (animate) {
+        setTimeout(() => setIsTransitioning(false), 300);
+      }
+    },
+    []
+  );
 
   // 이전달로 이동
   const goToPrevMonth = useCallback(() => {
     if (isTransitioning) return;
-    
+
     setCurrentIndex(0);
     updateSlidePosition(0);
-    
+
     setTimeout(() => {
       const prevMonth = months[0];
       const newPrevMonth = createMonthInfo(
         prevMonth.month === 0 ? prevMonth.year - 1 : prevMonth.year,
         prevMonth.month === 0 ? 11 : prevMonth.month - 1
       );
-      
+
       setMonths([newPrevMonth, months[0], months[1]]);
       setCurrentIndex(1);
       updateSlidePosition(1, false);
@@ -170,17 +195,17 @@ const DatePickerSwiper: React.FC<DatePickerSwiperProps> = ({
   // 다음달로 이동
   const goToNextMonth = useCallback(() => {
     if (isTransitioning) return;
-    
+
     setCurrentIndex(2);
     updateSlidePosition(2);
-    
+
     setTimeout(() => {
       const nextMonth = months[2];
       const newNextMonth = createMonthInfo(
         nextMonth.month === 11 ? nextMonth.year + 1 : nextMonth.year,
         nextMonth.month === 11 ? 0 : nextMonth.month + 1
       );
-      
+
       setMonths([months[1], months[2], newNextMonth]);
       setCurrentIndex(1);
       updateSlidePosition(1, false);
@@ -189,39 +214,46 @@ const DatePickerSwiper: React.FC<DatePickerSwiperProps> = ({
   }, [months, isTransitioning, updateSlidePosition, onViewChange]);
 
   // 터치 이벤트 처리
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    if (isTransitioning) return;
-    
-    const touch = e.touches[0];
-    setTouchStart({ x: touch.clientX, y: touch.clientY });
-    setIsDragging(true);
-  }, [isTransitioning]);
+  const handleTouchStart = useCallback(
+    (e: React.TouchEvent) => {
+      if (isTransitioning) return;
 
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    if (!touchStart || !isDragging || isTransitioning) return;
-    
-    const touch = e.touches[0];
-    setTouchMove({ x: touch.clientX, y: touch.clientY });
-    
-    const deltaX = touch.clientX - touchStart.x;
-    const deltaY = Math.abs(touch.clientY - touchStart.y);
-    
-    // 세로 스크롤이 더 크면 터치 무시
-    if (deltaY > Math.abs(deltaX)) {
-      setIsDragging(false);
-      return;
-    }
-    
-    // 가로 스크롤 방지
-    e.preventDefault();
-    
-    if (swiperRef.current) {
-      const currentTransform = -currentIndex * 100;
-      const dragPercent = (deltaX / (containerRef.current?.offsetWidth || 1)) * 100;
-      swiperRef.current.style.transition = 'none';
-      swiperRef.current.style.transform = `translateX(${currentTransform + dragPercent}%)`;
-    }
-  }, [touchStart, isDragging, currentIndex, isTransitioning]);
+      const touch = e.touches[0];
+      setTouchStart({ x: touch.clientX, y: touch.clientY });
+      setIsDragging(true);
+    },
+    [isTransitioning]
+  );
+
+  const handleTouchMove = useCallback(
+    (e: React.TouchEvent) => {
+      if (!touchStart || !isDragging || isTransitioning) return;
+
+      const touch = e.touches[0];
+      setTouchMove({ x: touch.clientX, y: touch.clientY });
+
+      const deltaX = touch.clientX - touchStart.x;
+      const deltaY = Math.abs(touch.clientY - touchStart.y);
+
+      // 세로 스크롤이 더 크면 터치 무시
+      if (deltaY > Math.abs(deltaX)) {
+        setIsDragging(false);
+        return;
+      }
+
+      // 가로 스크롤 방지
+      e.preventDefault();
+
+      if (swiperRef.current) {
+        const currentTransform = -currentIndex * 100;
+        const dragPercent =
+          (deltaX / (containerRef.current?.offsetWidth || 1)) * 100;
+        swiperRef.current.style.transition = 'none';
+        swiperRef.current.style.transform = `translateX(${currentTransform + dragPercent}%)`;
+      }
+    },
+    [touchStart, isDragging, currentIndex, isTransitioning]
+  );
 
   const handleTouchEnd = useCallback(() => {
     if (!touchStart || !touchMove || !isDragging) {
@@ -230,10 +262,10 @@ const DatePickerSwiper: React.FC<DatePickerSwiperProps> = ({
       setIsDragging(false);
       return;
     }
-    
+
     const deltaX = touchMove.x - touchStart.x;
     const threshold = 50; // 최소 드래그 거리
-    
+
     if (Math.abs(deltaX) > threshold) {
       if (deltaX > 0) {
         // 오른쪽으로 드래그 (이전달)
@@ -246,34 +278,49 @@ const DatePickerSwiper: React.FC<DatePickerSwiperProps> = ({
       // 원래 위치로 복원
       updateSlidePosition(currentIndex);
     }
-    
+
     setTouchStart(null);
     setTouchMove(null);
     setIsDragging(false);
-  }, [touchStart, touchMove, isDragging, goToPrevMonth, goToNextMonth, updateSlidePosition, currentIndex]);
+  }, [
+    touchStart,
+    touchMove,
+    isDragging,
+    goToPrevMonth,
+    goToNextMonth,
+    updateSlidePosition,
+    currentIndex,
+  ]);
 
   // 마우스 이벤트 (데스크톱)
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    if (isTransitioning) return;
-    
-    setTouchStart({ x: e.clientX, y: e.clientY });
-    setIsDragging(true);
-  }, [isTransitioning]);
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      if (isTransitioning) return;
 
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (!touchStart || !isDragging || isTransitioning) return;
-    
-    setTouchMove({ x: e.clientX, y: e.clientY });
-    
-    const deltaX = e.clientX - touchStart.x;
-    
-    if (swiperRef.current) {
-      const currentTransform = -currentIndex * 100;
-      const dragPercent = (deltaX / (containerRef.current?.offsetWidth || 1)) * 100;
-      swiperRef.current.style.transition = 'none';
-      swiperRef.current.style.transform = `translateX(${currentTransform + dragPercent}%)`;
-    }
-  }, [touchStart, isDragging, currentIndex, isTransitioning]);
+      setTouchStart({ x: e.clientX, y: e.clientY });
+      setIsDragging(true);
+    },
+    [isTransitioning]
+  );
+
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent) => {
+      if (!touchStart || !isDragging || isTransitioning) return;
+
+      setTouchMove({ x: e.clientX, y: e.clientY });
+
+      const deltaX = e.clientX - touchStart.x;
+
+      if (swiperRef.current) {
+        const currentTransform = -currentIndex * 100;
+        const dragPercent =
+          (deltaX / (containerRef.current?.offsetWidth || 1)) * 100;
+        swiperRef.current.style.transition = 'none';
+        swiperRef.current.style.transform = `translateX(${currentTransform + dragPercent}%)`;
+      }
+    },
+    [touchStart, isDragging, currentIndex, isTransitioning]
+  );
 
   const handleMouseUp = useCallback(() => {
     handleTouchEnd();
@@ -285,7 +332,7 @@ const DatePickerSwiper: React.FC<DatePickerSwiperProps> = ({
   }, [updateSlidePosition]);
 
   return (
-    <div 
+    <div
       ref={containerRef}
       className={styles['datepicker-swiper-container']}
       onTouchStart={handleTouchStart}
@@ -298,7 +345,10 @@ const DatePickerSwiper: React.FC<DatePickerSwiperProps> = ({
     >
       <div ref={swiperRef} className={styles['datepicker-swiper']}>
         {months.map((monthInfo, index) => (
-          <div key={`${monthInfo.year}-${monthInfo.month}`} className={styles['datepicker-slide']}>
+          <div
+            key={`${monthInfo.year}-${monthInfo.month}`}
+            className={styles['datepicker-slide']}
+          >
             <Calendar
               value={monthInfo.date}
               selectedDate={index === currentIndex ? selectedDate : undefined}
@@ -482,25 +532,39 @@ const DatePicker = forwardRef<DatePickerRef, DatePickerProps>(
     );
 
     // 년도 변경 핸들러
-    const handleYearChange = useCallback((year: number) => {
-      const newDate = new Date(year, currentViewDate.getMonth(), 1);
-      setCurrentViewDate(newDate);
-    }, [currentViewDate]);
+    const handleYearChange = useCallback(
+      (year: number) => {
+        const newDate = new Date(year, currentViewDate.getMonth(), 1);
+        setCurrentViewDate(newDate);
+      },
+      [currentViewDate]
+    );
 
     // 월 변경 핸들러
-    const handleMonthChange = useCallback((month: number) => {
-      const newDate = new Date(currentViewDate.getFullYear(), month, 1);
-      setCurrentViewDate(newDate);
-    }, [currentViewDate]);
+    const handleMonthChange = useCallback(
+      (month: number) => {
+        const newDate = new Date(currentViewDate.getFullYear(), month, 1);
+        setCurrentViewDate(newDate);
+      },
+      [currentViewDate]
+    );
 
     // 이전/다음 년도 이동
     const handlePrevYear = useCallback(() => {
-      const newDate = new Date(currentViewDate.getFullYear() - 1, currentViewDate.getMonth(), 1);
+      const newDate = new Date(
+        currentViewDate.getFullYear() - 1,
+        currentViewDate.getMonth(),
+        1
+      );
       setCurrentViewDate(newDate);
     }, [currentViewDate]);
 
     const handleNextYear = useCallback(() => {
-      const newDate = new Date(currentViewDate.getFullYear() + 1, currentViewDate.getMonth(), 1);
+      const newDate = new Date(
+        currentViewDate.getFullYear() + 1,
+        currentViewDate.getMonth(),
+        1
+      );
       setCurrentViewDate(newDate);
     }, [currentViewDate]);
 
@@ -508,14 +572,22 @@ const DatePicker = forwardRef<DatePickerRef, DatePickerProps>(
     const handlePrevMonth = useCallback(() => {
       const year = currentViewDate.getFullYear();
       const month = currentViewDate.getMonth();
-      const newDate = new Date(month === 0 ? year - 1 : year, month === 0 ? 11 : month - 1, 1);
+      const newDate = new Date(
+        month === 0 ? year - 1 : year,
+        month === 0 ? 11 : month - 1,
+        1
+      );
       setCurrentViewDate(newDate);
     }, [currentViewDate]);
 
     const handleNextMonth = useCallback(() => {
       const year = currentViewDate.getFullYear();
       const month = currentViewDate.getMonth();
-      const newDate = new Date(month === 11 ? year + 1 : year, month === 11 ? 0 : month + 1, 1);
+      const newDate = new Date(
+        month === 11 ? year + 1 : year,
+        month === 11 ? 0 : month + 1,
+        1
+      );
       setCurrentViewDate(newDate);
     }, [currentViewDate]);
 
