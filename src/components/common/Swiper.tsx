@@ -99,6 +99,7 @@ export interface SwiperProps {
 
   // 이벤트 핸들러
   onSlideChange?: (swiper: SwiperType) => void;
+  onSlideChangeTransitionEnd?: (swiper: SwiperType) => void; // 추가
   onSwiper?: (swiper: SwiperType) => void;
   onReachEnd?: (swiper: SwiperType) => void;
   onReachBeginning?: (swiper: SwiperType) => void;
@@ -297,6 +298,7 @@ export const Swiper = forwardRef<SwiperRef, SwiperProps>(
       wrapperClassName = '',
       slideClassName = '',
       onSlideChange,
+      onSlideChangeTransitionEnd, // 추가
       onSwiper,
       onReachEnd,
       onReachBeginning,
@@ -417,16 +419,23 @@ export const Swiper = forwardRef<SwiperRef, SwiperProps>(
           className={swiperClassName}
           onSwiper={handleSwiper}
           onSlideChange={onSlideChange}
+          onSlideChangeTransitionEnd={onSlideChangeTransitionEnd} // 추가
           onReachEnd={onReachEnd}
           onReachBeginning={onReachBeginning}
         >
           {React.Children.map(children, (child) => {
-            if (React.isValidElement<{ className?: string }>(child) && child.type === SwiperSlide) {
+            if (
+              React.isValidElement<{ className?: string }>(child) &&
+              child.type === SwiperSlide
+            ) {
               // SwiperSlide인 경우 slideClassName 추가
-              return React.cloneElement(child as ReactElement<{ className?: string }>, {
-                className:
-                  `${child.props.className || ''} ${slideClassName}`.trim(),
-              });
+              return React.cloneElement(
+                child as ReactElement<{ className?: string }>,
+                {
+                  className:
+                    `${child.props.className || ''} ${slideClassName}`.trim(),
+                }
+              );
             }
             // SwiperSlide가 아닌 경우 SwiperSlide로 감싸기
             return (
