@@ -1,10 +1,14 @@
-.swiper {
+.swiper-test {
+  padding: 20px;
+}
+
+.swiper-test .swiper {
   width: 100%;
   height: 300px;
   margin: 20px auto;
 }
 
-.swiper-slide {
+.swiper-test.swiper-slide {
   text-align: center;
   font-size: 18px;
   background: #444;
@@ -16,26 +20,26 @@
   align-items: center;
 }
 
-.swiper-slide img {
+.swiper-test .swiper-slide img {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.append-buttons {
+.swiper-test .append-buttons {
   text-align: center;
   margin-top: 20px;
 }
 
-.append-buttons h3 {
+.swiper-test .append-buttons h3 {
   margin-top: 30px;
   margin-bottom: 10px;
   color: #333;
   font-size: 16px;
 }
 
-.append-buttons button {
+.swiper-test .append-buttons button {
   display: inline-block;
   cursor: pointer;
   border: 1px solid #007aff;
@@ -49,11 +53,30 @@
   transition: all 0.2s ease;
 }
 
-.append-buttons button:hover {
+.swiper-test .append-buttons button:hover {
   background: #007aff;
   color: white;
 }
 
-.append-buttons button:active {
+.swiper-test .append-buttons button:active {
   transform: translateY(1px);
+}
+
+.swiper-test .info {
+  margin-top: 20px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  background-color: #f9f9f9;
+  font-size: 14px;
+}
+
+.swiper-test .info .btn {
+  margin-top: 10px;
+  padding: 5px 10px;
+  font-size: 12px;
+  background-color: #007aff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
 }
