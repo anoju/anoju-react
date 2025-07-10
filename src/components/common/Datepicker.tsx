@@ -632,6 +632,7 @@ const CalendarSwiper: React.FC<CalendarSwiperProps> = ({
     }
 
     // 경계 체크 및 새로운 월 추가 (수동 스와이프 대응)
+    /*
     if (index === 0 && !isTransitioning) {
       // 첫 번째 슬라이드에 도달 - 이전 월 추가
       console.log('🔙 첫 번째 슬라이드 도달 - 이전 월 추가');
@@ -673,9 +674,10 @@ const CalendarSwiper: React.FC<CalendarSwiperProps> = ({
         return newMonths;
       });
     }
+    */
   };
 
-  // 슬라이드 전환 완료 후 처리
+  // 슬라이드 전환 완료 후 처리 - 여기서 월 추가 로직 처리
   const handleSlideChangeTransitionEnd = useCallback(
     (swiper: { activeIndex: number }) => {
       const index = swiper.activeIndex;
@@ -689,8 +691,52 @@ const CalendarSwiper: React.FC<CalendarSwiperProps> = ({
       });
 
       setIsTransitioning(false); // 전환 완료
+
+      // 경계 체크 및 새로운 월 추가
+      if (index === 0) {
+        // 첫 번째 슬라이드에 도달 - 이전 월 추가
+        console.log('🔙 첫 번째 슬라이드 도달 - 이전 월 추가');
+
+        // MutationObserver를 사용한 깜빡임 없는 처리
+        pendingSlideToRef.current = 1;
+        setIsTransitioning(true);
+        startObserverWithTimeout();
+
+        const newPrevMonth = new Date(
+          months[0].getFullYear(),
+          months[0].getMonth() - 1,
+          1
+        );
+
+        setMonths((prev) => {
+          const newMonths = [newPrevMonth, ...prev];
+          console.log(
+            '🔙 이전 월 추가 - 새로운 월 배열:',
+            newMonths.map((m) => `${m.getFullYear()}-${m.getMonth() + 1}`)
+          );
+          return newMonths;
+        });
+      } else if (index === months.length - 1) {
+        // 마지막 슬라이드에 도달 - 다음 월 추가
+        console.log('🔜 마지막 슬라이드 도달 - 다음 월 추가');
+
+        const newNextMonth = new Date(
+          months[months.length - 1].getFullYear(),
+          months[months.length - 1].getMonth() + 1,
+          1
+        );
+
+        setMonths((prev) => {
+          const newMonths = [...prev, newNextMonth];
+          console.log(
+            '🔜 다음 월 추가 - 새로운 월 배열:',
+            newMonths.map((m) => `${m.getFullYear()}-${m.getMonth() + 1}`)
+          );
+          return newMonths;
+        });
+      }
     },
-    [months, isTransitioning]
+    [months, isTransitioning, startObserverWithTimeout]
   );
 
   const handleDateClick = (date: Date) => {
