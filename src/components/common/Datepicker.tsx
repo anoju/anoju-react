@@ -374,7 +374,6 @@ const CalendarSwiper: React.FC<CalendarSwiperProps> = ({
 }) => {
   const swiperRef = useRef<SwiperRef>(null);
   const [currentIndex, setCurrentIndex] = useState(1);
-  const [isTransitioning, setIsTransitioning] = useState(false);
 
   // 월 배열을 상태로 관리 (무한 스크롤을 위해)
   const [months, setMonths] = useState(() => {
@@ -393,24 +392,20 @@ const CalendarSwiper: React.FC<CalendarSwiperProps> = ({
 
   // 외부에서 사용할 수 있는 메서드들
   const goToPrevMonth = useCallback(() => {
-    if (swiperRef.current && currentIndex > 0 && !isTransitioning) {
+    if (swiperRef.current && currentIndex > 0) {
       console.log('🔙 goToPrevMonth: 이전달로 이동 시작');
       const newActiveIndex = currentIndex - 1;
       swiperRef.current.slideTo(newActiveIndex, 300);
     }
-  }, [currentIndex, isTransitioning]);
+  }, [currentIndex]);
 
   const goToNextMonth = useCallback(() => {
-    if (
-      swiperRef.current &&
-      currentIndex < months.length - 1 &&
-      !isTransitioning
-    ) {
+    if (swiperRef.current && currentIndex < months.length - 1) {
       console.log('🔜 goToNextMonth: 다음달로 이동 시작');
       const newActiveIndex = currentIndex + 1;
       swiperRef.current.slideTo(newActiveIndex, 300);
     }
-  }, [currentIndex, months.length, isTransitioning]);
+  }, [currentIndex, months.length]);
 
   // 메서드들을 외부로 노출
   useEffect(() => {
@@ -433,16 +428,10 @@ const CalendarSwiper: React.FC<CalendarSwiperProps> = ({
 
   // currentDate가 변경될 때 처리
   useEffect(() => {
-    console.log('🔄 CalendarSwiper currentDate useEffect:', {
-      currentDate: `${currentDate.getFullYear()}-${currentDate.getMonth() + 1}`,
-      popupVisible,
-      isTransitioning,
-    });
-
-    if (isTransitioning) {
-      console.log('⚠️ 전환 중이므로 처리 건너뛰기');
-      return;
-    }
+    // console.log('🔄 CalendarSwiper currentDate useEffect:', {
+    //   currentDate: `${currentDate.getFullYear()}-${currentDate.getMonth() + 1}`,
+    //   popupVisible,
+    // });
 
     // 현재 월 배열에 currentDate가 있는지 확인
     setMonths((prevMonths) => {
@@ -495,16 +484,27 @@ const CalendarSwiper: React.FC<CalendarSwiperProps> = ({
           // currentIndex 업데이트
           setCurrentIndex(targetIndex);
 
-          if (swiperRef.current && popupVisible) {
-            swiperRef.current?.slideTo?.(targetIndex, 300);
-          }
+          // if (swiperRef.current && popupVisible) {
+          //   swiperRef.current?.slideTo?.(targetIndex, 300);
+          // }
         }
 
         // 배열은 그대로 유지
         return prevMonths;
       }
     });
-  }, [currentDate, popupVisible, isTransitioning]);
+  }, [currentDate, popupVisible]);
+
+  useEffect(() => {
+    if (swiperRef.current && popupVisible) {
+      const timer = setTimeout(() => {
+        swiperRef.current?.update?.();
+        console.log('📦 월 배열 변경으로 인한 Swiper 업데이트:', months.length);
+      }, 150);
+
+      return () => clearTimeout(timer);
+    }
+  }, [months.length, popupVisible]);
 
   // 슬라이드 변경 시 - 단순히 인덱스 업데이트와 뷰 변경만 처리
   const handleSlideChange = (swiper: { activeIndex: number }) => {
@@ -514,13 +514,16 @@ const CalendarSwiper: React.FC<CalendarSwiperProps> = ({
       newIndex: index,
       monthsLength: months.length,
     });
+  };
 
-    setCurrentIndex(index);
-
-    // 뷰 변경 알림
-    if (months[index]) {
-      onViewChange(months[index]);
-    }
+  const handleSlideChangeTransitionStart = (swiper: {
+    activeIndex: number;
+  }) => {
+    const index = swiper.activeIndex;
+    console.log('📍 handleSlideChangeTransitionStart:', {
+      index,
+      monthsLength: months.length,
+    });
   };
 
   // 슬라이드 전환 완료 후 처리 - 여기서 월 추가 로직 처리
@@ -530,37 +533,29 @@ const CalendarSwiper: React.FC<CalendarSwiperProps> = ({
       console.log('✅ handleSlideChangeTransitionEnd:', {
         index,
         monthsLength: months.length,
-        isTransitioning,
         currentMonth: months[index]
           ? `${months[index].getFullYear()}-${months[index].getMonth() + 1}`
           : 'undefined',
       });
 
-      setIsTransitioning(false); // 전환 완료
+      // setCurrentIndex(index);
 
-      // 경계 체크 및 새로운 월 추가
+      if (months[index]) {
+        onViewChange(months[index]);
+      }
+
       if (index === 0) {
-        // 첫 번째 슬라이드에 도달 - 이전 월 추가
         console.log('🔙 첫 번째 슬라이드 도달 - 이전 월 추가');
-
-        setIsTransitioning(true);
-
         const newPrevMonth = new Date(
           months[0].getFullYear(),
           months[0].getMonth() - 1,
           1
         );
-
         setMonths((prev) => {
           const newMonths = [newPrevMonth, ...prev];
-          console.log(
-            '🔙 이전 월 추가 - 새로운 월 배열:',
-            newMonths.map((m) => `${m.getFullYear()}-${m.getMonth() + 1}`)
-          );
           return newMonths;
         });
       } else if (index === months.length - 1) {
-        // 마지막 슬라이드에 도달 - 다음 월 추가
         console.log('🔜 마지막 슬라이드 도달 - 다음 월 추가');
 
         const newNextMonth = new Date(
@@ -568,18 +563,14 @@ const CalendarSwiper: React.FC<CalendarSwiperProps> = ({
           months[months.length - 1].getMonth() + 1,
           1
         );
-
         setMonths((prev) => {
           const newMonths = [...prev, newNextMonth];
-          console.log(
-            '🔜 다음 월 추가 - 새로운 월 배열:',
-            newMonths.map((m) => `${m.getFullYear()}-${m.getMonth() + 1}`)
-          );
+
           return newMonths;
         });
       }
     },
-    [months, isTransitioning]
+    [months, onViewChange]
   );
 
   const handleDateClick = (date: Date) => {
@@ -610,10 +601,10 @@ const CalendarSwiper: React.FC<CalendarSwiperProps> = ({
         slidesPerView={1}
         initialSlide={1}
         onSlideChange={handleSlideChange}
+        onSlideChangeTransitionStart={handleSlideChangeTransitionStart}
         onSlideChangeTransitionEnd={handleSlideChangeTransitionEnd}
-        centeredSlides={true}
-        allowTouchMove={true}
         autoHeight={true}
+        slidesPerGroup={1}
         observer={true} // Observer 기능 활성화
       >
         {months.map((monthDate, index) => (
