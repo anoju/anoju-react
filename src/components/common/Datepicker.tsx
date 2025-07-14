@@ -345,7 +345,8 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
     </div>
   );
 };
-// MutationObserver를 활용한 개선된 달력 슬라이더 컴포넌트
+
+// 간소화된 달력 슬라이더 컴포넌트 (MutationObserver 제거)
 interface CalendarSwiperProps {
   currentDate: Date;
   mode: DatepickerMode;
@@ -375,13 +376,6 @@ const CalendarSwiper: React.FC<CalendarSwiperProps> = ({
   const [currentIndex, setCurrentIndex] = useState(1);
   const [isTransitioning, setIsTransitioning] = useState(false);
 
-  // MutationObserver 관련 상태 (성능 최적화)
-  const mutationObserverRef = useRef<MutationObserver | null>(null);
-  const pendingSlideToRef = useRef<number | null>(null);
-  const swiperContainerRef = useRef<HTMLDivElement | null>(null);
-  const isObservingRef = useRef<boolean>(false);
-  const observerTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
   // 월 배열을 상태로 관리 (무한 스크롤을 위해)
   const [months, setMonths] = useState(() => {
     const prevMonth = new Date(
@@ -397,110 +391,7 @@ const CalendarSwiper: React.FC<CalendarSwiperProps> = ({
     return [prevMonth, currentDate, nextMonth];
   });
 
-  // Observer 중지 함수 (useCallback으로 메모이제이션)
-  const stopObserver = useCallback(() => {
-    if (mutationObserverRef.current && isObservingRef.current) {
-      mutationObserverRef.current.disconnect();
-      isObservingRef.current = false;
-      console.log('🔍 MutationObserver: Stopped observing');
-    }
-  }, []);
-
-  // 성능 최적화된 MutationObserver 설정
-  const setupMutationObserver = useCallback(() => {
-    if (
-      !swiperRef.current ||
-      !swiperContainerRef.current ||
-      isObservingRef.current
-    )
-      return;
-
-    // 기존 Observer 정리
-    if (mutationObserverRef.current) {
-      mutationObserverRef.current.disconnect();
-    }
-
-    // 성능 최적화된 Observer 생성
-    mutationObserverRef.current = new MutationObserver((mutations) => {
-      // 성능 최적화: 관련 없는 변경사항 필터링
-      const relevantMutations = mutations.filter((mutation) => {
-        if (mutation.type !== 'childList') return false;
-        const target = mutation.target as Element;
-        return target.classList.contains('swiper-wrapper');
-      });
-
-      if (relevantMutations.length === 0) return;
-
-      console.log('🔍 MutationObserver: Relevant slides change detected');
-
-      if (pendingSlideToRef.current !== null) {
-        console.log(
-          '🔍 MutationObserver: Executing slideTo',
-          pendingSlideToRef.current
-        );
-
-        // 즉시 Observer 비활성화 (불필요한 감지 방지)
-        stopObserver();
-
-        // DOM 변경이 완료된 후 즉시 slideTo 실행
-        requestAnimationFrame(() => {
-          if (swiperRef.current?.swiper && pendingSlideToRef.current !== null) {
-            swiperRef.current.swiper.update();
-            swiperRef.current.swiper.slideTo(
-              pendingSlideToRef.current,
-              0,
-              false
-            );
-            pendingSlideToRef.current = null;
-            setIsTransitioning(false);
-          }
-        });
-      }
-    });
-
-    // swiper-wrapper만 관찰 (성능 최적화)
-    const swiperWrapper =
-      swiperContainerRef.current.querySelector('.swiper-wrapper');
-    if (swiperWrapper) {
-      mutationObserverRef.current.observe(swiperWrapper, {
-        childList: true, // 자식 요소 추가/제거만 감지
-        subtree: false, // 하위 트리는 감지하지 않음 (성능 향상)
-        attributes: false, // 속성 변경 무시 (성능 향상)
-        characterData: false, // 텍스트 변경 무시 (성능 향상)
-      });
-
-      isObservingRef.current = true;
-      console.log('🔍 MutationObserver: Started observing (optimized)');
-    }
-  }, [stopObserver]);
-
-  // 일정 시간 후 자동으로 Observer 중지 (성능 보호)
-  const startObserverWithTimeout = useCallback(() => {
-    setupMutationObserver();
-
-    // 기존 타임아웃 정리
-    if (observerTimeoutRef.current) {
-      clearTimeout(observerTimeoutRef.current);
-    }
-
-    // 5초 후 자동 중지 (성능 보호)
-    observerTimeoutRef.current = setTimeout(() => {
-      console.log('🔍 MutationObserver: Auto-stopped after timeout');
-      stopObserver();
-      pendingSlideToRef.current = null; // 대기 중인 작업도 취소
-    }, 5000);
-  }, [setupMutationObserver, stopObserver]);
-
-  // 컴포넌트 언마운트 시 Observer 및 타임아웃 정리
-  useEffect(() => {
-    return () => {
-      stopObserver();
-      if (observerTimeoutRef.current) {
-        clearTimeout(observerTimeoutRef.current);
-      }
-    };
-  }, [stopObserver]);
-  // 외부에서 사용할 수 있는 메서드들 (MutationObserver 활용)
+  // 외부에서 사용할 수 있는 메서드들
   const goToPrevMonth = useCallback(() => {
     if (swiperRef.current && currentIndex > 0 && !isTransitioning) {
       console.log('🔙 goToPrevMonth: 이전달로 이동 시작');
@@ -540,7 +431,7 @@ const CalendarSwiper: React.FC<CalendarSwiperProps> = ({
     }
   }, [popupVisible]);
 
-  // currentDate가 변경될 때 처리 (개선된 버전)
+  // currentDate가 변경될 때 처리
   useEffect(() => {
     console.log('🔄 CalendarSwiper currentDate useEffect:', {
       currentDate: `${currentDate.getFullYear()}-${currentDate.getMonth() + 1}`,
@@ -630,51 +521,6 @@ const CalendarSwiper: React.FC<CalendarSwiperProps> = ({
     if (months[index]) {
       onViewChange(months[index]);
     }
-
-    // 경계 체크 및 새로운 월 추가 (수동 스와이프 대응)
-    /*
-    if (index === 0 && !isTransitioning) {
-      // 첫 번째 슬라이드에 도달 - 이전 월 추가
-      console.log('🔙 첫 번째 슬라이드 도달 - 이전 월 추가');
-
-      pendingSlideToRef.current = 1;
-      setIsTransitioning(true);
-      startObserverWithTimeout();
-
-      const newPrevMonth = new Date(
-        months[0].getFullYear(),
-        months[0].getMonth() - 1,
-        1
-      );
-
-      setMonths((prev) => {
-        const newMonths = [newPrevMonth, ...prev];
-        console.log(
-          '🔙 수동 스와이프 - 새로운 월 배열:',
-          newMonths.map((m) => `${m.getFullYear()}-${m.getMonth() + 1}`)
-        );
-        return newMonths;
-      });
-    } else if (index === months.length - 1 && !isTransitioning) {
-      // 마지막 슬라이드에 도달 - 다음 월 추가
-      console.log('🔜 마지막 슬라이드 도달 - 다음 월 추가');
-
-      const newNextMonth = new Date(
-        months[months.length - 1].getFullYear(),
-        months[months.length - 1].getMonth() + 1,
-        1
-      );
-
-      setMonths((prev) => {
-        const newMonths = [...prev, newNextMonth];
-        console.log(
-          '🔜 수동 스와이프 - 새로운 월 배열:',
-          newMonths.map((m) => `${m.getFullYear()}-${m.getMonth() + 1}`)
-        );
-        return newMonths;
-      });
-    }
-    */
   };
 
   // 슬라이드 전환 완료 후 처리 - 여기서 월 추가 로직 처리
@@ -697,10 +543,7 @@ const CalendarSwiper: React.FC<CalendarSwiperProps> = ({
         // 첫 번째 슬라이드에 도달 - 이전 월 추가
         console.log('🔙 첫 번째 슬라이드 도달 - 이전 월 추가');
 
-        // MutationObserver를 사용한 깜빡임 없는 처리
-        pendingSlideToRef.current = 1;
         setIsTransitioning(true);
-        startObserverWithTimeout();
 
         const newPrevMonth = new Date(
           months[0].getFullYear(),
@@ -736,7 +579,7 @@ const CalendarSwiper: React.FC<CalendarSwiperProps> = ({
         });
       }
     },
-    [months, isTransitioning, startObserverWithTimeout]
+    [months, isTransitioning]
   );
 
   const handleDateClick = (date: Date) => {
@@ -761,7 +604,7 @@ const CalendarSwiper: React.FC<CalendarSwiperProps> = ({
   }, [type, selectedRange]);
 
   return (
-    <div className={styles['calendar-swiper']} ref={swiperContainerRef}>
+    <div className={styles['calendar-swiper']}>
       <Swiper
         ref={swiperRef}
         slidesPerView={1}
@@ -771,6 +614,7 @@ const CalendarSwiper: React.FC<CalendarSwiperProps> = ({
         centeredSlides={true}
         allowTouchMove={true}
         autoHeight={true}
+        observer={true} // Observer 기능 활성화
       >
         {months.map((monthDate, index) => (
           <SwiperSlide
@@ -793,6 +637,7 @@ const CalendarSwiper: React.FC<CalendarSwiperProps> = ({
     </div>
   );
 };
+
 // 팝업 컴포넌트
 interface DatepickerPopupProps {
   visible: boolean;
@@ -1072,6 +917,7 @@ const DatepickerPopup: React.FC<DatepickerPopupProps> = ({
 };
 
 DatepickerPopup.displayName = 'DatepickerPopup';
+
 // 메인 Datepicker 컴포넌트
 const DatepickerMain = forwardRef<HTMLDivElement, DatepickerMainProps>(
   (

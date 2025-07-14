@@ -5,6 +5,8 @@ import React, {
   useImperativeHandle,
   ReactNode,
   ReactElement,
+  useEffect,
+  useCallback,
 } from 'react';
 import { Swiper as SwiperCore, SwiperSlide } from 'swiper/react';
 import {
@@ -92,6 +94,9 @@ export interface SwiperProps {
   // 썸네일 연동
   thumbsSwiper?: SwiperType | null;
 
+  // MutationObserver 기능 - slide 앞에 추가 시 현재 slide 유지
+  observer?: boolean;
+
   // 스타일
   className?: string;
   wrapperClassName?: string;
@@ -99,7 +104,7 @@ export interface SwiperProps {
 
   // 이벤트 핸들러
   onSlideChange?: (swiper: SwiperType) => void;
-  onSlideChangeTransitionEnd?: (swiper: SwiperType) => void; // 추가
+  onSlideChangeTransitionEnd?: (swiper: SwiperType) => void;
   onSwiper?: (swiper: SwiperType) => void;
   onReachEnd?: (swiper: SwiperType) => void;
   onReachBeginning?: (swiper: SwiperType) => void;
@@ -294,11 +299,12 @@ export const Swiper = forwardRef<SwiperRef, SwiperProps>(
       effect,
       responsive,
       thumbsSwiper,
+      observer = false, // 기본값 false
       className = '',
       wrapperClassName = '',
       slideClassName = '',
       onSlideChange,
-      onSlideChangeTransitionEnd, // 추가
+      onSlideChangeTransitionEnd,
       onSwiper,
       onReachEnd,
       onReachBeginning,
@@ -307,7 +313,118 @@ export const Swiper = forwardRef<SwiperRef, SwiperProps>(
     ref
   ) => {
     const swiperRef = useRef<SwiperType | null>(null);
+    const swiperContainerRef = useRef<HTMLDivElement | null>(null);
 
+    // MutationObserver 관련 상태 (observer가 true일 때만 활성화)
+    const mutationObserverRef = useRef<MutationObserver | null>(null);
+    const isObservingRef = useRef<boolean>(false);
+
+    // Observer 중지 함수
+    const stopObserver = useCallback(() => {
+      if (mutationObserverRef.current && isObservingRef.current) {
+        mutationObserverRef.current.disconnect();
+        isObservingRef.current = false;
+        console.log('🔍 Swiper Observer: Stopped observing');
+      }
+    }, []);
+
+    // MutationObserver 설정
+    const setupMutationObserver = useCallback(() => {
+      if (
+        !observer ||
+        !swiperRef.current ||
+        !swiperContainerRef.current ||
+        isObservingRef.current
+      )
+        return;
+
+      // 기존 Observer 정리
+      if (mutationObserverRef.current) {
+        mutationObserverRef.current.disconnect();
+      }
+
+      // Observer 생성
+      mutationObserverRef.current = new MutationObserver((mutations) => {
+        // swiper-wrapper 변경사항만 필터링
+        const relevantMutations = mutations.filter((mutation) => {
+          if (mutation.type !== 'childList') return false;
+          const target = mutation.target as Element;
+          return target.classList.contains('swiper-wrapper');
+        });
+
+        if (relevantMutations.length === 0) return;
+
+        console.log('🔍 Swiper Observer: Slides change detected');
+
+        // slide가 앞에 추가되었는지 확인
+        let slidesAddedToFront = 0;
+        relevantMutations.forEach((mutation) => {
+          if (mutation.addedNodes.length > 0) {
+            // 첫 번째 자식 위치에 추가된 slide 개수 계산
+            mutation.addedNodes.forEach((node) => {
+              if (node.nodeType === Node.ELEMENT_NODE) {
+                const element = node as Element;
+                if (element.classList.contains('swiper-slide')) {
+                  // 추가된 노드가 wrapper의 앞쪽 부분에 있는지 확인
+                  const wrapperElement = mutation.target as Element;
+                  const nodeIndex = Array.from(wrapperElement.children).indexOf(
+                    element
+                  );
+                  if (nodeIndex < mutation.addedNodes.length) {
+                    slidesAddedToFront++;
+                  }
+                }
+              }
+            });
+          }
+        });
+
+        if (slidesAddedToFront > 0 && swiperRef.current) {
+          console.log(
+            '🔍 Swiper Observer: 앞에 추가된 slide 수:',
+            slidesAddedToFront
+          );
+
+          // 현재 activeIndex에 추가된 slide 수를 더해서 새로운 인덱스로 이동
+          const currentActiveIndex = swiperRef.current.activeIndex;
+          const newActiveIndex = currentActiveIndex + slidesAddedToFront;
+
+          // DOM 변경이 완료된 후 즉시 slideTo 실행
+          requestAnimationFrame(() => {
+            if (swiperRef.current) {
+              swiperRef.current.update();
+              swiperRef.current.slideTo(newActiveIndex, 0, false);
+              console.log(
+                '🔍 Swiper Observer: slideTo 실행:',
+                `${currentActiveIndex} -> ${newActiveIndex}`
+              );
+            }
+          });
+        }
+      });
+
+      // swiper-wrapper만 관찰
+      const swiperWrapper =
+        swiperContainerRef.current.querySelector('.swiper-wrapper');
+      if (swiperWrapper) {
+        mutationObserverRef.current.observe(swiperWrapper, {
+          childList: true,
+          subtree: false,
+          attributes: false,
+          characterData: false,
+        });
+
+        isObservingRef.current = true;
+        console.log('🔍 Swiper Observer: Started observing');
+      }
+    }, [observer]);
+
+    // 컴포넌트 언마운트 시 Observer 정리
+    useEffect(() => {
+      return () => {
+        stopObserver();
+      };
+    }, [stopObserver]);
     // ref 인터페이스 구현
     useImperativeHandle(ref, () => ({
       swiper: swiperRef.current,
@@ -400,6 +517,14 @@ export const Swiper = forwardRef<SwiperRef, SwiperProps>(
     const handleSwiper = (swiper: SwiperType) => {
       swiperRef.current = swiper;
       onSwiper?.(swiper);
+
+      // observer가 true일 때 Observer 시작
+      if (observer) {
+        // Swiper가 완전히 초기화된 후 Observer 시작
+        setTimeout(() => {
+          setupMutationObserver();
+        }, 100);
+      }
     };
 
     // 클래스명 조합
@@ -412,14 +537,17 @@ export const Swiper = forwardRef<SwiperRef, SwiperProps>(
       .join(' ');
 
     return (
-      <div className={`${styles['swiper-container']} ${wrapperClassName}`}>
+      <div
+        className={`${styles['swiper-container']} ${wrapperClassName}`}
+        ref={swiperContainerRef}
+      >
         <SwiperCore
           {...finalOptions}
           modules={modules}
           className={swiperClassName}
           onSwiper={handleSwiper}
           onSlideChange={onSlideChange}
-          onSlideChangeTransitionEnd={onSlideChangeTransitionEnd} // 추가
+          onSlideChangeTransitionEnd={onSlideChangeTransitionEnd}
           onReachEnd={onReachEnd}
           onReachBeginning={onReachBeginning}
         >
