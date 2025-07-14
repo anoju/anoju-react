@@ -78,6 +78,15 @@ export interface SwiperProps {
   allowTouchMove?: boolean;
   autoHeight?: boolean;
 
+  // 터치 스와이프 제어
+  slidesPerGroup?: number;
+  speed?: number;
+  threshold?: number;
+  shortSwipes?: boolean;
+  longSwipes?: boolean;
+  longSwipesRatio?: number;
+  longSwipesMs?: number;
+
   // 자동재생
   autoplay?: boolean | AutoplayOptions;
 
@@ -177,6 +186,7 @@ const getPresetOptions = (preset: SwiperPreset): Partial<SwiperOptions> => {
         1024: {
           slidesPerView: 3,
           spaceBetween: 10,
+          slidesPerGroup: 1,
         },
       },
     },
@@ -294,6 +304,13 @@ export const Swiper = forwardRef<SwiperRef, SwiperProps>(
       initialSlide,
       allowTouchMove,
       autoHeight,
+      longSwipes,
+      slidesPerGroup,
+      speed,
+      threshold,
+      longSwipesRatio,
+      shortSwipes,
+      longSwipesMs,
       autoplay,
       navigation,
       pagination,
@@ -457,6 +474,15 @@ export const Swiper = forwardRef<SwiperRef, SwiperProps>(
       ...(initialSlide !== undefined && { initialSlide }),
       ...(allowTouchMove !== undefined && { allowTouchMove }),
       ...(autoHeight !== undefined && { autoHeight }),
+
+      // 터치 스와이프 제어 옵션들
+      ...(slidesPerGroup !== undefined && { slidesPerGroup }),
+      ...(speed !== undefined && { speed }),
+      ...(threshold !== undefined && { threshold }),
+      ...(shortSwipes !== undefined && { shortSwipes }),
+      ...(longSwipes !== undefined && { longSwipes }),
+      ...(longSwipesRatio !== undefined && { longSwipesRatio }),
+      ...(longSwipesMs !== undefined && { longSwipesMs }),
       ...(effect && { effect }),
       ...(thumbsSwiper && { thumbs: { swiper: thumbsSwiper } }),
       ...swiperOptions,
