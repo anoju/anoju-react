@@ -104,6 +104,7 @@ export interface SwiperProps {
 
   // 이벤트 핸들러
   onSlideChange?: (swiper: SwiperType) => void;
+  onSlideChangeTransitionStart?: (swiper: SwiperType) => void;
   onSlideChangeTransitionEnd?: (swiper: SwiperType) => void;
   onSwiper?: (swiper: SwiperType) => void;
   onReachEnd?: (swiper: SwiperType) => void;
@@ -304,6 +305,7 @@ export const Swiper = forwardRef<SwiperRef, SwiperProps>(
       wrapperClassName = '',
       slideClassName = '',
       onSlideChange,
+      onSlideChangeTransitionStart,
       onSlideChangeTransitionEnd,
       onSwiper,
       onReachEnd,
@@ -547,6 +549,7 @@ export const Swiper = forwardRef<SwiperRef, SwiperProps>(
           className={swiperClassName}
           onSwiper={handleSwiper}
           onSlideChange={onSlideChange}
+          onSlideChangeTransitionStart={onSlideChangeTransitionStart}
           onSlideChangeTransitionEnd={onSlideChangeTransitionEnd}
           onReachEnd={onReachEnd}
           onReachBeginning={onReachBeginning}
