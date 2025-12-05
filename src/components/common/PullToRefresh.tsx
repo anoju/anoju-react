@@ -126,7 +126,12 @@ const PullToRefresh = React.forwardRef<PullToRefreshRef, PullToRefreshProps>(
 
       // Start closing animation
       setIsClosing(true);
-      setPullDistance(0);
+
+      // Use requestAnimationFrame to ensure the browser recognizes the state change
+      // before applying the height transition
+      requestAnimationFrame(() => {
+        setPullDistance(0);
+      });
 
       // Clear closing state after transition completes
       setTimeout(() => {
@@ -138,7 +143,12 @@ const PullToRefresh = React.forwardRef<PullToRefreshRef, PullToRefreshProps>(
       setIsPulling(false);
       setIsReleasing(false);
       setIsRefreshing(true);
-      setPullDistance(distThreshold);
+
+      // Use requestAnimationFrame to ensure the browser recognizes the state change
+      // before applying the height transition
+      requestAnimationFrame(() => {
+        setPullDistance(distThreshold);
+      });
 
       const close = () => {
         resetPull();
