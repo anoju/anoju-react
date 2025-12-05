@@ -1,4 +1,4 @@
-@use '../common/variables' as *;
+@use '@/assets/scss' as s;
 
 .sv-pull-to-refresh {
   position: relative;
@@ -9,8 +9,8 @@
   height: 0;
   pointer-events: none;
 
-  &.is-refreshing,
-  &.is-closing {
+  &:global(.is-refreshing),
+  &:global(.is-closing) {
     transition: height 0.3s ease;
   }
 
@@ -34,7 +34,7 @@
       transition: stroke-dasharray 0.1s ease;
     }
 
-    &.is-refreshing {
+    &:global(.is-refreshing) {
       animation: sv-ptr-rotate 1.28973s linear infinite;
 
       circle {
@@ -47,7 +47,7 @@
   }
 
   &--text {
-    font-size: 14px;
+    font-size: 1.4rem;
     font-weight: 500;
     line-height: 1.4;
     color: var(--color-text-tertiary, #999);

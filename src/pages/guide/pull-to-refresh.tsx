@@ -45,7 +45,7 @@ const PullToRefreshGuide = () => {
       ];
       setItems(newItems);
       close();
-    }, 2000);
+    }, 4000);
   };
 
   const handleProgress = (payload: ProgressPayload) => {

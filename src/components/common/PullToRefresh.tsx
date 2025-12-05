@@ -1,5 +1,6 @@
-import React, { useRef, useState, useEffect, useCallback, CSSProperties, ReactNode } from 'react';
+import React, { useRef, useState, useEffect, useCallback, useMemo, CSSProperties, ReactNode } from 'react';
 import styles from '@/assets/scss/components/pullToRefresh.module.scss';
+import { cx } from '@/utils/cx';
 
 // Types
 export interface PullToRefreshProps {
@@ -50,6 +51,8 @@ const PullToRefresh = React.forwardRef<PullToRefreshRef, PullToRefreshProps>(
     // Refs
     const containerRef = useRef<HTMLDivElement | null>(null);
     const indicatorRef = useRef<HTMLDivElement | null>(null);
+    const closeTimeoutRef = useRef<number | null>(null);
+    const isRefreshingRef = useRef(false);
 
     // State
     const [isPulling, setIsPulling] = useState(false);
@@ -62,54 +65,70 @@ const PullToRefresh = React.forwardRef<PullToRefreshRef, PullToRefreshProps>(
     const [isDisabled, setIsDisabled] = useState(false);
     const [isMouseDown, setIsMouseDown] = useState(false);
 
-    // Refs for timeout
-    const closeTimeoutRef = useRef<number | null>(null);
+    // Sync ref with state
+    useEffect(() => {
+      isRefreshingRef.current = isRefreshing;
+    }, [isRefreshing]);
 
-    // Computed values
-    const currentMessage = isRefreshing
-      ? refreshText
-      : isReleasing
-        ? releaseText
-        : isPulling
-          ? pullText
-          : '';
+    // Computed values - memoized
+    const currentMessage = useMemo(() => {
+      if (isRefreshing) return refreshText;
+      if (isReleasing) return releaseText;
+      if (isPulling) return pullText;
+      return '';
+    }, [isRefreshing, isReleasing, isPulling, refreshText, releaseText, pullText]);
 
-    const progress = Math.min(pullDistance / distThreshold, 1);
+    const progress = useMemo(
+      () => Math.min(pullDistance / distThreshold, 1),
+      [pullDistance, distThreshold]
+    );
 
-    const indicatorStyle: CSSProperties = {
-      height: `${Math.min(pullDistance, distMax)}px`,
-    };
+    const indicatorStyle: CSSProperties = useMemo(
+      () => ({
+        height: `${Math.min(pullDistance, distMax)}px`,
+      }),
+      [pullDistance, distMax]
+    );
 
-    const contentStyle: CSSProperties = {
-      opacity: 0.3 + progress * 0.7,
-      transform: `scale(${0.3 + progress * 0.7})`,
-    };
+    const contentStyle: CSSProperties = useMemo(() => {
+      const opacity = 0.3 + progress * 0.7;
+      const scale = 0.3 + progress * 0.7;
+      return {
+        opacity,
+        transform: `scale(${scale})`,
+      };
+    }, [progress]);
 
-    const circleStyle: CSSProperties = isRefreshing
-      ? {}
-      : {
-          strokeDasharray: `${1 + progress * 93}, 150`,
-          strokeDashoffset: 0,
-        };
+    const circleStyle: CSSProperties = useMemo(() => {
+      if (isRefreshing) return {};
+      return {
+        strokeDasharray: `${1 + progress * 93}, 150`,
+        strokeDashoffset: 0,
+      };
+    }, [isRefreshing, progress]);
 
     // Methods
+    const resistance = useCallback((t: number): number => {
+      return Math.min(1, t / 2.5);
+    }, []);
+
     const shouldPullToRefresh = useCallback(() => {
       if (isDisabled) return false;
       return touchStartScrollTop <= scrollThreshold;
     }, [isDisabled, touchStartScrollTop, scrollThreshold]);
 
-    const resistance = (t: number): number => {
-      return Math.min(1, t / 2.5);
-    };
-
     const resetPull = useCallback(() => {
-      setIsClosing(true);
+      // Clear interaction states immediately
       setIsPulling(false);
       setIsReleasing(false);
       setIsRefreshing(false);
-      setPullDistance(0);
       setTouchStartY(0);
 
+      // Start closing animation
+      setIsClosing(true);
+      setPullDistance(0);
+
+      // Clear closing state after transition completes
       setTimeout(() => {
         setIsClosing(false);
       }, 300);
@@ -122,7 +141,6 @@ const PullToRefresh = React.forwardRef<PullToRefreshRef, PullToRefreshProps>(
       setPullDistance(distThreshold);
 
       const close = () => {
-        setIsRefreshing(false);
         resetPull();
         if (closeTimeoutRef.current !== null) {
           clearTimeout(closeTimeoutRef.current);
@@ -136,16 +154,17 @@ const PullToRefresh = React.forwardRef<PullToRefreshRef, PullToRefreshProps>(
 
       if (refreshTimeout) {
         closeTimeoutRef.current = window.setTimeout(() => {
-          if (isRefreshing) {
+          // Use ref to get the latest value
+          if (isRefreshingRef.current) {
             close();
           }
         }, refreshTimeout);
       }
-    }, [distThreshold, isRefreshing, onRefresh, refreshTimeout, resetPull]);
+    }, [distThreshold, onRefresh, refreshTimeout, resetPull]);
 
     const handleTouchStart = useCallback(
       (e: TouchEvent | MouseEvent) => {
-        if (isRefreshing || isDisabled) return;
+        if (isRefreshingRef.current || isDisabled) return;
 
         if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
           return;
@@ -169,12 +188,12 @@ const PullToRefresh = React.forwardRef<PullToRefreshRef, PullToRefreshProps>(
             0
         );
       },
-      [isRefreshing, isDisabled, scrollElement]
+      [isDisabled, scrollElement]
     );
 
     const handleTouchMove = useCallback(
       (e: TouchEvent | MouseEvent) => {
-        if (isRefreshing || isDisabled) return;
+        if (isRefreshingRef.current || isDisabled) return;
 
         if (e instanceof MouseEvent && !isMouseDown) {
           return;
@@ -229,7 +248,6 @@ const PullToRefresh = React.forwardRef<PullToRefreshRef, PullToRefreshProps>(
         }
       },
       [
-        isRefreshing,
         isDisabled,
         isMouseDown,
         touchStartY,
@@ -240,11 +258,12 @@ const PullToRefresh = React.forwardRef<PullToRefreshRef, PullToRefreshProps>(
         distMax,
         onProgress,
         resetPull,
+        resistance,
       ]
     );
 
     const handleTouchEnd = useCallback(() => {
-      if (isRefreshing || isDisabled) return;
+      if (isRefreshingRef.current || isDisabled) return;
 
       setIsMouseDown(false);
 
@@ -253,7 +272,7 @@ const PullToRefresh = React.forwardRef<PullToRefreshRef, PullToRefreshProps>(
       } else {
         resetPull();
       }
-    }, [isRefreshing, isDisabled, isReleasing, triggerRefresh, resetPull]);
+    }, [isDisabled, isReleasing, triggerRefresh, resetPull]);
 
     const handleVisibilityChange = useCallback(() => {
       if (document.hidden && (isPulling || isReleasing)) {
@@ -271,12 +290,16 @@ const PullToRefresh = React.forwardRef<PullToRefreshRef, PullToRefreshProps>(
     );
 
     // Expose methods via ref
-    React.useImperativeHandle(ref, () => ({
-      disabled: (val: boolean) => {
-        setIsDisabled(val);
-      },
-      progress,
-    }));
+    React.useImperativeHandle(
+      ref,
+      () => ({
+        disabled: (val: boolean) => {
+          setIsDisabled(val);
+        },
+        progress,
+      }),
+      [progress]
+    );
 
     // Lifecycle
     useEffect(() => {
@@ -330,19 +353,20 @@ const PullToRefresh = React.forwardRef<PullToRefreshRef, PullToRefreshProps>(
         {(isPulling || isReleasing || isRefreshing || isClosing) && (
           <div
             ref={indicatorRef}
-            className={`${styles['sv-pull-to-refresh']} ${
-              isPulling ? styles['is-pulling'] : ''
-            } ${isReleasing ? styles['is-releasing'] : ''} ${
-              isRefreshing ? styles['is-refreshing'] : ''
-            } ${isClosing ? styles['is-closing'] : ''}`}
+            className={cx(styles['sv-pull-to-refresh'], {
+              'is-pulling': isPulling,
+              'is-releasing': isReleasing,
+              'is-refreshing': isRefreshing,
+              'is-closing': isClosing,
+            })}
             style={indicatorStyle}
           >
             <div className={styles['sv-pull-to-refresh--content']} style={contentStyle}>
               <span className={styles['sv-pull-to-refresh--icon']}>
                 <svg
-                  className={`${styles['sv-pull-to-refresh--circle']} ${
-                    isRefreshing ? styles['is-refreshing'] : ''
-                  }`}
+                  className={cx(styles['sv-pull-to-refresh--circle'], {
+                    'is-refreshing': isRefreshing,
+                  })}
                   viewBox="0 0 40 40"
                   width="40"
                   height="40"
