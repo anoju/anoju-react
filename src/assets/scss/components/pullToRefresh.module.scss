@@ -1,0 +1,76 @@
+@use '../common/variables' as *;
+
+.sv-pull-to-refresh {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  height: 0;
+  pointer-events: none;
+
+  &.is-refreshing,
+  &.is-closing {
+    transition: height 0.3s ease;
+  }
+
+  &--content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &--icon {
+    display: block;
+    width: 40px;
+    height: 40px;
+    margin-right: 8px;
+  }
+
+  &--circle {
+    color: var(--color-primary, #0066ff);
+
+    circle {
+      transition: stroke-dasharray 0.1s ease;
+    }
+
+    &.is-refreshing {
+      animation: sv-ptr-rotate 1.28973s linear infinite;
+
+      circle {
+        stroke-dasharray: 1, 150;
+        stroke-dashoffset: 0;
+        transition: none;
+        animation: sv-ptr-dash 2s ease-in-out infinite;
+      }
+    }
+  }
+
+  &--text {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--color-text-tertiary, #999);
+  }
+}
+
+@keyframes sv-ptr-rotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes sv-ptr-dash {
+  0% {
+    stroke-dasharray: 1, 150;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 66, 150;
+    stroke-dashoffset: -26px;
+  }
+  100% {
+    stroke-dasharray: 66, 150;
+    stroke-dashoffset: -92px;
+  }
+}

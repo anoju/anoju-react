@@ -80,6 +80,10 @@ const GuideLayout: React.FC<GuideLayoutProps> = ({ children }) => {
               label: 'Swiper',
               to: '/guide/swiper',
             },
+            {
+              label: 'PullToRefresh',
+              to: '/guide/pull-to-refresh',
+            },
           ]}
         />
       </Sticky>
