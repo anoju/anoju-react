@@ -351,7 +351,7 @@ const DatePickerSwiper: React.FC<DatePickerSwiperProps> = ({
           >
             <Calendar
               value={monthInfo.date}
-              selectedDate={index === currentIndex ? selectedDate : undefined}
+              selectedDate={index === currentIndex ? (selectedDate ?? undefined) : undefined}
               onChange={onDateSelect}
               disabledDate={disabledDate}
               showAdjacentMonths={true}
@@ -468,11 +468,8 @@ const DatePicker = forwardRef<DatePickerRef, DatePickerProps>(
       visible = false,
       onChange,
       onVisibleChange,
-      format = 'YYYY-MM-DD',
-      disabled = false,
       disabledDate,
       showToday = true,
-      allowClear = true,
       className = '',
       popupClassName = '',
     },
