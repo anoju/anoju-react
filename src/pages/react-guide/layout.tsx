@@ -20,7 +20,7 @@ const ReactGuideLayout: React.FC<LayoutProps> = ({ children }) => {
           ]}
         />
       </Sticky>
-      <div style={{ marginTop: '30px', padding: '0 20px' }}>{children}</div>
+      <div>{children}</div>
     </>
   );
 };
