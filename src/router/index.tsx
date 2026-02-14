@@ -179,6 +179,17 @@ function buildRouteTree(): RouteObject[] {
           errorBoundary: pages[pagePath].ErrorBoundary,
           originalPath: pagePath,
         };
+      } else if (i === folderSegments.length - 1 && segment === 'index') {
+        // index 페이지 처리 (현재 폴더의 인덱스 페이지)
+        if (!currentLevel.pages) currentLevel.pages = {};
+        currentLevel.pages[''] = {
+          path: routePath,
+          component: pages[pagePath].default,
+          loader: pages[pagePath].loader,
+          action: pages[pagePath].action,
+          errorBoundary: pages[pagePath].ErrorBoundary,
+          originalPath: pagePath,
+        };
       } else {
         // 폴더 처리
         if (!currentLevel.folders) currentLevel.folders = {};
@@ -186,19 +197,6 @@ function buildRouteTree(): RouteObject[] {
           currentLevel.folders[segment] = {};
         }
         currentLevel = currentLevel.folders[segment];
-
-        // index 페이지 처리 (폴더 인덱스)
-        if (i === folderSegments.length - 1 && segment === 'index') {
-          if (!currentLevel.pages) currentLevel.pages = {};
-          currentLevel.pages[''] = {
-            path: routePath,
-            component: pages[pagePath].default,
-            loader: pages[pagePath].loader,
-            action: pages[pagePath].action,
-            errorBoundary: pages[pagePath].ErrorBoundary,
-            originalPath: pagePath,
-          };
-        }
       }
     }
   });

@@ -61,6 +61,16 @@ function Home() {
             go to about
           </Button>
         </p>
+        <p>
+          <Button 
+            to="/react-guide" 
+            not 
+            className="btn-link" 
+            style={{ color: '#42b883', fontWeight: 'bold', marginTop: '10px', display: 'inline-block' }}
+          >
+            ⚛️ Vue 개발자를 위한 React 가이드
+          </Button>
+        </p>
       </div>
       <p className={styles.docs}>
         Click on the Vite and React logos to learn more
