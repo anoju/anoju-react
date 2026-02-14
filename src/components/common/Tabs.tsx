@@ -755,9 +755,14 @@ export const Tabs = React.forwardRef(
 
       // 경로 기반 활성화
       if (processedItems && processedItems.length > 0) {
-        const pathTab = processedItems.find(
+        // Longest Prefix Match
+        const matchedTabs = processedItems.filter(
           (item) => item.to && location.pathname.startsWith(item.to)
         );
+
+        const pathTab = matchedTabs.sort(
+          (a, b) => (b.to as string).length - (a.to as string).length
+        )[0];
 
         if (pathTab && pathTab.value !== undefined) {
           setActiveValue(pathTab.value);
@@ -773,6 +778,8 @@ export const Tabs = React.forwardRef(
       } else if (tabs.length > 0) {
         // 탭이 직접 자식으로 있는 경우
         let foundActiveTab = false;
+        let bestMatchIndex = -1;
+        let maxMatchLength = -1;
 
         for (let i = 0; i < tabs.length; i++) {
           const tabComponent = tabs[i];
@@ -781,10 +788,17 @@ export const Tabs = React.forwardRef(
           if (tabProps.disabled) continue;
 
           if (tabProps.to && location.pathname.startsWith(tabProps.to)) {
-            setActiveValue(tabValues[i]);
-            foundActiveTab = true;
-            break;
+            const matchLength = tabProps.to.length;
+            if (matchLength > maxMatchLength) {
+              maxMatchLength = matchLength;
+              bestMatchIndex = i;
+            }
           }
+        }
+
+        if (bestMatchIndex !== -1) {
+          setActiveValue(tabValues[bestMatchIndex]);
+          foundActiveTab = true;
         }
 
         if (!foundActiveTab) {
@@ -827,10 +841,14 @@ export const Tabs = React.forwardRef(
       if (initializedRef.current) {
         // items 방식으로 사용하는 경우
         if (processedItems && processedItems.length > 0) {
-          // URL과 일치하는 탭 찾기
-          const pathTab = processedItems.find(
+          // Longest Prefix Match
+          const matchedTabs = processedItems.filter(
             (item) => item.to && location.pathname.startsWith(item.to)
           );
+
+          const pathTab = matchedTabs.sort(
+            (a, b) => (b.to as string).length - (a.to as string).length
+          )[0];
 
           if (pathTab && pathTab.value !== undefined) {
             // 현재 활성 탭과 다른 경우에만 업데이트

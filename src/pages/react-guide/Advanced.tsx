@@ -11,6 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import { useLayout } from '@/contexts/LayoutContext';
 import Button from '@/components/common/Button';
 import Input from '@/components/common/Input';
+import cx from '@/utils/cx';
 import styles from '@/assets/scss/pages/react-guide.module.scss';
 
 // 자식 컴포넌트 (Emit & Expose 예제용)
@@ -98,6 +99,34 @@ const AdvancedDemo = () => {
   const handleChildEvent = (message: string) => {
     alert(`자식으로부터 받은 메시지: ${message}`);
   };
+
+  // 4. 스타일 & 클래스 예제용
+  const [isActive, setIsActive] = useState(false);
+
+  // Vue의 computed(() => ({ active: isActive.value }))
+  const computedClass = useMemo(() => {
+    // cx 유틸리티 사용 (classnames와 유사)
+    // 조건부로 클래스를 적용할 때 매우 유용합니다.
+    return cx(styles.fruitBox, {
+      [styles.active]: isActive, // styles.active가 정의되어 있다면 적용됨
+    });
+  }, [isActive]);
+
+  // Vue의 computed(() => ({ ...styles }))
+  const computedStyle = useMemo(() => {
+    return {
+      transition: 'all 0.3s ease',
+      border: isActive
+        ? '2px solid var(--primary-color)'
+        : '1px solid var(--form-border-color)',
+      backgroundColor: isActive
+        ? 'rgba(var(--primary-rgb), 0.1)'
+        : 'var(--form-bg-color)',
+      transform: isActive ? 'scale(1.02)' : 'scale(1)',
+      padding: '20px',
+      borderRadius: '8px',
+    };
+  }, [isActive]);
 
   return (
     <div className={styles.container}>
@@ -224,6 +253,81 @@ const AdvancedDemo = () => {
           </div>
 
           <ChildComponent ref={childRef} onCustomEvent={handleChildEvent} />
+        </div>
+      </div>
+
+      {/* 4. Style & Class */}
+      <div className={styles.demoSection}>
+        <h2>4. 스타일 & 클래스 (Conditional & Computed)</h2>
+        <p>
+          Vue의 <span className={styles.codeBlock}>:class</span>,{' '}
+          <span className={styles.codeBlock}>:style</span>을 React에서는{' '}
+          <span className={styles.codeBlock}>cx</span> 유틸리티나{' '}
+          <span className={styles.codeBlock}>style</span> 객체로 처리합니다.
+        </p>
+
+        <div style={{ margin: '15px 0' }}>
+          <Button onClick={() => setIsActive(!isActive)}>
+            스타일 토글 (isActive: {isActive.toString()})
+          </Button>
+        </div>
+
+        <div className={computedClass} style={computedStyle}>
+          <p style={{ margin: 0, textAlign: 'center', fontWeight: 'bold' }}>
+            이 박스는 useMemo로 계산된 스타일과 클래스를 가집니다.
+          </p>
+          <p
+            style={{
+              margin: '5px 0 0 0',
+              fontSize: '0.9em',
+              textAlign: 'center',
+              opacity: 0.8,
+            }}
+          >
+            (active 상태일 때 크기, 색상, 테두리가 변합니다)
+          </p>
+        </div>
+
+        <div className={styles.tipBox} style={{ marginTop: '20px' }}>
+          <h3>코드 비교</h3>
+          <div className={styles.tableContainer}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th style={{ width: '20%' }}>구분</th>
+                  <th>Vue (Computed)</th>
+                  <th>React (useMemo)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <strong>Class</strong>
+                  </td>
+                  <td>
+                    <code>:class="userInfo"</code>
+                  </td>
+                  <td>
+                    <code>
+                      className=&#123;cx(styles.box, &#123; [styles.active]:
+                      isActive &#125;)&#125;
+                    </code>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Style</strong>
+                  </td>
+                  <td>
+                    <code>:style="boxStyle"</code>
+                  </td>
+                  <td>
+                    <code>style=&#123;boxStyle&#125;</code> (객체를 반환)
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
