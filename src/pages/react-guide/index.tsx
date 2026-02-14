@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useLayout } from '@/contexts/LayoutContext';
 import { Button } from '@/components/common';
 import styles from '@/assets/scss/pages/react-guide.module.scss';
-import GuideTabs from './components/GuideTabs';
 
 const ReactGuideIndex = () => {
   const { updateConfig } = useLayout();
@@ -23,7 +22,6 @@ const ReactGuideIndex = () => {
 
   return (
     <div className={styles.container}>
-      <GuideTabs />
       <header className={styles.header}>
         <h1 className={styles.title}>React 마이그레이션 가이드</h1>
         <p className={styles.description}>

@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLayout } from '@/contexts/LayoutContext';
-import { Button } from '@/components/common';
+import Button from '@/components/common/Button';
 import styles from '@/assets/scss/pages/react-guide.module.scss';
-import GuideTabs from './components/GuideTabs';
 
 const PitfallsDemo = () => {
   const { updateConfig } = useLayout();
@@ -25,23 +24,13 @@ const PitfallsDemo = () => {
   const [count, setCount] = useState(0);
   const [infiniteLoopError, setInfiniteLoopError] = useState(false);
 
-  // 👎 잘못된 예 (무한 루프 발생 가능성)
-  /*
-    useEffect(() => {
-        // count가 변경되어 이 효과가 실행됨 -> setCount 호출 -> count 변경 -> 다시 실행...
-        setCount(count + 1); 
-    }, [count]);
-    */
-
-  // 👍 올바른 예
   useEffect(() => {
     // 꼭 필요한 경우에만 조건부로 업데이트하거나, 의존성 배열을 비워야 함
     if (count > 0 && count < 5 && infiniteLoopError) {
       console.log('조건부 업데이트로 안전하게 처리');
     }
 
-    // Lint 에러 방지용: 예제에서만 언급된 setter들을 실제로 사용하지 않을 경우
-    // 실제 코드에서는 이런 더미 로직은 필요 없습니다.
+    // Lint 에러 방지용
     console.log('API Usage:', setCount, setInfiniteLoopError);
   }, [count, infiniteLoopError]);
 
@@ -72,7 +61,6 @@ const PitfallsDemo = () => {
 
   return (
     <div className={styles.container}>
-      <GuideTabs />
       <h1 className={styles.title}>⚠️ React 사용 시 주의사항 (Pitfalls)</h1>
 
       {/* 1. 무한 루프 */}
@@ -148,19 +136,27 @@ const PitfallsDemo = () => {
             나이: {user.age}
           </div>
           <div>
-            <button
-              className={`${styles.button} danger`}
+            <Button
               onClick={wrongUpdate}
-              style={{ marginRight: '10px' }}
+              style={{
+                marginRight: '10px',
+                backgroundColor: '#dc3545',
+                color: 'white',
+                border: 'none',
+              }}
             >
               잘못된 수정 (반응 없음)
-            </button>
-            <button
-              className={`${styles.button} success`}
+            </Button>
+            <Button
               onClick={correctUpdate}
+              style={{
+                backgroundColor: '#28a745',
+                color: 'white',
+                border: 'none',
+              }}
             >
               올바른 수정 (새 객체)
-            </button>
+            </Button>
           </div>
         </div>
         <p

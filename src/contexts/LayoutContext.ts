@@ -1,4 +1,4 @@
-// src/contexts/LayoutContext.tsx
+// src/contexts/LayoutContext.ts
 import { useContext } from 'react';
 import {
   LayoutContext,
@@ -12,5 +12,9 @@ export type { LayoutConfig, LayoutContextProps };
 
 // 컨텍스트 사용을 위한 훅
 export const useLayout = () => {
-  return useContext(LayoutContext);
+  const context = useContext(LayoutContext);
+  if (context === undefined) {
+    throw new Error('useLayout must be used within a LayoutProvider');
+  }
+  return context;
 };

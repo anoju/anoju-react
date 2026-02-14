@@ -1,19 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLayout } from '@/contexts/LayoutContext';
-import { Button } from '@/components/common';
+import Button from '@/components/common/Button';
 import styles from '@/assets/scss/pages/react-guide.module.scss';
-import GuideTabs from './components/GuideTabs';
 
 /**
  * React 라이프사이클 가이드 페이지
- *
- * Vue의 라이프사이클 훅(mounted, updated, unmounted)이 React에서 어떻게 구현되는지 보여줍니다.
- *
- * 대응표:
- * - mounted -> useEffect(fn, [])
- * - updated -> useEffect(fn, [dep])
- * - unmounted -> useEffect(() => cleanup, [])
  */
 const LifecycleDemo = () => {
   const { updateConfig } = useLayout();
@@ -43,54 +35,33 @@ const LifecycleDemo = () => {
 
   /**
    * 1. 마운트 시점 (Vue: onMounted)
-   * 의존성 배열이 빈 배열([])이면 컴포넌트가 처음 나타날 때 딱 한 번 실행됩니다.
    */
   useEffect(() => {
     addLog('🟢 컴포넌트가 마운트되었습니다. (Vue: onMounted)');
 
-    // API 호출 등을 여기서 수행합니다.
-
-    // 이 useEffect의 return 함수는 언마운트 시 실행됩니다.
     return () => {
-      // 3. 언마운트 시점 (Vue: onUnmounted)
-      // 컴포넌트가 사라지기 직전에 정리 작업을 수행합니다.
       console.log('🔴 컴포넌트가 언마운트되었습니다. (Vue: onUnmounted)');
-      // 주의: 이 로그는 컴포넌트가 사라진 후의 콘솔이나 상위 컴포넌트에서 확인 가능합니다.
-      // alert('컴포넌트가 언마운트(제거)됩니다!');
     };
   }, []);
 
   /**
    * 2. 업데이트 시점 (Vue: watch + onUpdated)
-   * 의존성 배열에 변수([count])를 넣으면 해당 값이 변할 때마다 실행됩니다.
    */
   useEffect(() => {
     if (count > 0) {
       addLog(`🟡 count 값이 ${count}(으)로 변경되었습니다. (Vue: watch)`);
     }
-  }, [count]); // count가 바뀔 때만 실행
-
-  /**
-   * 4. 매 렌더링마다 실행 (Vue: onUpdated)
-   * 의존성 배열을 생략하면 모든 렌더링마다 실행됩니다. (성능 주의!)
-   */
-  useEffect(() => {
-    // console.log('매 렌더링마다 실행됩니다.');
-  });
+  }, [count]);
 
   return (
     <div className={styles.container}>
-      <GuideTabs />
       <h1 className={styles.title}>React 라이프사이클 (useEffect) 데모</h1>
 
       <div className={styles.demoSection}>
         <h2>카운터: {count}</h2>
-        <button
-          onClick={() => setCount((prev) => prev + 1)}
-          className={styles.button}
-        >
+        <Button onClick={() => setCount((prev) => prev + 1)}>
           증가시키기 (Update 트리거)
-        </button>
+        </Button>
         <p>버튼을 누르면 'Update' 라이프사이클이 동작하여 로그가 추가됩니다.</p>
       </div>
 

@@ -1,19 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLayout } from '@/contexts/LayoutContext';
-import { Button } from '@/components/common';
+import Button from '@/components/common/Button';
 import styles from '@/assets/scss/pages/react-guide.module.scss';
-import GuideTabs from './components/GuideTabs';
 
 /**
  * React 리스트와 조건부 렌더링 가이드 페이지
- *
- * Vue의 템플릿 문법(v-for, v-if)이 JSX에서 어떻게 자바스크립트로 표현되는지 보여줍니다.
- *
- * 대응표:
- * - v-for -> items.map(item => <Item />)
- * - v-if -> condition && <Component /> 또는 condition ? <A /> : <B />
- * - key -> map() 내부 최상위 요소에 필수 (유니크한 값)
  */
 const ListsDemo = () => {
   const { updateConfig } = useLayout();
@@ -56,7 +48,6 @@ const ListsDemo = () => {
 
   return (
     <div className={styles.container}>
-      <GuideTabs />
       <h1 className={styles.title}>React 리스트 & 조건부 렌더링 데모</h1>
 
       <div className={styles.demoSection}>
@@ -76,33 +67,37 @@ const ListsDemo = () => {
 
         <ul style={{ listStyle: 'none', padding: 0 }}>
           {items.map((item) => (
-            // 중요: map 내부 최상위 요소에는 반드시 고유한 key prop이 필요합니다.
             <li key={item.id} className={styles.fruitItem}>
               <span>
                 {item.name} (ID: {item.id})
               </span>
 
-              <button
+              <Button
+                size="sm"
+                // color 속성이 ButtonProp에 없으므로 className 활용하거나 style로 처리
+                // 만약 Button이 color prop을 지원하지 않으면 className으로 처리해야 함.
+                // 여기서는 일단 className으로 fallback
+                className={item.isVisible ? styles.danger : styles.success}
                 onClick={() => toggleVisibility(item.id)}
-                className={`${styles.button} ${item.isVisible ? 'danger' : 'success'}`}
-                style={{ fontSize: '0.8rem', padding: '5px 10px' }}
+                style={{
+                  backgroundColor: item.isVisible ? '#dc3545' : '#28a745',
+                  color: 'white',
+                  border: 'none',
+                }}
               >
                 {item.isVisible ? '숨기기' : '보이기'}
-              </button>
+              </Button>
             </li>
           ))}
         </ul>
 
-        <button
-          onClick={addItem}
-          className={styles.button}
-          style={{ width: '100%', marginTop: '10px' }}
-        >
+        <Button onClick={addItem} style={{ width: '100%', marginTop: '10px' }}>
           아이템 추가하기
-        </button>
+        </Button>
       </div>
 
       <div className={styles.demoSection}>
+        {/* ... 조건부 렌더링 섹션 ... */}
         <h2>2. 조건부 렌더링 (v-if 대신 && 연산자)</h2>
         <p>
           Vue: <span className={styles.codeBlock}>v-if="isVisible"</span>
@@ -117,7 +112,6 @@ const ListsDemo = () => {
         <div className={styles.flexWrap}>
           {items.map(
             (item) =>
-              // 조건부 렌더링 예시
               item.isVisible && (
                 <div key={item.id} className={styles.fruitBox}>
                   {item.name}
@@ -131,6 +125,7 @@ const ListsDemo = () => {
       </div>
 
       <div className={styles.demoSection}>
+        {/* ... 삼항 연산자 섹션 ... */}
         <h2>3. 삼항 연산자 (v-if / v-else)</h2>
         <p>
           Vue: <span className={styles.codeBlock}>v-else</span>
