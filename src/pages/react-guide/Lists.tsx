@@ -1,6 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useLayout } from '@/contexts/LayoutContext';
+import { Button } from '@/components/common';
 import styles from '@/assets/scss/pages/react-guide.module.scss';
 import GuideTabs from './components/GuideTabs';
+
 /**
  * React 리스트와 조건부 렌더링 가이드 페이지
  *
@@ -12,6 +16,21 @@ import GuideTabs from './components/GuideTabs';
  * - key -> map() 내부 최상위 요소에 필수 (유니크한 값)
  */
 const ListsDemo = () => {
+  const { updateConfig } = useLayout();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    updateConfig({
+      title: '리스트 & 조건부 렌더링',
+      showBackButton: true,
+      rightButtons: (
+        <Button size="sm" onClick={() => navigate('/')}>
+          홈
+        </Button>
+      ),
+    });
+  }, [updateConfig, navigate]);
+
   const [items, setItems] = useState([
     { id: 1, name: '사과', isVisible: true },
     { id: 2, name: '바나나', isVisible: false },

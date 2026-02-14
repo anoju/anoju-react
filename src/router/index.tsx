@@ -547,6 +547,27 @@ function buildRouteTree(): RouteObject[] {
 // 라우트 트리 생성
 const routes = buildRouteTree();
 
+// 404 페이지 추가 (모든 경로에 매칭되지 않을 경우)
+const notFoundKey = '../pages/NotFound.tsx';
+if (pages[notFoundKey]) {
+  const NotFoundComponent = pages[notFoundKey].default;
+  const metadata = getPageMetadata(pages[notFoundKey]);
+
+  let element = React.createElement(NotFoundComponent);
+
+  // 메타데이터에 지정된 레이아웃 적용
+  if (metadata.layout && defaultLayoutMap[metadata.layout]) {
+    element = React.createElement(defaultLayoutMap[metadata.layout], {
+      children: element,
+    });
+  }
+
+  routes.push({
+    path: '*',
+    element,
+  });
+}
+
 // 라우트 구성 로깅
 // console.log(
 //   'Final routes:',

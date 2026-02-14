@@ -5,7 +5,13 @@ import autoprefixer from 'autoprefixer';
 import postcssPresetEnv from 'postcss-preset-env';
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react({
+      babel: {
+        plugins: [['babel-plugin-react-compiler', {}]],
+      },
+    }),
+  ],
   css: {
     devSourcemap: true, // 개발 환경에서 CSS/SCSS 소스맵 활성화
     preprocessorOptions: {

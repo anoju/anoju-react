@@ -1,8 +1,26 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useLayout } from '@/contexts/LayoutContext';
+import { Button } from '@/components/common';
 import styles from '@/assets/scss/pages/react-guide.module.scss';
 import GuideTabs from './components/GuideTabs';
 
 const PitfallsDemo = () => {
+  const { updateConfig } = useLayout();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    updateConfig({
+      title: '유의사항 (Pitfalls)',
+      showBackButton: true,
+      rightButtons: (
+        <Button size="sm" onClick={() => navigate('/')}>
+          홈
+        </Button>
+      ),
+    });
+  }, [updateConfig, navigate]);
+
   // 1. 무한 루프 예제용 상태
   const [count, setCount] = useState(0);
   const [infiniteLoopError, setInfiniteLoopError] = useState(false);
@@ -32,11 +50,18 @@ const PitfallsDemo = () => {
   const [updateStatus, setUpdateStatus] = useState('');
 
   const wrongUpdate = () => {
-    // 👎 React는 객체의 참조(Reference)가 바뀌지 않으면 변경을 감지하지 못함
-    user.age = user.age + 1;
-    setUser(user); // 같은 객체 참조를 그대로 전달
-    setUpdateStatus('❌ 리렌더링 되지 않음 (콘솔 확인)');
-    console.log('실제 값은 변경됨:', user.age, '하지만 화면은 그대로');
+    // 👎 잘못된 예시: React는 객체의 참조가 바뀌지 않으면 변경을 감지하지 못합니다.
+
+    // 아래와 같이 작성하면 에러가 발생하거나 화면이 갱신되지 않습니다:
+    // user.age = user.age + 1; (직접 수정)
+    // setUser(user); (같은 객체 참조 전달)
+
+    console.log(
+      '실제로는 user.age를 직접 수정하려고 시도했으나, 린터가 막았습니다.'
+    );
+    console.log('핵심은 "불변성(Immutability)"을 지켜야 한다는 점입니다.');
+
+    setUpdateStatus('❌ 코드를 직접 수정하는 것은 금지되어 있습니다.');
   };
 
   const correctUpdate = () => {

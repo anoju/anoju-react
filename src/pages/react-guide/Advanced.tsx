@@ -4,7 +4,11 @@ import {
   useRef,
   useImperativeHandle,
   forwardRef,
+  useEffect,
 } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useLayout } from '@/contexts/LayoutContext';
+import { Button } from '@/components/common';
 import styles from '@/assets/scss/pages/react-guide.module.scss';
 import GuideTabs from './components/GuideTabs';
 
@@ -63,6 +67,21 @@ const ChildComponent = forwardRef<ChildHandle, ChildProps>((props, ref) => {
 
 // 부모 컴포넌트
 const AdvancedDemo = () => {
+  const { updateConfig } = useLayout();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    updateConfig({
+      title: '심화 가이드 (Computed, Events)',
+      showBackButton: true,
+      rightButtons: (
+        <Button size="sm" onClick={() => navigate('/')}>
+          홈
+        </Button>
+      ),
+    });
+  }, [updateConfig, navigate]);
+
   const [firstName, setFirstName] = useState('길동');
   const [lastName, setLastName] = useState('홍');
 

@@ -1,4 +1,7 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useLayout } from '@/contexts/LayoutContext';
+import { Button } from '@/components/common';
 import styles from '@/assets/scss/pages/react-guide.module.scss';
 import GuideTabs from './components/GuideTabs';
 
@@ -13,6 +16,21 @@ import GuideTabs from './components/GuideTabs';
  * - unmounted -> useEffect(() => cleanup, [])
  */
 const LifecycleDemo = () => {
+  const { updateConfig } = useLayout();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    updateConfig({
+      title: '라이프사이클 (useEffect)',
+      showBackButton: true,
+      rightButtons: (
+        <Button size="sm" onClick={() => navigate('/')}>
+          홈
+        </Button>
+      ),
+    });
+  }, [updateConfig, navigate]);
+
   // 상태 관리 (Vue의 data() 또는 ref())
   const [count, setCount] = useState(0);
   const [logs, setLogs] = useState<string[]>([]);

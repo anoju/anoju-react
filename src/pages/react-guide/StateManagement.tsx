@@ -1,6 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useLayout } from '@/contexts/LayoutContext';
+import { Button } from '@/components/common';
 import styles from '@/assets/scss/pages/react-guide.module.scss';
 import GuideTabs from './components/GuideTabs';
+
 /**
  * React 상태 관리 가이드 페이지
  *
@@ -11,6 +15,21 @@ import GuideTabs from './components/GuideTabs';
  * - React: 불변(Immutable). `setState({ ...data, check })`처럼 새 객체를 할당해야 반응함.
  */
 const StateManagementDemo = () => {
+  const { updateConfig } = useLayout();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    updateConfig({
+      title: '상태 관리 (useState)',
+      showBackButton: true,
+      rightButtons: (
+        <Button size="sm" onClick={() => navigate('/')}>
+          홈
+        </Button>
+      ),
+    });
+  }, [updateConfig, navigate]);
+
   // 1. 기본형 데이터 (Vue: ref(0))
   const [count, setCount] = useState(0);
 
