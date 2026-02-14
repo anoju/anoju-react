@@ -1,7 +1,7 @@
 // src/App.tsx
 import { RouterProvider } from 'react-router-dom';
 import router from './router';
-import { LayoutProvider } from './contexts/LayoutContext';
+import { LayoutProvider } from './contexts/LayoutProvider';
 import { StickyProvider } from './contexts/StickyContext';
 import { ToastProvider } from './contexts/ToastContext';
 import Loading from './components/common/Loading';

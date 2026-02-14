@@ -1,5 +1,5 @@
 // src/hooks/usePageLayout.ts
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useLayout, LayoutConfig } from '@/contexts/LayoutContext';
 
 /**
@@ -10,16 +10,19 @@ import { useLayout, LayoutConfig } from '@/contexts/LayoutContext';
 export function usePageLayout(config: Partial<LayoutConfig>) {
   const { updateConfig, resetConfig } = useLayout();
 
+  // 초기 렌더링 시의 config를 저장하여 불필요한 의존성 변경을 방지
+  // (대부분의 경우 페이지 레이아웃 설정은 마운트/언마운트 시에만 변경되면 됨)
+  const savedConfig = useRef(config);
+
   useEffect(() => {
     // 페이지 마운트 시 레이아웃 설정 업데이트
-    updateConfig(config);
+    updateConfig(savedConfig.current);
 
     // 페이지 언마운트 시 레이아웃 설정 초기화
     return () => {
       resetConfig();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only run on mount and unmount
+  }, [updateConfig, resetConfig]); // savedConfig is a ref, so it's stable
 
   return useLayout();
 }

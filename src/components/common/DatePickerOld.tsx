@@ -10,43 +10,6 @@ import React, {
 import { Button, Popup, Calendar, Select } from '@/components/common';
 import styles from '@/assets/scss/components/datePicker.module.scss';
 
-// 날짜 포맷팅 유틸리티
-const formatDate = (
-  date: Date | null,
-  format: string = 'YYYY-MM-DD'
-): string => {
-  if (!date) return '';
-
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-
-  return format
-    .replace('YYYY', String(year))
-    .replace('MM', month)
-    .replace('DD', day);
-};
-
-// 문자열을 Date로 파싱
-const parseDate = (
-  dateString: string,
-  format: string = 'YYYY-MM-DD'
-): Date | null => {
-  if (!dateString) return null;
-
-  try {
-    if (format === 'YYYY-MM-DD') {
-      const [year, month, day] = dateString.split('-').map(Number);
-      if (year && month && day) {
-        return new Date(year, month - 1, day);
-      }
-    }
-    return null;
-  } catch {
-    return null;
-  }
-};
-
 // 월 정보 생성
 const createMonthInfo = (year: number, month: number) => ({
   year,
@@ -351,7 +314,9 @@ const DatePickerSwiper: React.FC<DatePickerSwiperProps> = ({
           >
             <Calendar
               value={monthInfo.date}
-              selectedDate={index === currentIndex ? (selectedDate ?? undefined) : undefined}
+              selectedDate={
+                index === currentIndex ? (selectedDate ?? undefined) : undefined
+              }
               onChange={onDateSelect}
               disabledDate={disabledDate}
               showAdjacentMonths={true}
@@ -657,5 +622,4 @@ const DatePicker = forwardRef<DatePickerRef, DatePickerProps>(
 
 DatePicker.displayName = 'DatePicker';
 
-export { formatDate, parseDate };
 export default DatePicker;

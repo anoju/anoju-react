@@ -11,6 +11,79 @@ import {
 import { $alert, $confirm } from '@/utils/dialog';
 import styles from '@/assets/scss/pages/guide.module.scss';
 
+// usePopup 훅 사용 예제 컴포넌트
+const HookPopupExample = () => {
+  const popup = usePopup();
+
+  return (
+    <>
+      <Button className="primary" onClick={popup.open}>
+        usePopup 훅으로 팝업 열기
+      </Button>
+
+      <Popup
+        title="usePopup 훅 사용 예제"
+        visible={popup.visible}
+        onClose={popup.close}
+      >
+        <p>usePopup 훅을 사용하면 상태 관리가 간편해집니다.</p>
+        <div style={{ marginTop: '16px' }}>
+          <Button
+            className="line"
+            onClick={popup.close}
+            style={{ marginRight: '8px' }}
+          >
+            닫기
+          </Button>
+          <Button className="primary" onClick={popup.toggle}>
+            토글
+          </Button>
+        </div>
+      </Popup>
+    </>
+  );
+};
+
+// usePopups 훅 사용 예제 컴포넌트
+const MultiplePopupExample = () => {
+  const popups = usePopups();
+
+  return (
+    <>
+      <div className={styles['control-buttons']}>
+        <Button className="primary" onClick={() => popups.open('hook-popup1')}>
+          팝업 1 열기
+        </Button>
+        <Button className="primary" onClick={() => popups.open('hook-popup2')}>
+          팝업 2 열기
+        </Button>
+        <Button className="line" onClick={popups.closeAll}>
+          모든 팝업 닫기
+        </Button>
+      </div>
+
+      <Popup
+        title="usePopups - 첫 번째 팝업"
+        visible={popups.isOpen('hook-popup1')}
+        onClose={() => popups.close('hook-popup1')}
+      >
+        <p>usePopups 훅으로 관리되는 첫 번째 팝업입니다.</p>
+        <Button className="primary" onClick={() => popups.open('hook-popup2')}>
+          두 번째 팝업 열기
+        </Button>
+      </Popup>
+
+      <Popup
+        title="usePopups - 두 번째 팝업"
+        visible={popups.isOpen('hook-popup2')}
+        onClose={() => popups.close('hook-popup2')}
+      >
+        <p>usePopups 훅으로 관리되는 두 번째 팝업입니다.</p>
+      </Popup>
+    </>
+  );
+};
+
 const PopupGuide = () => {
   usePageLayout({
     title: '팝업 / 컴포넌트 가이드',
@@ -44,88 +117,6 @@ const PopupGuide = () => {
       ...prev,
       `${new Date().toLocaleTimeString()}: ${message}`,
     ]);
-  };
-
-  // usePopup 훅 사용 예제 컴포넌트
-  const HookPopupExample = () => {
-    const popup = usePopup();
-
-    return (
-      <>
-        <Button className="primary" onClick={popup.open}>
-          usePopup 훅으로 팝업 열기
-        </Button>
-
-        <Popup
-          title="usePopup 훅 사용 예제"
-          visible={popup.visible}
-          onClose={popup.close}
-        >
-          <p>usePopup 훅을 사용하면 상태 관리가 간편해집니다.</p>
-          <div style={{ marginTop: '16px' }}>
-            <Button
-              className="line"
-              onClick={popup.close}
-              style={{ marginRight: '8px' }}
-            >
-              닫기
-            </Button>
-            <Button className="primary" onClick={popup.toggle}>
-              토글
-            </Button>
-          </div>
-        </Popup>
-      </>
-    );
-  };
-
-  // usePopups 훅 사용 예제 컴포넌트
-  const MultiplePopupExample = () => {
-    const popups = usePopups();
-
-    return (
-      <>
-        <div className={styles['control-buttons']}>
-          <Button
-            className="primary"
-            onClick={() => popups.open('hook-popup1')}
-          >
-            팝업 1 열기
-          </Button>
-          <Button
-            className="primary"
-            onClick={() => popups.open('hook-popup2')}
-          >
-            팝업 2 열기
-          </Button>
-          <Button className="line" onClick={popups.closeAll}>
-            모든 팝업 닫기
-          </Button>
-        </div>
-
-        <Popup
-          title="usePopups - 첫 번째 팝업"
-          visible={popups.isOpen('hook-popup1')}
-          onClose={() => popups.close('hook-popup1')}
-        >
-          <p>usePopups 훅으로 관리되는 첫 번째 팝업입니다.</p>
-          <Button
-            className="primary"
-            onClick={() => popups.open('hook-popup2')}
-          >
-            두 번째 팝업 열기
-          </Button>
-        </Popup>
-
-        <Popup
-          title="usePopups - 두 번째 팝업"
-          visible={popups.isOpen('hook-popup2')}
-          onClose={() => popups.close('hook-popup2')}
-        >
-          <p>usePopups 훅으로 관리되는 두 번째 팝업입니다.</p>
-        </Popup>
-      </>
-    );
   };
 
   return (

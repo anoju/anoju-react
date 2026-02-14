@@ -551,13 +551,19 @@ const routes = buildRouteTree();
 const notFoundKey = '../pages/NotFound.tsx';
 if (pages[notFoundKey]) {
   const NotFoundComponent = pages[notFoundKey].default;
+  // 메타데이터 확인 (없으면 기본값 사용)
   const metadata = getPageMetadata(pages[notFoundKey]);
 
   let element = React.createElement(NotFoundComponent);
 
-  // 메타데이터에 지정된 레이아웃 적용
+  // 메타데이터에 지정된 레이아웃이 있으면 적용, 없으면 기본 레이아웃 적용
   if (metadata.layout && defaultLayoutMap[metadata.layout]) {
     element = React.createElement(defaultLayoutMap[metadata.layout], {
+      children: element,
+    });
+  } else {
+    // 기본 레이아웃 적용 (MainLayout)
+    element = React.createElement(defaultLayoutMap[''], {
       children: element,
     });
   }

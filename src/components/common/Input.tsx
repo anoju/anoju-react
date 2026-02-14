@@ -671,10 +671,6 @@ const Input = forwardRef<InputHandle, InputProps>(
 
         // ref 사용하여 실제 DOM 업데이트
         if (inputRef.current) {
-          inputRef.current.value = '';
-          // 변경 이벤트 발생
-          const event = new Event('input', { bubbles: true });
-          inputRef.current.dispatchEvent(event);
           // 포커스 설정
           inputRef.current.focus();
         }
@@ -789,6 +785,7 @@ const Input = forwardRef<InputHandle, InputProps>(
           <input
             key={`input-field-${index}`}
             ref={(el) => {
+              // eslint-disable-next-line react-compiler/react-compiler
               inputRefs.current[index] = el;
               // 외부 ref는 useImperativeHandle에서 처리하므로 여기서는 DOM 요소만 저장
             }}
