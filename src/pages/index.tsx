@@ -62,13 +62,33 @@ function Home() {
           </Button>
         </p>
         <p>
-          <Button 
-            to="/react-guide" 
-            not 
-            className="btn-link" 
-            style={{ color: '#42b883', fontWeight: 'bold', marginTop: '10px', display: 'inline-block' }}
+          <Button
+            to="/react-guide"
+            not
+            className="btn-link"
+            style={{
+              color: '#42b883',
+              fontWeight: 'bold',
+              marginTop: '10px',
+              display: 'inline-block',
+            }}
           >
             ⚛️ Vue 개발자를 위한 React 가이드
+          </Button>
+        </p>
+        <p>
+          <Button
+            to="/types-guide"
+            not
+            className="btn-link"
+            style={{
+              color: '#3178c6',
+              fontWeight: 'bold',
+              marginTop: '10px',
+              display: 'inline-block',
+            }}
+          >
+            📘 타입스크립트 실전 가이드
           </Button>
         </p>
       </div>
